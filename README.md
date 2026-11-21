@@ -175,6 +175,7 @@ modifications of GR: Brans–Dicke, `f(R)`, and Horndeski/Galileons.
 | `BransDicke.coupling_eq_one_add` | effective coupling `= 1 + 1/(3+2ω)` |
 | `BransDicke.coupling_bounds` | `ω ≥ 0 ⇒ 1 ≤ G_eff/G ≤ 4/3` |
 | `BransDicke.coupling_pole` | `ω = −3/2` is a pole: the kinetic term degenerates |
+| `BransDicke.gamma_tendsto_atTop` | `ω → ∞` gives `γ → 1`: the general-relativity limit |
 
 ### f(R) gravity
 
@@ -185,6 +186,24 @@ modifications of GR: Brans–Dicke, `f(R)`, and Horndeski/Galileons.
 | `fR.potential_eq` | Starobinsky potential `V(φ) = (φ−1)²/(8α)` |
 | `fR.mass_sq` | scalar mass `m² = 1/(3f'') = 1/(6α)` |
 | `fR.not_gr` | `α ≠ 0` ⇒ `f'` not constant ⇒ an extra scalar propagates |
+| `fR.trace_fieldEqn` / `fR.trace_fieldEqn_four` | tracing gives `f'(S)S − 2f(S) + 3□f' = 0`; the `3` is `n − 1` |
+
+### Chameleon screening
+
+`Gravitation.Screening` proves the chain by which `f(R)` and chameleon models
+pass solar-system tests despite `γ = 1/2`:
+
+| Result | Statement |
+| --- | --- |
+| `Screening.chameleonMass_mono` | `m² = cρ`: denser environment, heavier scalar |
+| `Screening.chameleon_range_shrinks` | heavier scalar, shorter Compton range |
+| `Screening.exp_neg_one_lt_half` | `e^{−1} < 1/2` |
+| `Screening.yukawaRatio_lt_half` | beyond one range the force is down by more than half |
+| `Screening.thin_shell_suppressed` | a thin shell caps the fifth force at `Δ` |
+| `Screening.screeningFactor_eq_one_iff` | the force saturates at one only for `Δ ≥ 1` |
+
+The mass–density law, the Yukawa factor and the thin-shell fraction are modelling
+assumptions stated as definitions; what is proved is the structure they imply.
 
 ### Horndeski and Galileons
 

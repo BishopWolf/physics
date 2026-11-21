@@ -6,4 +6,5 @@ import Gravitation.Einstein
 import Gravitation.Geodesics
 import Gravitation.InitialValue
 import Gravitation.ScalarTensor
+import Gravitation.Screening
 import Gravitation.Examples.Minkowski

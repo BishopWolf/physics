@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Topology.Order.Basic
 
 /-!
 # Scalar–tensor and higher-order gravity
@@ -63,6 +64,46 @@ theorem cassini_deviation (ω : ℝ) (h : 40000 < ω) : 1 - gamma ω < 1 / 40000
   have hinv : 1 / (2 + ω) < 1 / 40000 :=
     one_div_lt_one_div_of_lt (by norm_num) h2
   linarith
+
+/-- **The general-relativity limit.**  As `ω → ∞` the PPN parameter tends to
+`1`, so Brans–Dicke becomes indistinguishable from GR. -/
+theorem gamma_tendsto_atTop :
+    Filter.Tendsto (fun ω : ℝ => gamma ω) Filter.atTop (nhds 1) := by
+  rw [tendsto_order]
+  constructor
+  · intro a ha
+    rw [Filter.eventually_atTop]
+    refine ⟨1 / (1 - a) - 1, fun ω hω => ?_⟩
+    have ha1 : 0 < 1 - a := by linarith
+    have hpos : 0 < 1 / (1 - a) := one_div_pos.mpr ha1
+    have hden : 0 < 2 + ω := by linarith
+    have hlt : 1 / (1 - a) < 2 + ω := by linarith
+    have hone : 1 < (1 - a) * (2 + ω) := by
+      have hm := mul_lt_mul_of_pos_left hlt ha1
+      have h1 : (1 - a) * (1 / (1 - a)) = 1 := by field_simp
+      rwa [h1] at hm
+    have hinv : 1 / (2 + ω) < 1 - a := by
+      rw [div_lt_iff₀ hden]
+      exact hone
+    rw [gamma_eq_one_sub ω (by linarith)]
+    linarith
+  · intro b hb
+    rw [Filter.eventually_atTop]
+    refine ⟨1 / (b - 1) - 1, fun ω hω => ?_⟩
+    have hb1 : 0 < b - 1 := by linarith
+    have hpos : 0 < 1 / (b - 1) := one_div_pos.mpr hb1
+    have hden : 0 < 2 + ω := by linarith
+    have hlt : 1 / (b - 1) < 2 + ω := by linarith
+    have hone : 1 < (b - 1) * (2 + ω) := by
+      have hm := mul_lt_mul_of_pos_left hlt hb1
+      have h1 : (b - 1) * (1 / (b - 1)) = 1 := by field_simp
+      rwa [h1] at hm
+    have hinv : 1 / (2 + ω) < b - 1 := by
+      rw [div_lt_iff₀ hden]
+      exact hone
+    have hxpos : 0 < 1 / (2 + ω) := one_div_pos.mpr hden
+    rw [gamma_eq_one_sub ω (by linarith)]
+    linarith
 
 /-- **`f(R)` gravity is Brans–Dicke with `ω = 0`**, and then `γ = 1/2` — the PPN
 value that solar-system tests exclude for pure `f(R)` without screening. -/
@@ -159,6 +200,46 @@ theorem not_gr (α : ℝ) (hα : α ≠ 0) : ∃ S : ℝ, 1 + 2 * α * S ≠ 1 :
   intro heq
   rw [h] at heq
   norm_num at heq
+
+/-! ### The trace equation -/
+
+/-- **The trace of the `f(R)` field equation.**  The metric-formalism equation is
+`f'(S) Ric_ij − ½ f(S) g_ij − ∇_i∇_j f' + g_ij □f' = 0`; tracing with `g^{ij}`
+gives `f'(S) S − (n/2) f(S) + (n − 1) □f' = 0`, because `g^{ij} g_ij = n` while the
+two second-derivative terms contribute `−1 + n`. -/
+theorem trace_fieldEqn {n : ℕ} (M : Metric n) (R : Riemann n) (f df : ℝ → ℝ)
+    (box : ℝ) (d2 : Tensor2 n) (hbox : metricTrace M d2 = box) :
+    metricTrace M (fun i j => df (scalarCurv M R) * ricci M R i j
+        - (1 / 2) * f (scalarCurv M R) * M.g i j + (M.g i j * box - d2 i j))
+      = df (scalarCurv M R) * scalarCurv M R
+        - (1 / 2) * f (scalarCurv M R) * (n : ℝ) + ((n : ℝ) - 1) * box := by
+  have hcomm : (fun i j => M.g i j * box) = fun i j => box * M.g i j := by
+    funext i j
+    ring
+  have h1 := metricTrace_add_fun M
+    (fun i j => df (scalarCurv M R) * ricci M R i j - (1 / 2) * f (scalarCurv M R) * M.g i j)
+    (fun i j => M.g i j * box - d2 i j)
+  have h2 := metricTrace_sub_fun M
+    (fun i j => df (scalarCurv M R) * ricci M R i j)
+    (fun i j => (1 / 2) * f (scalarCurv M R) * M.g i j)
+  have h3 := metricTrace_sub_fun M (fun i j => M.g i j * box) d2
+  have h4 := metricTrace_smul M (df (scalarCurv M R)) (ricci M R)
+  have h5 := metricTrace_mul_g M box
+  have h6 := metricTrace_mul_g M ((1 / 2) * f (scalarCurv M R))
+  rw [h1, h2, h3, hcomm, h5, h6, h4, ← scalarCurv_eq_metricTrace, hbox]
+  ring
+
+/-- **In four dimensions the trace equation is `f'(S) S − 2 f(S) + 3 □f' = 0`.**
+The coefficient `3` is `n − 1`, and it is why the scalar mode is massive rather
+than an auxiliary field. -/
+theorem trace_fieldEqn_four (M : Metric 4) (R : Riemann 4) (f df : ℝ → ℝ)
+    (box : ℝ) (d2 : Tensor2 4) (hbox : metricTrace M d2 = box) :
+    metricTrace M (fun i j => df (scalarCurv M R) * ricci M R i j
+        - (1 / 2) * f (scalarCurv M R) * M.g i j + (M.g i j * box - d2 i j))
+      = df (scalarCurv M R) * scalarCurv M R - 2 * f (scalarCurv M R) + 3 * box := by
+  rw [trace_fieldEqn M R f df box d2 hbox]
+  push_cast
+  ring
 
 end fR
 

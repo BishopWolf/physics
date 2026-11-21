@@ -85,9 +85,13 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   maximal-slicing form, and a non-vacuum example proving the constraints are not
   automatic. Development existence (Choquet–Bruhat–Geroch) is deliberately not
   claimed and not axiomatised.
-* `gravitation/Gravitation/ScalarTensor.lean` — Brans–Dicke PPN parameters and
-def  coupling bounds, the `f(R)` linear case and Starobinsky potentials/masses,
-  and the one-dimensional Galileon total-derivative structure.
+* `gravitation/Gravitation/ScalarTensor.lean` — Brans–Dicke PPN parameters, the
+  `ω → ∞` GR limit and coupling bounds, the `f(R)` linear case, Starobinsky
+  potentials/masses, the four-dimensional trace equation and the
+  one-dimensional Galileon total-derivative structure.
+* `gravitation/Gravitation/Screening.lean` — chameleon screening: the
+  density-dependent mass, the shrinking Compton range, exponential Yukawa
+  suppression beyond it, and the thin-shell cap on the fifth force.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.

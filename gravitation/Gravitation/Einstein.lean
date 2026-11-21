@@ -21,6 +21,38 @@ variable {n : ℕ}
 /-- Full contraction of the inverse metric with a rank-2 tensor, `g^{ij} T_{ij}`. -/
 def metricTrace (M : Metric n) (T : Tensor2 n) : ℝ := ∑ i, ∑ j, M.ginv i j * T i j
 
+/-- `metricTrace` is additive over pointwise sums. -/
+theorem metricTrace_add_fun {n : ℕ} (M : Metric n) (A B : Tensor2 n) :
+    metricTrace M (fun i j => A i j + B i j) = metricTrace M A + metricTrace M B := by
+  simp only [metricTrace]
+  have h : ∀ i, (∑ j, M.ginv i j * (A i j + B i j))
+      = (∑ j, M.ginv i j * A i j) + (∑ j, M.ginv i j * B i j) := by
+    intro i
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl (fun j _ => by ring)
+  rw [Finset.sum_congr rfl (fun i _ => h i), Finset.sum_add_distrib]
+
+/-- `metricTrace` is additive over pointwise differences. -/
+theorem metricTrace_sub_fun {n : ℕ} (M : Metric n) (A B : Tensor2 n) :
+    metricTrace M (fun i j => A i j - B i j) = metricTrace M A - metricTrace M B := by
+  simp only [metricTrace]
+  have h : ∀ i, (∑ j, M.ginv i j * (A i j - B i j))
+      = (∑ j, M.ginv i j * A i j) - (∑ j, M.ginv i j * B i j) := by
+    intro i
+    rw [← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl (fun j _ => by ring)
+  rw [Finset.sum_congr rfl (fun i _ => h i), Finset.sum_sub_distrib]
+
+/-- `metricTrace` pulls out a scalar factor. -/
+theorem metricTrace_smul {n : ℕ} (M : Metric n) (c : ℝ) (A : Tensor2 n) :
+    metricTrace M (fun i j => c * A i j) = c * metricTrace M A := by
+  simp only [metricTrace]
+  have h : ∀ i, (∑ j, M.ginv i j * (c * A i j)) = c * (∑ j, M.ginv i j * A i j) := by
+    intro i
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun j _ => by ring)
+  rw [Finset.sum_congr rfl (fun i _ => h i), ← Finset.mul_sum]
+
 /-- The Einstein tensor `G_{ij} = Ric_{ij} - (1/2) S g_{ij}`. -/
 noncomputable def einstein (M : Metric n) (R : Riemann n) : Tensor2 n :=
   fun i j => ricci M R i j - (1 / 2) * scalarCurv M R * M.g i j
@@ -45,6 +77,14 @@ theorem sum_ginv_mul_g (M : Metric n) :
       = ∑ i, (M.ginv * M.g) i i := Finset.sum_congr rfl (fun i _ => h1 i)
     _ = ∑ i, (1 : Tensor2 n) i i := by rw [M.inv_right]
     _ = (n : ℝ) := by simp
+
+/-- `metricTrace M (c • g) = c n`: tracing the metric against itself gives the
+spacetime dimension. -/
+theorem metricTrace_mul_g {n : ℕ} (M : Metric n) (c : ℝ) :
+    metricTrace M (fun i j => c * M.g i j) = c * (n : ℝ) := by
+  rw [metricTrace_smul]
+  simp only [metricTrace]
+  rw [sum_ginv_mul_g]
 
 /-- Metric trace of the Einstein tensor: `g^{ij} G_{ij} = (1 - n/2) S`. -/
 theorem metricTrace_einstein (M : Metric n) (R : Riemann n) :
