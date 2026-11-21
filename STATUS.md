@@ -78,6 +78,12 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   `G = 0 ↔ Ric = 0` in four dimensions; Minkowski as a proved vacuum solution.
   (Caveat: `skew_first` is a structure field, as in the standard definition —
   it is not derived from the other three.)
+* `gravitation/Gravitation/InitialValue.lean` — the initial value problem's
+  constraint equations: `H = ³R + (tr K)² − K_ij K^ij`, `M_i = ∂_j K_ij −
+  ∂_i tr K`, the moment-of-time-symmetry reduction to scalar flatness, the
+  maximal-slicing form, and a non-vacuum example proving the constraints are not
+  automatic. Development existence (Choquet–Bruhat–Geroch) is deliberately not
+  claimed and not axiomatised.
 * `gravitation/vulkan/` — Vulkan compute path computing `Γ`, `Ric`, `R`, `G`
   from any metric supplied as an analytic function of the coordinates, used to
   check numerically that Schwarzschild is Ricci flat and that

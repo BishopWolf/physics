@@ -19,6 +19,7 @@ gravitation/
 │   ├── Basic.lean               metric with explicit inverse, Minkowski η
 │   ├── Curvature.lean           Riemann, Ricci, scalar curvature
 │   ├── Einstein.lean            Einstein tensor, trace identity, vacuum theorem
+│   ├── InitialValue.lean        initial data, constraint equations, reductions
 │   └── Examples/Minkowski.lean  Minkowski as a proved vacuum solution
 ├── Gravitation.lean             library root
 ├── lakefile.toml                Mathlib v4.36.0, Lean v4.36.0
@@ -56,6 +57,29 @@ Deliberately *not* claimed: coordinate invariance (everything is componentwise i
 one frame), the connection/Levi-Civita construction, and any global or PDE
 statement. `vacuum_iff_ricci_flat` is an algebraic identity at a point, not a
 statement about solution spaces.
+
+## Initial value problem
+
+One solution theory per commit. This commit adds `Gravitation.InitialValue`: the
+constraint half of the Cauchy problem, which is the part that is genuinely
+provable without PDE analysis.
+
+| Result | Statement |
+| --- | --- |
+| `InitialData.ham` | `H = ³R + (tr K)² − K_ij K^ij` |
+| `momConstraint` | `M_i = ∂_j K_ij − ∂_i (tr K)` |
+| `ham_zero_iff_scalarCurv_zero_of_K_zero` | at a moment of time symmetry (`K = 0`), vacuum data are exactly scalar-flat data |
+| `momConstraint_zero_of_dK_zero` | constant `K` gives `M ≡ 0` |
+| `ham_eq_of_trace_zero` | maximal slicing (`tr K = 0`) gives `H = ³R − K_ij K^ij` |
+| `trace_sq_eq_of_ham_zero` | on a scalar-flat slice, `H = 0` forces `(tr K)² = K_ij K^ij` |
+| `flatData_isVacuum` | flat `ℝ³` with `K = 0` satisfies both constraints |
+| `squeezedData_ham` / `_ne_zero` | `K = diag(1,1,0)` on flat space has `H = 2`, so the constraints are not automatic |
+
+**Not formalised, and not axiomatised:** existence and uniqueness of a maximal
+globally hyperbolic development (Choquet–Bruhat–Geroch). That is quasilinear
+hyperbolic PDE theory, absent from Mathlib; rather than adding an axiom, the
+gap is left open and stated here. In particular `IsVacuumData` is a predicate on
+the slice, not a theorem that a spacetime exists.
 
 ## Vulkan tensor pass
 
