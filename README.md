@@ -42,6 +42,7 @@ All in `gravitation/`, checked by the Lean kernel against Mathlib v4.36.0, no
 | `Metric.ginv_symm` | the inverse of a symmetric metric is symmetric |
 | `Riemann.zero_of_repeated_first/last` | components with a repeated antisymmetric index vanish |
 | `Riemann.swap_mixed` | `R_{ijkl} = R_{jilk}` |
+| `Riemann.skew_first` | `R_{ijkl} = −R_{jikl}`, *derived* from pair symmetry and antisymmetry in the last pair |
 | `ricci_symm` | `Ric_{ij} = Ric_{ji}`, derived from pair symmetry |
 | `einstein_symm` | the Einstein tensor is symmetric |
 | `sum_ginv_mul_g` | `∑ g^{ij} g_{ij} = n` |
@@ -49,11 +50,13 @@ All in `gravitation/`, checked by the Lean kernel against Mathlib v4.36.0, no
 | `vacuum_iff_ricci_flat` | in 4D, `G = 0 ↔ Ric = 0` |
 | `Minkowski.einstein_eq_zero` | Minkowski spacetime is a vacuum solution |
 
-The Riemann tensor carries its four algebraic symmetries as structure fields
-(the standard definition of a curvature tensor): antisymmetry in each pair,
-pair symmetry `R_{ijkl} = R_{klij}`, and the first Bianchi identity. `skew_first`
-is therefore an assumption, not a derived theorem — deriving it from the other
-three would be a worthwhile refinement.
+The Riemann tensor carries three structure fields: antisymmetry in the last
+pair, pair symmetry `R_{ijkl} = R_{klij}`, and the first Bianchi identity.
+Antisymmetry in the first pair is now *proved* from those
+(`Riemann.skew_first`), not assumed. Ricci contracts against the inverse metric,
+`Ric_{ij} = Σ_k g^{kk} R_{kikj}`, which is exact for charts with diagonal
+inverse metric (Minkowski, Schwarzschild and FLRW in standard coordinates); the
+fully general `g^{kl} R_{kilj}` contraction is the next refinement.
 
 Deliberately *not* claimed: coordinate invariance (everything is componentwise in
 one frame), the connection/Levi-Civita construction, and any global or PDE

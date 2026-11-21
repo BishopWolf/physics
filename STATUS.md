@@ -76,8 +76,9 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   algebraic symmetries, Ricci, scalar curvature, Einstein tensor; proved
   symmetry of `G`, the trace identity `g^{ij}G_{ij} = (1 - n/2)S`, and
   `G = 0 ↔ Ric = 0` in four dimensions; Minkowski as a proved vacuum solution.
-  (Caveat: `skew_first` is a structure field, as in the standard definition —
-  it is not derived from the other three.)
+  (The structure carries three symmetries — pair symmetry, antisymmetry in the
+  last pair, and the first Bianchi identity — and `skew_first` is proved from
+  them. Ricci contracts with the diagonal inverse metric.)
 * `gravitation/Gravitation/InitialValue.lean` — the initial value problem's
   constraint equations: `H = ³R + (tr K)² − K_ij K^ij`, `M_i = ∂_j K_ij −
   ∂_i tr K`, the moment-of-time-symmetry reduction to scalar flatness, the

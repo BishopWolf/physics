@@ -17,7 +17,7 @@ def minkowski : Metric 4 :=
 
 namespace Minkowski
 
-theorem ricci_eq_zero : ricci (Riemann.flat 4) = 0 := ricci_flat 4
+theorem ricci_eq_zero : ricci minkowski (Riemann.flat 4) = 0 := ricci_flat 4 minkowski
 
 theorem scalarCurv_eq_zero : scalarCurv minkowski (Riemann.flat 4) = 0 := by
   simp [scalarCurv]
@@ -29,7 +29,7 @@ theorem einstein_eq_zero : einstein minkowski (Riemann.flat 4) = 0 := by
 
 /-- `G = 0` and `Ric = 0` agree here, as the four-dimensional theorem predicts. -/
 theorem vacuum_iff_ricci_flat :
-    einstein minkowski (Riemann.flat 4) = 0 ↔ ricci (Riemann.flat 4) = 0 :=
+    einstein minkowski (Riemann.flat 4) = 0 ↔ ricci minkowski (Riemann.flat 4) = 0 :=
   Gravitation.vacuum_iff_ricci_flat minkowski (Riemann.flat 4)
 
 end Minkowski
