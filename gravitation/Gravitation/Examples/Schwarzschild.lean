@@ -104,6 +104,19 @@ theorem kretschmann_scalar (M r : ℝ) (hr : r ≠ 0) :
   have hr3 : r ^ 3 ≠ 0 := pow_ne_zero 3 hr
   field_simp
 
+/-- **The Schwarzschild frame Weyl tensor is purely electric**: with spatial
+`j, l, m`, every component carrying exactly one temporal index vanishes.  There
+is no magnetic part, so `electricPart k` is the whole of the Weyl tensor, which
+is what the GPU's electric-part output reports. -/
+theorem weyl_purely_electric (k : ℝ) (j l m : Fin 4) (hj : j ≠ 0) (hl : l ≠ 0)
+    (hm : m ≠ 0) :
+    (schwarzschild k).comp 0 j l m = 0 ∧ (schwarzschild k).comp j 0 l m = 0 ∧
+      (schwarzschild k).comp j l 0 m = 0 ∧ (schwarzschild k).comp j l m 0 = 0 := by
+  have h0j : (0 : Fin 4) ≠ j := fun h => hj h.symm
+  have h0l : (0 : Fin 4) ≠ l := fun h => hl h.symm
+  have h0m : (0 : Fin 4) ≠ m := fun h => hm h.symm
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> simp_all [schwarzschild, electricPart]
+
 /-! ## From the Schwarzschild metric to the electric part
 
 The components above are supplied; this section ties them to the metric.  The

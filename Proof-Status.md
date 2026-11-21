@@ -125,6 +125,7 @@ of date.
 | `Gravitation.Schwarzschild.ricci_eq_zero` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.frameSqSum_eq` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.kretschmann_scalar` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.weyl_purely_electric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.schwarzschildMetric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.schwarzschildMetric_tt` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.schwarzschildMetric_tt_potential` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |

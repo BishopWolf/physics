@@ -207,7 +207,7 @@ The solution theory of general relativity is formalisable, at least for the stat
 
 | Module | Declarations |
 | --- | --- |
-| `Examples/Schwarzschild.lean` | 45 |
+| `Examples/Schwarzschild.lean` | 46 |
 | `Examples/SchwarzschildDeSitter.lean` | 45 |
 | `ScalarTensor.lean` | 26 |
 | `Pipeline.lean` | 24 |
@@ -221,9 +221,9 @@ The solution theory of general relativity is formalisable, at least for the stat
 | `Conservation.lean` | 7 |
 | `Ostrogradsky.lean` | 7 |
 | `Examples/Minkowski.lean` | 5 |
-| **Total** | **264** |
+| **Total** | **265** |
 
-All 264 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
+All 265 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
 
 ## References
 
