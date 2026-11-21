@@ -84,6 +84,14 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   maximal-slicing form, and a non-vacuum example proving the constraints are not
   automatic. Development existence (Choquet–Bruhat–Geroch) is deliberately not
   claimed and not axiomatised.
+* `gravitation/Gravitation/Geodesics.lean` — the geodesic Cauchy problem:
+  local existence from initial position and velocity via Mathlib's
+  Picard–Lindelöf theorem, uniqueness under an explicit Lipschitz hypothesis,
+  and the flat-space straight lines.
+* `gravitation/Gravitation/Alternatives.lean` — MOND, MOG and TeVeS stated as
+  used, with proved structural theorems (deep-MOND flat rotation, MOG's bounded
+  enhancement, TeVeS's preserved Lorentzian signature) and the empirical
+  strengths/weaknesses recorded in prose, not as theorems.
 * `gravitation/vulkan/` — Vulkan compute path computing `Γ`, `Ric`, `R`, `G`
   from any metric supplied as an analytic function of the coordinates, used to
   check numerically that Schwarzschild is Ricci flat and that

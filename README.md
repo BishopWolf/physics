@@ -20,6 +20,8 @@ gravitation/
 │   ├── Curvature.lean           Riemann, Ricci, scalar curvature
 │   ├── Einstein.lean            Einstein tensor, trace identity, vacuum theorem
 │   ├── InitialValue.lean        initial data, constraint equations, reductions
+│   ├── Geodesics.lean           geodesic Cauchy problem: local existence/uniqueness
+│   ├── Alternatives.lean        MOND, MOG and TeVeS: proved structural properties
 │   └── Examples/Minkowski.lean  Minkowski as a proved vacuum solution
 ├── Gravitation.lean             library root
 ├── lakefile.toml                Mathlib v4.36.0, Lean v4.36.0
@@ -80,6 +82,61 @@ globally hyperbolic development (Choquet–Bruhat–Geroch). That is quasilinear
 hyperbolic PDE theory, absent from Mathlib; rather than adding an axiom, the
 gap is left open and stated here. In particular `IsVacuumData` is a predicate on
 the slice, not a theorem that a spacetime exists.
+
+## Geodesic Cauchy problem
+
+`Gravitation.Geodesics` is the solution theory for free fall. The geodesic
+equation `γ'' = -Γ(γ)(γ', γ')` becomes a first-order system on `E × E`, and
+Mathlib's Picard–Lindelöf theorem (proved, not assumed) supplies existence.
+
+| Result | Statement |
+| --- | --- |
+| `geodesic_ivp_exists` | `C¹` Christoffel symbols: every `(x₀, v₀)` has a solution on some `Ioo (-ε) ε` |
+| `geodesic_ivp_exists_curve` | the same split into `γ` and its velocity `w`, with `γ 0 = x₀`, `w 0 = v₀` |
+| `geodesic_ivp_unique` | two solutions agreeing at `t₀`, confined to a ball where the field is `K`-Lipschitz, agree on the interval |
+| `geodesicField_zero`, `flat_geodesic` | in flat space the geodesics are the straight lines `t ↦ x₀ + t • v₀` |
+
+Existence is local in time and inside the chart, because the field is only `C¹`
+at a point. The uniqueness statement carries its Lipschitz hypothesis explicitly
+rather than hiding it behind a choice of constants.
+
+## Alternative theories: MOND, MOG, TeVeS
+
+`Gravitation.Alternatives` states the three models in the form in which they are
+used and proves their structural properties. Proved:
+
+| Model | Result | Statement |
+| --- | --- | --- |
+| MOND | `newtonian_limit` | where `μ(a/a₀) = 1`, the MOND relation gives `a = g_N` |
+| MOND | `flat_rotation` | deep regime: `v⁴ = G M a₀`, independent of radius |
+| MOND | `newtonian_velocity_ne` | Newtonian orbits with fixed mass cannot share a speed at two radii |
+| MOG | `factor_bounds` | the enhancement factor lies in `[1, 1 + α]` |
+| MOG | `factor_zero` | the enhancement is exactly `1` at `r = 0` |
+| TeVeS | `metric_lorentzian` | the physical metric is Lorentzian for every `φ` |
+| TeVeS | `metric_spatial` | the spatial part is the conformal rescaling `e^{-2φ} δ` |
+
+Empirical strengths and weaknesses are **not** theorems and are not claimed as
+such — they are assessments from the literature:
+
+| Model | Strength | Weakness |
+| --- | --- | --- |
+| MOND | fits galaxy rotation curves with one constant `a₀`; predicts the baryonic Tully–Fisher relation (`v⁴ = G M a₀`) | non-relativistic; no cosmology or lensing of its own; galaxy clusters still require extra mass; the value of `a₀` is unexplained |
+| TeVeS | relativistic; reproduces the MOND limit; produces lensing without dark matter | needs a scalar and a unit-timelike vector field; parameters unconstrained; gravitational-wave speed and cluster/CMB fits are in tension with data |
+| MOG | fits rotation curves and cluster masses; the potential is a one-parameter deformation of Newton's | the enhancement is capped at `1 + α`; `α` and `μ` must be retuned per system; cosmological and lensing fits are contested |
+
+The formal content is the structure that makes those claims testable; the
+empirical verdict is not decidable inside Lean.
+
+References: Milgrom, ApJ 270 (1983) 365; Bekenstein, PRD 70 (2004) 083509;
+Moffat, JCAP 0603 (2006) 004; Abbott et al. (LIGO/Virgo), ApJL 848 (2017) L13;
+Famaey & McGaugh, Living Rev. Rel. 15 (2012) 10.
+
+How these models line up with quantum-gravity and unification approaches
+(string theory, loop quantum gravity, emergent gravity) is analysed in
+[`docs/QUANTUM-GRAVITY-MAPPING.md`](docs/QUANTUM-GRAVITY-MAPPING.md): MOND maps
+onto emergent/entropic gravity, TeVeS onto Einstein–aether/Hořava–Lifshitz,
+MOG onto massive gravity, while string theory and LQG have no established
+match. Those are structural correspondences, not derivations.
 
 ## Vulkan tensor pass
 
