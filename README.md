@@ -187,6 +187,9 @@ modifications of GR: Brans–Dicke, `f(R)`, and Horndeski/Galileons.
 | `fR.mass_sq` | scalar mass `m² = 1/(3f'') = 1/(6α)` |
 | `fR.not_gr` | `α ≠ 0` ⇒ `f'` not constant ⇒ an extra scalar propagates |
 | `fR.trace_fieldEqn` / `fR.trace_fieldEqn_four` | tracing gives `f'(S)S − 2f(S) + 3□f' = 0`; the `3` is `n − 1` |
+| `Basic.conformalMetric` | `g̃ = φg` is a metric with inverse `φ⁻¹g⁻¹` |
+| `fR.starobinsky_einsteinFrame_form` | Einstein frame: `U(φ) = (1/16α)(1 − 1/φ)²` |
+| `fR.starobinsky_plateau` | `φ → ∞` ⇒ `U → 1/(16α)`: the slow-roll plateau |
 
 ### Chameleon screening
 
@@ -201,9 +204,25 @@ pass solar-system tests despite `γ = 1/2`:
 | `Screening.yukawaRatio_lt_half` | beyond one range the force is down by more than half |
 | `Screening.thin_shell_suppressed` | a thin shell caps the fifth force at `Δ` |
 | `Screening.screeningFactor_eq_one_iff` | the force saturates at one only for `Δ ≥ 1` |
+| `ThinShell.hasDerivAt_profile` | exterior `φ = φ∞ − Q/r` has gradient `Q/r²` |
+| `ThinShell.forceRatio_thin_shell` | thin-shell charge ⇒ fifth force is `Δ` times gravity |
+| `ThinShell.profile_surface` | `φ(R) = φ∞ − ΔΦ` |
+| `ThinShell.thick_shell_strong` | `Δ ≥ 1` ⇒ order-one fifth force |
 
 The mass–density law, the Yukawa factor and the thin-shell fraction are modelling
 assumptions stated as definitions; what is proved is the structure they imply.
+
+### Ostrogradsky instability
+
+`Gravitation.Ostrogradsky` formalises why higher-derivative theories are
+unhealthy. For `L = ½q̈² + V(q)` the kinetic matrix in `(q̇, q̈)` is singular
+(`Ostrogradsky.kineticMatrix_degenerate`), the Hamiltonian is affine in the
+conjugate momentum with slope equal to the velocity
+(`Ostrogradsky.hamiltonian_add`), and it is unbounded below for any non-zero
+velocity (`Ostrogradsky.unbounded_below`) — the ghost. A standard quadratic
+kinetic term is bounded below and vanishes only at zero velocity
+(`Ostrogradsky.kinetic_bounded`, `Ostrogradsky.kinetic_zero_iff`). The Dirac
+reduction that isolates the ghost is not formalised.
 
 ### Horndeski and Galileons
 

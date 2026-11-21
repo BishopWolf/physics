@@ -1,4 +1,7 @@
 import Gravitation.Einstein
+import Mathlib.Analysis.Calculus.Deriv.Add
+import Mathlib.Analysis.Calculus.Deriv.Inv
+import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Complex.ExponentialBounds
 import Mathlib.Analysis.SpecialFunctions.Exp
 
@@ -98,5 +101,69 @@ theorem screeningFactor_eq_one_iff (Δ : ℝ) : screeningFactor Δ = 1 ↔ 1 ≤
   min_eq_right_iff
 
 end Screening
+
+/-! ## The thin-shell profile -/
+
+namespace ThinShell
+
+/-- The exterior scalar profile of a screened spherical body,
+`φ(r) = φ∞ − Q/r`. -/
+noncomputable def profile (φinf Q r : ℝ) : ℝ := φinf - Q / r
+
+/-- The exterior gradient is `Q/r²`. -/
+theorem hasDerivAt_profile (φinf Q r : ℝ) (hr : r ≠ 0) :
+    HasDerivAt (profile φinf Q) (Q / r ^ 2) r := by
+  change HasDerivAt (fun s : ℝ => φinf - Q / s) (Q / r ^ 2) r
+  have hinv : HasDerivAt (fun s : ℝ => s⁻¹) (-1 / r ^ 2) r :=
+    HasDerivAt.inv (hasDerivAt_id r) hr
+  have hQ : HasDerivAt (fun s : ℝ => Q * s⁻¹) (Q * (-1 / r ^ 2)) r :=
+    HasDerivAt.const_mul Q hinv
+  have hsub : HasDerivAt (fun s : ℝ => φinf - Q * s⁻¹) (0 - Q * (-1 / r ^ 2)) r :=
+    (hasDerivAt_const r φinf).sub hQ
+  have hval : (0 - Q * (-1 / r ^ 2)) = Q / r ^ 2 := by
+    field_simp <;> ring
+  rw [hval] at hsub
+  exact hsub
+
+/-- The fifth-force ratio: scalar acceleration over the Newtonian acceleration
+`Φ R/r²`. -/
+noncomputable def forceRatio (Q Phi R r : ℝ) : ℝ := (Q / r ^ 2) / (Phi * R / r ^ 2)
+
+theorem forceRatio_eq (Q Phi R r : ℝ) (h : Phi * R ≠ 0) (hr : r ≠ 0) :
+    forceRatio Q Phi R r = Q / (Phi * R) := by
+  simp only [forceRatio]
+  have hr2 : r ^ 2 ≠ 0 := pow_ne_zero 2 hr
+  field_simp <;> ring
+
+/-- **The thin-shell charge.**  With `Q = Δ Φ R` the exterior fifth force is
+`Δ` times gravity. -/
+theorem forceRatio_thin_shell (Δ Phi R r : ℝ) (h : Phi * R ≠ 0) (hr : r ≠ 0) :
+    forceRatio (Δ * Phi * R) Phi R r = Δ := by
+  have hPhi : Phi ≠ 0 := (mul_ne_zero_iff.mp h).1
+  have hR : R ≠ 0 := (mul_ne_zero_iff.mp h).2
+  rw [forceRatio_eq _ Phi R r h hr]
+  field_simp
+
+/-- The profile at the surface: `φ(R) = φ∞ − Δ Φ`. -/
+theorem profile_surface (φinf Δ Phi R : ℝ) (hR : R ≠ 0) :
+    profile φinf (Δ * Phi * R) R = φinf - Δ * Phi := by
+  simp only [profile]
+  field_simp <;> ring
+
+/-- **Thin shell, weak force.**  `Δ ≤ ε` caps the fifth force at `ε` times
+gravity. -/
+theorem thin_shell_weak (Δ ε Phi R r : ℝ) (hPR : Phi * R ≠ 0) (hr : r ≠ 0)
+    (h : Δ ≤ ε) : forceRatio (Δ * Phi * R) Phi R r ≤ ε := by
+  rw [forceRatio_thin_shell Δ Phi R r hPR hr]
+  exact h
+
+/-- **Thick shell, order-one force.**  `Δ ≥ 1` leaves an unscreened fifth force
+of the same order as gravity — the `γ = 1/2` problem. -/
+theorem thick_shell_strong (Δ Phi R r : ℝ) (hPR : Phi * R ≠ 0) (hr : r ≠ 0)
+    (h : 1 ≤ Δ) : 1 ≤ forceRatio (Δ * Phi * R) Phi R r := by
+  rw [forceRatio_thin_shell Δ Phi R r hPR hr]
+  exact h
+
+end ThinShell
 
 end Gravitation

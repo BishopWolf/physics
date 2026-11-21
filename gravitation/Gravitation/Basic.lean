@@ -69,4 +69,63 @@ theorem Metric.ginv_symm {n : ℕ} (M : Metric n) : IsSymm M.ginv := by
   intro i j
   exact (congrFun (congrFun hEq i) j).symm
 
+/-- Componentwise conformal rescaling of a metric, `g̃ = φ g`. -/
+def conformalG {n : ℕ} (g : Tensor2 n) (φ : ℝ) : Tensor2 n := fun i j => φ * g i j
+
+/-- The corresponding inverse components, `g̃⁻¹ = φ⁻¹ g⁻¹`. -/
+noncomputable def conformalGinv {n : ℕ} (ginv : Tensor2 n) (φ : ℝ) : Tensor2 n :=
+  fun i j => φ⁻¹ * ginv i j
+
+/-- The rescaled inverse is the inverse of the rescaled metric. -/
+theorem conformalG_mul {n : ℕ} (M : Metric n) (φ : ℝ) (hφ : φ ≠ 0) :
+    conformalG M.g φ * conformalGinv M.ginv φ = 1 := by
+  ext i j
+  rw [Matrix.mul_apply]
+  have hterm : ∀ k,
+      conformalG M.g φ i k * conformalGinv M.ginv φ k j = M.g i k * M.ginv k j := by
+    intro k
+    simp only [conformalG, conformalGinv]
+    calc (φ * M.g i k) * (φ⁻¹ * M.ginv k j)
+        = (φ * φ⁻¹) * (M.g i k * M.ginv k j) := by ring
+      _ = M.g i k * M.ginv k j := by rw [mul_inv_cancel₀ hφ, one_mul]
+  have h1 : (∑ k, M.g i k * M.ginv k j) = (1 : Tensor2 n) i j := by
+    have hinv := congrFun (congrFun M.inv_left i) j
+    simpa only [Matrix.mul_apply] using hinv
+  have hsum : (∑ k, conformalG M.g φ i k * conformalGinv M.ginv φ k j)
+      = ∑ k, M.g i k * M.ginv k j := Finset.sum_congr rfl (fun k _ => hterm k)
+  rw [hsum]
+  exact h1
+
+theorem conformalGinv_mul {n : ℕ} (M : Metric n) (φ : ℝ) (hφ : φ ≠ 0) :
+    conformalGinv M.ginv φ * conformalG M.g φ = 1 := by
+  ext i j
+  rw [Matrix.mul_apply]
+  have hterm : ∀ k,
+      conformalGinv M.ginv φ i k * conformalG M.g φ k j = M.ginv i k * M.g k j := by
+    intro k
+    simp only [conformalG, conformalGinv]
+    calc (φ⁻¹ * M.ginv i k) * (φ * M.g k j)
+        = (φ⁻¹ * φ) * (M.ginv i k * M.g k j) := by ring
+      _ = M.ginv i k * M.g k j := by rw [inv_mul_cancel₀ hφ, one_mul]
+  have h1 : (∑ k, M.ginv i k * M.g k j) = (1 : Tensor2 n) i j := by
+    have hinv := congrFun (congrFun M.inv_right i) j
+    simpa only [Matrix.mul_apply] using hinv
+  have hsum : (∑ k, conformalGinv M.ginv φ i k * conformalG M.g φ k j)
+      = ∑ k, M.ginv i k * M.g k j := Finset.sum_congr rfl (fun k _ => hterm k)
+  rw [hsum]
+  exact h1
+
+/-- A conformal rescaling `g̃ = φ g` of a metric, with inverse `φ⁻¹ g⁻¹` — the
+metric-level transformation underlying the Jordan-to-Einstein frame change. -/
+noncomputable def conformalMetric {n : ℕ} (M : Metric n) (φ : ℝ) (hφ : φ ≠ 0) :
+    Metric n where
+  g := conformalG M.g φ
+  ginv := conformalGinv M.ginv φ
+  symm := by
+    intro i j
+    show φ * M.g i j = φ * M.g j i
+    rw [M.symm i j]
+  inv_left := conformalG_mul M φ hφ
+  inv_right := conformalGinv_mul M φ hφ
+
 end Gravitation

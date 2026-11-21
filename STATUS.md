@@ -92,6 +92,10 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
 * `gravitation/Gravitation/Screening.lean` — chameleon screening: the
   density-dependent mass, the shrinking Compton range, exponential Yukawa
   suppression beyond it, and the thin-shell cap on the fifth force.
+* `gravitation/Gravitation/Ostrogradsky.lean` — the Ostrogradsky instability:
+a  degenerate velocity Hessian for `L = ½q̈² + V`, a Hamiltonian affine in one
+  momentum and unbounded below, contrasted with a positive-definite quadratic
+  kinetic term.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.

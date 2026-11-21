@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Topology.Algebra.Order.Field
 import Mathlib.Topology.Order.Basic
 
 /-!
@@ -240,6 +241,50 @@ theorem trace_fieldEqn_four (M : Metric 4) (R : Riemann 4) (f df : ℝ → ℝ)
   rw [trace_fieldEqn M R f df box d2 hbox]
   push_cast
   ring
+
+/-! ### The Einstein frame -/
+
+/-- The Einstein-frame potential of a scalar–tensor theory, `U = V/(2φ²)`. -/
+noncomputable def einsteinFrameV (V : ℝ → ℝ) (φ : ℝ) : ℝ := V φ / (2 * φ ^ 2)
+
+/-- **The Starobinsky potential in the Einstein frame.**  The conformal
+rescaling `g̃ = φ g` turns `V(φ) = (φ−1)²/(8α)` into
+`U(φ) = (φ−1)²/(16αφ²)`. -/
+theorem starobinsky_einsteinFrame (α φ : ℝ) (hα : α ≠ 0) (hφ : φ ≠ 0) :
+    einsteinFrameV (V α) φ = (φ - 1) ^ 2 / (16 * α * φ ^ 2) := by
+  have h8 : (8 : ℝ) * α ≠ 0 := mul_ne_zero (by norm_num) hα
+  have h2 : (2 : ℝ) * φ ^ 2 ≠ 0 := mul_ne_zero (by norm_num) (pow_ne_zero 2 hφ)
+  simp only [einsteinFrameV, V]
+  field_simp <;> ring
+
+/-- `U(φ) = 1/(16α) · (1 − 1/φ)²`, the form in which the plateau is visible. -/
+theorem starobinsky_einsteinFrame_form (α φ : ℝ) (hα : α ≠ 0) (hφ : φ ≠ 0) :
+    einsteinFrameV (V α) φ = (1 / (16 * α)) * (1 - 1 / φ) ^ 2 := by
+  rw [starobinsky_einsteinFrame α φ hα hφ]
+  have h16 : (16 : ℝ) * α * φ ^ 2 ≠ 0 := by
+    refine mul_ne_zero (mul_ne_zero (by norm_num) hα) (pow_ne_zero 2 hφ)
+  field_simp <;> ring
+
+/-- **The slow-roll plateau.**  As `φ → ∞` the Einstein-frame potential tends to
+its asymptote `1/(16α)`; that flat region is what makes Starobinsky inflation
+slow roll. -/
+theorem starobinsky_plateau (α : ℝ) (hα : α ≠ 0) :
+    Filter.Tendsto (fun φ : ℝ => einsteinFrameV (V α) φ) Filter.atTop
+      (nhds (1 / (16 * α))) := by
+  have hinv : Filter.Tendsto (fun φ : ℝ => 1 / φ) Filter.atTop (nhds 0) :=
+    tendsto_const_nhds.div_atTop Filter.tendsto_id
+  have h1 : Filter.Tendsto (fun φ : ℝ => 1 - 1 / φ) Filter.atTop (nhds 1) := by
+    simpa using tendsto_const_nhds.sub hinv
+  have hsq : Filter.Tendsto (fun φ : ℝ => (1 - 1 / φ) ^ 2) Filter.atTop (nhds 1) := by
+    simpa using h1.pow 2
+  have hmul : Filter.Tendsto (fun φ : ℝ => (1 / (16 * α)) * (1 - 1 / φ) ^ 2)
+      Filter.atTop (nhds ((1 / (16 * α)) * 1)) := tendsto_const_nhds.mul hsq
+  have heq : (fun φ : ℝ => einsteinFrameV (V α) φ)
+      =ᶠ[Filter.atTop] fun φ : ℝ => (1 / (16 * α)) * (1 - 1 / φ) ^ 2 := by
+    filter_upwards [Filter.eventually_atTop.2 ⟨1, fun b hb => hb⟩] with φ hφ
+    exact starobinsky_einsteinFrame_form α φ hα (by linarith)
+  refine Filter.Tendsto.congr' heq.symm ?_
+  simpa using hmul
 
 end fR
 
