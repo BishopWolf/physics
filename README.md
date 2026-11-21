@@ -159,6 +159,49 @@ onto emergent/entropic gravity, TeVeS onto Einstein–aether/Hořava–Lifshitz,
 MOG onto massive gravity, while string theory and LQG have no established
 match. Those are structural correspondences, not derivations.
 
+## Scalar–tensor and higher-order theories
+
+`Gravitation.ScalarTensor` covers the three families that dominate viable
+modifications of GR: Brans–Dicke, `f(R)`, and Horndeski/Galileons.
+
+### Brans–Dicke
+
+| Result | Statement |
+| --- | --- |
+| `BransDicke.gamma_eq_one_sub` | `γ = 1 − 1/(2+ω)` |
+| `BransDicke.gamma_bounds` | `ω > 0 ⇒ 1/2 < γ < 1` |
+| `BransDicke.cassini_deviation` | `ω > 40000 ⇒ 1 − γ < 1/40000` (the Cassini bound) |
+| `BransDicke.fR_gamma` | `ω = 0` gives `γ = 1/2`, the `f(R)` PPN value |
+| `BransDicke.coupling_eq_one_add` | effective coupling `= 1 + 1/(3+2ω)` |
+| `BransDicke.coupling_bounds` | `ω ≥ 0 ⇒ 1 ≤ G_eff/G ≤ 4/3` |
+| `BransDicke.coupling_pole` | `ω = −3/2` is a pole: the kinetic term degenerates |
+
+### f(R) gravity
+
+| Result | Statement |
+| --- | --- |
+| `fR.linear_is_einstein` | `f = R − 2Λ` gives exactly `G + Λg` |
+| `fR.phi_inverse` | `φ = 1 + 2αR` inverts to `R = (φ−1)/(2α)` |
+| `fR.potential_eq` | Starobinsky potential `V(φ) = (φ−1)²/(8α)` |
+| `fR.mass_sq` | scalar mass `m² = 1/(3f'') = 1/(6α)` |
+| `fR.not_gr` | `α ≠ 0` ⇒ `f'` not constant ⇒ an extra scalar propagates |
+
+### Horndeski and Galileons
+
+| Result | Statement |
+| --- | --- |
+| `Galileon.cubic_total_derivative` | `(φ')²φ''` is `d/dt[(φ')³/3]` |
+| `Galileon.shift_total_derivative` | a constant velocity shift moves the cubic density by a total derivative |
+| `Galileon.shift_forbids_potential` | an exactly shift-symmetric potential is constant |
+
+What is **not** formalised: the four-dimensional field equations of these
+theories, the variational calculus behind Horndeski's theorem (that `G₂…G₅`
+yields second-order equations), the Ostrogradsky instability of generic
+higher-derivative theories, and the full four-dimensional Galileon
+total-derivative identities. The one-dimensional statements above are the
+shadow of those, proved end to end. The QG mapping is in
+[docs/QUANTUM-GRAVITY-MAPPING.md](docs/QUANTUM-GRAVITY-MAPPING.md).
+
 ## Vulkan tensor pass
 
 The shader takes any metric given as an analytic function of `(t, r, θ, φ)`,
@@ -212,4 +255,4 @@ compute shader with no PyTorch dependency.
 
 ## Licence
 
-No licence file yet; add one before publishing.
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Alex Vergara Gil.

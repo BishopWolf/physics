@@ -5,4 +5,5 @@ import Gravitation.Curvature
 import Gravitation.Einstein
 import Gravitation.Geodesics
 import Gravitation.InitialValue
+import Gravitation.ScalarTensor
 import Gravitation.Examples.Minkowski
