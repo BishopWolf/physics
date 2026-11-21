@@ -1,5 +1,6 @@
 import Gravitation.Curvature
 import Gravitation.Examples.Schwarzschild
+import Gravitation.Examples.SchwarzschildDeSitter
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul
@@ -484,6 +485,249 @@ theorem christoffel_eq_schG (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     simp [christoffel, schG, schwarzschildG, schwarzschildGinv,
       pd_schwarzschild_r M x hr hf]
   all_goals field_simp
+
+
+/-! ## Schwarzschild–de Sitter in the same pipeline form
+
+The same construction with `f = 1 − 2M/r − Λr²/3` and `n = f'/2 = M/r² − Λr/3`.
+The tables are written in terms of `sdsF` and `sdsHalf`, with no `deriv` left in
+the derivative table: `∂_r(n/f)` is the quotient-rule value
+`(n' f − 2n²)/f²` with `n' = −2M/r³ − Λ/3`.
+-/
+
+/-- The Schwarzschild–de Sitter metric in `(t, r, θ, φ)` coordinates. -/
+noncomputable def sdsMetric (M Λ : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
+  fun i j =>
+    if i = j then
+      if i = 0 then -(SchwarzschildDeSitter.sdsF M Λ (x 1))
+      else if i = 1 then (SchwarzschildDeSitter.sdsF M Λ (x 1))⁻¹
+      else if i = 2 then (x 1) ^ 2
+      else (x 1) ^ 2 * Real.sin (x 2) ^ 2
+    else 0
+
+/-- The inverse of the Schwarzschild–de Sitter metric. -/
+noncomputable def sdsMetricInv (M Λ : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
+  fun i j =>
+    if i = j then
+      if i = 0 then -(SchwarzschildDeSitter.sdsF M Λ (x 1))⁻¹
+      else if i = 1 then SchwarzschildDeSitter.sdsF M Λ (x 1)
+      else if i = 2 then ((x 1) ^ 2)⁻¹
+      else ((x 1) ^ 2 * Real.sin (x 2) ^ 2)⁻¹
+    else 0
+
+/-- The Schwarzschild–de Sitter Christoffel symbols in closed form:
+`Γ^t_{tr} = n/f`, `Γ^r_{tt} = nf`, `Γ^r_{rr} = −n/f`, `Γ^r_{θθ} = −rf`,
+`Γ^r_{φφ} = −rf sin²θ`, `Γ^θ_{rθ} = Γ^φ_{rφ} = 1/r`,
+`Γ^θ_{φφ} = −sinθ cosθ` and `Γ^φ_{θφ} = cosθ/sinθ`. -/
+noncomputable def sdsG (M Λ : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) : ℝ :=
+  if k = 0 then
+    (if (i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 1) then
+      SchwarzschildDeSitter.sdsHalf M Λ (x 1) / SchwarzschildDeSitter.sdsF M Λ (x 1)
+     else 0)
+  else if k = 1 then
+    (if i = 0 ∧ j = 0 then
+       SchwarzschildDeSitter.sdsF M Λ (x 1) * SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+     else if i = 1 ∧ j = 1 then
+       -(SchwarzschildDeSitter.sdsHalf M Λ (x 1) / SchwarzschildDeSitter.sdsF M Λ (x 1))
+     else if i = 2 ∧ j = 2 then -(x 1 * SchwarzschildDeSitter.sdsF M Λ (x 1))
+     else if i = 3 ∧ j = 3 then
+       -(x 1 * Real.sin (x 2) ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 1))
+     else 0)
+  else if k = 2 then
+    (if (i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1) then 1 / (x 1)
+     else if i = 3 ∧ j = 3 then -(Real.sin (x 2) * Real.cos (x 2)) else 0)
+  else
+    (if (i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1) then 1 / (x 1)
+     else if (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then
+       Real.cos (x 2) / Real.sin (x 2) else 0)
+
+/-- The partial derivatives of the Schwarzschild–de Sitter Christoffel table:
+`∂_r(n/f) = (n'f − 2n²)/f²`, `∂_r Γ^r_{θθ} = −f − 2rn`,
+`∂_r Γ^r_{φφ} = (−f − 2rn) sin²θ` and `∂_θ Γ^θ_{φφ} = sin²θ − cos²θ`. -/
+noncomputable def sdsDG (M Λ : ℝ) (μ : Fin 4) (x : Fin 4 → ℝ)
+    (ρ ν σ : Fin 4) : ℝ :=
+  if μ = 1 ∧ ρ = 0 ∧ ν = 0 ∧ σ = 1 then
+    (-2 * M / (x 1) ^ 3 - Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1)
+      - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+          * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+          / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2
+  else if μ = 1 ∧ ρ = 1 ∧ ν = 2 ∧ σ = 2 then
+    -(SchwarzschildDeSitter.sdsF M Λ (x 1))
+      - (x 1) * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+  else if μ = 1 ∧ ρ = 1 ∧ ν = 3 ∧ σ = 3 then
+    (-(SchwarzschildDeSitter.sdsF M Λ (x 1))
+        - (x 1) * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))) * Real.sin (x 2) ^ 2
+  else if μ = 2 ∧ ρ = 2 ∧ ν = 3 ∧ σ = 3 then
+    Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2
+  else 0
+
+/-- **One evaluation of the pipeline yields all six Schwarzschild–de Sitter
+components**, for general `Λ`: `(2M/r³ + Λ/3)/f`, `Λr²/3 − M/r` twice,
+`(Λr²/3 − M/r)sin²θ` twice and `(2M/r + Λr²/3)sin²θ`. -/
+theorem riemann_components_pipeline_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemannFromData (sdsG M Λ) (sdsDG M Λ) x 0 1 0 1
+        = (2 * M / (x 1) ^ 3 + Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1))
+      ∧ (riemannFromData (sdsG M Λ) (sdsDG M Λ) x 0 2 0 2
+          = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemannFromData (sdsG M Λ) (sdsDG M Λ) x 0 3 0 3
+          = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (sdsG M Λ) (sdsDG M Λ) x 1 2 1 2
+          = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemannFromData (sdsG M Λ) (sdsDG M Λ) x 1 3 1 3
+          = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (sdsG M Λ) (sdsDG M Λ) x 2 3 2 3
+          = (2 * M / (x 1) + Λ * (x 1) ^ 2 / 3) * Real.sin (x 2) ^ 2) := by
+  have hd : deriv
+      (fun s : ℝ => SchwarzschildDeSitter.sdsHalf M Λ s / SchwarzschildDeSitter.sdsF M Λ s)
+      (x 1)
+      = (-2 * M / (x 1) ^ 3 - Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1)
+        - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+            * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+            / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2 := by
+    have h := (SchwarzschildDeSitter.hasDerivAt_sdsHalf M Λ (x 1) hr).div
+      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr) hf
+    have hfun : (fun s : ℝ =>
+          SchwarzschildDeSitter.sdsHalf M Λ s / SchwarzschildDeSitter.sdsF M Λ s)
+        = (fun s : ℝ => SchwarzschildDeSitter.sdsHalf M Λ s)
+          / fun s : ℝ => SchwarzschildDeSitter.sdsF M Λ s := rfl
+    rw [hfun, h.deriv]
+    field_simp [hf]
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · have h := SchwarzschildDeSitter.riemann_t_rtr_sds M Λ (x 1) hr hf
+    simp [riemannFromData, sdsG, sdsDG, Fin.sum_univ_four, hd, add_assoc,
+      sub_eq_add_neg, pow_two] at h ⊢
+    linear_combination h
+  · simpa [riemannFromData, sdsG, sdsDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] using
+      SchwarzschildDeSitter.riemann_t_thetatheta_sds M Λ (x 1) hr hf
+  · simpa [riemannFromData, sdsG, sdsDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] using
+      SchwarzschildDeSitter.riemann_t_phitphi_sds M Λ (x 1) (x 2) hr hf
+  · have h := SchwarzschildDeSitter.riemann_r_thetar_sds M Λ (x 1) hr hf
+    simp [riemannFromData, sdsG, sdsDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] at h ⊢
+    linear_combination h
+  · have h := SchwarzschildDeSitter.riemann_r_phirphi_sds M Λ (x 1) (x 2) hr hf
+    simp [riemannFromData, sdsG, sdsDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] at h ⊢
+    linear_combination h
+  · simpa [riemannFromData, sdsG, sdsDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] using
+      SchwarzschildDeSitter.riemann_theta_phitheta_sds M Λ (x 1) (x 2) hr hsin
+
+/-! ### The de Sitter table is the metric's own Christoffel table
+
+The same evaluation as for Schwarzschild, with `f` replaced by `sdsF`.
+-/
+
+/-- The metric does not depend on `t`. -/
+@[simp] theorem pd_sds_t (M Λ : ℝ) (x : Fin 4 → ℝ) (a b : Fin 4) :
+    pd 0 (fun y => sdsMetric M Λ y a b) x = 0 := by
+  fin_cases a <;> fin_cases b <;> simp [pd, sdsMetric]
+
+/-- The metric does not depend on `φ`. -/
+@[simp] theorem pd_sds_phi (M Λ : ℝ) (x : Fin 4 → ℝ) (a b : Fin 4) :
+    pd 3 (fun y => sdsMetric M Λ y a b) x = 0 := by
+  fin_cases a <;> fin_cases b <;> simp [pd, sdsMetric]
+
+/-- `∂_r g_rr = −2n/f²`, matching `deriv_sdsF_inv`. -/
+theorem pd_sds_rr (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) :
+    pd 1 (fun y => sdsMetric M Λ y 1 1) x
+      = -(2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+          / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2 := by
+  have hfun : (fun s : ℝ => sdsMetric M Λ (Function.update x 1 s) 1 1)
+      = fun s : ℝ => (SchwarzschildDeSitter.sdsF M Λ s)⁻¹ := by
+    funext s
+    simp [sdsMetric]
+  rw [pd, hfun, SchwarzschildDeSitter.deriv_sdsF_inv M Λ (x 1) hr hf]
+
+/-- `∂_r g_tt = −f' = −2n`. -/
+theorem pd_sds_tt (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => sdsMetric M Λ y 0 0) x
+      = -(2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)) := by
+  have hfun : (fun s : ℝ => sdsMetric M Λ (Function.update x 1 s) 0 0)
+      = -fun s : ℝ => SchwarzschildDeSitter.sdsF M Λ s := by
+    funext s
+    simp [sdsMetric]
+  have h := (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr).neg
+  rw [pd, hfun, h.deriv]
+
+/-- `∂_r g_θθ = 2r`. -/
+theorem pd_sds_thetatheta (M Λ : ℝ) (x : Fin 4 → ℝ) :
+    pd 1 (fun y => sdsMetric M Λ y 2 2) x = 2 * (x 1) := by
+  have hfun : (fun s : ℝ => sdsMetric M Λ (Function.update x 1 s) 2 2)
+      = fun s : ℝ => s ^ 2 := by
+    funext s
+    simp [sdsMetric]
+  rw [pd, hfun]
+  simp
+
+/-- `∂_r g_φφ = 2r sin²θ`. -/
+theorem pd_sds_phiphi_r (M Λ : ℝ) (x : Fin 4 → ℝ) :
+    pd 1 (fun y => sdsMetric M Λ y 3 3) x
+      = 2 * (x 1) * Real.sin (x 2) ^ 2 := by
+  have hfun : (fun s : ℝ => sdsMetric M Λ (Function.update x 1 s) 3 3)
+      = fun s : ℝ => s ^ 2 * Real.sin (x 2) ^ 2 := by
+    funext s
+    simp [sdsMetric]
+  have h := (hasDerivAt_pow 2 (x 1)).mul_const (Real.sin (x 2) ^ 2)
+  rw [pd, hfun, h.deriv]
+  ring
+
+/-- `∂_θ g_φφ = 2r² sinθ cosθ`. -/
+theorem pd_sds_phiphi_theta (M Λ : ℝ) (x : Fin 4 → ℝ) :
+    pd 2 (fun y => sdsMetric M Λ y 3 3) x
+      = 2 * (x 1) ^ 2 * Real.sin (x 2) * Real.cos (x 2) := by
+  have hfun : (fun s : ℝ => sdsMetric M Λ (Function.update x 2 s) 3 3)
+      = fun s : ℝ => (x 1) ^ 2 * Real.sin s ^ 2 := by
+    funext s
+    simp [sdsMetric]
+  have h := (Schwarzschild.hasDerivAt_sinSq (x 2)).const_mul ((x 1) ^ 2)
+  rw [pd, hfun, h.deriv]
+  ring
+
+/-- The `θ` derivatives: only `g_φφ` contributes. -/
+@[simp] theorem pd_sds_theta (M Λ : ℝ) (x : Fin 4 → ℝ) (a b : Fin 4) :
+    pd 2 (fun y => sdsMetric M Λ y a b) x
+      = if a = 3 ∧ b = 3 then 2 * (x 1) ^ 2 * Real.sin (x 2) * Real.cos (x 2)
+        else 0 := by
+  fin_cases a <;> fin_cases b <;>
+    first
+    | exact pd_sds_phiphi_theta M Λ x
+    | simp [pd, sdsMetric]
+
+/-- The `r` derivatives of the de Sitter metric components. -/
+theorem pd_sds_r (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (a b : Fin 4) :
+    pd 1 (fun y => sdsMetric M Λ y a b) x
+      = if a = 0 ∧ b = 0 then -(2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+        else if a = 1 ∧ b = 1 then
+          -(2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+            / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2
+        else if a = 2 ∧ b = 2 then 2 * (x 1)
+        else if a = 3 ∧ b = 3 then 2 * (x 1) * Real.sin (x 2) ^ 2
+        else 0 := by
+  fin_cases a <;> fin_cases b <;>
+    first
+    | exact pd_sds_tt M Λ x hr
+    | exact pd_sds_rr M Λ x hr hf
+    | exact pd_sds_thetatheta M Λ x
+    | exact pd_sds_phiphi_r M Λ x
+    | simp [pd, sdsMetric]
+
+/-- **The de Sitter Christoffel symbols are the closed-form table**, for every
+`Λ`.  With `riemann_components_pipeline_sds` the six de Sitter components are a
+statement about the metric. -/
+theorem christoffel_eq_sdsG (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    ∀ k i j, christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) x k i j
+      = sdsG M Λ x k i j := by
+  intro k i j
+  fin_cases k <;> fin_cases i <;> fin_cases j <;>
+    simp [christoffel, sdsG, sdsMetricInv, pd_sds_r M Λ x hr hf]
+  all_goals field_simp [hr, hf]
 
 end Pipeline
 
