@@ -143,7 +143,9 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   Ricci tensor: the Weyl part is trace free (`weylRic_zero`) and the trace part
   contracts to `Λη` (`traceRic_eq`), so `Ric = Λη`, `S = 4Λ` and `G = −Λη`
   (`sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`) — the `Λ` that cancelled from
-  the Weyl eigenvalues is exactly the Ricci curvature. At `Λ = 0` the same theorems give Schwarzschild's
+  the Weyl eigenvalues is exactly the Ricci curvature.
+  The frame Weyl tensor is purely electric — every component with a single
+  temporal index vanishes (`weyl_purely_electric`). At `Λ = 0` the same theorems give Schwarzschild's
   vacuum: `schwarzschild_ricci_zero`, `schwarzschild_scalar_zero` and
   `schwarzschild_einstein_zero`, and the Vulkan pass checks the frame Ricci
   tensor against `Λη` (`2.0e-8`). At `Λ = 0` the lapse reduces to
