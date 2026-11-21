@@ -1,0 +1,15 @@
+# Lean / Lake
+.lake/
+lake-manifest.json.bak
+*.olean
+*.ilean
+*.trace
+
+# Vulkan build products
+gravitation/vulkan/gr_vulkan
+gravitation/vulkan/shaders/*.spv
+
+# editors / OS
+.DS_Store
+.idea/
+*.swp

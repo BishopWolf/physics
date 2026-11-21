@@ -1,0 +1,206 @@
+#version 450
+// Tensor contractions for general relativity on the GPU.
+//
+// For every lattice point this shader computes, from a metric given as an
+// analytic function of the coordinates:
+//   g_ab, d_mu g_ab (central differences), Gamma^k_ij, d_mu Gamma^k_ij,
+//   Ric_ij = R^k_{i k j}, R = g^{ij} Ric_ij, G_ij = Ric_ij - 1/2 R g_ij.
+//
+// Output layout, 49 floats per point:
+//   [ 0..15] g_ab     (row major, a*4+b)
+//   [16..31] Ric_ab
+//   [   32] R
+//   [33..48] G_ab
+//
+// Index conventions: g[16*a+b] = g_ab, G[16*k+4*i+j] = Gamma^k_ij,
+// dG[64*mu+16*k+4*i+j] = d_mu Gamma^k_ij.
+
+layout(local_size_x = 64) in;
+
+layout(push_constant) uniform Params {
+    int   metricId;   // 0 Minkowski, 1 Schwarzschild, 2 Schwarzschild-de Sitter
+    float massM;
+    float lambdaC;
+    float h;          // finite-difference step
+    vec4  lo;         // lower corner in (t, r, theta, phi)
+    vec4  stepv;      // lattice step per coordinate
+    ivec4 grid;       // lattice size per coordinate
+} P;
+
+layout(std430, binding = 0) writeonly buffer Out {
+    float data[];
+};
+
+const int STRIDE = 49;
+
+void metricAt(int id, float mm, float lc, vec4 x, out float g[16])
+{
+    for (int i = 0; i < 16; ++i) g[i] = 0.0;
+
+    if (id == 0) {
+        // Minkowski, signature (-,+,+,+)
+        g[0] = -1.0;
+        g[5] = 1.0;
+        g[10] = 1.0;
+        g[15] = 1.0;
+    } else {
+        float r  = x.y;
+        float th = x.z;
+        float f  = 1.0 - 2.0 * mm / r;
+        if (id == 2) {
+            // Schwarzschild-de Sitter: Ric = Lambda * g
+            f -= (lc / 3.0) * r * r;
+        }
+        g[0]  = -f;
+        g[5]  = 1.0 / f;
+        g[10] = r * r;
+        g[15] = r * r * sin(th) * sin(th);
+    }
+}
+
+float det3(float a00, float a01, float a02,
+           float a10, float a11, float a12,
+           float a20, float a21, float a22)
+{
+    return a00 * (a11 * a22 - a12 * a21)
+         - a01 * (a10 * a22 - a12 * a20)
+         + a02 * (a10 * a21 - a11 * a20);
+}
+
+void inv4(in float a[16], out float inv[16], out float det)
+{
+    float c[16];
+    c[0]  =  det3(a[5], a[6], a[7],  a[9], a[10], a[11],  a[13], a[14], a[15]);
+    c[1]  = -det3(a[4], a[6], a[7],  a[8], a[10], a[11],  a[12], a[14], a[15]);
+    c[2]  =  det3(a[4], a[5], a[7],  a[8], a[9],  a[11],  a[12], a[13], a[15]);
+    c[3]  = -det3(a[4], a[5], a[6],  a[8], a[9],  a[10],  a[12], a[13], a[14]);
+    c[4]  = -det3(a[1], a[2], a[3],  a[9], a[10], a[11],  a[13], a[14], a[15]);
+    c[5]  =  det3(a[0], a[2], a[3],  a[8], a[10], a[11],  a[12], a[14], a[15]);
+    c[6]  = -det3(a[0], a[1], a[3],  a[8], a[9],  a[11],  a[12], a[13], a[15]);
+    c[7]  =  det3(a[0], a[1], a[2],  a[8], a[9],  a[10],  a[12], a[13], a[14]);
+    c[8]  =  det3(a[1], a[2], a[3],  a[5], a[6],  a[7],   a[13], a[14], a[15]);
+    c[9]  = -det3(a[0], a[2], a[3],  a[4], a[6],  a[7],   a[12], a[14], a[15]);
+    c[10] =  det3(a[0], a[1], a[3],  a[4], a[5],  a[7],   a[12], a[13], a[15]);
+    c[11] = -det3(a[0], a[1], a[2],  a[4], a[5],  a[6],   a[12], a[13], a[14]);
+    c[12] = -det3(a[1], a[2], a[3],  a[5], a[6],  a[7],   a[9],  a[10], a[11]);
+    c[13] =  det3(a[0], a[2], a[3],  a[4], a[6],  a[7],   a[8],  a[10], a[11]);
+    c[14] = -det3(a[0], a[1], a[3],  a[4], a[5],  a[7],   a[8],  a[9],  a[11]);
+    c[15] =  det3(a[0], a[1], a[2],  a[4], a[5],  a[6],   a[8],  a[9],  a[10]);
+
+    det = a[0] * c[0] + a[1] * c[1] + a[2] * c[2] + a[3] * c[3];
+
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j)
+            inv[i * 4 + j] = c[j * 4 + i] / det;
+}
+
+void dMetric(int id, float mm, float lc, vec4 x, float h, out float dg[64])
+{
+    for (int mu = 0; mu < 4; ++mu) {
+        vec4 xp = x;
+        vec4 xm = x;
+        xp[mu] += h;
+        xm[mu] -= h;
+        float gp[16];
+        float gm[16];
+        metricAt(id, mm, lc, xp, gp);
+        metricAt(id, mm, lc, xm, gm);
+        for (int ab = 0; ab < 16; ++ab)
+            dg[16 * mu + ab] = (gp[ab] - gm[ab]) / (2.0 * h);
+    }
+}
+
+void christoffel(in float g[16], in float dg[64], out float G[64])
+{
+    float ginv[16];
+    float det;
+    inv4(g, ginv, det);
+
+    for (int k = 0; k < 4; ++k)
+    for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j) {
+        float s = 0.0;
+        for (int l = 0; l < 4; ++l)
+            s += ginv[k * 4 + l]
+               * (dg[16 * i + j * 4 + l]
+                + dg[16 * j + i * 4 + l]
+                - dg[16 * l + i * 4 + j]);
+        G[16 * k + 4 * i + j] = 0.5 * s;
+    }
+}
+
+void main()
+{
+    uint tid = gl_GlobalInvocationID.x;
+    uint total = uint(P.grid.x) * uint(P.grid.y) * uint(P.grid.z) * uint(P.grid.w);
+    if (tid >= total) return;
+
+    int i0 = int(tid % uint(P.grid.x));
+    int i1 = int((tid / uint(P.grid.x)) % uint(P.grid.y));
+    int i2 = int((tid / (uint(P.grid.x) * uint(P.grid.y))) % uint(P.grid.z));
+    int i3 = int((tid / (uint(P.grid.x) * uint(P.grid.y) * uint(P.grid.z))) % uint(P.grid.w));
+
+    vec4 x = P.lo + vec4(float(i0), float(i1), float(i2), float(i3)) * P.stepv;
+
+    float g[16];
+    metricAt(P.metricId, P.massM, P.lambdaC, x, g);
+
+    float dg[64];
+    dMetric(P.metricId, P.massM, P.lambdaC, x, P.h, dg);
+
+    float G0[64];
+    christoffel(g, dg, G0);
+
+    // d_mu Gamma^k_ij by central differences of the Christoffel symbols.
+    float dG[256];
+    for (int mu = 0; mu < 4; ++mu) {
+        vec4 xp = x;
+        vec4 xm = x;
+        xp[mu] += P.h;
+        xm[mu] -= P.h;
+
+        float gp[16], gm[16], dgp[64], dgm[64], Gp[64], Gm[64];
+        metricAt(P.metricId, P.massM, P.lambdaC, xp, gp);
+        metricAt(P.metricId, P.massM, P.lambdaC, xm, gm);
+        dMetric(P.metricId, P.massM, P.lambdaC, xp, P.h, dgp);
+        dMetric(P.metricId, P.massM, P.lambdaC, xm, P.h, dgm);
+        christoffel(gp, dgp, Gp);
+        christoffel(gm, dgm, Gm);
+
+        for (int t = 0; t < 64; ++t)
+            dG[64 * mu + t] = (Gp[t] - Gm[t]) / (2.0 * P.h);
+    }
+
+    // Ric_sigma_nu = R^rho_{sigma rho nu}
+    float Ric[16];
+    for (int i = 0; i < 16; ++i) Ric[i] = 0.0;
+
+    for (int sig = 0; sig < 4; ++sig)
+    for (int nu = 0; nu < 4; ++nu) {
+        float s = 0.0;
+        for (int rho = 0; rho < 4; ++rho) {
+            s += dG[64 * rho + 16 * rho + 4 * nu + sig]
+               - dG[64 * nu  + 16 * rho + 4 * rho + sig];
+            for (int lam = 0; lam < 4; ++lam)
+                s += G0[16 * rho + 4 * rho + lam] * G0[16 * lam + 4 * nu + sig]
+                   - G0[16 * rho + 4 * nu  + lam] * G0[16 * lam + 4 * rho + sig];
+        }
+        Ric[4 * sig + nu] = s;
+    }
+
+    float ginv[16];
+    float det;
+    inv4(g, ginv, det);
+
+    float R = 0.0;
+    for (int a = 0; a < 4; ++a)
+        for (int b = 0; b < 4; ++b)
+            R += ginv[a * 4 + b] * Ric[a * 4 + b];
+
+    uint base = tid * uint(STRIDE);
+    for (int i = 0; i < 16; ++i) data[base + uint(i)] = g[i];
+    for (int i = 0; i < 16; ++i) data[base + 16u + uint(i)] = Ric[i];
+    data[base + 32u] = R;
+    for (int i = 0; i < 16; ++i)
+        data[base + 33u + uint(i)] = Ric[i] - 0.5 * R * g[i];
+}

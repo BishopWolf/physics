@@ -1,0 +1,95 @@
+# Survey: Lean formalisation of physics and mathematics (Nov 2026)
+
+Context gathered for this repository: what the Anthropic and OpenAI Lean
+repositories contain, what the physics-Lean community has done, and where
+general relativity currently stands as *formalised theorems*.
+
+Repositories were inspected through the GitHub contents API and their
+published documentation on 2026-11-21.
+
+## Anthropic
+
+| Repository | Contents | Physics / GR |
+| --- | --- | --- |
+| [`anthropics/formal-math`](https://github.com/anthropics/formal-math) | Self-contained Lake projects, Apache-2.0: `zeta23` (Riemann zeta zeros), `3sum-apsp` (fine-grained complexity), `eth` (2^o(n) 3-SAT) | None |
+| [`anthropics/fermats-last-theorem`](https://github.com/anthropics/fermats-last-theorem) | Complete Lean 4 formalisation of Fermat's Last Theorem (Frey–Serre–Ribet–Wiles), Lean 4.33.1 / Mathlib v4.33.0, `#print axioms` restricted to the three standard axioms | None |
+
+Both are pure mathematics/TCS. Neither contains a physics library, a metric, or
+a curvature tensor.
+
+## OpenAI
+
+| Repository | Contents | Physics / GR |
+| --- | --- | --- |
+| [`openai/ten-proofs`](https://github.com/openai/ten-proofs) | Lean 4 certificates for ten results (sphere packing, binary/spherical codes, permanent, Ramsey, non-sofic groups, quantum parallel repetition, Ehrhart, GapCVP, Connes rigidity, compactness/degeneracy) | None (quantum parallel repetition is information-theoretic, not field theory) |
+| [`openai/math`](https://github.com/openai/math) | 722 manuscripts in 372 families; `lean/` catalogue lists 162 papers whose main result has a Lean formalisation (snapshot 2026-10-07) | None found; the collection is mathematics |
+
+## Community physics formalisation
+
+* [`leanprover-community/physlib`](https://github.com/leanprover-community/physlib)
+  (`Physlib`, `PhyslibAlpha`). Top-level areas: `ClassicalMechanics`,
+  `ClassicalFieldTheory`, `Electromagnetism`, `QFT`, `QuantumMechanics`,
+  `StatisticalMechanics`, `Cosmology`, `Relativity`, `SpaceAndTime`, …
+  `Physlib/Relativity/` contains `MinkowskiMatrix.lean`, `LorentzGroup/`,
+  `LorentzAlgebra/`, `Tensors/`, `Special/`, `Causality/`, `Poincare/`,
+  `Bispinors/`, `Fermions/`, `SL2C/`, `PauliMatrices/`. That is
+  special-relativistic kinematics and Lorentz/Poincaré representation theory;
+  there is no Einstein field equation and no curvature tensor.
+* HepLean (Tooby-Smith) — high-energy physics: particles, gauge theory,
+  spinors; not gravitation.
+* `TataSatyaPratheek/mathematical-physics-lean` — a from-scratch,
+  Mathlib-free dimension-parametric development reaching the Einstein tensor and
+  Einstein equations (`Relativity/EinsteinN.lean`). Its own README states
+  0 `sorry` but 365 axioms; trust surface is the axioms, not the kernel alone.
+* QIQT / Zenodo 20837810 — an audited human-AI loop whose case study proves a
+  *conditional* statement: the Einstein field equations follow from a
+  finite-information capacity bound plus a Jacobson-style equation of state,
+  with the physics inputs as explicit hypotheses
+  (`QIQTH.QiqtToGR.qiqt_bekenstein_gives_gr`). The authors stress the result is
+  conditional, not a derivation of GR from first principles.
+
+## Has general relativity been formalised as theorems?
+
+**No, not end to end.** As of the surveyed state:
+
+1. **Curvature algebra** is formalised in places: metric components,
+   Christoffel symbols, Riemann/Ricci/scalar curvature, the Einstein tensor and
+   its divergence-free property.
+2. **The field equations** have been *stated* and derived only conditionally
+   from extra physical premises.
+3. **Solution theory** — the initial value formulation, local existence and
+   uniqueness for the Einstein equations, singularity theorems (Penrose–
+   Hawking), black-hole uniqueness/no-hair, energy conditions, global
+   hyperbolicity — is not formalised in any of these projects.
+4. **No Lean theorem** in the surveyed repositories states that a specific
+   black-hole metric solves the vacuum equations; the Schwarzschild solution
+   appears, if at all, as an unproved claim.
+
+So the meaningful gap is not "definitions of curvature" but "theorems about
+solutions". This repository is a small, kernel-checked step into that gap, plus
+a GPU numerical check of the solutions the Lean side cannot yet reach.
+
+## What this repository adds
+
+* `gravitation/Gravitation/` — Mathlib-based, `sorry`-free component
+  formalisation: metric with explicit inverse, Riemann tensor with its
+  algebraic symmetries, Ricci, scalar curvature, Einstein tensor; proved
+  symmetry of `G`, the trace identity `g^{ij}G_{ij} = (1 - n/2)S`, and
+  `G = 0 ↔ Ric = 0` in four dimensions; Minkowski as a proved vacuum solution.
+  (Caveat: `skew_first` is a structure field, as in the standard definition —
+  it is not derived from the other three.)
+* `gravitation/vulkan/` — Vulkan compute path computing `Γ`, `Ric`, `R`, `G`
+  from any metric supplied as an analytic function of the coordinates, used to
+  check numerically that Schwarzschild is Ricci flat and that
+  Schwarzschild–de Sitter has `Ric = Λg`.
+
+## Sources
+
+* https://github.com/anthropics/formal-math
+* https://github.com/anthropics/fermats-last-theorem
+* https://github.com/openai/ten-proofs
+* https://github.com/openai/math
+* https://github.com/leanprover-community/physlib
+* https://arxiv.org/abs/2405.08863 (HepLean)
+* https://zenodo.org/records/20837810 (conditional EFE derivation)
+* https://github.com/TataSatyaPratheek/mathematical-physics-lean
