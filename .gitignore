@@ -9,6 +9,9 @@ lake-manifest.json.bak
 gravitation/vulkan/gr_vulkan
 gravitation/vulkan/shaders/*.spv
 
+# local scratch notes (not part of the development)
+/.scratch/
+
 # editors / OS
 .DS_Store
 .idea/
