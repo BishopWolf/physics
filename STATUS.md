@@ -85,6 +85,9 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   maximal-slicing form, and a non-vacuum example proving the constraints are not
   automatic. Development existence (Choquet–Bruhat–Geroch) is deliberately not
   claimed and not axiomatised.
+* `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
+  accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
+  conserved combination of `Ric` and `S g`.
 * `gravitation/Gravitation/Geodesics.lean` — the geodesic Cauchy problem:
   local existence from initial position and velocity via Mathlib's
   Picard–Lindelöf theorem, uniqueness under an explicit Lipschitz hypothesis,

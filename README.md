@@ -86,6 +86,24 @@ hyperbolic PDE theory, absent from Mathlib; rather than adding an axiom, the
 gap is left open and stated here. In particular `IsVacuumData` is a predicate on
 the slice, not a theorem that a spacetime exists.
 
+## Conservation of the Einstein tensor
+
+`Gravitation.Conservation` takes the contracted Bianchi identity
+`∇^a Ric_ab = ½ ∇_b S` (a consequence of the second Bianchi identity and
+metric compatibility) as an explicit hypothesis and proves what follows.
+
+| Result | Statement |
+| --- | --- |
+| `sum_eta_mul` | `Σ_a f a · η^{aa} η_ab = f b` |
+| `divergence_combination` | `∇^a(α Ric + β S g)_b = (α/2 + β) ∇_b S` |
+| `divergence_einstein_eq_zero` | `∇^a G_ab = 0` |
+| `combination_conserved_iff` | if `∇S ≠ 0` somewhere, `α Ric + β S g` is conserved only when `α = -2β` |
+
+So `G` is the unique combination of `Ric` and `S g` that is conserved, up to
+scale — the algebraic reason Einstein's tensor is the one that appears in the
+field equations. The differential identity itself is *not* formalised; assuming
+it is stated plainly in the module, and it is the next target.
+
 ## Geodesic Cauchy problem
 
 `Gravitation.Geodesics` is the solution theory for free fall. The geodesic
