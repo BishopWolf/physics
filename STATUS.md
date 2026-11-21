@@ -150,6 +150,15 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   `schwarzschild_einstein_zero`, and the Vulkan pass checks the frame Ricci
   tensor against `Λη` (`2.0e-8`). At `Λ = 0` the lapse reduces to
   `schwarzschildF`.
+* `gravitation/Gravitation/Pipeline.lean` — end-to-end coordinate pipeline
+  `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G` directly from component metrics:
+  proves Minkowski is flat, equates `christoffel` with `schG`/`sdsG` and its
+  coordinate derivatives with `schDG`/`sdsDGFull`, evaluates all six Riemann
+  components directly from `g` and `g⁻¹` (`riemann_sds_components`,
+  `riemann_schwarzschild_components`), and proves full metric-level field
+  equations (`ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds`,
+  `ricciOf_sds_frame`, `ricciOf_schwarzschild`, `scalarOf_schwarzschild`,
+  `einsteinOf_schwarzschild`).
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.

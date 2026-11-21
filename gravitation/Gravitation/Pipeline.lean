@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
-import Mathlib.Tactic.LinearCombination
 
 /-!
 # The metric → Christoffel → Riemann pipeline
@@ -739,6 +738,86 @@ theorem christoffel_eq_sdsG (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     simp [christoffel, sdsG, sdsMetricInv, pd_sds_r M Λ x hr hf]
   all_goals field_simp [hr, hf]
 
+/-- At `Λ = 0`, `sdsMetric` reduces to `schwarzschildG`. -/
+theorem sdsMetric_zero_lambda (M : ℝ) : sdsMetric M 0 = schwarzschildG M := by
+  funext x i j
+  simp [sdsMetric, schwarzschildG, Schwarzschild.schwarzschildMetric,
+    SchwarzschildDeSitter.sdsF]
+
+/-- At `Λ = 0`, `sdsMetricInv` reduces to `schwarzschildGinv`. -/
+theorem sdsMetricInv_zero_lambda (M : ℝ) : sdsMetricInv M 0 = schwarzschildGinv M := by
+  funext x i j
+  simp [sdsMetricInv, schwarzschildGinv, SchwarzschildDeSitter.sdsF,
+    Schwarzschild.schwarzschildF]
+
+/-- At `Λ = 0`, `sdsG` reduces to `schG`. -/
+theorem sdsG_zero_lambda (M : ℝ) : sdsG M 0 = schG M := by
+  funext x k i j
+  by_cases hr : x 1 = 0
+  · fin_cases k <;> fin_cases i <;> fin_cases j <;>
+      simp [sdsG, schG, SchwarzschildDeSitter.sdsHalf, SchwarzschildDeSitter.sdsF,
+        Schwarzschild.schwarzschildF, hr]
+  · fin_cases k <;> fin_cases i <;> fin_cases j <;>
+      simp [sdsG, schG, SchwarzschildDeSitter.sdsHalf, SchwarzschildDeSitter.sdsF,
+        Schwarzschild.schwarzschildF]
+    all_goals field_simp [hr]
+
+/-- **The Schwarzschild–de Sitter Christoffel table and its closed form have the
+same partial derivatives.**  Because `r ≠ 0`, `f ≠ 0`, and `sin θ ≠ 0` are open
+conditions, `christoffel_eq_sdsG` holds on a neighbourhood of `x` along every
+coordinate line, so its `deriv` equals that of `sdsG`. -/
+theorem pd_christoffel_eq_pd_sdsG (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (μ a b c : Fin 4) :
+    pd μ (fun y => christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) y a b c) x
+      = pd μ (fun y => sdsG M Λ y a b c) x := by
+  fin_cases μ
+  · have heq : (fun s : ℝ =>
+        christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) (Function.update x 0 s) a b c)
+        =ᶠ[nhds (x 0)] (fun s : ℝ => sdsG M Λ (Function.update x 0 s) a b c) :=
+      Filter.Eventually.of_forall (fun s =>
+        christoffel_eq_sdsG M Λ (Function.update x 0 s) hr hf hsin a b c)
+    exact Filter.EventuallyEq.deriv_eq heq
+  · have hr' : ∀ᶠ s in nhds (x 1), s ≠ 0 := eventually_ne_nhds hr
+    have hcont : ContinuousAt (SchwarzschildDeSitter.sdsF M Λ) (x 1) :=
+      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr).continuousAt
+    have hf' : ∀ᶠ s in nhds (x 1), SchwarzschildDeSitter.sdsF M Λ s ≠ 0 :=
+      hcont.eventually_ne hf
+    have heq : (fun s : ℝ =>
+        christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) (Function.update x 1 s) a b c)
+        =ᶠ[nhds (x 1)] (fun s : ℝ => sdsG M Λ (Function.update x 1 s) a b c) := by
+      filter_upwards [hr', hf'] with s hs1 hs2
+      exact christoffel_eq_sdsG M Λ (Function.update x 1 s)
+        (by simpa using hs1) (by simpa using hs2) (by simpa using hsin) a b c
+    exact Filter.EventuallyEq.deriv_eq heq
+  · have hsin' : ∀ᶠ s in nhds (x 2), Real.sin s ≠ 0 :=
+      Real.continuous_sin.continuousAt.eventually_ne hsin
+    have heq : (fun s : ℝ =>
+        christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) (Function.update x 2 s) a b c)
+        =ᶠ[nhds (x 2)] (fun s : ℝ => sdsG M Λ (Function.update x 2 s) a b c) := by
+      filter_upwards [hsin'] with s hs
+      exact christoffel_eq_sdsG M Λ (Function.update x 2 s)
+        (by simpa using hr) (by simpa using hf) (by simpa using hs) a b c
+    exact Filter.EventuallyEq.deriv_eq heq
+  · have heq : (fun s : ℝ =>
+        christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) (Function.update x 3 s) a b c)
+        =ᶠ[nhds (x 3)] (fun s : ℝ => sdsG M Λ (Function.update x 3 s) a b c) :=
+      Filter.Eventually.of_forall (fun s =>
+        christoffel_eq_sdsG M Λ (Function.update x 3 s) hr hf hsin a b c)
+    exact Filter.EventuallyEq.deriv_eq heq
+
+/-- **The Schwarzschild Christoffel table and its closed form have the same
+partial derivatives.** -/
+theorem pd_christoffel_eq_pd_schG (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (μ a b c : Fin 4) :
+    pd μ (fun y => christoffel (schwarzschildG M) (schwarzschildGinv M) y a b c) x
+      = pd μ (fun y => schG M y a b c) x := by
+  have hf0 : SchwarzschildDeSitter.sdsF M 0 (x 1) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.sdsF_zero_lambda]
+  have h := pd_christoffel_eq_pd_sdsG M 0 x hr hf0 hsin μ a b c
+  simpa [sdsMetric_zero_lambda, sdsMetricInv_zero_lambda, sdsG_zero_lambda] using h
+
 
 /-! ### The evaluation takes the metric's own Christoffel table
 
@@ -1139,6 +1218,468 @@ theorem riemann_components_deriv_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 
         (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
         (dG' := sdsDG M Λ) x 2 3 2 3 h11 h12).trans ?_
     exact p6
+
+
+/-! ## Full derivative table and metric-level Ricci, scalar, and Einstein tensors
+
+The twelve slots in `pd_sdsG_eq_sdsDG` suffice for the six independent Riemann
+components, while the Ricci contraction `Ric_{σν} = Σ_ρ R^ρ_{σρν}` reads
+additional components (such as `R^r_{trt}`, `R^θ_{rθr}`, `R^φ_{θφθ}`).  Here we
+tabulate all 256 partial derivatives of `sdsG` in `sdsDGFull`, prove
+`pd_sdsG_eq_sdsDGFull` everywhere, lift through `pd_christoffel_eq_pd_sdsG`, and
+prove directly from the metric pipeline that
+
+`Ric_{σν} = Λ g_{σν}`, `S = 4 Λ`, `G_{ij} = −Λ g_{ij}`,
+
+with Schwarzschild (`Λ = 0`) as the vacuum specialization.
+-/
+
+/-- The complete partial-derivative table `∂_μ sdsG^k_{ij}` across all 256
+index tuples `(μ, k, i, j)`. -/
+noncomputable def sdsDGFull (M Λ : ℝ) (μ : Fin 4) (x : Fin 4 → ℝ)
+    (k i j : Fin 4) : ℝ :=
+  if μ = 1 then
+    (if k = 0 ∧ ((i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 1)) then
+       (-2 * M / (x 1) ^ 3 - Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1)
+         - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+             * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+             / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2
+     else if k = 1 ∧ i = 0 ∧ j = 0 then
+       (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+           * SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+         + SchwarzschildDeSitter.sdsF M Λ (x 1) * (-2 * M / (x 1) ^ 3 - Λ / 3)
+     else if k = 1 ∧ i = 1 ∧ j = 1 then
+       -((-2 * M / (x 1) ^ 3 - Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1)
+         - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+             * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+             / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2)
+     else if k = 1 ∧ i = 2 ∧ j = 2 then
+       -(SchwarzschildDeSitter.sdsF M Λ (x 1))
+         - (x 1) * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+     else if k = 1 ∧ i = 3 ∧ j = 3 then
+       (-(SchwarzschildDeSitter.sdsF M Λ (x 1))
+           - (x 1) * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)))
+         * Real.sin (x 2) ^ 2
+     else if (k = 2 ∧ ((i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1)))
+         ∨ (k = 3 ∧ ((i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1))) then
+       -1 / (x 1) ^ 2
+     else 0)
+  else if μ = 2 then
+    (if k = 1 ∧ i = 3 ∧ j = 3 then
+       -(x 1 * (2 * Real.sin (x 2) * Real.cos (x 2))
+         * SchwarzschildDeSitter.sdsF M Λ (x 1))
+     else if k = 2 ∧ i = 3 ∧ j = 3 then
+       Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2
+     else if k = 3 ∧ ((i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2)) then
+       -1 / Real.sin (x 2) ^ 2
+     else 0)
+  else 0
+
+/-- `∂_r Γ^r_{tt} = (2n)n + f n'`, product rule for `f n`. -/
+theorem pd_sdsG_r_tt (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => sdsG M Λ y 1 0 0) x = sdsDGFull M Λ 1 x 1 0 0 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 1 s) 1 0 0)
+      = fun s : ℝ => SchwarzschildDeSitter.sdsF M Λ s
+          * SchwarzschildDeSitter.sdsHalf M Λ s := by
+    funext s
+    simp [sdsG]
+  have hd : HasDerivAt
+      (fun s : ℝ => SchwarzschildDeSitter.sdsF M Λ s * SchwarzschildDeSitter.sdsHalf M Λ s)
+      ((2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)) * SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+        + SchwarzschildDeSitter.sdsF M Λ (x 1) * (-2 * M / (x 1) ^ 3 - Λ / 3))
+      (x 1) :=
+    (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr).mul
+      (SchwarzschildDeSitter.hasDerivAt_sdsHalf M Λ (x 1) hr)
+  have hderiv : deriv
+      (fun s : ℝ => SchwarzschildDeSitter.sdsF M Λ s * SchwarzschildDeSitter.sdsHalf M Λ s)
+      (x 1)
+      = (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)) * SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+        + SchwarzschildDeSitter.sdsF M Λ (x 1) * (-2 * M / (x 1) ^ 3 - Λ / 3) :=
+    hd.deriv
+  rw [pd, hfun, hderiv, sdsDGFull]
+  simp
+
+/-- `∂_r Γ^r_{rr} = −∂_r(n/f)`. -/
+theorem pd_sdsG_r_rr (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) :
+    pd 1 (fun y => sdsG M Λ y 1 1 1) x = sdsDGFull M Λ 1 x 1 1 1 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 1 s) 1 1 1)
+      = fun s : ℝ => -(SchwarzschildDeSitter.sdsHalf M Λ s
+          / SchwarzschildDeSitter.sdsF M Λ s) := by
+    funext s
+    simp [sdsG]
+  have hd : HasDerivAt
+      (fun s : ℝ => -(SchwarzschildDeSitter.sdsHalf M Λ s
+          / SchwarzschildDeSitter.sdsF M Λ s))
+      (-((-2 * M / (x 1) ^ 3 - Λ / 3) * SchwarzschildDeSitter.sdsF M Λ (x 1)
+        - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+            * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)))
+        / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2)
+      (x 1) := by
+    have h := ((SchwarzschildDeSitter.hasDerivAt_sdsHalf M Λ (x 1) hr).div
+      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr) hf).neg
+    convert h using 1
+    ring
+  have hderiv : deriv
+      (fun s : ℝ => -(SchwarzschildDeSitter.sdsHalf M Λ s
+          / SchwarzschildDeSitter.sdsF M Λ s))
+      (x 1)
+      = -((-2 * M / (x 1) ^ 3 - Λ / 3) * SchwarzschildDeSitter.sdsF M Λ (x 1)
+        - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+            * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)))
+        / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2 :=
+    hd.deriv
+  rw [pd, hfun, hderiv, sdsDGFull]
+  simp
+  field_simp [hf]
+
+/-- `∂_r (1/r) = −1/r²`. -/
+theorem deriv_one_div_eq (r : ℝ) (hr : r ≠ 0) :
+    deriv (fun s : ℝ => 1 / s) r = -1 / r ^ 2 := by
+  have hfun : (fun s : ℝ => 1 / s) = fun s : ℝ => s⁻¹ := by
+    funext s
+    simp [one_div]
+  have h := hasDerivAt_inv hr
+  rw [hfun, h.deriv]
+  ring
+
+/-- `∂_θ Γ^r_{φφ} = −2 r sinθ cosθ f`. -/
+theorem pd_sdsG_theta_r_phiphi (M Λ : ℝ) (x : Fin 4 → ℝ) :
+    pd 2 (fun y => sdsG M Λ y 1 3 3) x = sdsDGFull M Λ 2 x 1 3 3 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 2 s) 1 3 3)
+      = fun s : ℝ => -(x 1 * Real.sin s ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 1)) := by
+    funext s
+    simp [sdsG]
+  have hd : HasDerivAt
+      (fun s : ℝ => -(x 1 * Real.sin s ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 1)))
+      (-(x 1 * (2 * Real.sin (x 2) * Real.cos (x 2))
+        * SchwarzschildDeSitter.sdsF M Λ (x 1)))
+      (x 2) := by
+    have h := (((Schwarzschild.hasDerivAt_sinSq (x 2)).const_mul (x 1)).mul_const
+      (SchwarzschildDeSitter.sdsF M Λ (x 1))).neg
+    convert h using 1
+  have hderiv : deriv
+      (fun s : ℝ => -(x 1 * Real.sin s ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 1)))
+      (x 2)
+      = -(x 1 * (2 * Real.sin (x 2) * Real.cos (x 2))
+        * SchwarzschildDeSitter.sdsF M Λ (x 1)) :=
+    hd.deriv
+  rw [pd, hfun, hderiv, sdsDGFull]
+  simp
+
+/-- `∂_θ (cosθ / sinθ) = −1 / sin²θ`. -/
+theorem deriv_cos_div_sin (th : ℝ) (hsin : Real.sin th ≠ 0) :
+    deriv (fun s : ℝ => Real.cos s / Real.sin s) th = -1 / Real.sin th ^ 2 := by
+  have h := (Real.hasDerivAt_cos th).div (Real.hasDerivAt_sin th) hsin
+  have hsc : Real.sin th ^ 2 + Real.cos th ^ 2 = 1 := Real.sin_sq_add_cos_sq th
+  have hnum : (-Real.sin th * Real.sin th - Real.cos th * Real.cos th) / Real.sin th ^ 2
+      = -1 / Real.sin th ^ 2 := by
+    have h1 : -Real.sin th * Real.sin th - Real.cos th * Real.cos th = -1 := by
+      linear_combination -hsc
+    rw [h1]
+  rw [hnum] at h
+  exact h.deriv
+
+theorem pd_sdsG_eq_sdsDGFull_0 (M Λ : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) :
+    pd 0 (fun y => sdsG M Λ y k i j) x = sdsDGFull M Λ 0 x k i j := by
+  fin_cases k <;> fin_cases i <;> fin_cases j <;> simp [pd, sdsG, sdsDGFull]
+
+theorem pd_sdsG_eq_sdsDGFull_1_0 (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (i j : Fin 4) :
+    pd 1 (fun y => sdsG M Λ y 0 i j) x = sdsDGFull M Λ 1 x 0 i j := by
+  have h01 : pd 1 (fun y => sdsG M Λ y 0 0 1) x = sdsDGFull M Λ 1 x 0 0 1 := by
+    simpa [sdsDG, sdsDGFull] using pd_sdsG_rt M Λ x hr hf
+  fin_cases i <;> fin_cases j
+  all_goals first | exact h01 | simp [pd, sdsG, sdsDGFull]
+
+theorem pd_sdsG_eq_sdsDGFull_1_1 (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (i j : Fin 4) :
+    pd 1 (fun y => sdsG M Λ y 1 i j) x = sdsDGFull M Λ 1 x 1 i j := by
+  have h00 := pd_sdsG_r_tt M Λ x hr
+  have h11 := pd_sdsG_r_rr M Λ x hr hf
+  have h22 : pd 1 (fun y => sdsG M Λ y 1 2 2) x = sdsDGFull M Λ 1 x 1 2 2 := by
+    simpa [sdsDG, sdsDGFull] using pd_sdsG_r_thetatheta M Λ x hr
+  have h33 : pd 1 (fun y => sdsG M Λ y 1 3 3) x = sdsDGFull M Λ 1 x 1 3 3 := by
+    simpa [sdsDG, sdsDGFull] using pd_sdsG_r_phiphi M Λ x hr
+  fin_cases i <;> fin_cases j
+  all_goals first | exact h00 | exact h11 | exact h22 | exact h33 | simp [pd, sdsG, sdsDGFull]
+
+theorem pd_sdsG_eq_sdsDGFull_1_2 (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) (i j : Fin 4) :
+    pd 1 (fun y => sdsG M Λ y 2 i j) x = sdsDGFull M Λ 1 x 2 i j := by
+  have hinv := deriv_one_div_eq (x 1) hr
+  fin_cases i <;> fin_cases j <;> simp [pd, sdsG, sdsDGFull]
+  · simpa [one_div] using hinv
+  · simpa [one_div] using hinv
+
+theorem pd_sdsG_eq_sdsDGFull_1_3 (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) (i j : Fin 4) :
+    pd 1 (fun y => sdsG M Λ y 3 i j) x = sdsDGFull M Λ 1 x 3 i j := by
+  have hinv := deriv_one_div_eq (x 1) hr
+  fin_cases i <;> fin_cases j <;> simp [pd, sdsG, sdsDGFull]
+  · simpa [one_div] using hinv
+  · simpa [one_div] using hinv
+
+theorem pd_sdsG_eq_sdsDGFull_1 (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (k i j : Fin 4) :
+    pd 1 (fun y => sdsG M Λ y k i j) x = sdsDGFull M Λ 1 x k i j := by
+  fin_cases k
+  · exact pd_sdsG_eq_sdsDGFull_1_0 M Λ x hr hf i j
+  · exact pd_sdsG_eq_sdsDGFull_1_1 M Λ x hr hf i j
+  · exact pd_sdsG_eq_sdsDGFull_1_2 M Λ x hr i j
+  · exact pd_sdsG_eq_sdsDGFull_1_3 M Λ x hr i j
+
+theorem pd_sdsG_eq_sdsDGFull_2 (M Λ : ℝ) (x : Fin 4 → ℝ)
+    (hsin : Real.sin (x 2) ≠ 0) (k i j : Fin 4) :
+    pd 2 (fun y => sdsG M Λ y k i j) x = sdsDGFull M Λ 2 x k i j := by
+  have h133 := pd_sdsG_theta_r_phiphi M Λ x
+  have h233 : pd 2 (fun y => sdsG M Λ y 2 3 3) x = sdsDGFull M Λ 2 x 2 3 3 := by
+    simpa [sdsDG, sdsDGFull] using pd_sdsG_theta_phiphi M Λ x
+  have hcot := deriv_cos_div_sin (x 2) hsin
+  fin_cases k <;> fin_cases i <;> fin_cases j
+  all_goals first
+    | exact h133
+    | exact h233
+    | (simp [pd, sdsG, sdsDGFull]; done)
+    | (simp [pd, sdsG, sdsDGFull]; exact hcot)
+
+theorem pd_sdsG_eq_sdsDGFull_3 (M Λ : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) :
+    pd 3 (fun y => sdsG M Λ y k i j) x = sdsDGFull M Λ 3 x k i j := by
+  fin_cases k <;> fin_cases i <;> fin_cases j <;> simp [pd, sdsG, sdsDGFull]
+
+/-- **Every partial derivative of `sdsG` equals `sdsDGFull`**, across all 256
+index tuples `(μ, k, i, j)`. -/
+theorem pd_sdsG_eq_sdsDGFull (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (μ k i j : Fin 4) :
+    pd μ (fun y => sdsG M Λ y k i j) x = sdsDGFull M Λ μ x k i j := by
+  fin_cases μ
+  · exact pd_sdsG_eq_sdsDGFull_0 M Λ x k i j
+  · exact pd_sdsG_eq_sdsDGFull_1 M Λ x hr hf k i j
+  · exact pd_sdsG_eq_sdsDGFull_2 M Λ x hsin k i j
+  · exact pd_sdsG_eq_sdsDGFull_3 M Λ x k i j
+
+/-- **The metric pipeline's Riemann tensor equals `riemannFromData sdsG sdsDGFull`**
+at every 4-tuple of indices `(ρ, σ, μ, ν)`, for general `Λ`. -/
+theorem riemann_sds_eq_data (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (ρ σ μ ν : Fin 4) :
+    riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x ρ σ μ ν
+      = riemannFromData (sdsG M Λ) (sdsDGFull M Λ) x ρ σ μ ν := by
+  rw [riemann_eq_riemannFromData]
+  have h1 : pd μ (fun z => christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) z ρ ν σ) x
+      = sdsDGFull M Λ μ x ρ ν σ :=
+    (pd_christoffel_eq_pd_sdsG M Λ x hr hf hsin μ ρ ν σ).trans
+      (pd_sdsG_eq_sdsDGFull M Λ x hr hf hsin μ ρ ν σ)
+  have h2 : pd ν (fun z => christoffel (sdsMetric M Λ) (sdsMetricInv M Λ) z ρ μ σ) x
+      = sdsDGFull M Λ ν x ρ μ σ :=
+    (pd_christoffel_eq_pd_sdsG M Λ x hr hf hsin ν ρ μ σ).trans
+      (pd_sdsG_eq_sdsDGFull M Λ x hr hf hsin ν ρ μ σ)
+  simp only [riemannFromData, h1, h2, christoffel_eq_sdsG M Λ x hr hf hsin]
+
+/-- **All six independent Riemann components directly from the metric pipeline**
+for Schwarzschild–de Sitter, with general `Λ`: no transcribed Christoffel or
+derivative table appears in the statement. -/
+theorem riemann_sds_components (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x 0 1 0 1
+        = (2 * M / (x 1) ^ 3 + Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1))
+      ∧ (riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x 0 2 0 2
+          = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x 0 3 0 3
+          = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x 1 2 1 2
+          = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x 1 3 1 3
+          = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemann (sdsMetric M Λ) (sdsMetricInv M Λ) x 2 3 2 3
+          = (2 * M / (x 1) + Λ * (x 1) ^ 2 / 3) * Real.sin (x 2) ^ 2) := by
+  obtain ⟨p1, p2, p3, p4, p5, p6⟩ := riemann_components_pipeline_sds M Λ x hr hf hsin
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [riemann_sds_eq_data M Λ x hr hf hsin]
+    exact (riemannFromData_congr (sdsG M Λ) x 0 1 0 1
+      (by simp [sdsDGFull, sdsDG]) (by simp [sdsDGFull, sdsDG])).trans p1
+  · rw [riemann_sds_eq_data M Λ x hr hf hsin]
+    exact (riemannFromData_congr (sdsG M Λ) x 0 2 0 2
+      (by simp [sdsDGFull, sdsDG]) (by simp [sdsDGFull, sdsDG])).trans p2
+  · rw [riemann_sds_eq_data M Λ x hr hf hsin]
+    exact (riemannFromData_congr (sdsG M Λ) x 0 3 0 3
+      (by simp [sdsDGFull, sdsDG]) (by simp [sdsDGFull, sdsDG])).trans p3
+  · rw [riemann_sds_eq_data M Λ x hr hf hsin]
+    exact (riemannFromData_congr (sdsG M Λ) x 1 2 1 2
+      (by simp [sdsDGFull, sdsDG]) (by simp [sdsDGFull, sdsDG])).trans p4
+  · rw [riemann_sds_eq_data M Λ x hr hf hsin]
+    exact (riemannFromData_congr (sdsG M Λ) x 1 3 1 3
+      (by simp [sdsDGFull, sdsDG]) (by simp [sdsDGFull, sdsDG])).trans p5
+  · rw [riemann_sds_eq_data M Λ x hr hf hsin]
+    exact (riemannFromData_congr (sdsG M Λ) x 2 3 2 3
+      (by simp [sdsDGFull, sdsDG]) (by simp [sdsDGFull, sdsDG])).trans p6
+
+/-- **All six independent Schwarzschild Riemann components directly from the
+metric pipeline**, specialized from `riemann_sds_components` at `Λ = 0`. -/
+theorem riemann_schwarzschild_components (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemann (schwarzschildG M) (schwarzschildGinv M) x 0 1 0 1
+        = 2 * M / ((x 1) ^ 3 * Schwarzschild.schwarzschildF M (x 1)))
+      ∧ (riemann (schwarzschildG M) (schwarzschildGinv M) x 0 2 0 2 = -M / (x 1))
+      ∧ (riemann (schwarzschildG M) (schwarzschildGinv M) x 0 3 0 3
+          = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemann (schwarzschildG M) (schwarzschildGinv M) x 1 2 1 2 = -M / (x 1))
+      ∧ (riemann (schwarzschildG M) (schwarzschildGinv M) x 1 3 1 3
+          = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemann (schwarzschildG M) (schwarzschildGinv M) x 2 3 2 3
+          = (2 * M / (x 1)) * Real.sin (x 2) ^ 2) := by
+  have hf0 : SchwarzschildDeSitter.sdsF M 0 (x 1) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.sdsF_zero_lambda]
+  obtain ⟨c1, c2, c3, c4, c5, c6⟩ := riemann_sds_components M 0 x hr hf0 hsin
+  rw [sdsMetric_zero_lambda, sdsMetricInv_zero_lambda] at c1 c2 c3 c4 c5 c6
+  rw [SchwarzschildDeSitter.sdsF_zero_lambda] at c1
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [c1]
+    field_simp [hr, hf]
+    ring
+  · rw [c2]
+    ring
+  · simpa using c3
+  · rw [c4]
+    ring
+  · simpa using c5
+  · simpa using c6
+
+/-- **Metric-level Ricci tensor for Schwarzschild–de Sitter**:
+`Ric_{σν} = Λ g_{σν}`, directly from `ricciOf (sdsMetric M Λ) (sdsMetricInv M Λ)`. -/
+theorem ricciOf_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (σ ν : Fin 4) :
+    ricciOf (sdsMetric M Λ) (sdsMetricInv M Λ) x σ ν = Λ * sdsMetric M Λ x σ ν := by
+  have hcos_sq : Real.cos (x 2) ^ 2 = 1 - Real.sin (x 2) ^ 2 := by
+    linear_combination Real.sin_sq_add_cos_sq (x 2)
+  fin_cases σ <;> fin_cases ν
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+    field_simp [hr, hf]
+    simp only [SchwarzschildDeSitter.sdsF, SchwarzschildDeSitter.sdsHalf]
+    field_simp [hr]
+    ring
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+    field_simp [hr, hf]
+    simp only [SchwarzschildDeSitter.sdsF, SchwarzschildDeSitter.sdsHalf]
+    field_simp [hr]
+    ring
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+    ring
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+    field_simp [hr, hf, hsin]
+    simp only [SchwarzschildDeSitter.sdsF, SchwarzschildDeSitter.sdsHalf]
+    field_simp [hr]
+    simp only [hcos_sq]
+    ring
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+  · simp [ricciOf, Fin.sum_univ_four, riemann_sds_eq_data M Λ x hr hf hsin,
+      riemannFromData, sdsG, sdsDGFull, sdsMetric]
+    field_simp [hr, hf, hsin]
+    simp only [SchwarzschildDeSitter.sdsF, SchwarzschildDeSitter.sdsHalf]
+    field_simp [hr]
+    simp only [hcos_sq]
+    ring
+
+/-- **Metric-level scalar curvature for Schwarzschild–de Sitter**: `S = 4 Λ`. -/
+theorem scalarOf_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    scalarOf (sdsMetric M Λ) (sdsMetricInv M Λ) x = 4 * Λ := by
+  simp only [scalarOf, ricciOf_sds M Λ x hr hf hsin]
+  simp only [Fin.sum_univ_four, sdsMetric, sdsMetricInv]
+  simp
+  field_simp [hr, hf, hsin]
+  ring
+
+/-- **Metric-level Einstein tensor for Schwarzschild–de Sitter**:
+`G_{ij} = −Λ g_{ij}`, so `G_{ij} + Λ g_{ij} = 0` directly from the metric. -/
+theorem einsteinOf_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (i j : Fin 4) :
+    einsteinOf (sdsMetric M Λ) (sdsMetricInv M Λ) x i j
+      = -(Λ * sdsMetric M Λ x i j) := by
+  simp only [einsteinOf, ricciOf_sds M Λ x hr hf hsin, scalarOf_sds M Λ x hr hf hsin]
+  ring
+
+/-- The inverse diagonal scale `|g_{aa}|⁻¹` relating the coordinate Ricci
+components of `sdsMetric` to the orthonormal frame `η`. -/
+noncomputable def sdsFrameScale (M Λ : ℝ) (x : Fin 4 → ℝ) (a : Fin 4) : ℝ :=
+  if a = 0 then (SchwarzschildDeSitter.sdsF M Λ (x 1))⁻¹
+  else if a = 1 then SchwarzschildDeSitter.sdsF M Λ (x 1)
+  else if a = 2 then ((x 1) ^ 2)⁻¹
+  else ((x 1) ^ 2 * Real.sin (x 2) ^ 2)⁻¹
+
+/-- **The metric's Ricci tensor equals `Λ η` in the orthonormal frame**:
+scaling `ricciOf (sdsMetric M Λ)` by `|g_{σσ}|⁻¹` reproduces `sdsRic_eq`. -/
+theorem ricciOf_sds_frame (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (σ ν : Fin 4) :
+    sdsFrameScale M Λ x σ * ricciOf (sdsMetric M Λ) (sdsMetricInv M Λ) x σ ν
+      = Λ * eta4 σ ν := by
+  rw [ricciOf_sds M Λ x hr hf hsin]
+  fin_cases σ <;> fin_cases ν <;> simp [sdsFrameScale, sdsMetric, eta4]
+  · field_simp [hf]
+  · field_simp [hf]
+  · field_simp [hr]
+  · field_simp [hr, hsin]
+
+/-- **Metric-level Ricci flatness for Schwarzschild**: `Ric = 0` directly from
+`schwarzschildG` and `schwarzschildGinv`. -/
+theorem ricciOf_schwarzschild (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (σ ν : Fin 4) :
+    ricciOf (schwarzschildG M) (schwarzschildGinv M) x σ ν = 0 := by
+  have hf0 : SchwarzschildDeSitter.sdsF M 0 (x 1) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.sdsF_zero_lambda]
+  have h := ricciOf_sds M 0 x hr hf0 hsin σ ν
+  rw [sdsMetric_zero_lambda, sdsMetricInv_zero_lambda] at h
+  simpa using h
+
+/-- **Metric-level vanishing scalar curvature for Schwarzschild**: `S = 0`. -/
+theorem scalarOf_schwarzschild (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    scalarOf (schwarzschildG M) (schwarzschildGinv M) x = 0 := by
+  have hf0 : SchwarzschildDeSitter.sdsF M 0 (x 1) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.sdsF_zero_lambda]
+  have h := scalarOf_sds M 0 x hr hf0 hsin
+  rw [sdsMetric_zero_lambda, sdsMetricInv_zero_lambda] at h
+  simpa using h
+
+/-- **Metric-level vacuum Einstein equation for Schwarzschild**: `G_{ij} = 0`
+directly from `g = diag(−f, 1/f, r², r²sin²θ)`. -/
+theorem einsteinOf_schwarzschild (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (i j : Fin 4) :
+    einsteinOf (schwarzschildG M) (schwarzschildGinv M) x i j = 0 := by
+  have hf0 : SchwarzschildDeSitter.sdsF M 0 (x 1) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.sdsF_zero_lambda]
+  have h := einsteinOf_sds M 0 x hr hf0 hsin i j
+  rw [sdsMetric_zero_lambda, sdsMetricInv_zero_lambda] at h
+  simpa using h
 
 end Pipeline
 

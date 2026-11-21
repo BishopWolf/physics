@@ -16,18 +16,26 @@ singularity theorems, black-hole uniqueness) exists. This repository is a small,
 ```
 gravitation/
 ├── Gravitation/
-│   ├── Basic.lean               metric with explicit inverse, Minkowski η
-│   ├── Curvature.lean           Riemann, Ricci, scalar curvature
-│   ├── Einstein.lean            Einstein tensor, trace identity, vacuum theorem
-│   ├── InitialValue.lean        initial data, constraint equations, reductions
-│   ├── Geodesics.lean           geodesic Cauchy problem: local existence/uniqueness
-│   ├── Alternatives.lean        MOND, MOG and TeVeS: proved structural properties
-│   └── Examples/Minkowski.lean  Minkowski as a proved vacuum solution
-├── Gravitation.lean             library root
-├── lakefile.toml                Physlib 56430c6 (Mathlib v4.36.0), Lean v4.36.0
+│   ├── Basic.lean                         metric with explicit inverse, Minkowski η
+│   ├── Curvature.lean                     Riemann, Ricci, scalar curvature
+│   ├── Einstein.lean                      Einstein tensor, trace identity, vacuum theorem
+│   ├── Conservation.lean                  divergence-free Einstein tensor in orthonormal frame
+│   ├── InitialValue.lean                  initial data, constraint equations, reductions
+│   ├── Geodesics.lean                     geodesic Cauchy problem: local existence/uniqueness
+│   ├── Pipeline.lean                      g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G pipeline
+│   ├── Alternatives.lean                  MOND, MOG and TeVeS: proved structural properties
+│   ├── ScalarTensor.lean                  Brans–Dicke, f(R), Starobinsky, Galileons
+│   ├── Screening.lean                     chameleon screening and thin-shell cap
+│   ├── Ostrogradsky.lean                  Ostrogradsky instability and ghost
+│   └── Examples/
+│       ├── Minkowski.lean                 Minkowski as a proved vacuum solution
+│       ├── Schwarzschild.lean             Schwarzschild frame and metric curvature
+│       └── SchwarzschildDeSitter.lean     Schwarzschild–de Sitter (general Λ) curvature
+├── Gravitation.lean                       library root
+├── lakefile.toml                          Physlib 56430c6 (transitive Mathlib v4.36.0), Lean v4.36.0
 └── vulkan/
-    ├── shaders/tensor.comp      GLSL compute: Γ, Ric, R, G on a spacetime lattice
-    ├── src/gr_vulkan.c          Vulkan host: dispatch, readback, tolerance checks
+    ├── shaders/tensor.comp                GLSL compute: Γ, Ric, R, G on a spacetime lattice
+    ├── src/gr_vulkan.c                    Vulkan host: dispatch, readback, tolerance checks
     └── Makefile
 ```
 
@@ -86,23 +94,19 @@ hyperbolic PDE theory, absent from Mathlib; rather than adding an axiom, the
 gap is left open and stated here. In particular `IsVacuumData` is a predicate on
 the slice, not a theorem that a spacetime exists.
 
-## Schwarzschild curvature
+## Schwarzschild and Schwarzschild–de Sitter curvature
 
-`Gravitation.Examples.Schwarzschild` defines the Schwarzschild curvature in the
-orthonormal frame `(t, r, θ, φ)` from its electric part `E = diag(0, −2k, k, k)`
-with `k = M/r³`, proves the three structural laws of `Riemann`, and proves:
+`Gravitation.Examples.Schwarzschild`, `Gravitation.Examples.SchwarzschildDeSitter`, and `Gravitation.Pipeline` prove the solution theory both in the orthonormal frame `(t, r, θ, φ)` (`electricPart`, `kretschmann_scalar`, `kretschmann_sds`, `sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`) and end to end directly at the metric level from `g = diag(−f, 1/f, r², r²sin²θ)`:
 
 | Result | Statement |
 | --- | --- |
 | `Schwarzschild.ricci_eq_zero` | `ricci η (schwarzschild k) = 0` for every `k` |
 | `Schwarzschild.frameSqSum_eq` | `Σ R_{abcd}² = 48 k²` |
 | `Schwarzschild.kretschmann_scalar` | at `k = M/r³`: `Σ R_{abcd}² = 48 M²/r⁶` |
-
-Together with `vacuum_iff_ricci_flat`, the first is the vacuum Einstein
-equation in an orthonormal frame. **Scope:** the components are supplied as the
-standard frame components; deriving them from `g = diag(−f, 1/f, r², r²sin²θ)`
-by differentiating the Christoffel symbols is not formalised. This verifies the
-solution's curvature algebra, not the derivation.
+| `Pipeline.riemann_sds_components` / `Pipeline.riemann_schwarzschild_components` | all 6 independent Riemann components computed from `g` and `g⁻¹` via `pd_christoffel_eq_pd_sdsG` and `pd_sdsG_eq_sdsDGFull` |
+| `Pipeline.ricciOf_sds` / `Pipeline.scalarOf_sds` / `Pipeline.einsteinOf_sds` | metric-level `Ric = Λg`, `S = 4Λ`, and `G = −Λg` for general `Λ` |
+| `Pipeline.ricciOf_sds_frame` | scales coordinate `ricciOf (sdsMetric M Λ)` to the orthonormal-frame `Λ η` |
+| `Pipeline.ricciOf_schwarzschild` / `Pipeline.scalarOf_schwarzschild` / `Pipeline.einsteinOf_schwarzschild` | metric-level `Ric = 0`, `S = 0`, and `G = 0` for Schwarzschild (`Λ = 0`) |
 
 ## Conservation of the Einstein tensor
 
