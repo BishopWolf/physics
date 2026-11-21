@@ -107,8 +107,9 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   Lake's module-system advisory is opted out with `allowNonModules = true`.
   `scripts/check_messages.sh` fails if a message reappears; CI runs it.
 * GPU check — the Vulkan tensor pass runs in double precision and, for the
-  Schwarzschild metric, reproduces the proved `48M²/r⁶` to `1.2e-7` and the
-  electric part `diag(0, −2k, k, k)` to `2.6e-9`. CI runs it on the lavapipe
+  Schwarzschild metric, reproduces the proved `48M²/r⁶` to `1.2e-7`, the
+  electric part `diag(0, −2k, k, k)` to `2.6e-9` and `R^t_rtr` to `2M/(r³f)`
+  to `7.8e-9`. CI runs it on the lavapipe
   software driver, so no GPU runner is needed.
 * `gravitation/Gravitation/Examples/Schwarzschild.lean` — the Schwarzschild
   curvature in an orthonormal frame: proved Ricci flat for every mass
@@ -116,10 +117,11 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   rather than asserted: `g_tt = −(1 + 2Φ)` fixes `Φ = −M/r`, and the tidal
   eigenvalues `Φ'' = −2M/r³`, `Φ'/r = M/r³` are proved from the potential, so
   the tensor is `electricPart` at `k = M/r³` and is trace free because `Φ` is
-  harmonic. The `t r t r` and `t θ t θ` components are also derived from the
-  metric by differentiating the Christoffel symbols — `R^t{}_{rtr} = 2M/(r³f)`
-  and `R^t{}_{θtθ} = −M/r` — and lowered/scaled to the two electric eigenvalues;
-  the remaining frame components are supplied.
+  harmonic. Every component of the curvature is also derived from the metric by
+  differentiating the Christoffel symbols — `R^t{}_{rtr} = 2M/(r³f)`,
+  `R^t{}_{θtθ} = −M/r`, `R^t{}_{φtφ} = −(M/r)sin²θ`, `R^r{}_{θrθ} = −M/r`,
+  `R^r{}_{φrφ} = −(M/r)sin²θ` and `R^θ{}_{φθφ} = (2M/r)sin²θ` — and scaled to
+  the electric eigenvalues `−2k, k, k`.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.

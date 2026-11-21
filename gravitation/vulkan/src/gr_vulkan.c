@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     const int G[4]     = {3, 4, 3, 3};
     const uint32_t total = (uint32_t)G[0] * (uint32_t)G[1] * (uint32_t)G[2] *
                            (uint32_t)G[3];
-    const int    STRIDE  = 66;
+    const int    STRIDE  = 67;
     const size_t bufSize = (size_t)total * STRIDE * sizeof(double);
 
     VkApplicationInfo app = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
@@ -335,7 +335,7 @@ int main(int argc, char **argv)
         const double *d = mapped;
 
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
-        double maxKrel = 0.0, maxEdev = 0.0;
+        double maxKrel = 0.0, maxEdev = 0.0, maxRtr = 0.0;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
@@ -379,6 +379,14 @@ int main(int argc, char **argv)
                     double dev = fabs(E[i] - exp[i]);
                     if (dev > maxEdev) maxEdev = dev;
                 }
+
+                // R^t_rtr against its closed form 2M/(r^3 f), the statement
+                // proved as riemann_t_rtr_from_metric in Lean.
+                double ff    = 1.0 - 2.0 * (double)cases[c].M / rr;
+                double rtrExp = 2.0 * (double)cases[c].M /
+                                (rr * rr * rr * ff);
+                double rtrDev = fabs(o[66] - rtrExp);
+                if (rtrDev > maxRtr) maxRtr = rtrDev;
             }
         }
         vkUnmapMemory(gDev, gMem);
@@ -390,6 +398,10 @@ int main(int argc, char **argv)
             failures++;
         }
         if (cases[c].id == 1 && maxEdev > eTol) {
+            verdict = "FAIL";
+            failures++;
+        }
+        if (cases[c].id == 1 && maxRtr > eTol) {
             verdict = "FAIL";
             failures++;
         }
@@ -408,6 +420,8 @@ int main(int argc, char **argv)
                    maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");
             printf("        electric part |E - diag(0,-2k,k,k)| = %.3e  (tol %.0e)  [%s]\n",
                    maxEdev, eTol, maxEdev <= eTol ? "ok" : "FAIL");
+            printf("        R^t_rtr  |R - 2M/(r^3 f)| = %.3e  (tol %.0e)  [%s]\n",
+                   maxRtr, eTol, maxRtr <= eTol ? "ok" : "FAIL");
         }
         printf("\n");
     }

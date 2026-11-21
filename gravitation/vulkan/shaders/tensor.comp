@@ -19,6 +19,7 @@
 //   [33..48] G_ab
 //   [   49] Kretschmann K
 //   [50..65] E_ab     electric part of the Weyl tensor in the orthonormal frame
+//   [   66] R^t_rtr   the component proved to be 2M/(r^3 f)
 //
 // Index conventions: g[16*a+b] = g_ab, G[16*k+4*i+j] = Gamma^k_ij,
 // dG[64*mu+16*k+4*i+j] = d_mu Gamma^k_ij, Rup[64*rho+16*sigma+4*mu+nu] =
@@ -40,7 +41,7 @@ layout(std430, binding = 0) writeonly buffer Out {
     double data[];
 };
 
-const int STRIDE = 66;
+const int STRIDE = 67;
 
 void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
 {
@@ -318,4 +319,5 @@ void main()
         data[base + 33u + uint(i)] = Ric[i] - 0.5 * R * g[i];
     data[base + 49u] = K;
     for (int i = 0; i < 16; ++i) data[base + 50u + uint(i)] = E[i];
+    data[base + 66u] = Rup[64 * 0 + 16 * 1 + 4 * 0 + 1];
 }

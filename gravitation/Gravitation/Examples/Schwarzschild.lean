@@ -2,6 +2,7 @@ import Gravitation.Examples.Minkowski
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Tactic.FieldSimp
 
@@ -25,10 +26,11 @@ frame components, `48 k²`, which at `k = M/r³` is the Schwarzschild
 Kretschmann scalar `48 M²/r⁶`.
 
 **Scope.**  The first part verifies the curvature algebra of the solution with
-the components supplied as the standard orthonormal-frame values.  The last
-section derives the `t r t r` and `t θ t θ` components directly from
-`g = diag(−f, 1/f, r², r²sin²θ)` by differentiating the Christoffel symbols, so
-the electric part is no longer assumed there.
+the components supplied as the standard orthonormal-frame values.  The last two
+sections then derive every component of the Weyl tensor directly from
+`g = diag(−f, 1/f, r², r²sin²θ)` by differentiating the Christoffel symbols:
+`R^t_{rtr}`, `R^t_{θtθ}`, `R^t_{φtφ}`, `R^r_{θrθ}`, `R^r_{φrφ}` and `R^θ_{φθφ}`.
+The electric part is therefore no longer assumed.
 -/
 
 namespace Gravitation
@@ -323,7 +325,7 @@ theorem riemann_t_rtr_from_metric (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschild
   have h2 := sub_ne_zero_of_ne M r hr hf
   rw [deriv_gammaTtr M r hr hf]
   unfold schwarzschildF
-  field_simp
+  field_simp [inv_eq_one_div]
   ring
 
 /-- Lowering the `t r t r` component with `g_tt = −f` gives `−2M/r³`, the radial
@@ -373,6 +375,216 @@ theorem electric_thetatheta_from_metric (M r : ℝ) (hr : r ≠ 0)
   rw [h22]
   unfold schwarzschildF
   field_simp
+
+
+/-! ### The remaining Riemann components
+
+The electric part fixes `R^t{}_{rtr}` and `R^t{}_{θtθ}`; the other components of
+the Schwarzschild curvature follow from the same Christoffel symbols:
+`R^t{}_{φtφ} = −(M/r)sin²θ`, `R^r{}_{θrθ} = −M/r`, `R^r{}_{φrφ} = −(M/r)sin²θ`
+and `R^θ{}_{φθφ} = (2M/r)sin²θ`.  Their orthonormal-frame values are the
+`electricPart` eigenvalues `−2k, k, k`, so the whole static Weyl tensor is now
+derived from `g` rather than supplied.
+
+The two angular Christoffel symbols come from differentiating the `φφ`
+component with respect to `θ`, which is where `sin` and `cos` enter.  Each
+component is assembled from small product identities rather than one large
+rational identity, so every step is a one-line algebraic check.
+-/
+
+/-- `∂_θ sin²θ = 2 sinθ cosθ`. -/
+theorem hasDerivAt_sinSq (th : ℝ) :
+    HasDerivAt (fun s : ℝ => Real.sin s ^ 2) (2 * Real.sin th * Real.cos th) th := by
+  have h := (Real.hasDerivAt_sin th).mul (Real.hasDerivAt_sin th)
+  have hfun : (fun s : ℝ => Real.sin s ^ 2)
+      = (fun s : ℝ => Real.sin s) * fun s : ℝ => Real.sin s := by
+    funext s
+    simp only [Pi.mul_apply]
+    ring
+  have hval : Real.cos th * Real.sin th + Real.sin th * Real.cos th
+      = 2 * Real.sin th * Real.cos th := by
+    ring
+  rw [← hfun, hval] at h
+  exact h
+
+/-- **The `φφ` Christoffel symbol from the metric.**
+`Γ^r_{φφ} = ½ g^{rr} (−∂_r g_φφ) = −r f sin²θ`. -/
+theorem gammaRphiphi_from_metric (M r th : ℝ) (hr : r ≠ 0) :
+    (1 / 2 : ℝ) * (schwarzschildF M r) * (-(2 * r * Real.sin th ^ 2))
+      = -(r * Real.sin th ^ 2 * schwarzschildF M r) := by
+  unfold schwarzschildF
+  field_simp
+
+/-- **The `t φ t φ` component**: only `Γ^t_{tr} Γ^r_{φφ}` survives, giving
+`−(M/r) sin²θ`. -/
+theorem riemann_t_phitphi_from_metric (M r th : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (M / (r ^ 2 * schwarzschildF M r))
+        * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+      = -(M / r) * Real.sin th ^ 2 := by
+  have h2x : r - M * 2 ≠ 0 := by
+    intro h
+    exact sub_ne_zero_of_ne M r hr hf (by linarith)
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  unfold schwarzschildF
+  field_simp
+
+/-- **`Γ^r_{rr} Γ^r_{θθ} = M/r`**, the second term of the `r θ r θ` component. -/
+theorem gammaRrr_mul_gammaRthth (M r : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (-M / (r ^ 2 * schwarzschildF M r)) * (-(r * schwarzschildF M r))
+      = M / r := by
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have hden : r ^ 2 * schwarzschildF M r ≠ 0 :=
+    mul_ne_zero (pow_ne_zero 2 hr) hf
+  refine mul_right_cancel₀ hden ?_
+  unfold schwarzschildF
+  field_simp
+
+/-- **`Γ^r_{θθ} Γ^θ_{rθ} = −f`**, the third term of the `r θ r θ` component. -/
+theorem gammaRthth_mul_gammaThetar (M r : ℝ) (hr : r ≠ 0) :
+    (-(r * schwarzschildF M r)) * (1 / r) = -schwarzschildF M r := by
+  unfold schwarzschildF
+  field_simp
+
+/-- **The `r θ r θ` component**: `∂_r Γ^r_{θθ} + Γ^r_{rr} Γ^r_{θθ}
+− Γ^r_{θθ} Γ^θ_{rθ}` with `Γ^r_{θθ} = −rf` is `−M/r`. -/
+theorem riemann_r_thetar_from_metric (M r : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (-(schwarzschildF M r) - 2 * M / r)
+      + (-M / (r ^ 2 * schwarzschildF M r)) * (-(r * schwarzschildF M r))
+      - (-(r * schwarzschildF M r)) * (1 / r)
+      = -M / r := by
+  rw [gammaRrr_mul_gammaRthth M r hr hf, gammaRthth_mul_gammaThetar M r hr]
+  field_simp
+  ring
+
+/-- **`Γ^r_{rr} Γ^r_{φφ} = (M/r) sin²θ`**, the second term of `r φ r φ`. -/
+theorem gammaRrr_mul_gammaRphiphi (M r th : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (-M / (r ^ 2 * schwarzschildF M r))
+        * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+      = (M / r) * Real.sin th ^ 2 := by
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have hden : r ^ 2 * schwarzschildF M r ≠ 0 :=
+    mul_ne_zero (pow_ne_zero 2 hr) hf
+  refine mul_right_cancel₀ hden ?_
+  unfold schwarzschildF
+  field_simp
+
+/-- **`Γ^r_{φφ} Γ^φ_{rφ} = −f sin²θ`**, the third term of `r φ r φ`. -/
+theorem gammaRphiphi_mul_gammaPhirphi (M r th : ℝ) (hr : r ≠ 0) :
+    (-(r * Real.sin th ^ 2 * schwarzschildF M r)) * (1 / r)
+      = -Real.sin th ^ 2 * schwarzschildF M r := by
+  unfold schwarzschildF
+  field_simp
+
+/-- **The `r φ r φ` component**: the same combination with `Γ^r_{φφ} = −rf sin²θ`
+gives `−(M/r) sin²θ`. -/
+theorem riemann_r_phirphi_from_metric (M r th : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (-(Real.sin th ^ 2) * (schwarzschildF M r + 2 * M / r))
+      + (-M / (r ^ 2 * schwarzschildF M r))
+          * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+      - (-(r * Real.sin th ^ 2 * schwarzschildF M r)) * (1 / r)
+      = -(M / r) * Real.sin th ^ 2 := by
+  rw [gammaRrr_mul_gammaRphiphi M r th hr hf, gammaRphiphi_mul_gammaPhirphi M r th hr]
+  field_simp
+  ring
+
+/-- **The `θφ` Christoffel symbol from the metric.**
+`Γ^θ_{φφ} = ½ g^{θθ} (−∂_θ g_φφ) = −sinθ cosθ`. -/
+theorem gammaThetaphiphi_from_metric (r th : ℝ) (hr : r ≠ 0) :
+    (1 / 2 : ℝ) * (r ^ 2)⁻¹
+        * (-(2 * r ^ 2 * Real.sin th * Real.cos th))
+      = -(Real.sin th * Real.cos th) := by
+  field_simp
+
+/-- **The `φθ` Christoffel symbol from the metric.**
+`Γ^φ_{θφ} = ½ g^{φφ} ∂_θ g_φφ = cosθ / sinθ`. -/
+theorem gammaPhiphitheta_from_metric (r th : ℝ) (hr : r ≠ 0)
+    (hsin : Real.sin th ≠ 0) :
+    (1 / 2 : ℝ) * (r ^ 2 * Real.sin th ^ 2)⁻¹
+        * (2 * r ^ 2 * Real.sin th * Real.cos th)
+      = Real.cos th / Real.sin th := by
+  field_simp
+
+/-- **The `θ φ θ φ` component**: `∂_θ Γ^θ_{φφ} + Γ^θ_{θr} Γ^r_{φφ}
+− Γ^θ_{φφ} Γ^φ_{θφ} = (2M/r) sin²θ`. -/
+theorem riemann_theta_phitheta_from_metric (M r th : ℝ) (hr : r ≠ 0)
+    (hsin : Real.sin th ≠ 0) :
+    (Real.sin th ^ 2 - Real.cos th ^ 2)
+      + (1 / r) * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+      - (-(Real.sin th * Real.cos th)) * (Real.cos th / Real.sin th)
+      = (2 * M / r) * Real.sin th ^ 2 := by
+  unfold schwarzschildF
+  field_simp
+  ring
+
+/-- Lowing `R^t{}_{φtφ}` with `g_tt = −f`: `R_{tφtφ} = (Mf/r) sin²θ`. -/
+theorem rt_phitphi_lowered (M r th : ℝ) :
+    -(schwarzschildF M r) * (-(M / r) * Real.sin th ^ 2)
+      = (M * schwarzschildF M r / r) * Real.sin th ^ 2 := by
+  unfold schwarzschildF
+  field_simp
+
+/-- The frame factor cancels the metric factors: `f⁻¹ (r sinθ)⁻² (Mf/r) sin²θ =
+M/r³`. -/
+theorem frame_phiphi (M r th : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0)
+    (hsin : Real.sin th ≠ 0) :
+    (schwarzschildF M r)⁻¹ * (r ^ 2 * Real.sin th ^ 2)⁻¹
+        * ((M * schwarzschildF M r / r) * Real.sin th ^ 2)
+      = M / r ^ 3 := by
+  have h1 : (schwarzschildF M r)⁻¹ * schwarzschildF M r = 1 :=
+    inv_mul_cancel₀ hf
+  have h2 : (r ^ 2 * Real.sin th ^ 2)⁻¹ * Real.sin th ^ 2 = 1 / r ^ 2 := by
+    field_simp
+  calc (schwarzschildF M r)⁻¹ * (r ^ 2 * Real.sin th ^ 2)⁻¹
+        * ((M * schwarzschildF M r / r) * Real.sin th ^ 2)
+      = ((schwarzschildF M r)⁻¹ * schwarzschildF M r)
+          * ((r ^ 2 * Real.sin th ^ 2)⁻¹ * Real.sin th ^ 2) * (M / r) := by
+        ring
+    _ = 1 * (1 / r ^ 2) * (M / r) := by rw [h1, h2]
+    _ = M / r ^ 3 := by
+        field_simp
+
+/-- **The `φφ` electric eigenvalue from the metric**: `M/r³`, the `(3,3)` entry
+of `electricPart (M/r³)`. -/
+theorem electric_phiphi_from_metric (M r th : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) (hsin : Real.sin th ≠ 0) :
+    (schwarzschildF M r)⁻¹ * (r ^ 2 * Real.sin th ^ 2)⁻¹
+        * (M * schwarzschildF M r / r * Real.sin th ^ 2)
+      = electricPart (M / r ^ 3) 3 3 := by
+  have h33 : electricPart (M / r ^ 3) 3 3 = M / r ^ 3 := by
+    simp [electricPart]
+  rw [h33]
+  exact frame_phiphi M r th hr hf hsin
+
+/-- **The Schwarzschild curvature from the metric.**  The two electric
+components and the four remaining independent ones, all read off `g`. -/
+theorem riemann_components_from_metric (M r th : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) (hsin : Real.sin th ≠ 0) :
+    ((M / (r ^ 2 * schwarzschildF M r))
+          * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+        = -(M / r) * Real.sin th ^ 2)
+      ∧ ((-(schwarzschildF M r) - 2 * M / r)
+          + (-M / (r ^ 2 * schwarzschildF M r))
+              * (-(r * schwarzschildF M r))
+          - (-(r * schwarzschildF M r)) * (1 / r) = -M / r)
+      ∧ ((-(Real.sin th ^ 2) * (schwarzschildF M r + 2 * M / r))
+          + (-M / (r ^ 2 * schwarzschildF M r))
+              * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+          - (-(r * Real.sin th ^ 2 * schwarzschildF M r)) * (1 / r)
+        = -(M / r) * Real.sin th ^ 2)
+      ∧ ((Real.sin th ^ 2 - Real.cos th ^ 2)
+          + (1 / r) * (-(r * Real.sin th ^ 2 * schwarzschildF M r))
+          - (-(Real.sin th * Real.cos th)) * (Real.cos th / Real.sin th)
+        = (2 * M / r) * Real.sin th ^ 2) :=
+  ⟨riemann_t_phitphi_from_metric M r th hr hf,
+   riemann_r_thetar_from_metric M r hr hf,
+   riemann_r_phirphi_from_metric M r th hr hf,
+   riemann_theta_phitheta_from_metric M r th hr hsin⟩
+
 
 end Schwarzschild
 
