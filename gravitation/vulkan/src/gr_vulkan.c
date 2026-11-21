@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     const int G[4]     = {3, 4, 3, 3};
     const uint32_t total = (uint32_t)G[0] * (uint32_t)G[1] * (uint32_t)G[2] *
                            (uint32_t)G[3];
-    const int    STRIDE  = 50;
+    const int    STRIDE  = 66;
     const size_t bufSize = (size_t)total * STRIDE * sizeof(double);
 
     VkApplicationInfo app = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
@@ -283,7 +283,7 @@ int main(int argc, char **argv)
     };
 
     int failures = 0;
-    printf("\n%u lattice points per case, stride %d floats\n\n", total, STRIDE);
+    printf("\n%u lattice points per case, stride %d doubles\n\n", total, STRIDE);
 
     for (size_t c = 0; c < sizeof cases / sizeof cases[0]; ++c) {
         PushParams P;
@@ -335,8 +335,9 @@ int main(int argc, char **argv)
         const double *d = mapped;
 
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
-        double maxKrel = 0.0;
+        double maxKrel = 0.0, maxEdev = 0.0;
         const double kTol = 1e-6;
+        const double eTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
             const double *o   = d + (size_t)p * STRIDE;
             const double *g   = o;
@@ -364,6 +365,20 @@ int main(int argc, char **argv)
                 double kexp = 48.0 * k2 / (rr * rr * rr * rr * rr * rr);
                 double krel = fabs(K - kexp) / kexp;
                 if (krel > maxKrel) maxKrel = krel;
+
+                // Electric part in the orthonormal frame: the Weyl electric
+                // eigenvalues diag(0, -2k, k, k) that the Lean development
+                // proves for this metric.
+                const double *E = o + 50;
+                double kk = (double)cases[c].M / (rr * rr * rr);
+                double exp[16] = {0};
+                exp[5]  = -2.0 * kk;
+                exp[10] = kk;
+                exp[15] = kk;
+                for (int i = 0; i < 16; ++i) {
+                    double dev = fabs(E[i] - exp[i]);
+                    if (dev > maxEdev) maxEdev = dev;
+                }
             }
         }
         vkUnmapMemory(gDev, gMem);
@@ -371,6 +386,10 @@ int main(int argc, char **argv)
         const char *verdict = (maxDev <= cases[c].tol) ? "ok" : "FAIL";
         if (maxDev > cases[c].tol) failures++;
         if (cases[c].id == 1 && maxKrel > kTol) {
+            verdict = "FAIL";
+            failures++;
+        }
+        if (cases[c].id == 1 && maxEdev > eTol) {
             verdict = "FAIL";
             failures++;
         }
@@ -384,9 +403,12 @@ int main(int argc, char **argv)
         else
             printf("        max|Ric| = %.3e  (tol %.0e)  [%s]\n", maxDev,
                    cases[c].tol, verdict);
-        if (cases[c].id == 1)
+        if (cases[c].id == 1) {
             printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
                    maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");
+            printf("        electric part |E - diag(0,-2k,k,k)| = %.3e  (tol %.0e)  [%s]\n",
+                   maxEdev, eTol, maxEdev <= eTol ? "ok" : "FAIL");
+        }
         printf("\n");
     }
 

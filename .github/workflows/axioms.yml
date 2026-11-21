@@ -56,14 +56,18 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential libvulkan-dev mesa-vulkan-drivers glslc
+            build-essential libvulkan-dev mesa-vulkan-drivers glslc vulkan-tools
+
+      # No GPU on the runner, so lavapipe is the only ICD the loader finds.  Do
+      # not pin VK_ICD_FILENAMES: a wrong path makes the loader enumerate zero
+      # devices instead of falling back to the default scan.
+      - name: Show the Vulkan device
+        run: vulkaninfo --summary
 
       - name: Build the tensor pass
         working-directory: gravitation/vulkan
         run: make
 
-      - name: Run the Kretschmann check on lavapipe
+      - name: Run the Kretschmann check on the software driver
         working-directory: gravitation/vulkan
-        env:
-          VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
         run: ./gr_vulkan shaders/tensor.comp.spv

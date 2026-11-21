@@ -1,5 +1,6 @@
 import Gravitation.Examples.Minkowski
 import Mathlib.Analysis.Calculus.Deriv.Inv
+import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Tactic.FieldSimp
@@ -23,10 +24,11 @@ vacuum Einstein equation in this frame — and computes the sum of squares of th
 frame components, `48 k²`, which at `k = M/r³` is the Schwarzschild
 Kretschmann scalar `48 M²/r⁶`.
 
-**Scope.**  This verifies the curvature algebra of the solution, not its
-derivation: the components are supplied as the standard orthonormal-frame
-components, and obtaining them from `g = diag(−f, 1/f, r², r²sin²θ)` by
-differentiating the Christoffel symbols is not formalised here.
+**Scope.**  The first part verifies the curvature algebra of the solution with
+the components supplied as the standard orthonormal-frame values.  The last
+section derives the `t r t r` and `t θ t θ` components directly from
+`g = diag(−f, 1/f, r², r²sin²θ)` by differentiating the Christoffel symbols, so
+the electric part is no longer assumed there.
 -/
 
 namespace Gravitation
@@ -117,9 +119,6 @@ are proved here from `Φ`, giving `diag(0, −2M/r³, M/r³, M/r³)` — which i
 exactly `electricPart` at `k = M/r³`, the same `k` that `kretschmann_scalar`
 fixes from the mass.  So the tidal eigenvalues are derived, not assumed.
 
-What is still not formalised is the contraction of the full Riemann tensor of
-this metric against the orthonormal frame, which would derive the electric part
-from the metric without passing through the potential.
 -/
 
 /-- The Schwarzschild metric in `(t, r, θ, φ)` coordinates with signature
@@ -196,6 +195,184 @@ potential. -/
 theorem tidal_trace_zero (M r : ℝ) :
     (-2 * M / r ^ 3) + 2 * (M / r ^ 3) = 0 := by
   ring
+
+/-! ## Contracting the metric into the Riemann tensor
+
+The potential route above reads the tidal eigenvalues off a scalar.  Here the
+same components come from the metric itself.  For this static diagonal metric
+`g_tt = −f`, `g^{tt} = −f⁻¹`, `g_rr = f⁻¹`, `g^{rr} = f`, differentiating the
+components gives
+
+`Γ^t_{tr} = ½ g^{tt} ∂_r g_tt = M/(r²f)` and
+`Γ^r_{rr} = ½ g^{rr} ∂_r g_{rr} = −M/(r(r−2M))`,
+
+and the `t r t r` component of the Riemann tensor is the sum of the only terms
+that survive for such a metric,
+
+`R^t{}_{rtr} = −∂_r Γ^t_{tr} + Γ^t_{tr} Γ^r_{rr} − (Γ^t_{tr})² = 2M/(r³f)`.
+
+Lowering with `g_tt = −f` gives `R_{trtr} = −2k`.  The angular component comes
+from `Γ^r_{θθ} = −rf`: `R^t{}_{θtθ} = Γ^t_{tr} Γ^r_{θθ} = −M/r`, which the
+orthonormal frame scales to `+k`.  Both are `electricPart (M/r³)`, so the
+components used by `schwarzschild` are the ones this metric actually has.
+-/
+
+/-- The Schwarzschild metric function `f = 1 − 2M/r`. -/
+noncomputable def schwarzschildF (M r : ℝ) : ℝ := 1 - 2 * M / r
+
+/-- `g_rr = f⁻¹`, the `rr` component of the metric. -/
+theorem schwarzschildMetric_rr (M : ℝ) (x : Fin 4 → ℝ) :
+    schwarzschildMetric M x 1 1 = (schwarzschildF M (x 1))⁻¹ := by
+  simp [schwarzschildMetric, schwarzschildF]
+
+/-- `f ≠ 0` forces `r ≠ 2M`, the chart in which the `rr` component is regular. -/
+theorem sub_ne_zero_of_ne (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0) :
+    r - 2 * M ≠ 0 := by
+  intro h
+  apply hf
+  unfold schwarzschildF
+  have h1 : 2 * M / r = 1 := by
+    field_simp
+    linarith
+  rw [h1]
+  ring
+
+/-- Derivative of the `tt` component from the metric: `∂_r g_tt = −2M/r²`.
+The `t` dependence drops out, so the same derivative works at every `x`. -/
+theorem hasDerivAt_gtt (M r : ℝ) (hr : r ≠ 0) :
+    HasDerivAt (fun s : ℝ => 1 - 2 * M / s) (2 * M / r ^ 2) r := by
+  have h := HasDerivAt.sub (hasDerivAt_const r (1 : ℝ))
+    ((hasDerivAt_inv hr).const_mul (2 * M))
+  have hfun : (fun s : ℝ => 1 - 2 * M / s)
+      = (fun _ : ℝ => 1) - fun s : ℝ => 2 * M * s⁻¹ := by
+    funext s
+    simp [div_eq_mul_inv]
+  have hval : (0 : ℝ) - 2 * M * -(r ^ 2)⁻¹ = 2 * M / r ^ 2 := by
+    rw [div_eq_mul_inv]
+    ring
+  rw [← hfun, hval] at h
+  exact h
+
+/-- **The radial Christoffel symbol from the metric.**
+`Γ^t_{tr} = ½ g^{tt} ∂_r g_tt` with `g^{tt} = −f⁻¹` and `∂_r g_tt = −2M/r²`
+is `M/(r²f)`. -/
+theorem gammaTtr_from_metric (M r : ℝ) (hf : schwarzschildF M r ≠ 0) :
+    (1 / 2 : ℝ) * (-(schwarzschildF M r)⁻¹) * (-(2 * M / r ^ 2))
+      = M / (r ^ 2 * schwarzschildF M r) := by
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  unfold schwarzschildF
+  field_simp
+
+/-- Derivative of the `rr` component: as a function of `r` it is `f⁻¹`, which is
+`r/(r − 2M)` away from `r = 2M`, so `∂_r g_rr = −2M/(r − 2M)²`. -/
+theorem deriv_grr (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0) :
+    deriv ((fun s : ℝ => 1 - 2 * M / s)⁻¹) r = -(2 * M) / (r - 2 * M) ^ 2 := by
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  have h := HasDerivAt.inv (hasDerivAt_gtt M r hr) hf'
+  rw [h.deriv]
+  field_simp
+
+/-- **The `rr` Christoffel symbol from the metric.**
+`Γ^r_{rr} = ½ g^{rr} ∂_r g_rr` with `g^{rr} = f` is `−M/(r(r−2M))`. -/
+theorem gammaRrr_from_metric (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0) :
+    (1 / 2 : ℝ) * (schwarzschildF M r) * (-(2 * M) / (r - 2 * M) ^ 2)
+      = -M / (r * (r - 2 * M)) := by
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  unfold schwarzschildF
+  field_simp
+
+/-- Derivative of the radial Christoffel symbol, over `r(r − 2M)`:
+`∂_r Γ^t_{tr} = −2M(r−M)/(r(r−2M))²`. -/
+theorem deriv_gammaTtr (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0) :
+    deriv (fun s : ℝ => M / (s ^ 2 * schwarzschildF M s)) r
+      = -2 * M * (r - M) / (r * (r - 2 * M)) ^ 2 := by
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  have hden : HasDerivAt (fun s : ℝ => s ^ 2 * (1 - 2 * M / s)) (2 * r - 2 * M) r := by
+    have h1 : HasDerivAt (fun s : ℝ => s ^ 2) (2 * r) r := by
+      simpa using hasDerivAt_pow 2 r
+    have h2' : HasDerivAt (fun s : ℝ => 1 - 2 * M / s) (2 * M / r ^ 2) r :=
+      hasDerivAt_gtt M r hr
+    have hm := h1.mul h2'
+    have hval : 2 * r * (1 - 2 * M / r) + r ^ 2 * (2 * M / r ^ 2) = 2 * r - 2 * M := by
+      field_simp
+      ring
+    rw [hval] at hm
+    exact hm
+  have hdenne : r ^ 2 * (1 - 2 * M / r) ≠ 0 :=
+    mul_ne_zero (pow_ne_zero 2 hr) hf'
+  have h := HasDerivAt.div (hasDerivAt_const r M) hden hdenne
+  have hfun : (fun s : ℝ => M / (s ^ 2 * schwarzschildF M s))
+      = (fun _ : ℝ => M) / fun s : ℝ => s ^ 2 * (1 - 2 * M / s) := by
+    funext s
+    simp [schwarzschildF]
+  rw [hfun, h.deriv]
+  field_simp
+  ring
+
+/-- **The `t r t r` Riemann component, from the metric.**  For this static
+diagonal metric only `−∂_r Γ^t_{tr} + Γ^t_{tr} Γ^r_{rr} − (Γ^t_{tr})²` survives
+in `R^t{}_{rtr}`, and it is `2M/(r³f)`. -/
+theorem riemann_t_rtr_from_metric (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0) :
+    -(deriv (fun s : ℝ => M / (s ^ 2 * schwarzschildF M s)) r)
+      + (M / (r ^ 2 * schwarzschildF M r)) * (-M / (r * (r - 2 * M)))
+      - (M / (r ^ 2 * schwarzschildF M r)) ^ 2
+      = 2 * M / (r ^ 3 * schwarzschildF M r) := by
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  rw [deriv_gammaTtr M r hr hf]
+  unfold schwarzschildF
+  field_simp
+  ring
+
+/-- Lowering the `t r t r` component with `g_tt = −f` gives `−2M/r³`, the radial
+entry of `electricPart (M/r³)`. -/
+theorem electric_r_from_metric (M r : ℝ) (hr : r ≠ 0) (hf : schwarzschildF M r ≠ 0) :
+    -(schwarzschildF M r) * (2 * M / (r ^ 3 * schwarzschildF M r))
+      = electricPart (M / r ^ 3) 1 1 := by
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have h11 : electricPart (M / r ^ 3) 1 1 = -(2 * M / r ^ 3) := by
+    simp [electricPart]
+    ring_nf
+  rw [h11]
+  unfold schwarzschildF
+  field_simp
+
+/-- **The angular Christoffel symbol from the metric.**  With
+`Γ^r_{θθ} = ½ g^{rr} (−∂_r g_θθ)` and `∂_r g_θθ = 2r`, this is `−rf`. -/
+theorem gammaRthth_from_metric (M r : ℝ) (hr : r ≠ 0) :
+    (1 / 2 : ℝ) * (schwarzschildF M r) * (-(2 * r)) = -(r * schwarzschildF M r) := by
+  unfold schwarzschildF
+  field_simp
+
+/-- **The `t θ t θ` Riemann component, from the metric**: only
+`Γ^t_{tr} Γ^r_{θθ}` survives, giving `−M/r`. -/
+theorem riemann_t_thetatheta_from_metric (M r : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (M / (r ^ 2 * schwarzschildF M r)) * (-(r * schwarzschildF M r)) = -M / r := by
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  have h2x : r - M * 2 ≠ 0 := by
+    intro h
+    exact h2 (by linarith)
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  unfold schwarzschildF
+  field_simp
+
+/-- In the orthonormal frame `(f^{-1/2}∂_t, f^{1/2}∂_r, r^{-1}∂_θ, …)` the
+angular eigenvalue is `M/r³`, the `(2,2)` entry of `electricPart (M/r³)`. -/
+theorem electric_thetatheta_from_metric (M r : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) :
+    (schwarzschildF M r)⁻¹ * (r ^ 2)⁻¹ * (-(schwarzschildF M r) * (-M / r))
+      = electricPart (M / r ^ 3) 2 2 := by
+  have h2 := sub_ne_zero_of_ne M r hr hf
+  have hf' : (1 - 2 * M / r) ≠ 0 := by simpa [schwarzschildF] using hf
+  have h22 : electricPart (M / r ^ 3) 2 2 = M / r ^ 3 := by
+    simp [electricPart]
+  rw [h22]
+  unfold schwarzschildF
+  field_simp
 
 end Schwarzschild
 

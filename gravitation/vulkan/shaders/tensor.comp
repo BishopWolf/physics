@@ -12,12 +12,13 @@
 // Everything is kept in `double`: the derivatives are difference quotients, so
 // single precision would put the noise floor of `K` at the percent level.
 //
-// Output layout, 50 doubles per point:
+// Output layout, 66 doubles per point:
 //   [ 0..15] g_ab     (row major, a*4+b)
 //   [16..31] Ric_ab
 //   [   32] R
 //   [33..48] G_ab
 //   [   49] Kretschmann K
+//   [50..65] E_ab     electric part of the Weyl tensor in the orthonormal frame
 //
 // Index conventions: g[16*a+b] = g_ab, G[16*k+4*i+j] = Gamma^k_ij,
 // dG[64*mu+16*k+4*i+j] = d_mu Gamma^k_ij, Rup[64*rho+16*sigma+4*mu+nu] =
@@ -39,7 +40,7 @@ layout(std430, binding = 0) writeonly buffer Out {
     double data[];
 };
 
-const int STRIDE = 50;
+const int STRIDE = 66;
 
 void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
 {
@@ -75,6 +76,12 @@ void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
         double sth = s0 + c0 * d - 0.5 * s0 * d * d - c0 * d * d * d / 6.0;
         g[15] = r * r * sth * sth;
     }
+}
+
+// glslc exposes no double overload of `fabs`, and the frame factors need one.
+double dabs(double x)
+{
+    return x < 0.0 ? -x : x;
 }
 
 double det3(double a00, double a01, double a02,
@@ -289,6 +296,20 @@ void main()
     double K = 0.0;
     for (int i = 0; i < 256; ++i) K += R4[i] * Rlo[i];
 
+    // Electric part of the Weyl tensor in the orthonormal frame.  The metric is
+    // diagonal, so the frame is e_a = |g_aa|^{-1/2} d_a and the unit normal is
+    // n = e_t, leaving E_ij = R_{t i t j} / sqrt(|g_tt g_ii g_tt g_jj|).
+    double E[16];
+    {
+        double st = sqrt(dabs(g[0]));
+        for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j) {
+            double si = sqrt(dabs(g[5 * i]));
+            double sj = sqrt(dabs(g[5 * j]));
+            E[4 * i + j] = Rlo[64 * 0 + 16 * i + 4 * 0 + j] / (st * si * st * sj);
+        }
+    }
+
     uint base = tid * uint(STRIDE);
     for (int i = 0; i < 16; ++i) data[base + uint(i)] = g[i];
     for (int i = 0; i < 16; ++i) data[base + 16u + uint(i)] = Ric[i];
@@ -296,4 +317,5 @@ void main()
     for (int i = 0; i < 16; ++i)
         data[base + 33u + uint(i)] = Ric[i] - 0.5 * R * g[i];
     data[base + 49u] = K;
+    for (int i = 0; i < 16; ++i) data[base + 50u + uint(i)] = E[i];
 }

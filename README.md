@@ -266,23 +266,27 @@ differentiates it by central differences, and computes
 `Γ^k_{ij}` → `∂Γ` → `R^ρ_{σμν}` → `Ric_{σν} = R^ρ_{σρν}` → `R = g^{μν}Ric_{μν}` →
 `G_{μν} = Ric_{μν} − ½ R g_{μν}`,
 
-writing all 49 components per lattice point to an SSBO; the host checks the
-deviations against tolerances.
+writing 66 doubles per lattice point to an SSBO — the metric, Ricci, `R`, `G`,
+the Kretschmann scalar and the electric part in the orthonormal frame; the host
+checks the deviations against tolerances.
 
-Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 points,
-`h = 1e-2`:
+Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 points, double
+precision with `h = 1e-4`:
 
 | Case | max abs Ric | max abs R | max abs G | check |
 | --- | --- | --- | --- | --- |
 | Minkowski | 0.000e+00 | 0.000e+00 | 0.000e+00 | exact |
-| Schwarzschild `r ∈ [3, 3.45]`, `M = 1` | 2.253e-03 | 6.794e-04 | 1.878e-03 | vacuum to FD error |
-| Schwarzschild–de Sitter `Λ = 0.1` | 4.255e+00 | 4.005e-01 | 4.247e+00 | `max abs(Ric − Λg) = 6.614e-03` |
+| Schwarzschild `r ∈ [3, 3.45]`, `M = 1` | 1.840e-07 | 2.279e-08 | 1.028e-07 | vacuum to FD error |
+| Schwarzschild–de Sitter `Λ = 0.1` | 4.248e+00 | 4.000e-01 | 4.248e+00 | `max abs(Ric − Λg) = 6.960e-07` |
 
 The Minkowski zeros are exact (a constant metric differentiates to zero). The
 Schwarzschild residual is central-difference noise, not curvature: `|Ric|` is
 four orders of magnitude below the curvature scale `M/r³ ≈ 0.04`. The de Sitter
 case is the control — it has genuinely nonzero Ricci curvature and is recovered
-to the same noise level, so the vacuum test is not vacuous.
+to the same noise level, so the vacuum test is not vacuous. Two checks use the
+closed forms proved in Lean: the Kretschmann scalar against `48M²/r⁶` (`1.2e-7`
+relative) and the electric part against `diag(0, −2k, k, k)` at `k = M/r³`
+(`2.6e-9` absolute).
 
 This is a numerical sanity check on the same objects the Lean side defines; it is
 not a proof, and finite differences say nothing about the analytic solution.
@@ -435,6 +439,19 @@ of date.
 | `Gravitation.Schwarzschild.tidalPart` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.tidalPart_eq_electricPart` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.tidal_trace_zero` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.schwarzschildF` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.schwarzschildMetric_rr` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.sub_ne_zero_of_ne` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.hasDerivAt_gtt` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.gammaTtr_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.deriv_grr` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.gammaRrr_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.deriv_gammaTtr` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.riemann_t_rtr_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.electric_r_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.gammaRthth_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.riemann_t_thetatheta_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.electric_thetatheta_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Christoffel` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.geodesicAccel` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.geodesicField` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
