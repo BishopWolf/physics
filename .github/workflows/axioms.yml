@@ -1,8 +1,12 @@
-name: axiom-audit
+name: proofs
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+  # Weekly run so toolchain or Mathlib drift shows up even without a commit.
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
   audit:
@@ -36,5 +40,8 @@ jobs:
       - name: Check that the build is silent
         run: bash scripts/check_messages.sh
 
-      - name: Axiom audit
+      - name: Axiom audit (proves every declaration stays inside the base axioms)
         run: bash scripts/audit_axioms.sh
+
+      - name: Proof-status table is current
+        run: bash scripts/proof_status.sh --check

@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     const int G[4]     = {3, 4, 3, 3};
     const uint32_t total = (uint32_t)G[0] * (uint32_t)G[1] * (uint32_t)G[2] *
                            (uint32_t)G[3];
-    const int    STRIDE  = 49;
+    const int    STRIDE  = 50;
     const size_t bufSize = (size_t)total * STRIDE * sizeof(float);
 
     VkApplicationInfo app = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
@@ -324,6 +324,8 @@ int main(int argc, char **argv)
         const float *d = mapped;
 
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
+        double maxKrel = 0.0;
+        const double kTol = 5e-2;
         for (uint32_t p = 0; p < total; ++p) {
             const float *o   = d + (size_t)p * STRIDE;
             const float *g   = o;
@@ -341,11 +343,26 @@ int main(int argc, char **argv)
                 if (dev > maxDev) maxDev = dev;
             }
             if (fabs(R) > maxR) maxR = fabs(R);
+
+            // Kretschmann check: Schwarzschild has K = 48 M^2 / r^6.
+            if (cases[c].id == 1) {
+                double K   = o[49];
+                int    i1  = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double rr  = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double k2  = (double)cases[c].M * (double)cases[c].M;
+                double kexp = 48.0 * k2 / (rr * rr * rr * rr * rr * rr);
+                double krel = fabs(K - kexp) / kexp;
+                if (krel > maxKrel) maxKrel = krel;
+            }
         }
         vkUnmapMemory(gDev, gMem);
 
         const char *verdict = (maxDev <= cases[c].tol) ? "ok" : "FAIL";
         if (maxDev > cases[c].tol) failures++;
+        if (cases[c].id == 1 && maxKrel > kTol) {
+            verdict = "FAIL";
+            failures++;
+        }
 
         printf("case %d  %-26s\n", cases[c].id, cases[c].name);
         printf("        max|Ric| = %.3e   max|R| = %.3e   max|G| = %.3e\n",
@@ -356,6 +373,9 @@ int main(int argc, char **argv)
         else
             printf("        max|Ric| = %.3e  (tol %.0e)  [%s]\n", maxDev,
                    cases[c].tol, verdict);
+        if (cases[c].id == 1)
+            printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
+                   maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");
         printf("\n");
     }
 

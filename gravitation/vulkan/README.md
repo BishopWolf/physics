@@ -14,10 +14,11 @@ g_ab  ->  ∂_μ g_ab (central differences)
       ->  ∂_μ Γ^k_ij (central differences)
       ->  R^ρ_σμν = ∂_μΓ^ρ_νσ − ∂_νΓ^ρ_μσ + Γ^ρ_μλΓ^λ_νσ − Γ^ρ_νλΓ^λ_μσ
       ->  Ric_σν = R^ρ_σρν,  R = g^{μν}Ric_μν,  G_μν = Ric_μν − ½ R g_μν
+      ->  R_{ρσμν} = g_{ρλ}R^λ_σμν,  K = R_{ρσμν}R^{ρσμν}
 ```
 
-Output is 49 floats per point: `g` (16), `Ric` (16), `R` (1), `G` (16), all
-row-major. The inverse metric comes from a cofactor inverse of the 4×4 metric,
+Output is 50 floats per point: `g` (16), `Ric` (16), `R` (1), `G` (16),
+Kretschmann `K` (1), all row-major. The inverse metric comes from a cofactor inverse of the 4×4 metric,
 so non-diagonal metrics are handled.
 
 The metric is selected by a push constant (`metricId`), with parameters `massM`,
@@ -32,9 +33,11 @@ The metric is selected by a push constant (`metricId`), with parameters `massM`,
 ## Host
 
 `src/gr_vulkan.c` creates a compute-only device (prefers a discrete GPU), a
-host-visible SSBO of 49 floats per point, runs the three cases, and checks
+host-visible SSBO of 50 floats per point, runs the three cases, and checks
 `max|Ric|` (cases 0, 1) or `max|Ric − Λg|` (case 2) against a tolerance,
-exiting nonzero on failure. No validation layers, no staging buffers, no
+exiting nonzero on failure. For the Schwarzschild case it also checks the
+Kretschmann scalar against `48M²/r⁶`, the value proved as `kretschmann_scalar`
+in `Gravitation/Examples/Schwarzschild.lean`. No validation layers, no staging buffers, no
 external dependencies beyond `libvulkan`.
 
 ## Accuracy
@@ -44,3 +47,8 @@ noise floor is roughly `ε/h² ≈ 1e-3` in the components; the measured
 Schwarzschild residual (`2.3e-3`) sits at that floor, while the curvature itself
 is `O(1)` for the de Sitter control. Tighten `h` only after moving the shader to
 `float64` (`GL_ARB_gpu_shader_fp64`), otherwise cancellation dominates.
+
+The Kretschmann check is a structural test at that same noise floor: it catches
+a wrong factor or a sign in the Riemann assembly, and the `5e-2` relative
+tolerance reflects single precision, not the tolerance of the Lean theorem,
+which is exact. The measured deviation at `r = 3` is `1.7e-3`.

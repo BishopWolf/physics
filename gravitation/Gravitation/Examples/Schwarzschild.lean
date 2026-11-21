@@ -1,4 +1,7 @@
 import Gravitation.Examples.Minkowski
+import Mathlib.Analysis.Calculus.Deriv.Inv
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Tactic.FieldSimp
 
 /-!
@@ -96,6 +99,103 @@ theorem kretschmann_scalar (M r : ℝ) (hr : r ≠ 0) :
   rw [frameSqSum_eq]
   have hr3 : r ^ 3 ≠ 0 := pow_ne_zero 3 hr
   field_simp
+
+/-! ## From the Schwarzschild metric to the electric part
+
+The components above are supplied; this section ties them to the metric.  The
+Schwarzschild line element in `(t, r, θ, φ)` coordinates is
+
+`ds² = −f dt² + f⁻¹ dr² + r² dθ² + r² sin²θ dφ²`,  `f = 1 − 2M/r`,
+
+and `g_tt = −f = −(1 + 2Φ)` for the potential `Φ = −M/r`, so the static
+potential that governs the tidal field is read off from the metric itself.
+
+In an orthonormal frame the Hessian of a radial potential has eigenvalues `Φ''`
+along the radial direction and `Φ'/r` along the two angular directions, and the
+electric part of the Weyl tensor is (up to sign) that Hessian.  Both eigenvalues
+are proved here from `Φ`, giving `diag(0, −2M/r³, M/r³, M/r³)` — which is
+exactly `electricPart` at `k = M/r³`, the same `k` that `kretschmann_scalar`
+fixes from the mass.  So the tidal eigenvalues are derived, not assumed.
+
+What is still not formalised is the contraction of the full Riemann tensor of
+this metric against the orthonormal frame, which would derive the electric part
+from the metric without passing through the potential.
+-/
+
+/-- The Schwarzschild metric in `(t, r, θ, φ)` coordinates with signature
+`(−,+,+,+)`, as a matrix of functions of the coordinates. -/
+noncomputable def schwarzschildMetric (M : ℝ) (x : Fin 4 → ℝ) : Fin 4 → Fin 4 → ℝ :=
+  fun i j =>
+    if i = j then
+      if i = 0 then -(1 - 2 * M / x 1)
+      else if i = 1 then (1 - 2 * M / x 1)⁻¹
+      else if i = 2 then x 1 ^ 2
+      else x 1 ^ 2 * Real.sin (x 2) ^ 2
+    else 0
+
+/-- The `tt` component of the Schwarzschild metric is `−f` with `f = 1 − 2M/r`. -/
+theorem schwarzschildMetric_tt (M : ℝ) (x : Fin 4 → ℝ) :
+    schwarzschildMetric M x 0 0 = -(1 - 2 * M / x 1) := by
+  simp [schwarzschildMetric]
+
+/-- The metric's static potential is `Φ = −M/r`: `g_tt = −(1 + 2Φ)`. -/
+theorem schwarzschildMetric_tt_potential (M : ℝ) (x : Fin 4 → ℝ) :
+    schwarzschildMetric M x 0 0 = -(1 + 2 * (-M / x 1)) := by
+  rw [schwarzschildMetric_tt]
+  ring
+
+/-- First derivative of the potential: `Φ' = M/r²`. -/
+theorem potential_hasDerivAt (M r : ℝ) (hr : r ≠ 0) :
+    HasDerivAt (fun s : ℝ => -M / s) (M / r ^ 2) r := by
+  have h : HasDerivAt (fun s : ℝ => s⁻¹) (-(r ^ 2)⁻¹) r := hasDerivAt_inv hr
+  have h' := h.const_mul (-M)
+  have hfun : (fun s : ℝ => -M / s) = fun s : ℝ => -M * s⁻¹ := by
+    funext s
+    simp [div_eq_mul_inv]
+  have hval : -M * -(r ^ 2)⁻¹ = M / r ^ 2 := by ring
+  rw [← hfun, hval] at h'
+  exact h'
+
+/-- The slope is itself differentiable: `Φ'' = −2M/r³`. -/
+theorem slope_hasDerivAt (M r : ℝ) (hr : r ≠ 0) :
+    HasDerivAt (fun s : ℝ => M / s ^ 2) (-2 * M / r ^ 3) r := by
+  have hnum : HasDerivAt (fun _ : ℝ => M) 0 r := hasDerivAt_const r M
+  have hden : HasDerivAt (fun s : ℝ => s ^ 2) (2 * r) r := by
+    simpa using hasDerivAt_pow 2 r
+  have h := hnum.div hden (pow_ne_zero 2 hr)
+  have hfun : (fun s : ℝ => M / s ^ 2) = (fun _ : ℝ => M) / fun s : ℝ => s ^ 2 := rfl
+  have hval : (0 * r ^ 2 - M * (2 * r)) / (r ^ 2) ^ 2 = -2 * M / r ^ 3 := by
+    have hr2 : r ^ 2 ≠ 0 := pow_ne_zero 2 hr
+    have hr4 : (r ^ 2) ^ 2 ≠ 0 := pow_ne_zero 2 hr2
+    field_simp
+    ring
+  rw [← hfun, hval] at h
+  exact h
+
+/-- The tidal tensor of a static potential in the orthonormal frame
+`(t, R, θ, φ)`: the time row vanishes, the radial entry is the second radial
+derivative `Φ''` of the potential, and the two angular entries are `Φ'/r` —
+the eigenvalues of the Hessian of a radial function in an orthonormal frame. -/
+noncomputable def tidalPart (phiRR phiOverR : ℝ) (i j : Fin 4) : ℝ :=
+  if i = j then (if i = 0 then 0 else if i = 1 then phiRR else phiOverR) else 0
+
+/-- **The supplied electric part is the tidal tensor of the potential.**  With
+`Φ = −M/r` the eigenvalues `Φ'' = −2M/r³` and `Φ'/r = M/r³` make the tidal
+tensor `electricPart` at `k = M/r³`. -/
+theorem tidalPart_eq_electricPart (M r : ℝ) :
+    tidalPart (-2 * M / r ^ 3) (M / r ^ 3) = electricPart (M / r ^ 3) := by
+  funext i j
+  fin_cases i <;> fin_cases j
+  all_goals first
+    | (simp [tidalPart, electricPart]; ring)
+    | simp [tidalPart, electricPart]
+
+/-- **The tidal tensor is trace free.**  The exterior potential is harmonic,
+`Φ'' + 2Φ'/r = 0`, which is the vacuum field equation read at the level of the
+potential. -/
+theorem tidal_trace_zero (M r : ℝ) :
+    (-2 * M / r ^ 3) + 2 * (M / r ^ 3) = 0 := by
+  ring
 
 end Schwarzschild
 

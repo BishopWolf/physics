@@ -26,7 +26,7 @@ fi
 echo "none"
 
 echo "== 2. collecting declarations =="
-NAMES=$(awk '
+DECLS=$(awk '
   BEGIN { incomment = 0 }
   /^[[:space:]]*\/-/ { incomment = 1; if ($0 ~ /-\//) incomment = 0; next }
   incomment { if ($0 ~ /-\//) incomment = 0; next }
@@ -47,11 +47,14 @@ NAMES=$(awk '
       if (name ~ /^[A-Za-z_][A-Za-z0-9_.]*$/) {
         full = ""
         for (i = 1; i <= depth; i++) full = full ns[i] "."
-        print full name
+        print full name "\t" FILENAME "\t" FNR
       }
     }
   }
 ' $(find "$SRC" -name '*.lean' | sort))
+
+printf '%s\n' "$DECLS" > "$PROJ/.lake/decls.tsv"
+NAMES=$(printf '%s\n' "$DECLS" | cut -f1)
 
 count=$(printf '%s\n' "$NAMES" | grep -c . || true)
 theorems=$(grep -hE "^(theorem|lemma)[[:space:]]" $(find "$SRC" -name '*.lean') | wc -l)
@@ -102,5 +105,20 @@ if grep -q "sorryAx" "$OUT"; then
   echo "FAIL: sorryAx present"
   exit 1
 fi
+
+while IFS= read -r line; do
+  case "$line" in
+    \'*) ;;
+    *) continue ;;
+  esac
+  nm=$(printf '%s' "$line" | cut -d"'" -f2)
+  if printf '%s' "$line" | grep -q "does not depend on any axioms"; then
+    printf '%s\t(none)\n' "$nm"
+  else
+    ax="${line#*\[}"
+    ax="${ax%%\]*}"
+    printf '%s\t%s\n' "$nm" "$ax"
+  fi
+done < "$OUT" > "$PROJ/.lake/axioms.tsv"
 
 echo "PASS: $count declarations, axioms subset of {propext, Classical.choice, Quot.sound}"
