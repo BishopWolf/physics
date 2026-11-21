@@ -37,7 +37,7 @@ DECLS=$(awk '
   /^[[:space:]]*\/-/ { incomment = 1; if ($0 ~ /-\//) incomment = 0; next }
   incomment { if ($0 ~ /-\//) incomment = 0; next }
   /^namespace / { ns[++depth] = $2; next }
-  /^end[[:space:]]/ { if (depth > 0) depth--; next }
+  /^end[[:space:]]/ { if (depth > 0 && $2 == ns[depth]) depth--; next }
   /^@\[/ { next }
   $1 == "private" { next }
   {
@@ -78,7 +78,8 @@ echo "== 3. checking axiom footprints =="
 
 cd "$PROJ"
 export PATH="$HOME/.elan/bin:$PATH"
-lake env lean "$GEN" > "$OUT" 2>&1 || true
+lake env lean "$GEN" > "$OUT.raw" 2>&1 || true
+awk '/^[[:space:]]/ && have_prev { prev = prev $0; next } have_prev { print prev } { prev = $0; have_prev = 1 } END { if (have_prev) print prev }' "$OUT.raw" > "$OUT"
 
 reports=$(grep -c "depends on axioms\|does not depend on any axioms" "$OUT" || true)
 echo "axiom reports: $reports / $count"

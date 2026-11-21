@@ -113,7 +113,7 @@ of date.
 | `Gravitation.Schwarzschild.riemann_r_phirphi_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.gammaThetaphiphi_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.gammaPhiphitheta_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
-| `Gravitation.Schwarzschild.riemann_theta_phitheta_from_metric` | `Schwarzschild.lean` | propext, | proved |
+| `Gravitation.Schwarzschild.riemann_theta_phitheta_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.rt_phitphi_lowered` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.frame_phiphi` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.electric_phiphi_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -137,7 +137,7 @@ of date.
 | `Gravitation.SchwarzschildDeSitter.riemann_t_phitphi_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.riemann_r_thetar_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.riemann_r_phirphi_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
-| `Gravitation.SchwarzschildDeSitter.riemann_theta_phitheta_sds` | `SchwarzschildDeSitter.lean` | propext, | proved |
+| `Gravitation.SchwarzschildDeSitter.riemann_theta_phitheta_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.weyl_rr_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.weyl_thetatheta_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.weyl_phiphi_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -163,10 +163,10 @@ of date.
 | `Gravitation.SchwarzschildDeSitter.sdsEinstein_diag` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.schwarzschild_ricci_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.schwarzschild_scalar_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
-| `Gravitation.SchwarzschildDeSitter.schwarzschild_einstein_zero` | `SchwarzschildDeSitter.lean` | propext, | proved |
-| `Gravitation.sdsFrameCurvDeriv` | `SchwarzschildDeSitter.lean` | - | unverified |
-| `Gravitation.sds_frame_bianchi` | `SchwarzschildDeSitter.lean` | - | unverified |
-| `Gravitation.sds_frame_einstein_conserved` | `SchwarzschildDeSitter.lean` | - | unverified |
+| `Gravitation.SchwarzschildDeSitter.schwarzschild_einstein_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.sdsFrameCurvDeriv` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.sds_frame_bianchi` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.sds_frame_einstein_conserved` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Christoffel` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.geodesicAccel` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.geodesicField` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -183,7 +183,7 @@ of date.
 | `Gravitation.InitialData.ham` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.InitialData.IsVacuumData` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.InitialData.ham_eq_scalarCurv_of_K_zero` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
-| `Gravitation.InitialData.ham_zero_iff_scalarCurv_zero_of_K_zero` | `InitialValue.lean` | propext, | proved |
+| `Gravitation.InitialData.ham_zero_iff_scalarCurv_zero_of_K_zero` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.InitialData.ham_eq_of_trace_zero` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.InitialData.trace_sq_eq_of_ham_zero` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.momConstraint_zero_of_dK_zero` | `InitialValue.lean` | propext, Classical.choice, Quot.sound | proved |
