@@ -12,6 +12,12 @@
 #   3. prints #print axioms for each and checks the reported sets.
 set -euo pipefail
 
+# `sort` collation depends on the locale, and the proof-status table is sorted:
+# CI's C locale ordered the rows differently from a developer machine's fr_FR,
+# so the same commit produced a table only one of the two accepted.  Pin the
+# locale so every run builds a byte-identical table.
+export LC_ALL=C
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJ="$ROOT/gravitation"
 SRC="$PROJ/Gravitation"
