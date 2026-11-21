@@ -1,3 +1,4 @@
+import Gravitation.Conservation
 import Gravitation.Examples.Schwarzschild
 import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Tactic.FieldSimp
@@ -518,6 +519,39 @@ theorem schwarzschild_einstein_zero (M r : ℝ) (i j : Fin 4) :
   ring
 
 end kretschmann
+
+/-! ## Conservation of the frame Einstein tensor
+
+The frame Ricci tensor is `Λ η` and the scalar curvature is `4Λ`, both constant
+in the orthonormal chart because `Λ` is a parameter.  Hence their (frame)
+derivatives vanish, and the contracted Bianchi identity holds for this family
+without being assumed: it is the `Λ`-independence of `sdsRic_eq` and
+`sdsScalar_eq`, made into a `CurvDeriv`.
+-/
+
+/-- The frame covariant derivative of the Schwarzschild–de Sitter Einstein
+space: since `Ric = Λ η` and `S = 4Λ` are constant, both derivatives are zero. -/
+noncomputable def sdsFrameCurvDeriv (_M _Λ _r : ℝ) : Gravitation.CurvDeriv where
+  dRic := fun _ _ _ => 0
+  dS := fun _ => 0
+
+/-- **The contracted Bianchi identity holds for the frame Einstein space.**  It
+is not assumed: the Ricci tensor and scalar curvature are constant, so
+`∇Ric = 0 = ½ ∇S`. -/
+theorem sds_frame_bianchi (M Λ r : ℝ) :
+    ∀ b, (∑ a, Gravitation.eta4 a a * (sdsFrameCurvDeriv M Λ r).dRic a a b)
+      = (1 / 2) * (sdsFrameCurvDeriv M Λ r).dS b := by
+  intro b
+  simp [sdsFrameCurvDeriv]
+
+/-- **The frame Einstein tensor is conserved**: applying the contracted Bianchi
+identity (proved above, not assumed) gives `∇·G = 0` for the
+Schwarzschild–de Sitter frame Einstein space. -/
+theorem sds_frame_einstein_conserved (M Λ r : ℝ) (b : Fin 4) :
+    Gravitation.divergence
+        (Gravitation.CurvDeriv.dEinstein (sdsFrameCurvDeriv M Λ r)) b = 0 := by
+  apply Gravitation.divergence_einstein_eq_zero (sdsFrameCurvDeriv M Λ r)
+    (sds_frame_bianchi M Λ r) b
 
 end SchwarzschildDeSitter
 

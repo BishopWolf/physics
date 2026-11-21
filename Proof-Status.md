@@ -164,6 +164,9 @@ of date.
 | `Gravitation.SchwarzschildDeSitter.schwarzschild_ricci_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.schwarzschild_scalar_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.schwarzschild_einstein_zero` | `SchwarzschildDeSitter.lean` | propext, | proved |
+| `Gravitation.sdsFrameCurvDeriv` | `SchwarzschildDeSitter.lean` | - | unverified |
+| `Gravitation.sds_frame_bianchi` | `SchwarzschildDeSitter.lean` | - | unverified |
+| `Gravitation.sds_frame_einstein_conserved` | `SchwarzschildDeSitter.lean` | - | unverified |
 | `Gravitation.Christoffel` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.geodesicAccel` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.geodesicField` | `Geodesics.lean` | propext, Classical.choice, Quot.sound | proved |
