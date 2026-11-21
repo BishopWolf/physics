@@ -177,12 +177,14 @@ This is a regression test for the shader and for the closed forms, not evidence 
 
 ## 6. Limitations
 
-1. **The pipeline takes derivative data; the metric's derivative table is the remaining work.** `Gravitation/Pipeline.lean` evaluates $R^\rho{}_{\sigma\mu\nu}$ from $\Gamma$ and $\partial\Gamma$ supplied as parameters (`riemannFromData`), and `riemann_eq_riemannFromData` proves that feeding the metric's actual partial derivatives reproduces the pipeline definitionally, so no assumption separates the two. What remains is to write Schwarzschild's and Schwarzschild–de Sitter's $\partial\Gamma$ as closed forms — the derivative lemmas already exist (`deriv_gammaTtr`, `deriv_sdsF`, `deriv_sdsHalf`) — and to read the six components off one evaluation each.
-2. **Ricci flatness is a frame statement.** For Schwarzschild–de Sitter the frame tensors satisfy $R_{\mu\nu}=\Lambda\eta_{\mu\nu}$, $S=4\Lambda$ and $G_{\mu\nu}=-\Lambda\eta_{\mu\nu}$ for every $r$, and vanish at $\Lambda=0$; the link back to the metric runs through the electric-part theorems rather than a single theorem "the metric's Ricci tensor vanishes".
-3. **No global existence theory.** The constraints are formalised; existence and uniqueness for the Cauchy problem of the field equations are not, and are not axiomatised.
-4. **The contracted Bianchi identity is a hypothesis** (§4.7).
-5. **Chart restrictions apply to the metric-level theorems.** The frame-level results — Weyl, Kretschmann, Ricci, Einstein — carry no hypotheses at all; the six component derivations assume $r\neq0$ and $f\neq0$, and for $\Lambda>0$ the latter excludes the horizon roots.
-6. **Alternatives are structural shadows.** The MOND, MOG, TeVeS and screening results are algebraic statements in one or two variables, not field theories. The paper's claims about them are correspondingly narrow.
+This section is the backlog, not a disclaimer: each item says what is not proved, what now narrows it, and whether removing it is mechanical, tractable, or out of scope for this paper.
+
+1. **The metric's derivative table is written by hand, not derived from the closed form.** `Pipeline.lean` evaluates $R^\rho{}_{\sigma\mu\nu}$ from $\Gamma$ and $\partial\Gamma$ supplied as parameters (`riemannFromData`), and `riemann_eq_riemannFromData` proves that feeding the metric's actual partial derivatives reproduces the differentiable pipeline definitionally, so no assumption separates the two. What is missing is the closed-form $\partial\Gamma$ table for Schwarzschild and Schwarzschild–de Sitter and the six identities that read the components off one evaluation each; the derivative lemmas that supply the entries already exist (`deriv_gammaTtr`, `deriv_sdsF`, `deriv_sdsHalf`). *Removable, mechanical.*
+2. **Ricci flatness is a frame statement.** The frame tensors satisfy $R_{\mu\nu}=\Lambda\eta_{\mu\nu}$, $S=4\Lambda$ and $G_{\mu\nu}=-\Lambda\eta_{\mu\nu}$ for every $r$ and with no chart hypotheses, hence vanish at $\Lambda=0$. The link back to the metric runs through the electric-part theorems, not a single theorem "the metric's Ricci tensor vanishes"; assembling that statement from the six component theorems is the missing composition. *Removable.*
+3. **No global existence theory.** The constraints are formalised; existence and uniqueness for the Cauchy problem of the field equations are not, and are not axiomatised. *Out of scope: this paper is about solution theory, not the initial-value problem.*
+4. **The contracted Bianchi identity is a hypothesis** (§4.7). For the frame Einstein space it follows from $R_{\mu\nu}=\Lambda\eta_{\mu\nu}$, but making that a theorem requires a frame covariant derivative. *Removable.*
+5. **Chart restrictions apply to the metric-level theorems.** The frame-level results — Weyl, Kretschmann, Ricci, Einstein — carry no hypotheses at all. The metric-level derivations assume $r\neq0$ and $f\neq0$, and for $\Lambda>0$ the latter excludes the horizon roots. *Partly removable.*
+6. **Alternatives are structural shadows.** The MOND, MOG, TeVeS and screening results are algebraic statements in one or two variables, not field theories. The paper's claims about them are correspondingly narrow. *Not removable without formalising an alternative as a field theory.*
 
 ## 7. Reproducibility
 
@@ -200,7 +202,7 @@ The numerical pass is not a proof, and does not need to be: it now checks quanti
 
 ## 8. Conclusion
 
-The solution theory of general relativity is formalisable, at least for the static spherically symmetric family, and doing so changes what one can claim. The derivation of Schwarzschild–de Sitter's curvature for general $\Lambda$ shows why: the cosmological constant appears in every Riemann component, yet cancels from the Weyl tensor, and a formalisation makes that cancellation a theorem rather than a remark. The natural next step is the general-metric pipeline — metric to Christoffel to Riemann to Ricci as a single kernel-checked computation — which would turn these component-wise results into instances of one construction.
+The solution theory of general relativity is formalisable, at least for the static spherically symmetric family, and doing so changes what one can claim. The derivation of Schwarzschild–de Sitter's curvature for general $\Lambda$ shows why: the cosmological constant appears in every Riemann component, yet cancels from the Weyl tensor, and a formalisation makes that cancellation a theorem rather than a remark. The remaining step is the closed-form derivative table that lets one evaluation of `riemannFromData` produce all six components: the data form is already the metric pipeline by `riemann_eq_riemannFromData`.
 
 ## Appendix A. Declaration census
 
