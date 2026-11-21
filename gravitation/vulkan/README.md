@@ -39,7 +39,8 @@ host-visible SSBO of 70 doubles per point, runs the three cases, and checks
 `max|Ric|` (cases 0, 1) or `max|Ric − Λg|` (case 2) against a tolerance,
 exiting nonzero on failure. For cases 1 and 2 it also checks the closed forms
 proved in the Lean development: the Kretschmann scalar against `48M²/r⁶`
-(`kretschmann_scalar`), the Weyl electric part against `diag(0, −2k, k, k)` with
+(`kretschmann_scalar`) — and, for case 2, the lifted invariant
+`48M²/r⁶ + 8Λ²/3` — the Weyl electric part against `diag(0, −2k, k, k)` with
 `k = M/r³` after adding back the trace `Λ/3` (`weyl_rr_sds`,
 `weyl_thetatheta_sds`, `weyl_phiphi_sds`), and the four Riemann components
 `R^t_rtr = (2M/r³ + Λ/3)/f`, `R^t_θtθ = R^r_θrθ = Λr²/3 − M/r`,

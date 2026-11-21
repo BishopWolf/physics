@@ -293,7 +293,8 @@ Schwarzschild–de Sitter values for general `Λ` — `R^t_rtr` against
 `(2M/r³ + Λ/3)/f` (`7.8e-9` at `Λ = 0`, `5.9e-7` at `Λ = 0.1`), `R^t_θtθ` and
 `R^r_θrθ` against `Λr²/3 − M/r` (`3.7e-10` and `1.5e-8`) and `R^θ_φθφ` against
 `(2M/r + Λr²/3)sin²θ` (`5.5e-9`). In the de Sitter case the Weyl electric part
-itself is checked — `E + Λ/3` against `diag(0, −2k, k, k)` — to `1.4e-8`.
+itself is checked — `E + Λ/3` against `diag(0, −2k, k, k)` — to `1.4e-8`, and
+so is the lifted Kretschmann scalar `48M²/r⁶ + 8Λ²/3` (`1.9e-7` relative).
 
 This is a numerical sanity check on the same objects the Lean side defines; it is
 not a proof, and finite differences say nothing about the analytic solution.

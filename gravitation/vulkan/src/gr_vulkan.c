@@ -337,6 +337,7 @@ int main(int argc, char **argv)
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
         double maxKrel = 0.0, maxEdev = 0.0, maxRtr = 0.0;
         double maxRtt = 0.0, maxRrr = 0.0, maxRtp = 0.0;
+        double maxKsds = 0.0;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
@@ -375,6 +376,15 @@ int main(int argc, char **argv)
                     double kexp = 48.0 * M * M / (r2 * r2 * r2);
                     double krel = fabs(K - kexp) / kexp;
                     if (krel > maxKrel) maxKrel = krel;
+                }
+                if (cases[c].id == 2) {
+                    // De Sitter lifts the Weyl invariant by the trace part:
+                    // K = 48M^2/r^6 + (8/3) Lambda^2.
+                    double K    = o[49];
+                    double kexp = 48.0 * M * M / (r2 * r2 * r2)
+                                  + (8.0 / 3.0) * L * L;
+                    double krel = fabs(K - kexp) / kexp;
+                    if (krel > maxKsds) maxKsds = krel;
                 }
 
                 // R^t_rtr = (2M/r^3 + Lambda/3)/f  (riemann_t_rtr_sds)
@@ -423,6 +433,10 @@ int main(int argc, char **argv)
             verdict = "FAIL";
             failures++;
         }
+        if (cases[c].id == 2 && maxKsds > kTol) {
+            verdict = "FAIL";
+            failures++;
+        }
 
         printf("case %d  %-26s\n", cases[c].id, cases[c].name);
         printf("        max|Ric| = %.3e   max|R| = %.3e   max|G| = %.3e\n",
@@ -437,6 +451,9 @@ int main(int argc, char **argv)
             if (cases[c].id == 1)
                 printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
                        maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");
+            if (cases[c].id == 2)
+                printf("        Kretschmann |K - 48M^2/r^6 - 8L^2/3| / (48M^2/r^6 + 8L^2/3) = %.3e  (tol %.0e)  [%s]\n",
+                       maxKsds, kTol, maxKsds <= kTol ? "ok" : "FAIL");
             printf("        Weyl electric part |E + L/3 - diag(0,-2k,k,k)| = %.3e  (tol %.0e)  [%s]\n",
                    maxEdev, eTol, maxEdev <= eTol ? "ok" : "FAIL");
             printf("        R^t_rtr          |R - (2M/r^3 + L/3)/f| = %.3e  (tol %.0e)  [%s]\n",
