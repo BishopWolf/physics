@@ -399,6 +399,98 @@ theorem kretschmann_sds (M Λ r : ℝ) (hr : r ≠ 0) :
   have hr6 : r ^ 6 ≠ 0 := pow_ne_zero 6 hr
   field_simp [hr3, hr6]
 
+
+/-! ## Ricci and Einstein tensors from the Weyl and trace parts
+
+The frame curvature is `C + A`.  `C` is trace free, so it contributes nothing
+to the Ricci tensor, while the trace part contracts to `Λ η`.  Hence
+`Ric = Λ η`, `S = 4Λ` and `G = −Λ η`: the cosmological constant that cancels
+from the Weyl eigenvalues is precisely the Ricci curvature.
+-/
+
+/-- The frame components of the Schwarzschild–de Sitter curvature: Weyl part
+plus trace part. -/
+noncomputable def sdsFrameComp (M Λ r : ℝ) (i j k l : Fin 4) : ℝ :=
+  (schwarzschild (M / r ^ 3)).comp i j k l + deSitterPart Λ i j k l
+
+/-- The frame Ricci tensor, `Ric_{σν} = η^{ρρ'} R_{ρ'σρν}`.  The frame metric is
+its own inverse, so both index pairs carry `eta4`. -/
+noncomputable def sdsRic (M Λ r : ℝ) (σ ν : Fin 4) : ℝ :=
+  ∑ ρ, ∑ ρ', eta4 ρ ρ' * sdsFrameComp M Λ r ρ' σ ρ ν
+
+/-- **The Weyl part contributes nothing to the Ricci tensor**: it is trace free,
+which is what makes the vacuum part of the curvature `Λ`-independent. -/
+theorem weylRic_zero (M r : ℝ) (σ ν : Fin 4) :
+    (∑ ρ, ∑ ρ', eta4 ρ ρ' * (schwarzschild (M / r ^ 3)).comp ρ' σ ρ ν) = 0 := by
+  fin_cases σ <;> fin_cases ν <;>
+    simp [Fin.sum_univ_four, schwarzschild, electricPart, eta4] <;> ring
+
+/-- The trace part contracts to `Λ η` in every entry: `(Λ/3)(η∧η)` has
+`(4 − 1)Λ/3 = Λ` on the diagonal. -/
+theorem traceRic_eq (Λ : ℝ) (σ ν : Fin 4) :
+    (∑ ρ, ∑ ρ', eta4 ρ ρ' * deSitterPart Λ ρ' σ ρ ν) = Λ * eta4 σ ν := by
+  fin_cases σ <;> fin_cases ν <;>
+    simp [Fin.sum_univ_four, deSitterPart, eta4] <;> ring
+
+/-- **The frame Ricci tensor of Schwarzschild–de Sitter is `Λ η`**: the
+spacetime is an Einstein space with cosmological constant `Λ`. -/
+theorem sdsRic_eq (M Λ r : ℝ) (σ ν : Fin 4) :
+    sdsRic M Λ r σ ν = Λ * eta4 σ ν := by
+  have hW := weylRic_zero M r σ ν
+  have hT := traceRic_eq Λ σ ν
+  simp only [sdsRic, sdsFrameComp, mul_add, Finset.sum_add_distrib]
+  simp only [hW, hT]
+  ring
+
+/-- The frame scalar curvature `S = η^{σν} Ric_{σν}`. -/
+noncomputable def sdsScalar (M Λ r : ℝ) : ℝ :=
+  ∑ σ, ∑ ν, eta4 σ ν * sdsRic M Λ r σ ν
+
+/-- **The frame scalar curvature is `4Λ`.** -/
+theorem sdsScalar_eq (M Λ r : ℝ) : sdsScalar M Λ r = 4 * Λ := by
+  simp only [sdsScalar, sdsRic_eq]
+  simp [eta4, Fin.sum_univ_four]
+  ring
+
+/-- The frame Einstein tensor `G_{ij} = Ric_{ij} − ½ S η_{ij}`. -/
+noncomputable def sdsEinstein (M Λ r : ℝ) (i j : Fin 4) : ℝ :=
+  sdsRic M Λ r i j - (1 / 2) * sdsScalar M Λ r * eta4 i j
+
+/-- **The frame Einstein tensor is `−Λ η`**, so `G_{ij} + Λ η_{ij} = 0`: with no
+matter the cosmological constant is the whole source. -/
+theorem sdsEinstein_eq (M Λ r : ℝ) (i j : Fin 4) :
+    sdsEinstein M Λ r i j = -(Λ * eta4 i j) := by
+  simp only [sdsEinstein, sdsRic_eq, sdsScalar_eq]
+  ring
+
+/-- The diagonal frame components: `Ric_{tt} = −Λ` and
+`Ric_{rr} = Ric_{θθ} = Ric_{φφ} = Λ`. -/
+theorem sdsRic_diag (M Λ r : ℝ) :
+    sdsRic M Λ r 0 0 = -Λ ∧ sdsRic M Λ r 1 1 = Λ ∧
+      sdsRic M Λ r 2 2 = Λ ∧ sdsRic M Λ r 3 3 = Λ := by
+  have h0 : sdsRic M Λ r 0 0 = -Λ := by rw [sdsRic_eq]; simp [eta4]
+  have h1 : sdsRic M Λ r 1 1 = Λ := by rw [sdsRic_eq]; simp [eta4]
+  have h2 : sdsRic M Λ r 2 2 = Λ := by rw [sdsRic_eq]; simp [eta4]
+  have h3 : sdsRic M Λ r 3 3 = Λ := by rw [sdsRic_eq]; simp [eta4]
+  exact ⟨h0, h1, h2, h3⟩
+
+/-- The off-diagonal frame entries of the Ricci tensor vanish. -/
+theorem sdsRic_offdiag (M Λ r : ℝ) {σ ν : Fin 4} (h : σ ≠ ν) :
+    sdsRic M Λ r σ ν = 0 := by
+  rw [sdsRic_eq]
+  fin_cases σ <;> fin_cases ν <;> simp_all [eta4]
+
+/-- The diagonal frame components of the Einstein tensor: `G_{tt} = Λ` and
+`G_{rr} = G_{θθ} = G_{φφ} = −Λ`. -/
+theorem sdsEinstein_diag (M Λ r : ℝ) :
+    sdsEinstein M Λ r 0 0 = Λ ∧ sdsEinstein M Λ r 1 1 = -Λ ∧
+      sdsEinstein M Λ r 2 2 = -Λ ∧ sdsEinstein M Λ r 3 3 = -Λ := by
+  have h0 : sdsEinstein M Λ r 0 0 = Λ := by rw [sdsEinstein_eq]; simp [eta4]
+  have h1 : sdsEinstein M Λ r 1 1 = -Λ := by rw [sdsEinstein_eq]; simp [eta4]
+  have h2 : sdsEinstein M Λ r 2 2 = -Λ := by rw [sdsEinstein_eq]; simp [eta4]
+  have h3 : sdsEinstein M Λ r 3 3 = -Λ := by rw [sdsEinstein_eq]; simp [eta4]
+  exact ⟨h0, h1, h2, h3⟩
+
 end kretschmann
 
 end SchwarzschildDeSitter

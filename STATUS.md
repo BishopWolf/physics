@@ -137,7 +137,11 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   changes Ricci and leaves the free gravitational field alone. Squaring the
   whole frame tensor gives the Kretschmann scalar `48M²/r⁶ + 8Λ²/3`
   (`kretschmann_sds`), the Weyl square plus `(Λ/3)²·24`, so `Λ` survives in `K`
-  even though it cancels from the eigenvalues. At `Λ = 0` the lapse reduces to
+  even though it cancels from the eigenvalues. Contracting that split gives the
+  Ricci tensor: the Weyl part is trace free (`weylRic_zero`) and the trace part
+  contracts to `Λη` (`traceRic_eq`), so `Ric = Λη`, `S = 4Λ` and `G = −Λη`
+  (`sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`) — the `Λ` that cancelled from
+  the Weyl eigenvalues is exactly the Ricci curvature. At `Λ = 0` the lapse reduces to
   `schwarzschildF`.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
