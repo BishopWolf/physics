@@ -95,6 +95,13 @@ of date.
 | `Gravitation.SchwarzschildDeSitter.weyl_thetatheta_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.weyl_phiphi_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.riemann_components_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.deSitterPart` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.deSitterPart_skew_last` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.deSitterPart_pair_symm` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.deSitterPart_bianchi` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.sdsFrameSqSum` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.sdsFrameSqSum_eq` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.kretschmann_sds` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.electricPart` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.electricPart_symm` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.electricPart_trace` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |

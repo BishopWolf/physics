@@ -305,6 +305,102 @@ theorem riemann_components_sds (M Λ r th : ℝ) (hr : r ≠ 0)
    riemann_r_phirphi_sds M Λ r th hr hf,
    riemann_theta_phitheta_sds M Λ r th hr hsin⟩
 
+/-! ## The Kretschmann scalar
+
+In the orthonormal frame the curvature of Schwarzschild–de Sitter splits as its
+Weyl part — Schwarzschild's, by `weyl_rr_sds` and the two angular theorems —
+plus the trace part `(Λ/3)(η_{μρ}η_{νσ} − η_{μσ}η_{νρ})`.  Squaring and summing
+over all four indices therefore gives the Schwarzschild invariant `48k²` with
+`k = M/r³`, plus `(Λ/3)²·24 = 8Λ²/3` from the trace: the cosmological constant
+survives in `K` even though it cancels from the electric eigenvalues.
+-/
+
+/-- The trace part of the frame Riemann tensor,
+`(Λ/3)(η_{ik}η_{jl} − η_{il}η_{jk})`. -/
+noncomputable def deSitterPart (Λ : ℝ) (i j k l : Fin 4) : ℝ :=
+  (Λ / 3) * (eta4 i k * eta4 j l - eta4 i l * eta4 j k)
+
+/-- The trace part is antisymmetric in its last pair, as a curvature tensor must be. -/
+theorem deSitterPart_skew_last (Λ : ℝ) (i j k l : Fin 4) :
+    deSitterPart Λ i j k l = -deSitterPart Λ i j l k := by
+  simp only [deSitterPart]
+  ring
+
+/-- The trace part is symmetric under exchange of the two index pairs. -/
+theorem deSitterPart_pair_symm (Λ : ℝ) (i j k l : Fin 4) :
+    deSitterPart Λ i j k l = deSitterPart Λ k l i j := by
+  have h1 : eta4 k i = eta4 i k := eta4_symm k i
+  have h2 : eta4 l j = eta4 j l := eta4_symm l j
+  have h3 : eta4 k j = eta4 j k := eta4_symm k j
+  have h4 : eta4 l i = eta4 i l := eta4_symm l i
+  simp only [deSitterPart, h1, h2, h3, h4]
+  ring
+
+/-- The trace part satisfies the first Bianchi identity. -/
+theorem deSitterPart_bianchi (Λ : ℝ) (i j k l : Fin 4) :
+    deSitterPart Λ i j k l + deSitterPart Λ i k l j + deSitterPart Λ i l j k = 0 := by
+  have h1 : eta4 k j = eta4 j k := eta4_symm k j
+  have h2 : eta4 l k = eta4 k l := eta4_symm l k
+  have h3 : eta4 l j = eta4 j l := eta4_symm l j
+  simp only [deSitterPart, h1, h2, h3]
+  ring
+
+/-- Sum of squares of the frame components of the Schwarzschild–de Sitter
+curvature: the Weyl part plus the trace part. -/
+noncomputable def sdsFrameSqSum (M Λ r : ℝ) : ℝ :=
+  ∑ i, ∑ j, ∑ k, ∑ l,
+    ((schwarzschild (M / r ^ 3)).comp i j k l + deSitterPart Λ i j k l) *
+    ((schwarzschild (M / r ^ 3)).comp i j k l + deSitterPart Λ i j k l)
+
+section kretschmann
+
+set_option maxHeartbeats 2000000
+
+/-- **Frame Kretschmann scalar of Schwarzschild–de Sitter**: `48k² + 8Λ²/3`
+with `k = M/r³`.  Squaring splits into the Weyl square, the two cross terms and
+the trace square; the cross terms vanish because the Weyl part is trace free in
+this pairing, so the value is Schwarzschild's `48k²` plus `(Λ/3)²·24`. -/
+theorem sdsFrameSqSum_eq (M Λ r : ℝ) :
+    sdsFrameSqSum M Λ r = 48 * (M / r ^ 3) ^ 2 + 8 * Λ ^ 2 / 3 := by
+  have hW : (∑ i, ∑ j, ∑ k, ∑ l,
+      (schwarzschild (M / r ^ 3)).comp i j k l *
+        (schwarzschild (M / r ^ 3)).comp i j k l)
+      = 48 * (M / r ^ 3) ^ 2 := Gravitation.Schwarzschild.frameSqSum_eq (M / r ^ 3)
+  have hA : (∑ i, ∑ j, ∑ k, ∑ l,
+      deSitterPart Λ i j k l * deSitterPart Λ i j k l) = 8 * Λ ^ 2 / 3 := by
+    simp [deSitterPart, eta4, Fin.sum_univ_four]
+    ring
+  have hX : (∑ i, ∑ j, ∑ k, ∑ l,
+      (schwarzschild (M / r ^ 3)).comp i j k l * deSitterPart Λ i j k l) = 0 := by
+    simp [schwarzschild, deSitterPart, electricPart, eta4, Fin.sum_univ_four,
+      two_mul, add_assoc]
+    ring
+  have hpt : ∀ i j k l : Fin 4,
+      ((schwarzschild (M / r ^ 3)).comp i j k l + deSitterPart Λ i j k l) *
+          ((schwarzschild (M / r ^ 3)).comp i j k l + deSitterPart Λ i j k l)
+        = ((schwarzschild (M / r ^ 3)).comp i j k l *
+              (schwarzschild (M / r ^ 3)).comp i j k l
+            + (schwarzschild (M / r ^ 3)).comp i j k l * deSitterPart Λ i j k l)
+          + ((schwarzschild (M / r ^ 3)).comp i j k l * deSitterPart Λ i j k l
+            + deSitterPart Λ i j k l * deSitterPart Λ i j k l) := by
+    intro i j k l
+    ring
+  simp only [sdsFrameSqSum, hpt, Finset.sum_add_distrib]
+  simp only [hW, hX, hA]
+  ring
+
+/-- **The Schwarzschild–de Sitter Kretschmann scalar**,
+`K = 48M²/r⁶ + 8Λ²/3`: the Schwarzschild invariant plus `(Λ/3)²·24` from the
+trace part.  Unlike the electric Weyl eigenvalues, it is `Λ`-dependent. -/
+theorem kretschmann_sds (M Λ r : ℝ) (hr : r ≠ 0) :
+    sdsFrameSqSum M Λ r = 48 * M ^ 2 / r ^ 6 + 8 * Λ ^ 2 / 3 := by
+  rw [sdsFrameSqSum_eq]
+  have hr3 : r ^ 3 ≠ 0 := pow_ne_zero 3 hr
+  have hr6 : r ^ 6 ≠ 0 := pow_ne_zero 6 hr
+  field_simp [hr3, hr6]
+
+end kretschmann
+
 end SchwarzschildDeSitter
 
 end Gravitation

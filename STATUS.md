@@ -134,8 +134,11 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   to be `diag(0, −2M/r³, M/r³, M/r³)` for every `Λ`: since
   `C_{titj} = R_{titj} + (Λ/3)g_ij`, the cosmological constant enters the
   Riemann tensor only through the trace the Weyl tensor removes, so de Sitter
-  changes Ricci and leaves the free gravitational field alone. At `Λ = 0` the
-  lapse reduces to `schwarzschildF`.
+  changes Ricci and leaves the free gravitational field alone. Squaring the
+  whole frame tensor gives the Kretschmann scalar `48M²/r⁶ + 8Λ²/3`
+  (`kretschmann_sds`), the Weyl square plus `(Λ/3)²·24`, so `Λ` survives in `K`
+  even though it cancels from the eigenvalues. At `Λ = 0` the lapse reduces to
+  `schwarzschildF`.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.
