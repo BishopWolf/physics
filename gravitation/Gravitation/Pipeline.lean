@@ -729,6 +729,75 @@ theorem christoffel_eq_sdsG (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     simp [christoffel, sdsG, sdsMetricInv, pd_sds_r M Λ x hr hf]
   all_goals field_simp [hr, hf]
 
+
+/-! ### The evaluation takes the metric's own Christoffel table
+
+`riemannFromData` reads its first argument only at `x`, so `christoffel_eq_schG`
+identifies the pipeline's Christoffel table with `schG` at the point and the six
+components follow with no transcribed table in the evaluation.
+-/
+
+/-- The evaluation is unchanged when the Christoffel argument is the pipeline's
+own `christoffel` of the metric: `riemannFromData` reads that argument only at
+`x`, where `christoffel_eq_schG` identifies it with `schG`. -/
+theorem riemannFromData_christoffel_eq (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (ρ σ μ ν : Fin 4) :
+    riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+        (schDG M) x ρ σ μ ν
+      = riemannFromData (schG M) (schDG M) x ρ σ μ ν := by
+  simp [riemannFromData, christoffel_eq_schG M x hr hf hsin]
+
+/-- **The pipeline's own Christoffel table gives the six components.**  The
+first argument is `christoffel` of the metric rather than the transcribed
+`schG`; the closed-form derivative table is the only data left. -/
+theorem riemann_components_christoffel (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+          (schDG M) x 0 1 0 1
+        = 2 * M / ((x 1) ^ 3 * Schwarzschild.schwarzschildF M (x 1)))
+      ∧ (riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+            (schDG M) x 0 2 0 2 = -M / (x 1))
+      ∧ (riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+            (schDG M) x 0 3 0 3 = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+            (schDG M) x 1 2 1 2 = -M / (x 1))
+      ∧ (riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+            (schDG M) x 1 3 1 3 = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (christoffel (schwarzschildG M) (schwarzschildGinv M))
+            (schDG M) x 2 3 2 3 = (2 * M / (x 1)) * Real.sin (x 2) ^ 2) := by
+  simp only [riemannFromData_christoffel_eq M x hr hf hsin]
+  exact riemann_components_pipeline M x hr hf hsin
+
+/-- The de Sitter evaluation with the pipeline's own Christoffel table. -/
+theorem riemannFromData_christoffel_eq_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (ρ σ μ ν : Fin 4) :
+    riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+        x ρ σ μ ν
+      = riemannFromData (sdsG M Λ) (sdsDG M Λ) x ρ σ μ ν := by
+  simp [riemannFromData, christoffel_eq_sdsG M Λ x hr hf hsin]
+
+/-- **The de Sitter pipeline's own Christoffel table gives the six components**,
+for general `Λ`. -/
+theorem riemann_components_christoffel_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+          x 0 1 0 1
+        = (2 * M / (x 1) ^ 3 + Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1))
+      ∧ (riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+            x 0 2 0 2 = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+            x 0 3 0 3 = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+            x 1 2 1 2 = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+            x 1 3 1 3 = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)) (sdsDG M Λ)
+            x 2 3 2 3 = (2 * M / (x 1) + Λ * (x 1) ^ 2 / 3) * Real.sin (x 2) ^ 2) := by
+  simp only [riemannFromData_christoffel_eq_sds M Λ x hr hf hsin]
+  exact riemann_components_pipeline_sds M Λ x hr hf hsin
+
 end Pipeline
 
 end Gravitation

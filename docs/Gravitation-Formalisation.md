@@ -8,7 +8,7 @@
 
 ## Abstract
 
-General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 289 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat in the orthonormal frame, the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ by differentiating the Christoffel symbols, rather than assumed. For Schwarzschild–de Sitter the same derivation is carried out for general $\Lambda$, giving
+General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 293 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat in the orthonormal frame, the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ by differentiating the Christoffel symbols, rather than assumed. For Schwarzschild–de Sitter the same derivation is carried out for general $\Lambda$, giving
 $R^t{}_{rtr}=(2M/r^3+\Lambda/3)/f$, $R^t{}_{\theta t\theta}=R^r{}_{\theta r\theta}=\Lambda r^2/3-M/r$ and $R^\theta{}_{\varphi\theta\varphi}=(2M/r+\Lambda r^2/3)\sin^2\theta$, together with a proof that the frame electric part of the Weyl tensor is $\mathrm{diag}(0,-2M/r^3,M/r^3,M/r^3)$ for **every** $\Lambda$: a cosmological constant enters the Riemann tensor only through the trace that the Weyl tensor removes. Alongside these, the development formalises the initial-value constraints, geodesic local existence, and structural theorems for MOND, MOG, TeVeS, Brans–Dicke, $f(R)$, Starobinsky, Galileon, chameleon screening and Ostrogradsky theories. As an independent check, a double-precision Vulkan compute pass evaluates the same tensors from the same metrics and reproduces every closed form proved in Lean to better than $10^{-6}$ — including the $\Lambda$-independent Weyl part of de Sitter to $1.4\times 10^{-8}$.
 
 **Keywords:** general relativity · Lean 4 · Mathlib · formal verification · exact solutions · cosmological constant · alternative theories of gravity · GPU validation
@@ -56,7 +56,7 @@ The development is Lean 4 against Mathlib `v4.36.0`.
 $$g \mapsto \partial g \mapsto \Gamma^k{}_{ij} \mapsto \partial\Gamma \mapsto R^\rho{}_{\sigma\mu\nu} \mapsto \mathrm{Ric}_{\sigma\nu} \mapsto S \mapsto G_{ij}$$
 for an arbitrary component field $g$ and its inverse, with $\partial_\mu$ the coordinate partial derivative: differentiate a component along the line through $x$ with the other coordinates fixed. A component is then the value of a formula rather than the conclusion of a bespoke proof, and what remains per metric is the evaluation of one-variable derivatives. The module proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$ — Minkowski as a *computed* vacuum solution — and that Schwarzschild's $\Gamma^t{}_{tr}$ evaluates to the $M/(r^2f)$ that §4.4 derives by hand. The full closed-form table $\Gamma$ and its partial derivatives $\partial\Gamma$ for Schwarzschild are part of the development too, and `riemann_components_pipeline` reads all six independent curvature components off a single evaluation of `riemannFromData`, and `christoffel_eq_schG` proves that the table is exactly the Christoffel table the pipeline computes from the metric, so for Schwarzschild the chain $g \to \partial g \to \Gamma \to R^\rho{}_{\sigma\mu\nu}$ is closed. The de Sitter case is carried out the same way for general $\Lambda$ (`christoffel_eq_sdsG`).
 
-**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 289 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
+**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 293 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
 
 **Silence as a test.** `lake build` emits no message at all — no errors and no warnings. Tactic and unused-variable warnings were removed by rewriting proofs, not by disabling linters, and `scripts/check_messages.sh` fails CI if a message reappears.
 
@@ -97,7 +97,7 @@ The electric part is then *derived* twice over. From the potential: $g_{tt}=-(1+
 
 Each is assembled from small product identities instead of one large rational identity, because the closure tactic (`field_simp` followed by `ring`) leaves an uncancellable $(r-2M)^{-1}$ in this chart; the products are closed by an explicit cancellation against $r^2f\neq 0$.
 
-One evaluation now replaces the six computations. `schG` is the Christoffel table of the line element in closed form and `schDG` its partial derivatives in closed form — no `deriv` expression survives in the table — and `riemann_components_pipeline` proves that `riemannFromData` applied to that pair returns exactly the six values tabulated above: the curvature is read off one evaluation rather than one derivation per component. The six per-component theorems remain as the certificates for the table's entries — the evaluation reproduces their values rather than re-deriving them — and `christoffel_eq_schG` proves that the table is exactly the Christoffel table the pipeline computes from $g$, so the six values are those of the metric's own curvature rather than of a transcription. The same construction for Schwarzschild–de Sitter, with general $\Lambda$, is §4.5.
+One evaluation now replaces the six computations. `schG` is the Christoffel table of the line element in closed form and `schDG` its partial derivatives in closed form — no `deriv` expression survives in the table — and `riemann_components_pipeline` proves that `riemannFromData` applied to that pair returns exactly the six values tabulated above: the curvature is read off one evaluation rather than one derivation per component. The six per-component theorems remain as the certificates for the table's entries — the evaluation reproduces their values rather than re-deriving them — and `christoffel_eq_schG` proves that the table is exactly the Christoffel table the pipeline computes from $g$, so the six values are those of the metric's own curvature rather than of a transcription. `riemann_components_christoffel` goes one step further and removes even the Christoffel transcription from the evaluation: the object `riemannFromData` is given is `christoffel` of the metric, and the closed-form derivative table is the only data left. The same construction for Schwarzschild–de Sitter, with general $\Lambda$, is §4.5.
 
 ### 4.5 Schwarzschild–de Sitter, for general $\Lambda$
 
@@ -114,7 +114,7 @@ the two $\Gamma$ products cancelling the $2n^2/f^2$ left by the derivative. The 
 
 The angular Christoffel symbols carry no $M$ or $\Lambda$, so the last line enters only through $1-f$.
 
-The pipeline handles the whole family at once. `sdsMetric` and `sdsMetricInv` are the metric and its inverse as component fields, `sdsG` and `sdsDG` are the closed-form Christoffel and derivative tables — the only new entry is the quotient-rule value $\partial_r(n/f) = (n'f - 2n^2)/f^2$ with $n' = -2M/r^3 - \Lambda/3$ — and `riemann_components_pipeline_sds` reads the six values above off one evaluation of `riemannFromData`. `christoffel_eq_sdsG` proves that those tables are exactly the Christoffel symbols the pipeline computes from the metric, for every $\Lambda$, so the six de Sitter components are the metric's own just as the Schwarzschild ones are.
+The pipeline handles the whole family at once. `sdsMetric` and `sdsMetricInv` are the metric and its inverse as component fields, `sdsG` and `sdsDG` are the closed-form Christoffel and derivative tables — the only new entry is the quotient-rule value $\partial_r(n/f) = (n'f - 2n^2)/f^2$ with $n' = -2M/r^3 - \Lambda/3$ — and `riemann_components_pipeline_sds` reads the six values above off one evaluation of `riemannFromData`. `christoffel_eq_sdsG` proves that those tables are exactly the Christoffel symbols the pipeline computes from the metric, for every $\Lambda$, so the six de Sitter components are the metric's own just as the Schwarzschild ones are. `riemann_components_christoffel_sds` is the same statement with the metric's own `christoffel` in place of the table.
 
 Squaring the whole frame tensor gives the Kretschmann scalar
 $$K = \frac{48M^2}{r^6} + \frac{8\Lambda^2}{3}$$
@@ -213,7 +213,7 @@ The solution theory of general relativity is formalisable, at least for the stat
 | --- | --- |
 | `Examples/Schwarzschild.lean` | 46 |
 | `Examples/SchwarzschildDeSitter.lean` | 45 |
-| `Pipeline.lean` | 48 |
+| `Pipeline.lean` | 52 |
 | `ScalarTensor.lean` | 26 |
 | `Screening.lean` | 24 |
 | `InitialValue.lean` | 20 |
@@ -225,9 +225,9 @@ The solution theory of general relativity is formalisable, at least for the stat
 | `Conservation.lean` | 7 |
 | `Ostrogradsky.lean` | 7 |
 | `Examples/Minkowski.lean` | 5 |
-| **Total** | **289** |
+| **Total** | **293** |
 
-All 289 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
+All 293 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
 
 ## References
 
