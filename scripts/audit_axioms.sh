@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Axiom audit for the Lean development.
 #
-# Policy: this repository declares no axioms of its own. Every theorem may
+# Policy: this repository declares no axioms of its own. Every declaration may
 # depend only on the axioms the base libraries already assume, namely
 # propext, Classical.choice and Quot.sound (Lean/Mathlib; PhysLib adds none).
 #
 # The script
 #   1. rejects any axiom/constant/opaque/unsafe/sorry/admit/native_decide,
-#   2. collects every theorem name (tracking namespaces),
+#   2. collects every declaration (theorem, lemma, def, abbrev, structure,
+#      inductive, class, instance) with its namespace,
 #   3. prints #print axioms for each and checks the reported sets.
 set -euo pipefail
 
@@ -24,23 +25,39 @@ if grep -rnE "^[[:space:]]*(axiom|constant|opaque|unsafe)[[:space:]]|\bsorry\b|\
 fi
 echo "none"
 
-echo "== 2. collecting theorem names =="
+echo "== 2. collecting declarations =="
 NAMES=$(awk '
+  BEGIN { incomment = 0 }
+  /^[[:space:]]*\/-/ { incomment = 1; if ($0 ~ /-\//) incomment = 0; next }
+  incomment { if ($0 ~ /-\//) incomment = 0; next }
   /^namespace / { ns[++depth] = $2; next }
   /^end[[:space:]]/ { if (depth > 0) depth--; next }
-  /^(theorem|lemma)[[:space:]]/ {
-    # only real declarations: a bare identifier (possibly dotted) as the name
-    if ($2 !~ /^[A-Za-z_][A-Za-z0-9_.]*$/) next
-    full = ""
-    for (i = 1; i <= depth; i++) full = full ns[i] "."
-    print full $2
+  /^@\[/ { next }
+  $1 == "private" { next }
+  {
+    line = $0
+    while (line ~ /^(noncomputable|protected|partial|nonrec|unsafe)[[:space:]]/) {
+      sub(/^[A-Za-z_]+[[:space:]]+/, "", line)
+    }
+    if (line ~ /^(theorem|lemma|def|abbrev|structure|inductive|class|instance)[[:space:]]/) {
+      rest = line
+      sub(/^[A-Za-z_]+[[:space:]]+/, "", rest)
+      name = rest
+      sub(/[[:space:]].*/, "", name)
+      if (name ~ /^[A-Za-z_][A-Za-z0-9_.]*$/) {
+        full = ""
+        for (i = 1; i <= depth; i++) full = full ns[i] "."
+        print full name
+      }
+    }
   }
 ' $(find "$SRC" -name '*.lean' | sort))
 
 count=$(printf '%s\n' "$NAMES" | grep -c . || true)
-echo "theorems found: $count"
-if [ "$count" -lt 40 ]; then
-  echo "FAIL: theorem extraction found too few names; check the awk rule"
+theorems=$(grep -hE "^(theorem|lemma)[[:space:]]" $(find "$SRC" -name '*.lean') | wc -l)
+echo "declarations found: $count (of which $theorems theorem-like)"
+if [ "$count" -lt 100 ]; then
+  echo "FAIL: declaration extraction found too few names; check the awk rule"
   exit 1
 fi
 
@@ -86,4 +103,4 @@ if grep -q "sorryAx" "$OUT"; then
   exit 1
 fi
 
-echo "PASS: $count theorems, axioms subset of {propext, Classical.choice, Quot.sound}"
+echo "PASS: $count declarations, axioms subset of {propext, Classical.choice, Quot.sound}"

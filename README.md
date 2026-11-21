@@ -86,6 +86,24 @@ hyperbolic PDE theory, absent from Mathlib; rather than adding an axiom, the
 gap is left open and stated here. In particular `IsVacuumData` is a predicate on
 the slice, not a theorem that a spacetime exists.
 
+## Schwarzschild curvature
+
+`Gravitation.Examples.Schwarzschild` defines the Schwarzschild curvature in the
+orthonormal frame `(t, r, θ, φ)` from its electric part `E = diag(0, −2k, k, k)`
+with `k = M/r³`, proves the three structural laws of `Riemann`, and proves:
+
+| Result | Statement |
+| --- | --- |
+| `Schwarzschild.ricci_eq_zero` | `ricci η (schwarzschild k) = 0` for every `k` |
+| `Schwarzschild.frameSqSum_eq` | `Σ R_{abcd}² = 48 k²` |
+| `Schwarzschild.kretschmann_scalar` | at `k = M/r³`: `Σ R_{abcd}² = 48 M²/r⁶` |
+
+Together with `vacuum_iff_ricci_flat`, the first is the vacuum Einstein
+equation in an orthonormal frame. **Scope:** the components are supplied as the
+standard frame components; deriving them from `g = diag(−f, 1/f, r², r²sin²θ)`
+by differentiating the Christoffel symbols is not formalised. This verifies the
+solution's curvature algebra, not the derivation.
+
 ## Conservation of the Einstein tensor
 
 `Gravitation.Conservation` takes the contracted Bianchi identity
@@ -307,9 +325,24 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-theorem under `gravitation/Gravitation/`, and rejects any axiom outside
+declaration under `gravitation/Gravitation/` — theorems, definitions,
+structures — and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. Nothing in the library is justified
-by an assumption introduced here.
+by an assumption introduced here. The audit runs in CI on every push and pull
+request (`.github/workflows/axioms.yml`).
+
+## Silent build
+
+`lake build` prints no messages at all — no errors and no warnings. Style
+warnings are fixed at the source rather than suppressed, and Lake's advisory
+about importing module-system packages is opted out through
+`allowNonModules = true` in `gravitation/lakefile.toml`. The rule is enforced:
+
+```sh
+scripts/check_messages.sh
+```
+
+exits nonzero if the build emits anything, and CI runs it after `lake build`.
 
 ## Licence
 

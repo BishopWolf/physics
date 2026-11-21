@@ -255,7 +255,7 @@ theorem starobinsky_einsteinFrame (α φ : ℝ) (hα : α ≠ 0) (hφ : φ ≠ 0
   have h8 : (8 : ℝ) * α ≠ 0 := mul_ne_zero (by norm_num) hα
   have h2 : (2 : ℝ) * φ ^ 2 ≠ 0 := mul_ne_zero (by norm_num) (pow_ne_zero 2 hφ)
   simp only [einsteinFrameV, V]
-  field_simp <;> ring
+  field_simp; ring
 
 /-- `U(φ) = 1/(16α) · (1 − 1/φ)²`, the form in which the plateau is visible. -/
 theorem starobinsky_einsteinFrame_form (α φ : ℝ) (hα : α ≠ 0) (hφ : φ ≠ 0) :
@@ -263,7 +263,7 @@ theorem starobinsky_einsteinFrame_form (α φ : ℝ) (hα : α ≠ 0) (hφ : φ 
   rw [starobinsky_einsteinFrame α φ hα hφ]
   have h16 : (16 : ℝ) * α * φ ^ 2 ≠ 0 := by
     refine mul_ne_zero (mul_ne_zero (by norm_num) hα) (pow_ne_zero 2 hφ)
-  field_simp <;> ring
+  field_simp
 
 /-- **The slow-roll plateau.**  As `φ → ∞` the Einstein-frame potential tends to
 its asymptote `1/(16α)`; that flat region is what makes Starobinsky inflation
@@ -300,7 +300,7 @@ equations stay second order and carry no Ostrogradsky ghost. -/
 theorem cubic_total_derivative (v a : ℝ → ℝ) (t : ℝ) (hv : HasDerivAt v (a t) t) :
     HasDerivAt (fun s => v s ^ 3 / 3) (v t ^ 2 * a t) t := by
   have h := (hv.pow 3).div_const 3
-  convert h using 1 <;> ring
+  convert h using 1; ring
 
 /-- **Shift symmetry is an invariance up to a total derivative.**  Shifting the
 velocity by a constant changes the cubic Galileon density by the derivative of

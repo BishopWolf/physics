@@ -9,3 +9,4 @@ import Gravitation.Ostrogradsky
 import Gravitation.ScalarTensor
 import Gravitation.Screening
 import Gravitation.Examples.Minkowski
+import Gravitation.Examples.Schwarzschild

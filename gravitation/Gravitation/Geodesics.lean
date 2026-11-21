@@ -35,7 +35,7 @@ open Set Metric
 
 namespace Gravitation
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 /-- Christoffel symbols on a chart, as a field of bilinear maps. -/
 abbrev Christoffel (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
@@ -73,7 +73,8 @@ theorem hasDerivAt_snd {f : ℝ → E × E} {f' : E × E} {t : ℝ}
 /-- **Local existence for the geodesic Cauchy problem.**  Given `C¹` Christoffel
 symbols, every pair of initial position and velocity is the initial data of a
 geodesic defined on an open interval around `0`. -/
-theorem geodesic_ivp_exists (Γ : Christoffel E) (hΓ : ContDiff ℝ 1 Γ) (x₀ v₀ : E) :
+theorem geodesic_ivp_exists [CompleteSpace E] (Γ : Christoffel E) (hΓ : ContDiff ℝ 1 Γ)
+    (x₀ v₀ : E) :
     ∃ ε > 0, ∃ z : ℝ → E × E, z 0 = (x₀, v₀) ∧
       ∀ t ∈ Ioo (-ε) ε,
         HasDerivAt (fun s => (z s).1) (z t).2 t ∧
@@ -88,7 +89,7 @@ theorem geodesic_ivp_exists (Γ : Christoffel E) (hΓ : ContDiff ℝ 1 Γ) (x₀
   exact ⟨hasDerivAt_fst h, hasDerivAt_snd h⟩
 
 /-- The same existence result split into a curve and its velocity. -/
-theorem geodesic_ivp_exists_curve (Γ : Christoffel E) (hΓ : ContDiff ℝ 1 Γ)
+theorem geodesic_ivp_exists_curve [CompleteSpace E] (Γ : Christoffel E) (hΓ : ContDiff ℝ 1 Γ)
     (x₀ v₀ : E) :
     ∃ ε > 0, ∃ γ w : ℝ → E, γ 0 = x₀ ∧ w 0 = v₀ ∧
       ∀ t ∈ Ioo (-ε) ε,

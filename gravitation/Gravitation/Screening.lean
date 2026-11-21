@@ -121,7 +121,7 @@ theorem hasDerivAt_profile (φinf Q r : ℝ) (hr : r ≠ 0) :
   have hsub : HasDerivAt (fun s : ℝ => φinf - Q * s⁻¹) (0 - Q * (-1 / r ^ 2)) r :=
     (hasDerivAt_const r φinf).sub hQ
   have hval : (0 - Q * (-1 / r ^ 2)) = Q / r ^ 2 := by
-    field_simp <;> ring
+    field_simp; ring
   rw [hval] at hsub
   exact hsub
 
@@ -129,11 +129,11 @@ theorem hasDerivAt_profile (φinf Q r : ℝ) (hr : r ≠ 0) :
 `Φ R/r²`. -/
 noncomputable def forceRatio (Q Phi R r : ℝ) : ℝ := (Q / r ^ 2) / (Phi * R / r ^ 2)
 
-theorem forceRatio_eq (Q Phi R r : ℝ) (h : Phi * R ≠ 0) (hr : r ≠ 0) :
+theorem forceRatio_eq (Q Phi R r : ℝ) (_h : Phi * R ≠ 0) (hr : r ≠ 0) :
     forceRatio Q Phi R r = Q / (Phi * R) := by
   simp only [forceRatio]
   have hr2 : r ^ 2 ≠ 0 := pow_ne_zero 2 hr
-  field_simp <;> ring
+  field_simp
 
 /-- **The thin-shell charge.**  With `Q = Δ Φ R` the exterior fifth force is
 `Δ` times gravity. -/
@@ -148,7 +148,7 @@ theorem forceRatio_thin_shell (Δ Phi R r : ℝ) (h : Phi * R ≠ 0) (hr : r ≠
 theorem profile_surface (φinf Δ Phi R : ℝ) (hR : R ≠ 0) :
     profile φinf (Δ * Phi * R) R = φinf - Δ * Phi := by
   simp only [profile]
-  field_simp <;> ring
+  field_simp
 
 /-- **Thin shell, weak force.**  `Δ ≤ ε` caps the fifth force at `ε` times
 gravity. -/

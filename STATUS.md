@@ -98,8 +98,16 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   kinetic term.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` anywhere in `Gravitation/`; `scripts/audit_axioms.sh` checks
-  every theorem against `{propext, Classical.choice, Quot.sound}`, the axioms
-  the base libraries already assume.
+  every declaration against `{propext, Classical.choice, Quot.sound}`, the
+  axioms the base libraries already assume, and runs in CI on every push.
+* Silent build — `lake build` emits no messages. Tactic and unused-variable
+  warnings were removed by rewriting the proofs, not by disabling linters, and
+  Lake's module-system advisory is opted out with `allowNonModules = true`.
+  `scripts/check_messages.sh` fails if a message reappears; CI runs it.
+* `gravitation/Gravitation/Examples/Schwarzschild.lean` — the Schwarzschild
+  curvature in an orthonormal frame: proved Ricci flat for every mass
+  parameter, with the Kretschmann sum `48 M²/r⁶`. The components are supplied
+  rather than derived from the metric.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.

@@ -1,6 +1,10 @@
 name = "gravitation"
 version = "0.1.0"
 defaultTargets = ["Gravitation"]
+# This development does not use Lean's module system. Mathlib does, so Lake
+# otherwise emits a module-system advisory for every Mathlib import; this option
+# records the choice explicitly so the build is silent.
+allowNonModules = true
 
 [[lean_lib]]
 name = "Gravitation"
