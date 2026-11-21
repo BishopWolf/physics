@@ -231,6 +231,12 @@ of date.
 | `Gravitation.Pipeline.schG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.schDG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemann_components_pipeline` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schwarzschild_rr` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schwarzschild_thetatheta` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schwarzschild_phiphi_r` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schwarzschild_phiphi_theta` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schwarzschild_r` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.christoffel_eq_schG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma_eq_one_sub` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma_bounds` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |

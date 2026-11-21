@@ -6,6 +6,7 @@ import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.LinearCombination
 
 /-!
 # The metric → Christoffel → Riemann pipeline
@@ -289,7 +290,7 @@ form, and `schDG` its partial derivatives.  Feeding the pair to
 -/
 
 /-- The Schwarzschild Christoffel symbols in `(t, r, θ, φ)` coordinates:
-`Γ^t_{tr} = M/(r²f)`, `Γ^r_{rr} = −M/(r²f)`, `Γ^r_{θθ} = −rf`,
+`Γ^t_{tr} = M/(r²f)`, `Γ^r_{tt} = Mf/r²`, `Γ^r_{rr} = −M/(r²f)`, `Γ^r_{θθ} = −rf`,
 `Γ^r_{φφ} = −rf sin²θ`, `Γ^θ_{rθ} = Γ^φ_{rφ} = 1/r`,
 `Γ^θ_{φφ} = −sinθ cosθ` and `Γ^φ_{θφ} = cosθ/sinθ`. -/
 noncomputable def schG (M : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) : ℝ :=
@@ -297,7 +298,8 @@ noncomputable def schG (M : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) : ℝ :=
     (if (i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 1) then
       M / ((x 1) ^ 2 * Schwarzschild.schwarzschildF M (x 1)) else 0)
   else if k = 1 then
-    (if i = 1 ∧ j = 1 then (-M) / ((x 1) ^ 2 * Schwarzschild.schwarzschildF M (x 1))
+    (if i = 0 ∧ j = 0 then M * Schwarzschild.schwarzschildF M (x 1) / (x 1) ^ 2
+     else if i = 1 ∧ j = 1 then (-M) / ((x 1) ^ 2 * Schwarzschild.schwarzschildF M (x 1))
      else if i = 2 ∧ j = 2 then -(x 1 * Schwarzschild.schwarzschildF M (x 1))
      else if i = 3 ∧ j = 3 then
        -(x 1 * Real.sin (x 2) ^ 2 * Schwarzschild.schwarzschildF M (x 1))
@@ -310,14 +312,16 @@ noncomputable def schG (M : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) : ℝ :=
      else if (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then
        Real.cos (x 2) / Real.sin (x 2) else 0)
 
-/-- The partial derivatives of the Schwarzschild Christoffel table:
-`∂_r Γ^t_{tr} = (M/(r²f))'`, `∂_r Γ^r_{θθ} = −f − 2M/r`,
+/-- The partial derivatives of the Schwarzschild Christoffel table, in closed
+form: `∂_r Γ^t_{tr} = −2M(r−M)/(r(r−2M))²`, `∂_r Γ^r_{θθ} = −f − 2M/r`,
 `∂_r Γ^r_{φφ} = −(f + 2M/r) sin²θ` and `∂_θ Γ^θ_{φφ} = sin²θ − cos²θ`, with
-all other partial derivatives zero. -/
+all other partial derivatives zero.  The `r t` entry is the value
+`deriv_gammaTtr` computes, so the table is the differentiation already done by
+hand rather than a derivative expression. -/
 noncomputable def schDG (M : ℝ) (μ : Fin 4) (x : Fin 4 → ℝ)
     (ρ ν σ : Fin 4) : ℝ :=
   if μ = 1 ∧ ρ = 0 ∧ ν = 0 ∧ σ = 1 then
-    deriv (fun s : ℝ => M / (s ^ 2 * Schwarzschild.schwarzschildF M s)) (x 1)
+    -2 * M * (x 1 - M) / (x 1 * (x 1 - 2 * M)) ^ 2
   else if μ = 1 ∧ ρ = 1 ∧ ν = 2 ∧ σ = 2 then
     -(Schwarzschild.schwarzschildF M (x 1)) - 2 * M / (x 1)
   else if μ = 1 ∧ ρ = 1 ∧ ν = 3 ∧ σ = 3 then
@@ -349,8 +353,11 @@ theorem riemann_components_pipeline (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 
         = x 1 * (x 1 - 2 * M) := by
       unfold Schwarzschild.schwarzschildF
       field_simp
+    have hd : deriv (fun s : ℝ => M / (s * s * Schwarzschild.schwarzschildF M s)) (x 1)
+        = -2 * M * (x 1 - M) / (x 1 * (x 1 - 2 * M)) ^ 2 := by
+      simpa [pow_two] using Schwarzschild.deriv_gammaTtr M (x 1) hr hf
     have h := Schwarzschild.riemann_t_rtr_from_metric M (x 1) hr hf
-    simp [riemannFromData, schG, schDG, Fin.sum_univ_four, hden, add_assoc,
+    simp [riemannFromData, schG, schDG, Fin.sum_univ_four, hden, hd, add_assoc,
       sub_eq_add_neg, pow_two] at h ⊢
     linear_combination h
   · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four] using
@@ -366,6 +373,117 @@ theorem riemann_components_pipeline (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 
   · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four, add_assoc,
       sub_eq_add_neg, pow_two] using
       Schwarzschild.riemann_theta_phitheta_from_metric M (x 1) (x 2) hr hsin
+
+
+/-! ### The metric's Christoffel symbols are the closed-form table
+
+`christoffel` evaluated on the metric's own components and their inverse is
+`schG`, so the six-component theorem speaks about the metric rather than about a
+transcribed table.  The metric is static in `t` and axisymmetric in `φ`, so only
+`r` and `θ` derivatives appear; `pd_schwarzschild_r` and `pd_schwarzschild_theta`
+tabulate them.
+-/
+
+/-- The metric does not depend on `t`: every `t` derivative vanishes. -/
+@[simp] theorem pd_schwarzschild_t (M : ℝ) (x : Fin 4 → ℝ) (a b : Fin 4) :
+    pd 0 (fun y => Schwarzschild.schwarzschildMetric M y a b) x = 0 := by
+  fin_cases a <;> fin_cases b <;> simp [pd, Schwarzschild.schwarzschildMetric]
+
+/-- The metric does not depend on `φ`: every `φ` derivative vanishes. -/
+@[simp] theorem pd_schwarzschild_phi (M : ℝ) (x : Fin 4 → ℝ) (a b : Fin 4) :
+    pd 3 (fun y => Schwarzschild.schwarzschildMetric M y a b) x = 0 := by
+  fin_cases a <;> fin_cases b <;> simp [pd, Schwarzschild.schwarzschildMetric]
+
+/-- `∂_r g_rr = −(2M/r²) f⁻²`, from `∂_r f = 2M/r²` and `g_rr = f⁻¹`. -/
+theorem pd_schwarzschild_rr (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) :
+    pd 1 (fun y => Schwarzschild.schwarzschildMetric M y 1 1) x
+      = -(2 * M / (x 1) ^ 2) * (Schwarzschild.schwarzschildF M (x 1))⁻¹ ^ 2 := by
+  have hf' : (1 - 2 * M / (x 1)) ≠ 0 := by
+    simpa [Schwarzschild.schwarzschildF] using hf
+  have hfun : (fun s : ℝ => Schwarzschild.schwarzschildMetric M (Function.update x 1 s) 1 1)
+      = (fun s : ℝ => 1 - 2 * M / s)⁻¹ := by
+    funext s
+    simp [Schwarzschild.schwarzschildMetric]
+  have h := HasDerivAt.inv (Schwarzschild.hasDerivAt_gtt M (x 1) hr) hf'
+  rw [pd, hfun, h.deriv, Schwarzschild.schwarzschildF]
+  field_simp
+
+/-- `∂_r g_θθ = 2r`. -/
+theorem pd_schwarzschild_thetatheta (M : ℝ) (x : Fin 4 → ℝ) :
+    pd 1 (fun y => Schwarzschild.schwarzschildMetric M y 2 2) x = 2 * (x 1) := by
+  have hfun : (fun s : ℝ => Schwarzschild.schwarzschildMetric M (Function.update x 1 s) 2 2)
+      = fun s : ℝ => s ^ 2 := by
+    funext s
+    simp [Schwarzschild.schwarzschildMetric]
+  rw [pd, hfun]
+  simp
+
+/-- `∂_r g_φφ = 2r sin²θ`. -/
+theorem pd_schwarzschild_phiphi_r (M : ℝ) (x : Fin 4 → ℝ) :
+    pd 1 (fun y => Schwarzschild.schwarzschildMetric M y 3 3) x
+      = 2 * (x 1) * Real.sin (x 2) ^ 2 := by
+  have hfun : (fun s : ℝ => Schwarzschild.schwarzschildMetric M (Function.update x 1 s) 3 3)
+      = fun s : ℝ => s ^ 2 * Real.sin (x 2) ^ 2 := by
+    funext s
+    simp [Schwarzschild.schwarzschildMetric]
+  have h := (hasDerivAt_pow 2 (x 1)).mul_const (Real.sin (x 2) ^ 2)
+  rw [pd, hfun, h.deriv]
+  ring
+
+/-- `∂_θ g_φφ = 2r² sinθ cosθ`. -/
+theorem pd_schwarzschild_phiphi_theta (M : ℝ) (x : Fin 4 → ℝ) :
+    pd 2 (fun y => Schwarzschild.schwarzschildMetric M y 3 3) x
+      = 2 * (x 1) ^ 2 * Real.sin (x 2) * Real.cos (x 2) := by
+  have hfun : (fun s : ℝ => Schwarzschild.schwarzschildMetric M (Function.update x 2 s) 3 3)
+      = fun s : ℝ => (x 1) ^ 2 * Real.sin s ^ 2 := by
+    funext s
+    simp [Schwarzschild.schwarzschildMetric]
+  have h := (Schwarzschild.hasDerivAt_sinSq (x 2)).const_mul ((x 1) ^ 2)
+  rw [pd, hfun, h.deriv]
+  ring
+
+/-- The `θ` derivatives of the metric components: only `g_φφ` contributes. -/
+@[simp] theorem pd_schwarzschild_theta (M : ℝ) (x : Fin 4 → ℝ) (a b : Fin 4) :
+    pd 2 (fun y => Schwarzschild.schwarzschildMetric M y a b) x
+      = if a = 3 ∧ b = 3 then 2 * (x 1) ^ 2 * Real.sin (x 2) * Real.cos (x 2)
+        else 0 := by
+  fin_cases a <;> fin_cases b <;>
+    first
+    | exact pd_schwarzschild_phiphi_theta M x
+    | simp [pd, Schwarzschild.schwarzschildMetric]
+
+/-- The `r` derivatives of the metric components. -/
+theorem pd_schwarzschild_r (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (a b : Fin 4) :
+    pd 1 (fun y => Schwarzschild.schwarzschildMetric M y a b) x
+      = if a = 0 ∧ b = 0 then -(2 * M / (x 1) ^ 2)
+        else if a = 1 ∧ b = 1 then
+          -(2 * M / (x 1) ^ 2) * (Schwarzschild.schwarzschildF M (x 1))⁻¹ ^ 2
+        else if a = 2 ∧ b = 2 then 2 * (x 1)
+        else if a = 3 ∧ b = 3 then 2 * (x 1) * Real.sin (x 2) ^ 2
+        else 0 := by
+  fin_cases a <;> fin_cases b <;>
+    first
+    | exact pd_schwarzschild_tt M x hr
+    | exact pd_schwarzschild_rr M x hr hf
+    | exact pd_schwarzschild_thetatheta M x
+    | exact pd_schwarzschild_phiphi_r M x
+    | simp [pd, Schwarzschild.schwarzschildMetric]
+
+/-- **The metric's Christoffel symbols are the closed-form table.**  Evaluating
+`christoffel` on `schwarzschildG` and `schwarzschildGinv` gives `schG`, so the
+table is the pipeline's own output; with `riemann_components_pipeline` the six
+Schwarzschild components are then a statement about the metric itself. -/
+theorem christoffel_eq_schG (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    ∀ k i j, christoffel (schwarzschildG M) (schwarzschildGinv M) x k i j
+      = schG M x k i j := by
+  intro k i j
+  fin_cases k <;> fin_cases i <;> fin_cases j <;>
+    simp [christoffel, schG, schwarzschildG, schwarzschildGinv,
+      pd_schwarzschild_r M x hr hf]
+  all_goals field_simp
 
 end Pipeline
 
