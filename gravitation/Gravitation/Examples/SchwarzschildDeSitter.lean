@@ -491,6 +491,32 @@ theorem sdsEinstein_diag (M Λ r : ℝ) :
   have h3 : sdsEinstein M Λ r 3 3 = -Λ := by rw [sdsEinstein_eq]; simp [eta4]
   exact ⟨h0, h1, h2, h3⟩
 
+
+/-! ## The vacuum limit: Schwarzschild has no Ricci curvature
+
+`Λ = 0` is Schwarzschild, and the same theorems say it is Ricciflat: this is
+the `Λ = 0` case of `sdsRic_eq`, not a separate computation.
+-/
+
+/-- **At `Λ = 0` the frame Ricci tensor vanishes**: Schwarzschild is a vacuum
+solution of the Einstein equations. -/
+theorem schwarzschild_ricci_zero (M r : ℝ) (σ ν : Fin 4) :
+    sdsRic M 0 r σ ν = 0 := by
+  rw [sdsRic_eq]
+  ring
+
+/-- At `Λ = 0` the frame scalar curvature vanishes. -/
+theorem schwarzschild_scalar_zero (M r : ℝ) : sdsScalar M 0 r = 0 := by
+  rw [sdsScalar_eq]
+  ring
+
+/-- **At `Λ = 0` the frame Einstein tensor vanishes**, `G = 0`: Schwarzschild
+solves the vacuum equations with no cosmological term. -/
+theorem schwarzschild_einstein_zero (M r : ℝ) (i j : Fin 4) :
+    sdsEinstein M 0 r i j = 0 := by
+  rw [sdsEinstein_eq]
+  ring
+
 end kretschmann
 
 end SchwarzschildDeSitter

@@ -8,7 +8,7 @@
 
 ## Abstract
 
-General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 261 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat in the orthonormal frame, the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ by differentiating the Christoffel symbols, rather than assumed. For Schwarzschild–de Sitter the same derivation is carried out for general $\Lambda$, giving
+General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 264 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat in the orthonormal frame, the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ by differentiating the Christoffel symbols, rather than assumed. For Schwarzschild–de Sitter the same derivation is carried out for general $\Lambda$, giving
 $R^t{}_{rtr}=(2M/r^3+\Lambda/3)/f$, $R^t{}_{\theta t\theta}=R^r{}_{\theta r\theta}=\Lambda r^2/3-M/r$ and $R^\theta{}_{\varphi\theta\varphi}=(2M/r+\Lambda r^2/3)\sin^2\theta$, together with a proof that the frame electric part of the Weyl tensor is $\mathrm{diag}(0,-2M/r^3,M/r^3,M/r^3)$ for **every** $\Lambda$: a cosmological constant enters the Riemann tensor only through the trace that the Weyl tensor removes. Alongside these, the development formalises the initial-value constraints, geodesic local existence, and structural theorems for MOND, MOG, TeVeS, Brans–Dicke, $f(R)$, Starobinsky, Galileon, chameleon screening and Ostrogradsky theories. As an independent check, a double-precision Vulkan compute pass evaluates the same tensors from the same metrics and reproduces every closed form proved in Lean to better than $10^{-6}$ — including the $\Lambda$-independent Weyl part of de Sitter to $1.4\times 10^{-8}$.
 
 **Keywords:** general relativity · Lean 4 · Mathlib · formal verification · exact solutions · cosmological constant · alternative theories of gravity · GPU validation
@@ -56,7 +56,7 @@ The development is Lean 4 against Mathlib `v4.36.0`.
 $$g \mapsto \partial g \mapsto \Gamma^k{}_{ij} \mapsto \partial\Gamma \mapsto R^\rho{}_{\sigma\mu\nu} \mapsto \mathrm{Ric}_{\sigma\nu} \mapsto S \mapsto G_{ij}$$
 for an arbitrary component field $g$ and its inverse, with $\partial_\mu$ the coordinate partial derivative: differentiate a component along the line through $x$ with the other coordinates fixed. A component is then the value of a formula rather than the conclusion of a bespoke proof, and what remains per metric is the evaluation of one-variable derivatives. The module proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$ — Minkowski as a *computed* vacuum solution — and that Schwarzschild's $\Gamma^t{}_{tr}$ evaluates to the $M/(r^2f)$ that §4.4 derives by hand.
 
-**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 261 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
+**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 264 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
 
 **Silence as a test.** `lake build` emits no message at all — no errors and no warnings. Tactic and unused-variable warnings were removed by rewriting proofs, not by disabling linters, and `scripts/check_messages.sh` fails CI if a message reappears.
 
@@ -118,7 +118,7 @@ $$K = \frac{48M^2}{r^6} + \frac{8\Lambda^2}{3}$$
 
 Contracting instead of squaring gives the other half of the same split. The Weyl part is trace free, so it contributes nothing to the Ricci tensor (`weylRic_zero`); the trace part contracts to $(4-1)\Lambda/3=\Lambda$ times the frame metric (`traceRic_eq`). Hence
 $$R_{\mu\nu} = \Lambda\,\eta_{\mu\nu},\qquad S = 4\Lambda,\qquad G_{\mu\nu} = -\Lambda\,\eta_{\mu\nu}$$
-(`sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`): Schwarzschild–de Sitter is an Einstein space, and the $\Lambda$ that cancelled from the electric Weyl eigenvalues is exactly the Ricci curvature, so $G+\Lambda\eta=0$ with no matter.
+(`sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`): Schwarzschild–de Sitter is an Einstein space, and the $\Lambda$ that cancelled from the electric Weyl eigenvalues is exactly the Ricci curvature, so $G+\Lambda\eta=0$ with no matter. At $\Lambda=0$ the same three theorems give Schwarzschild's vacuum directly: `schwarzschild_ricci_zero`, `schwarzschild_scalar_zero` and `schwarzschild_einstein_zero`, so the vacuum solution is the $\Lambda\to0$ case of the Einstein-space statement rather than a second computation.
 
 The structural result is what happens in the frame. Since
 $$C_{titj} = R_{titj} + \frac{\Lambda}{3}\,g_{ij},$$
@@ -171,7 +171,7 @@ Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 lattice points, 
 | $R^r{}_{\theta r\theta}$ vs $\Lambda r^2/3-M/r$ | $7.972\times10^{-9}$ | $1.481\times10^{-8}$ |
 | $R^\theta{}_{\varphi\theta\varphi}$ vs $(2M/r+\Lambda r^2/3)\sin^2\theta$ | $5.543\times10^{-9}$ | $5.543\times10^{-9}$ |
 
-The de Sitter case is the control: it has genuinely nonzero Ricci curvature, recovered at the same noise level as the vacuum case, so the vacuum test is not vacuous — and `sdsRic_eq` says the measured entries are exactly $\Lambda\eta_{\mu\nu}$. It also confirms the lifted Kretschmann scalar of Figure 2, $48M^2/r^6+\tfrac83\Lambda^2$ — now the theorem `kretschmann_sds` — to $1.9\times10^{-7}$ relative. In that case the emitted frame Riemann part is $R_{titj} = C_{titj} - (\Lambda/3)\delta_{ij}$, so the Weyl statement is checked by adding $\Lambda/3$ back, which reproduces $\mathrm{diag}(0,-2k,k,k)$ to $1.4\times10^{-8}$.
+The de Sitter case is the control: it has genuinely nonzero Ricci curvature, recovered at the same noise level as the vacuum case, so the vacuum test is not vacuous — and `sdsRic_eq` says the measured entries are exactly $\Lambda\eta_{\mu\nu}$. The host now forms the frame components $R_{ab}/\sqrt{|g_{aa}g_{bb}|}$ and checks them against $\Lambda\,\mathrm{diag}(-1,1,1,1)$, which lands at $2.0\times10^{-8}$ for both cases and is, at $\Lambda=0$, the vanishing of `schwarzschild_ricci_zero`. It also confirms the lifted Kretschmann scalar of Figure 2, $48M^2/r^6+\tfrac83\Lambda^2$ — now the theorem `kretschmann_sds` — to $1.9\times10^{-7}$ relative. In that case the emitted frame Riemann part is $R_{titj} = C_{titj} - (\Lambda/3)\delta_{ij}$, so the Weyl statement is checked by adding $\Lambda/3$ back, which reproduces $\mathrm{diag}(0,-2k,k,k)$ to $1.4\times10^{-8}$.
 
 This is a regression test for the shader and for the closed forms, not evidence for the theorems. Finite differences say nothing about an analytic solution; the Lean statement is exact, while the numerical agreement is second-order accurate at $h^2\approx10^{-8}$ with roundoff $\varepsilon/h^2\approx10^{-8}$. The measured de Sitter $R^t{}_{rtr}$ deviation of $5.9\times10^{-7}$ is the largest, and is consistent with the larger curvature scale there ($\Lambda/3$).
 
@@ -208,7 +208,7 @@ The solution theory of general relativity is formalisable, at least for the stat
 | Module | Declarations |
 | --- | --- |
 | `Examples/Schwarzschild.lean` | 45 |
-| `Examples/SchwarzschildDeSitter.lean` | 42 |
+| `Examples/SchwarzschildDeSitter.lean` | 45 |
 | `ScalarTensor.lean` | 26 |
 | `Pipeline.lean` | 24 |
 | `Screening.lean` | 24 |
@@ -221,9 +221,9 @@ The solution theory of general relativity is formalisable, at least for the stat
 | `Conservation.lean` | 7 |
 | `Ostrogradsky.lean` | 7 |
 | `Examples/Minkowski.lean` | 5 |
-| **Total** | **261** |
+| **Total** | **264** |
 
-All 261 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
+All 264 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
 
 ## References
 

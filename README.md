@@ -299,7 +299,9 @@ so is the lifted Kretschmann scalar `48M²/r⁶ + 8Λ²/3` (`1.9e-7` relative), 
 
 The frame Ricci tensor is that same trace part: `Ric = Λη`, `S = 4Λ` and
 `G = −Λη` (`sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`), so the de Sitter Ricci
-signal this pass measures has an exact value.
+signal this pass measures has an exact value. The host forms the frame
+components `Ric_ab/√|g_aa g_bb|` and checks them against `Λ diag(−1,1,1,1)`,
+reaching `2.0e-8`; at `Λ = 0` that is `schwarzschild_ricci_zero`.
 
 This is a numerical sanity check on the same objects the Lean side defines; it is
 not a proof, and finite differences say nothing about the analytic solution.

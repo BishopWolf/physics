@@ -74,3 +74,11 @@ CI runs the whole check on lavapipe, so it needs no GPU runner. It installs
 `vulkan-tools` and prints `vulkaninfo --summary` rather than pinning
 `VK_ICD_FILENAMES`: a wrong path makes the loader enumerate zero devices instead
 of falling back to its default scan.
+
+## Frame Ricci against `Λη`
+
+The host forms the orthonormal-frame components `Ric_ab / sqrt(|g_aa g_bb|)` and
+checks them against `Λ diag(−1,1,1,1)`, the frame statement proved as
+`sdsRic_eq`; at `Λ = 0` this is the vanishing of the Schwarzschild frame Ricci
+tensor (`schwarzschild_ricci_zero`).  Reported as
+`frame Ricci |Ric - Lambda eta|` for every case.

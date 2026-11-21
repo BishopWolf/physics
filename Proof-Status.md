@@ -114,6 +114,9 @@ of date.
 | `Gravitation.SchwarzschildDeSitter.sdsRic_diag` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.sdsRic_offdiag` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.sdsEinstein_diag` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.schwarzschild_ricci_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.schwarzschild_scalar_zero` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.SchwarzschildDeSitter.schwarzschild_einstein_zero` | `SchwarzschildDeSitter.lean` | propext, | proved |
 | `Gravitation.electricPart` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.electricPart_symm` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.electricPart_trace` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |

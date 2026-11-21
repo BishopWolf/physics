@@ -1,6 +1,7 @@
 // gr_vulkan.c — minimal Vulkan compute host for general-relativity tensor
 // contractions.  Dispatches shaders/tensor.comp over a lattice of spacetime
-// points and reports the maximum |Ricci|, |R| and |G| it finds.
+// points, reports the maximum |Ricci|, |R| and |G| it finds, and checks the
+// frame Ricci tensor against Lambda * eta (which vanishes for Schwarzschild).
 //
 // Build:  make
 // Run:    ./gr_vulkan shaders/tensor.comp.spv
@@ -337,7 +338,7 @@ int main(int argc, char **argv)
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
         double maxKrel = 0.0, maxEdev = 0.0, maxRtr = 0.0;
         double maxRtt = 0.0, maxRrr = 0.0, maxRtp = 0.0;
-        double maxKsds = 0.0;
+        double maxKsds = 0.0, maxRicFrame = 0.0;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
@@ -355,6 +356,24 @@ int main(int argc, char **argv)
                 double expect = (cases[c].id == 2) ? (double)cases[c].Lambda * g_i : 0.0;
                 double dev = fabs(ric_i - expect);
                 if (dev > maxDev) maxDev = dev;
+            }
+            // The frame statement proved in Lean: Ric = Lambda eta in the
+            // orthonormal frame.  The metric is diagonal, so the frame
+            // component is Ric_ab / sqrt(|g_aa g_bb|), which must be
+            // Lambda * diag(-1, 1, 1, 1).  At Lambda = 0 this is the vanishing
+            // of the Schwarzschild frame Ricci tensor.
+            {
+                double eta[16] = {0};
+                double L       = (double)cases[c].Lambda;
+                eta[0] = -1.0; eta[5] = 1.0; eta[10] = 1.0; eta[15] = 1.0;
+                for (int a = 0; a < 4; ++a)
+                for (int b = 0; b < 4; ++b) {
+                    double sa   = sqrt(fabs(g[5 * a]));
+                    double sb   = sqrt(fabs(g[5 * b]));
+                    double ricf = ric[4 * a + b] / (sa * sb);
+                    double dev  = fabs(ricf - L * eta[4 * a + b]);
+                    if (dev > maxRicFrame) maxRicFrame = dev;
+                }
             }
             if (fabs(R) > maxR) maxR = fabs(R);
 
@@ -437,6 +456,10 @@ int main(int argc, char **argv)
             verdict = "FAIL";
             failures++;
         }
+        if (maxRicFrame > eTol) {
+            verdict = "FAIL";
+            failures++;
+        }
 
         printf("case %d  %-26s\n", cases[c].id, cases[c].name);
         printf("        max|Ric| = %.3e   max|R| = %.3e   max|G| = %.3e\n",
@@ -447,6 +470,8 @@ int main(int argc, char **argv)
         else
             printf("        max|Ric| = %.3e  (tol %.0e)  [%s]\n", maxDev,
                    cases[c].tol, verdict);
+        printf("        frame Ricci |Ric - Lambda eta| = %.3e  (tol %.0e)  [%s]\n",
+               maxRicFrame, eTol, maxRicFrame <= eTol ? "ok" : "FAIL");
         if (cases[c].id >= 1) {
             if (cases[c].id == 1)
                 printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
