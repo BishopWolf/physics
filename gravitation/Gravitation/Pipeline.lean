@@ -967,6 +967,179 @@ theorem riemann_components_christoffel_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr 
   simp only [riemannFromData_christoffel_eq_sds M Λ x hr hf hsin]
   exact riemann_components_pipeline_sds M Λ x hr hf hsin
 
+/-! ### The de Sitter derivative table is the derivative of its table
+
+The twelve slots of the Schwarzschild proof, with `f' = 2n` in place of
+`f' = 2M/r²` and the quotient rule `∂_r(n/f) = (n'f − 2n²)/f²` for the `rt`
+entry.
+-/
+
+/-- `∂_r(n/f) = (n'f − 2n²)/f²` with `n' = −2M/r³ − Λ/3`. -/
+theorem pd_sdsG_rt (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) :
+    pd 1 (fun y => sdsG M Λ y 0 0 1) x = sdsDG M Λ 1 x 0 0 1 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 1 s) 0 0 1)
+      = fun s : ℝ => SchwarzschildDeSitter.sdsHalf M Λ s
+          / SchwarzschildDeSitter.sdsF M Λ s := by
+    funext s
+    simp [sdsG]
+  have hd : deriv (fun s : ℝ => SchwarzschildDeSitter.sdsHalf M Λ s
+        / SchwarzschildDeSitter.sdsF M Λ s) (x 1)
+      = (-2 * M / (x 1) ^ 3 - Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1)
+        - SchwarzschildDeSitter.sdsHalf M Λ (x 1)
+            * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))
+            / (SchwarzschildDeSitter.sdsF M Λ (x 1)) ^ 2 := by
+    have h := (SchwarzschildDeSitter.hasDerivAt_sdsHalf M Λ (x 1) hr).div
+      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr) hf
+    have hfun2 : (fun s : ℝ => SchwarzschildDeSitter.sdsHalf M Λ s
+          / SchwarzschildDeSitter.sdsF M Λ s)
+        = (fun s : ℝ => SchwarzschildDeSitter.sdsHalf M Λ s)
+          / fun s : ℝ => SchwarzschildDeSitter.sdsF M Λ s := rfl
+    rw [hfun2, h.deriv]
+    field_simp [hf]
+  rw [pd, hfun, hd, sdsDG]
+  simp
+
+/-- `∂_r Γ^r_{θθ} = −f − 2rn`, the product rule with `f' = 2n`. -/
+theorem pd_sdsG_r_thetatheta (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => sdsG M Λ y 1 2 2) x = sdsDG M Λ 1 x 1 2 2 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 1 s) 1 2 2)
+      = fun s : ℝ => -(s * SchwarzschildDeSitter.sdsF M Λ s) := by
+    funext s
+    simp [sdsG]
+  have hd : HasDerivAt (fun s : ℝ => -(s * SchwarzschildDeSitter.sdsF M Λ s))
+      (-(1 * SchwarzschildDeSitter.sdsF M Λ (x 1)
+        + (x 1) * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)))) (x 1) :=
+    ((hasDerivAt_id (x 1)).mul
+      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr)).neg
+  have hderiv : deriv (fun s : ℝ => -(s * SchwarzschildDeSitter.sdsF M Λ s)) (x 1)
+      = -(1 * SchwarzschildDeSitter.sdsF M Λ (x 1)
+        + (x 1) * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))) := hd.deriv
+  have hval : sdsDG M Λ 1 x 1 2 2
+      = -(SchwarzschildDeSitter.sdsF M Λ (x 1))
+        - x 1 * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)) := by
+    simp [sdsDG]
+  rw [pd, hfun, hderiv, hval]
+  ring
+
+/-- `∂_r Γ^r_{φφ} = (−f − 2rn) sin²θ`. -/
+theorem pd_sdsG_r_phiphi (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => sdsG M Λ y 1 3 3) x = sdsDG M Λ 1 x 1 3 3 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 1 s) 1 3 3)
+      = fun s : ℝ =>
+        -(s * (Real.sin (x 2) ^ 2 * SchwarzschildDeSitter.sdsF M Λ s)) := by
+    funext s
+    simp [sdsG]
+    ring
+  have hd : HasDerivAt
+      (fun s : ℝ => -(s * (Real.sin (x 2) ^ 2 * SchwarzschildDeSitter.sdsF M Λ s)))
+      (-(1 * (Real.sin (x 2) ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 1))
+        + (x 1) * (Real.sin (x 2) ^ 2
+          * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1))))) (x 1) :=
+    ((hasDerivAt_id (x 1)).mul
+      ((SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 1) hr).const_mul
+        (Real.sin (x 2) ^ 2))).neg
+  have hderiv : deriv
+      (fun s : ℝ => -(s * (Real.sin (x 2) ^ 2 * SchwarzschildDeSitter.sdsF M Λ s)))
+      (x 1)
+      = -(1 * (Real.sin (x 2) ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 1))
+        + (x 1) * (Real.sin (x 2) ^ 2
+          * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)))) := hd.deriv
+  have hval : sdsDG M Λ 1 x 1 3 3
+      = (-(SchwarzschildDeSitter.sdsF M Λ (x 1))
+        - x 1 * (2 * SchwarzschildDeSitter.sdsHalf M Λ (x 1)))
+        * Real.sin (x 2) ^ 2 := by
+    simp [sdsDG]
+  rw [pd, hfun, hderiv, hval]
+  ring
+
+/-- `∂_θ Γ^θ_{φφ} = sin²θ − cos²θ`, unchanged from Schwarzschild. -/
+theorem pd_sdsG_theta_phiphi (M Λ : ℝ) (x : Fin 4 → ℝ) :
+    pd 2 (fun y => sdsG M Λ y 2 3 3) x = sdsDG M Λ 2 x 2 3 3 := by
+  have hfun : (fun s : ℝ => sdsG M Λ (Function.update x 2 s) 2 3 3)
+      = fun s : ℝ => -(Real.sin s * Real.cos s) := by
+    funext s
+    simp [sdsG]
+  have hd : HasDerivAt (fun s : ℝ => -(Real.sin s * Real.cos s))
+      (Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2) (x 2) := by
+    have h := ((Real.hasDerivAt_sin (x 2)).mul (Real.hasDerivAt_cos (x 2))).neg
+    convert h using 1
+    ring
+  have hderiv : deriv (fun s : ℝ => -(Real.sin s * Real.cos s)) (x 2)
+      = Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2 := hd.deriv
+  rw [pd, hfun, hderiv, sdsDG]
+  simp
+
+/-- **The de Sitter derivative table is the derivative of the closed-form table**
+at every slot the six components read, for general `Λ`. -/
+theorem pd_sdsG_eq_sdsDG (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) :
+    (pd 0 (fun y => sdsG M Λ y 0 1 1) x = sdsDG M Λ 0 x 0 1 1)
+      ∧ (pd 1 (fun y => sdsG M Λ y 0 0 1) x = sdsDG M Λ 1 x 0 0 1)
+      ∧ (pd 0 (fun y => sdsG M Λ y 0 2 2) x = sdsDG M Λ 0 x 0 2 2)
+      ∧ (pd 2 (fun y => sdsG M Λ y 0 0 2) x = sdsDG M Λ 2 x 0 0 2)
+      ∧ (pd 0 (fun y => sdsG M Λ y 0 3 3) x = sdsDG M Λ 0 x 0 3 3)
+      ∧ (pd 3 (fun y => sdsG M Λ y 0 0 3) x = sdsDG M Λ 3 x 0 0 3)
+      ∧ (pd 1 (fun y => sdsG M Λ y 1 2 2) x = sdsDG M Λ 1 x 1 2 2)
+      ∧ (pd 2 (fun y => sdsG M Λ y 1 1 2) x = sdsDG M Λ 2 x 1 1 2)
+      ∧ (pd 1 (fun y => sdsG M Λ y 1 3 3) x = sdsDG M Λ 1 x 1 3 3)
+      ∧ (pd 3 (fun y => sdsG M Λ y 1 1 3) x = sdsDG M Λ 3 x 1 1 3)
+      ∧ (pd 2 (fun y => sdsG M Λ y 2 3 3) x = sdsDG M Λ 2 x 2 3 3)
+      ∧ (pd 3 (fun y => sdsG M Λ y 2 2 3) x = sdsDG M Λ 3 x 2 2 3) := by
+  refine ⟨by simp [pd, sdsG, sdsDG], pd_sdsG_rt M Λ x hr hf,
+    by simp [pd, sdsG, sdsDG], by simp [pd, sdsG, sdsDG], by simp [pd, sdsG, sdsDG],
+    by simp [pd, sdsG, sdsDG], pd_sdsG_r_thetatheta M Λ x hr, by simp [pd, sdsG, sdsDG],
+    pd_sdsG_r_phiphi M Λ x hr, by simp [pd, sdsG, sdsDG], pd_sdsG_theta_phiphi M Λ x,
+    by simp [pd, sdsG, sdsDG]⟩
+
+/-- **The de Sitter pipeline on its closed-form table, differentiated.**  With
+the actual partial derivatives of `sdsG` in place of `sdsDG` the six components
+are unchanged, so they follow from the Christoffel table alone, for every
+`Λ`. -/
+theorem riemann_components_deriv_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemannFromData (sdsG M Λ) (fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+          x 0 1 0 1
+        = (2 * M / (x 1) ^ 3 + Λ / 3) / SchwarzschildDeSitter.sdsF M Λ (x 1))
+      ∧ (riemannFromData (sdsG M Λ) (fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+            x 0 2 0 2 = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemannFromData (sdsG M Λ) (fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+            x 0 3 0 3 = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (sdsG M Λ) (fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+            x 1 2 1 2 = Λ * (x 1) ^ 2 / 3 - M / (x 1))
+      ∧ (riemannFromData (sdsG M Λ) (fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+            x 1 3 1 3 = (Λ * (x 1) ^ 2 / 3 - M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (sdsG M Λ) (fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+            x 2 3 2 3 = (2 * M / (x 1) + Λ * (x 1) ^ 2 / 3) * Real.sin (x 2) ^ 2) := by
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ :=
+    pd_sdsG_eq_sdsDG M Λ x hr hf
+  obtain ⟨p1, p2, p3, p4, p5, p6⟩ := riemann_components_pipeline_sds M Λ x hr hf hsin
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · refine (riemannFromData_congr (G := sdsG M Λ)
+        (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+        (dG' := sdsDG M Λ) x 0 1 0 1 h1 h2).trans ?_
+    exact p1
+  · refine (riemannFromData_congr (G := sdsG M Λ)
+        (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+        (dG' := sdsDG M Λ) x 0 2 0 2 h3 h4).trans ?_
+    exact p2
+  · refine (riemannFromData_congr (G := sdsG M Λ)
+        (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+        (dG' := sdsDG M Λ) x 0 3 0 3 h5 h6).trans ?_
+    exact p3
+  · refine (riemannFromData_congr (G := sdsG M Λ)
+        (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+        (dG' := sdsDG M Λ) x 1 2 1 2 h7 h8).trans ?_
+    exact p4
+  · refine (riemannFromData_congr (G := sdsG M Λ)
+        (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+        (dG' := sdsDG M Λ) x 1 3 1 3 h9 h10).trans ?_
+    exact p5
+  · refine (riemannFromData_congr (G := sdsG M Λ)
+        (dG := fun μ y a b c => pd μ (fun z => sdsG M Λ z a b c) y)
+        (dG' := sdsDG M Λ) x 2 3 2 3 h11 h12).trans ?_
+    exact p6
+
 end Pipeline
 
 end Gravitation
