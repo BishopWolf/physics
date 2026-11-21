@@ -573,6 +573,33 @@ theorem electric_phiphi_from_metric (M r th : ℝ) (hr : r ≠ 0)
   rw [h33]
   exact frame_phiphi M r th hr hf hsin
 
+/-- **The electric part of the Weyl tensor, from the metric.**  The three
+frame eigenvalues are `−2M/r³`, `M/r³`, `M/r³`, and every other entry of
+`electricPart (M/r³)` vanishes, so the whole frame electric part — not just one
+component at a time — is assembled from `g`. -/
+theorem electricPart_from_metric (M r th : ℝ) (hr : r ≠ 0)
+    (hf : schwarzschildF M r ≠ 0) (hsin : Real.sin th ≠ 0) :
+    (-(schwarzschildF M r) * (2 * M / (r ^ 3 * schwarzschildF M r))
+        = electricPart (M / r ^ 3) 1 1)
+      ∧ ((schwarzschildF M r)⁻¹ * (r ^ 2)⁻¹ * (-(schwarzschildF M r) * (-M / r))
+          = electricPart (M / r ^ 3) 2 2)
+      ∧ ((schwarzschildF M r)⁻¹ * (r ^ 2 * Real.sin th ^ 2)⁻¹
+            * (M * schwarzschildF M r / r * Real.sin th ^ 2)
+          = electricPart (M / r ^ 3) 3 3)
+      ∧ electricPart (M / r ^ 3) 0 0 = 0
+      ∧ electricPart (M / r ^ 3) 0 1 = 0
+      ∧ electricPart (M / r ^ 3) 0 2 = 0
+      ∧ electricPart (M / r ^ 3) 0 3 = 0
+      ∧ electricPart (M / r ^ 3) 1 2 = 0
+      ∧ electricPart (M / r ^ 3) 1 3 = 0
+      ∧ electricPart (M / r ^ 3) 2 3 = 0 :=
+  ⟨electric_r_from_metric M r hr hf,
+   electric_thetatheta_from_metric M r hr hf,
+   electric_phiphi_from_metric M r th hr hf hsin,
+   by simp [electricPart], by simp [electricPart], by simp [electricPart],
+   by simp [electricPart], by simp [electricPart], by simp [electricPart],
+   by simp [electricPart]⟩
+
 /-- **The Schwarzschild curvature from the metric.**  The two electric
 components and the four remaining independent ones, all read off `g`. -/
 theorem riemann_components_from_metric (M r th : ℝ) (hr : r ≠ 0)

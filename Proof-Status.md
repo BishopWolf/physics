@@ -117,6 +117,7 @@ of date.
 | `Gravitation.Schwarzschild.rt_phitphi_lowered` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.frame_phiphi` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.electric_phiphi_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Schwarzschild.electricPart_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Schwarzschild.riemann_components_from_metric` | `Schwarzschild.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.sdsF` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.SchwarzschildDeSitter.sdsHalf` | `SchwarzschildDeSitter.lean` | propext, Classical.choice, Quot.sound | proved |
