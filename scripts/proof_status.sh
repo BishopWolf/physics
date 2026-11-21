@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Maintains the proof-status table in README.md.
+# Maintains the proof-status table in Proof-Status.md.
 #
 # Every declaration under gravitation/Gravitation/ is listed with the axioms its
 # proof depends on, as reported by the audit.  A declaration is "proved" when the
@@ -8,7 +8,7 @@
 # declares an axiom of its own.
 #
 # Usage:
-#   scripts/proof_status.sh           rewrite the table in README.md
+#   scripts/proof_status.sh           rewrite the table in Proof-Status.md
 #   scripts/proof_status.sh --check   fail if the table is out of date (CI)
 set -uo pipefail
 
@@ -18,7 +18,7 @@ DECLS="$PROJ/.lake/decls.tsv"
 AXIOMS="$PROJ/.lake/axioms.tsv"
 ROWS="$PROJ/.lake/proof_rows.tsv"
 TABLE="$PROJ/.lake/proof_status.md"
-README="$ROOT/README.md"
+PAGE="$ROOT/Proof-Status.md"
 BEGIN='<!-- proof-status:begin -->'
 END='<!-- proof-status:end -->'
 
@@ -53,12 +53,12 @@ count=$(($(wc -l < "$TABLE") - 2))
 
 if [ "$mode" = "--check" ]; then
   current="$(awk -v b="$BEGIN" -v e="$END" \
-    '$0 == b {on=1; next} $0 == e {on=0} on' "$README")"
+    '$0 == b {on=1; next} $0 == e {on=0} on' "$PAGE")"
   if [ "$current" = "$(cat "$TABLE")" ]; then
-    echo "PASS: README proof-status table is current ($count declarations)."
+    echo "PASS: Proof-Status.md table is current ($count declarations)."
     exit 0
   fi
-  echo "FAIL: README proof-status table is out of date; run scripts/proof_status.sh"
+  echo "FAIL: Proof-Status.md table is out of date; run scripts/proof_status.sh"
   exit 1
 fi
 
@@ -66,5 +66,5 @@ awk -v b="$BEGIN" -v e="$END" -v tbl="$TABLE" '
   $0 == b { print; while ((getline l < tbl) > 0) print l; skip = 1; next }
   $0 == e { print; skip = 0; next }
   !skip { print }
-' "$README" > "$README.new" && mv "$README.new" "$README"
-echo "wrote the proof-status table into README.md ($count declarations)"
+' "$PAGE" > "$PAGE.new" && mv "$PAGE.new" "$PAGE"
+echo "wrote the proof-status table into Proof-Status.md ($count declarations)"
