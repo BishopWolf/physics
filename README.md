@@ -256,7 +256,9 @@ yields second-order equations), the Ostrogradsky instability of generic
 higher-derivative theories, and the full four-dimensional Galileon
 total-derivative identities. The one-dimensional statements above are the
 shadow of those, proved end to end. The QG mapping is in
-[docs/QUANTUM-GRAVITY-MAPPING.md](docs/QUANTUM-GRAVITY-MAPPING.md).
+[docs/QUANTUM-GRAVITY-MAPPING.md](docs/QUANTUM-GRAVITY-MAPPING.md), and a
+written account of the formalisation, its results and its limitations is in
+[docs/Gravitation-Formalisation.md](docs/Gravitation-Formalisation.md).
 
 ## Vulkan tensor pass
 
@@ -266,9 +268,10 @@ differentiates it by central differences, and computes
 `Γ^k_{ij}` → `∂Γ` → `R^ρ_{σμν}` → `Ric_{σν} = R^ρ_{σρν}` → `R = g^{μν}Ric_{μν}` →
 `G_{μν} = Ric_{μν} − ½ R g_{μν}`,
 
-writing 67 doubles per lattice point to an SSBO — the metric, Ricci, `R`, `G`,
-the Kretschmann scalar, the electric part in the orthonormal frame and
-`R^t_rtr`; the host checks the deviations against tolerances.
+writing 70 doubles per lattice point to an SSBO — the metric, Ricci, `R`, `G`,
+the Kretschmann scalar, the electric part in the orthonormal frame and the four
+Riemann components `R^t_rtr`, `R^t_θtθ`, `R^r_θrθ`, `R^θ_φθφ`; the host checks
+the deviations against tolerances.
 
 Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 points, double
 precision with `h = 1e-4`:
@@ -283,10 +286,14 @@ The Minkowski zeros are exact (a constant metric differentiates to zero). The
 Schwarzschild residual is central-difference noise, not curvature: `|Ric|` is
 four orders of magnitude below the curvature scale `M/r³ ≈ 0.04`. The de Sitter
 case is the control — it has genuinely nonzero Ricci curvature and is recovered
-to the same noise level, so the vacuum test is not vacuous. Two checks use the
-closed forms proved in Lean: the Kretschmann scalar against `48M²/r⁶` (`1.2e-7`
-relative), the electric part against `diag(0, −2k, k, k)` at `k = M/r³`
-(`2.6e-9` absolute) and `R^t_rtr` against `2M/(r³f)` (`7.8e-9`).
+to the same noise level, so the vacuum test is not vacuous. Six checks use the closed forms proved in Lean: the Kretschmann scalar against
+`48M²/r⁶` (`1.2e-7` relative), the Weyl electric part against `diag(0, −2k, k, k)`
+at `k = M/r³` (`2.6e-9` absolute), and the four Riemann components against their
+Schwarzschild–de Sitter values for general `Λ` — `R^t_rtr` against
+`(2M/r³ + Λ/3)/f` (`7.8e-9` at `Λ = 0`, `5.9e-7` at `Λ = 0.1`), `R^t_θtθ` and
+`R^r_θrθ` against `Λr²/3 − M/r` (`3.7e-10` and `1.5e-8`) and `R^θ_φθφ` against
+`(2M/r + Λr²/3)sin²θ` (`5.5e-9`). In the de Sitter case the Weyl electric part
+itself is checked — `E + Λ/3` against `diag(0, −2k, k, k)` — to `1.4e-8`.
 
 This is a numerical sanity check on the same objects the Lean side defines; it is
 not a proof, and finite differences say nothing about the analytic solution.

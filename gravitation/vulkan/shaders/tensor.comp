@@ -12,14 +12,17 @@
 // Everything is kept in `double`: the derivatives are difference quotients, so
 // single precision would put the noise floor of `K` at the percent level.
 //
-// Output layout, 66 doubles per point:
+// Output layout, 70 doubles per point:
 //   [ 0..15] g_ab     (row major, a*4+b)
 //   [16..31] Ric_ab
 //   [   32] R
 //   [33..48] G_ab
 //   [   49] Kretschmann K
 //   [50..65] E_ab     electric part of the Weyl tensor in the orthonormal frame
-//   [   66] R^t_rtr   the component proved to be 2M/(r^3 f)
+//   [   66] R^t_rtr          (2M/r^3 + Lambda/3)/f
+//   [   67] R^t_thetatheta   Lambda r^2/3 - M/r
+//   [   68] R^r_thetar       Lambda r^2/3 - M/r
+//   [   69] R^theta_phitheta (2M/r + Lambda r^2/3) sin^2 theta
 //
 // Index conventions: g[16*a+b] = g_ab, G[16*k+4*i+j] = Gamma^k_ij,
 // dG[64*mu+16*k+4*i+j] = d_mu Gamma^k_ij, Rup[64*rho+16*sigma+4*mu+nu] =
@@ -41,7 +44,7 @@ layout(std430, binding = 0) writeonly buffer Out {
     double data[];
 };
 
-const int STRIDE = 67;
+const int STRIDE = 70;
 
 void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
 {
@@ -320,4 +323,7 @@ void main()
     data[base + 49u] = K;
     for (int i = 0; i < 16; ++i) data[base + 50u + uint(i)] = E[i];
     data[base + 66u] = Rup[64 * 0 + 16 * 1 + 4 * 0 + 1];
+    data[base + 67u] = Rup[64 * 0 + 16 * 2 + 4 * 0 + 2];
+    data[base + 68u] = Rup[64 * 1 + 16 * 2 + 4 * 1 + 2];
+    data[base + 69u] = Rup[64 * 2 + 16 * 3 + 4 * 2 + 3];
 }

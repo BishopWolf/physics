@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     const int G[4]     = {3, 4, 3, 3};
     const uint32_t total = (uint32_t)G[0] * (uint32_t)G[1] * (uint32_t)G[2] *
                            (uint32_t)G[3];
-    const int    STRIDE  = 67;
+    const int    STRIDE  = 70;
     const size_t bufSize = (size_t)total * STRIDE * sizeof(double);
 
     VkApplicationInfo app = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
@@ -336,6 +336,7 @@ int main(int argc, char **argv)
 
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
         double maxKrel = 0.0, maxEdev = 0.0, maxRtr = 0.0;
+        double maxRtt = 0.0, maxRrr = 0.0, maxRtp = 0.0;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
@@ -356,37 +357,56 @@ int main(int argc, char **argv)
             }
             if (fabs(R) > maxR) maxR = fabs(R);
 
-            // Kretschmann check: Schwarzschild has K = 48 M^2 / r^6.
-            if (cases[c].id == 1) {
-                double K   = o[49];
-                int    i1  = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
-                double rr  = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
-                double k2  = (double)cases[c].M * (double)cases[c].M;
-                double kexp = 48.0 * k2 / (rr * rr * rr * rr * rr * rr);
-                double krel = fabs(K - kexp) / kexp;
-                if (krel > maxKrel) maxKrel = krel;
+            // Kretschmann and the Riemann components proved in Lean: the
+            // Schwarzschild-de Sitter forms with general Lambda, of which
+            // Schwarzschild is the Lambda = 0 special case.
+            if (cases[c].id >= 1) {
+                int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double M  = (double)cases[c].M;
+                double L  = (double)cases[c].Lambda;
+                double r2 = rr * rr;
+                double ff = 1.0 - 2.0 * M / rr - L * r2 / 3.0;
+                double s2 = g[15] / g[10];   // sin^2 theta = g_phiphi/g_thetatheta
+                double dev;
 
-                // Electric part in the orthonormal frame: the Weyl electric
-                // eigenvalues diag(0, -2k, k, k) that the Lean development
-                // proves for this metric.
-                const double *E = o + 50;
-                double kk = (double)cases[c].M / (rr * rr * rr);
-                double exp[16] = {0};
-                exp[5]  = -2.0 * kk;
-                exp[10] = kk;
-                exp[15] = kk;
-                for (int i = 0; i < 16; ++i) {
-                    double dev = fabs(E[i] - exp[i]);
-                    if (dev > maxEdev) maxEdev = dev;
+                if (cases[c].id == 1) {
+                    double K    = o[49];
+                    double kexp = 48.0 * M * M / (r2 * r2 * r2);
+                    double krel = fabs(K - kexp) / kexp;
+                    if (krel > maxKrel) maxKrel = krel;
                 }
 
-                // R^t_rtr against its closed form 2M/(r^3 f), the statement
-                // proved as riemann_t_rtr_from_metric in Lean.
-                double ff    = 1.0 - 2.0 * (double)cases[c].M / rr;
-                double rtrExp = 2.0 * (double)cases[c].M /
-                                (rr * rr * rr * ff);
-                double rtrDev = fabs(o[66] - rtrExp);
-                if (rtrDev > maxRtr) maxRtr = rtrDev;
+                // R^t_rtr = (2M/r^3 + Lambda/3)/f  (riemann_t_rtr_sds)
+                dev = fabs(o[66] - (2.0 * M / (r2 * rr) + L / 3.0) / ff);
+                if (dev > maxRtr) maxRtr = dev;
+
+                // R^t_thetatheta = R^r_thetar = Lambda r^2/3 - M/r
+                dev = fabs(o[67] - (L * r2 / 3.0 - M / rr));
+                if (dev > maxRtt) maxRtt = dev;
+                dev = fabs(o[68] - (L * r2 / 3.0 - M / rr));
+                if (dev > maxRrr) maxRrr = dev;
+
+                // R^theta_phitheta = (2M/r + Lambda r^2/3) sin^2 theta
+                dev = fabs(o[69] - (2.0 * M / rr + L * r2 / 3.0) * s2);
+                if (dev > maxRtp) maxRtp = dev;
+
+                // Weyl electric part.  In the frame Lambda enters the Riemann
+                // tensor as R_{titj} = C_{titj} - (Lambda/3) delta_ij, so adding
+                // Lambda/3 back leaves the Schwarzschild eigenvalues
+                // diag(0, -2k, k, k) with k = M/r^3.
+                const double *E = o + 50;
+                double kk = M / (r2 * rr);
+                double wexp[16] = {0};
+                wexp[5]  = -2.0 * kk;
+                wexp[10] = kk;
+                wexp[15] = kk;
+                for (int i = 0; i < 16; ++i) {
+                    double e = E[i];
+                    if (i == 5 || i == 10 || i == 15) e += L / 3.0;
+                    dev = fabs(e - wexp[i]);
+                    if (dev > maxEdev) maxEdev = dev;
+                }
             }
         }
         vkUnmapMemory(gDev, gMem);
@@ -397,11 +417,9 @@ int main(int argc, char **argv)
             verdict = "FAIL";
             failures++;
         }
-        if (cases[c].id == 1 && maxEdev > eTol) {
-            verdict = "FAIL";
-            failures++;
-        }
-        if (cases[c].id == 1 && maxRtr > eTol) {
+        if (cases[c].id >= 1 &&
+            (maxEdev > eTol || maxRtr > eTol || maxRtt > eTol ||
+             maxRrr > eTol || maxRtp > eTol)) {
             verdict = "FAIL";
             failures++;
         }
@@ -415,13 +433,20 @@ int main(int argc, char **argv)
         else
             printf("        max|Ric| = %.3e  (tol %.0e)  [%s]\n", maxDev,
                    cases[c].tol, verdict);
-        if (cases[c].id == 1) {
-            printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
-                   maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");
-            printf("        electric part |E - diag(0,-2k,k,k)| = %.3e  (tol %.0e)  [%s]\n",
+        if (cases[c].id >= 1) {
+            if (cases[c].id == 1)
+                printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
+                       maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");
+            printf("        Weyl electric part |E + L/3 - diag(0,-2k,k,k)| = %.3e  (tol %.0e)  [%s]\n",
                    maxEdev, eTol, maxEdev <= eTol ? "ok" : "FAIL");
-            printf("        R^t_rtr  |R - 2M/(r^3 f)| = %.3e  (tol %.0e)  [%s]\n",
+            printf("        R^t_rtr          |R - (2M/r^3 + L/3)/f| = %.3e  (tol %.0e)  [%s]\n",
                    maxRtr, eTol, maxRtr <= eTol ? "ok" : "FAIL");
+            printf("        R^t_thetatheta   |R - (L r^2/3 - M/r)| = %.3e  (tol %.0e)  [%s]\n",
+                   maxRtt, eTol, maxRtt <= eTol ? "ok" : "FAIL");
+            printf("        R^r_thetar       |R - (L r^2/3 - M/r)| = %.3e  (tol %.0e)  [%s]\n",
+                   maxRrr, eTol, maxRrr <= eTol ? "ok" : "FAIL");
+            printf("        R^theta_phitheta |R - (2M/r + L r^2/3) sin^2| = %.3e  (tol %.0e)  [%s]\n",
+                   maxRtp, eTol, maxRtp <= eTol ? "ok" : "FAIL");
         }
         printf("\n");
     }

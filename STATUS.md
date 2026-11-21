@@ -106,11 +106,14 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   warnings were removed by rewriting the proofs, not by disabling linters, and
   Lake's module-system advisory is opted out with `allowNonModules = true`.
   `scripts/check_messages.sh` fails if a message reappears; CI runs it.
-* GPU check — the Vulkan tensor pass runs in double precision and, for the
-  Schwarzschild metric, reproduces the proved `48M²/r⁶` to `1.2e-7`, the
-  electric part `diag(0, −2k, k, k)` to `2.6e-9` and `R^t_rtr` to `2M/(r³f)`
-  to `7.8e-9`. CI runs it on the lavapipe
-  software driver, so no GPU runner is needed.
+* GPU check — the Vulkan tensor pass runs in double precision and reproduces
+  the proved `48M²/r⁶` to `1.2e-7` and the electric part `diag(0, −2k, k, k)`
+  to `2.6e-9`; for Schwarzschild and Schwarzschild–de Sitter with `Λ = 0.1` it
+  also matches the four closed-form Riemann components derived in Lean —
+  `R^t_rtr` to `7.8e-9` and `5.9e-7`, `R^t_θtθ` to `3.7e-10`, `R^r_θrθ` to
+  `1.5e-8`, `R^θ_φθφ` to `5.5e-9` — and the `Λ`-independent Weyl part to
+  `1.4e-8`. CI runs it on the lavapipe software driver, so no GPU runner is
+  needed.
 * `gravitation/Gravitation/Examples/Schwarzschild.lean` — the Schwarzschild
   curvature in an orthonormal frame: proved Ricci flat for every mass
   parameter, with the Kretschmann sum `48 M²/r⁶`. The electric part is derived
@@ -122,6 +125,17 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   `R^t{}_{θtθ} = −M/r`, `R^t{}_{φtφ} = −(M/r)sin²θ`, `R^r{}_{θrθ} = −M/r`,
   `R^r{}_{φrφ} = −(M/r)sin²θ` and `R^θ{}_{φθφ} = (2M/r)sin²θ` — and scaled to
   the electric eigenvalues `−2k, k, k`.
+* `gravitation/Gravitation/Examples/SchwarzschildDeSitter.lean` — the same
+  curvature with a cosmological constant, for general `Λ`: with
+  `f = 1 − 2M/r − Λr²/3` and `n = f'/2 = M/r² − Λr/3`, the components are
+  `R^t{}_{rtr} = (2M/r³ + Λ/3)/f`, `R^t{}_{θtθ} = R^r{}_{θrθ} = Λr²/3 − M/r`,
+  `R^t{}_{φtφ} = R^r{}_{φrφ} = (Λr²/3 − M/r)sin²θ` and
+  `R^θ{}_{φθφ} = (2M/r + Λr²/3)sin²θ`. The frame Weyl electric part is proved
+  to be `diag(0, −2M/r³, M/r³, M/r³)` for every `Λ`: since
+  `C_{titj} = R_{titj} + (Λ/3)g_ij`, the cosmological constant enters the
+  Riemann tensor only through the trace the Weyl tensor removes, so de Sitter
+  changes Ricci and leaves the free gravitational field alone. At `Λ = 0` the
+  lapse reduces to `schwarzschildF`.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.
