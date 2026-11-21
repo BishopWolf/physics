@@ -24,8 +24,21 @@ END='<!-- proof-status:end -->'
 
 mode="${1:-write}"
 
+# Never trust audit data left over from an earlier build.  The CI cache restores
+# gravitation/.lake (keyed on the toolchain and manifest, not on the commit), and
+# a local tree can hold TSVs from before the last edit; either way the table
+# would look current while the sources have moved on.  Refresh the data when it
+# is missing or older than the newest source file, so a `--check` in CI and a
+# `--check` on a developer machine compare the page against the same extraction.
+stale=0
 if [ ! -s "$DECLS" ] || [ ! -s "$AXIOMS" ]; then
-  echo "== no declaration data yet, running the audit =="
+  stale=1
+elif [ -n "$(find "$PROJ/Gravitation" -name '*.lean' -newer "$DECLS" -print -quit)" ]; then
+  stale=1
+fi
+
+if [ "$stale" = 1 ]; then
+  echo "== refreshing declaration and axiom data =="
   bash "$ROOT/scripts/audit_axioms.sh" >/dev/null || {
     echo "FAIL: audit failed, cannot build the proof-status table"
     exit 1
