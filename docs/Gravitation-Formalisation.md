@@ -8,7 +8,7 @@
 
 ## Abstract
 
-General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 218 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat in the orthonormal frame, the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ by differentiating the Christoffel symbols, rather than assumed. For Schwarzschild–de Sitter the same derivation is carried out for general $\Lambda$, giving
+General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 242 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat in the orthonormal frame, the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ by differentiating the Christoffel symbols, rather than assumed. For Schwarzschild–de Sitter the same derivation is carried out for general $\Lambda$, giving
 $R^t{}_{rtr}=(2M/r^3+\Lambda/3)/f$, $R^t{}_{\theta t\theta}=R^r{}_{\theta r\theta}=\Lambda r^2/3-M/r$ and $R^\theta{}_{\varphi\theta\varphi}=(2M/r+\Lambda r^2/3)\sin^2\theta$, together with a proof that the frame electric part of the Weyl tensor is $\mathrm{diag}(0,-2M/r^3,M/r^3,M/r^3)$ for **every** $\Lambda$: a cosmological constant enters the Riemann tensor only through the trace that the Weyl tensor removes. Alongside these, the development formalises the initial-value constraints, geodesic local existence, and structural theorems for MOND, MOG, TeVeS, Brans–Dicke, $f(R)$, Starobinsky, Galileon, chameleon screening and Ostrogradsky theories. As an independent check, a double-precision Vulkan compute pass evaluates the same tensors from the same metrics and reproduces every closed form proved in Lean to better than $10^{-6}$ — including the $\Lambda$-independent Weyl part of de Sitter to $1.4\times 10^{-8}$.
 
 **Keywords:** general relativity · Lean 4 · Mathlib · formal verification · exact solutions · cosmological constant · alternative theories of gravity · GPU validation
@@ -52,7 +52,11 @@ The development is Lean 4 against Mathlib `v4.36.0`.
 
 **Interfaces.** Curvature is a bundled structure carrying the algebraic symmetries it must satisfy — antisymmetry in the last pair, pair symmetry, and the first Bianchi identity — so that a "Riemann tensor" cannot be constructed without them. A `Metric` carries its inverse and the proof that the two compose to the identity, so contractions use the inverse actually proved for that metric. Ricci, the scalar curvature and the Einstein tensor are defined by contraction and are therefore available for any bundle satisfying the interface.
 
-**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 218 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
+**One pipeline.** `Gravitation/Pipeline.lean` defines the chain
+$$g \mapsto \partial g \mapsto \Gamma^k{}_{ij} \mapsto \partial\Gamma \mapsto R^\rho{}_{\sigma\mu\nu} \mapsto \mathrm{Ric}_{\sigma\nu} \mapsto S \mapsto G_{ij}$$
+for an arbitrary component field $g$ and its inverse, with $\partial_\mu$ the coordinate partial derivative: differentiate a component along the line through $x$ with the other coordinates fixed. A component is then the value of a formula rather than the conclusion of a bespoke proof, and what remains per metric is the evaluation of one-variable derivatives. The module proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$ — Minkowski as a *computed* vacuum solution — and that Schwarzschild's $\Gamma^t{}_{tr}$ evaluates to the $M/(r^2f)$ that §4.4 derives by hand.
+
+**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 242 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
 
 **Silence as a test.** `lake build` emits no message at all — no errors and no warnings. Tactic and unused-variable warnings were removed by rewriting proofs, not by disabling linters, and `scripts/check_messages.sh` fails CI if a message reappears.
 
@@ -114,6 +118,10 @@ the de Sitter contribution to the Riemann tensor is the trace part that the Weyl
 $$\mathrm{diag}\!\left(0, -\frac{2M}{r^3}, \frac{M}{r^3}, \frac{M}{r^3}\right) = \texttt{electricPart}\,(M/r^3)$$
 for every $\Lambda$ — the Schwarzschild answer. In words: a cosmological constant changes the Ricci tensor and leaves the free gravitational field alone. This is proved for the radial, $\theta$ and $\varphi$ frame eigenvalues, and at $\Lambda=0$ the lapse is proved to reduce to `schwarzschildF`, so the whole family specialises to the results of §4.4.
 
+![Frame eigenvalues of the Schwarzschild–de Sitter Riemann tensor against $r$, for $M=1$ and $\Lambda=0,0.05,0.1$.](figures/tidal-eigenvalues.svg)
+
+**Figure 1.** Frame eigenvalues of the Riemann tensor of Schwarzschild–de Sitter against $r$, for $M=1$ and $\Lambda=0$ (blue), $0.05$ (orange) and $0.1$ (green). Solid curves are the angular eigenvalue $R_{t\theta t\theta}=M/r^3-\Lambda/3$; dashed curves the radial one, $R_{trtr}=-2M/r^3-\Lambda/3$; dotted lines mark $-\Lambda/3$. Raising $\Lambda$ shifts both families rigidly by $-\Lambda/3$ and leaves the splitting $R_{t\theta t\theta}-R_{trtr}=3M/r^3$ unchanged. That shift is the trace part, and exactly what the Weyl tensor removes: the Weyl eigenvalues stay on the $\Lambda=0$ curves while both Riemann eigenvalues tend to $-\Lambda/3$ at large $r$. Generated by `docs/figures/make_tidal_figure.py`.
+
 All statements hold where $r\neq0$ and $f\neq0$; for $\Lambda>0$ the latter excludes the roots of the cubic $3r - 6M - \Lambda r^3$.
 
 ### 4.6 Alternative theories
@@ -157,7 +165,7 @@ This is a regression test for the shader and for the closed forms, not evidence 
 
 ## 6. Limitations
 
-1. **Component-wise derivation, not automated contraction.** The Lean side proves each Riemann component of a static diagonal metric by hand, from its Christoffel symbols. There is no general pipeline from $g$ to $\Gamma$ to $R^\rho{}_{\sigma\mu\nu}$ to $\mathrm{Ric}$; the numerical pass has one, the formal side does not. Extending the development to a general metric requires that automation.
+1. **The pipeline is not yet composed with the component theorems.** `Gravitation/Pipeline.lean` defines $g\mapsto\partial g\mapsto\Gamma\mapsto R\mapsto\mathrm{Ric}\mapsto S\mapsto G$ as one chain of definitions, proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$, and evaluates Schwarzschild's $\Gamma^t{}_{tr}$ to $M/(r^2f)$. But the six component theorems of §4.4–4.5 are still separate proofs, and only that one component has been shown to agree with the pipeline. Evaluating the pipeline's partial derivatives for the two metrics and matching all six closed forms is the next step.
 2. **Ricci flatness is verified in the frame.** For Schwarzschild, Ricci flatness is proved for the frame curvature tensor with $k=M/r^3$, and the components are separately derived from $g$; the two are linked by the electric-part theorems. They are not yet composed into a single theorem "the metric's Ricci tensor vanishes".
 3. **No global existence theory.** The constraints are formalised; existence and uniqueness for the Cauchy problem of the field equations are not, and are not axiomatised.
 4. **The contracted Bianchi identity is a hypothesis** (§4.7).
@@ -189,6 +197,7 @@ The solution theory of general relativity is formalisable, at least for the stat
 | --- | --- |
 | `Examples/Schwarzschild.lean` | 45 |
 | `ScalarTensor.lean` | 26 |
+| `Pipeline.lean` | 24 |
 | `Screening.lean` | 24 |
 | `Examples/SchwarzschildDeSitter.lean` | 23 |
 | `InitialValue.lean` | 20 |
@@ -197,12 +206,12 @@ The solution theory of general relativity is formalisable, at least for the stat
 | `Einstein.lean` | 12 |
 | `Geodesics.lean` | 11 |
 | `Curvature.lean` | 9 |
-| `Ostrogradsky.lean` | 7 |
 | `Conservation.lean` | 7 |
+| `Ostrogradsky.lean` | 7 |
 | `Examples/Minkowski.lean` | 5 |
-| **Total** | **218** |
+| **Total** | **242** |
 
-All 218 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
+All 242 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
 
 ## References
 
@@ -223,4 +232,4 @@ All 218 are `proved` against `{propext, Classical.choice, Quot.sound}`; the gene
 
 ## Appendix B. Source format
 
-This article is written in Markdown with LaTeX mathematics so that it can be read in the repository. For arXiv submission, `pandoc -f markdown -t latex Gravitation-Formalisation.md -o gravitation.tex` produces a LaTeX manuscript; the mathematics is already in `$…$`/`$$…$$` form and needs no rewriting.
+This article is written in Markdown with LaTeX mathematics so that it can be read in the repository. For arXiv submission, `pandoc -f markdown -t latex Gravitation-Formalisation.md -o gravitation.tex` produces a LaTeX manuscript; the mathematics is already in `$…$`/`$$…$$` form and needs no rewriting. Figure 1 is an SVG produced by `docs/figures/make_tidal_figure.py`; `rsvg-convert -f pdf docs/figures/tidal-eigenvalues.svg -o fig1.pdf` converts it to the PDF that arXiv prefers.

@@ -1,0 +1,245 @@
+import Gravitation.Curvature
+import Gravitation.Examples.Schwarzschild
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Analysis.Calculus.Deriv.Add
+import Mathlib.Analysis.Calculus.Deriv.Mul
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+import Mathlib.Tactic.FieldSimp
+
+/-!
+# The metric → Christoffel → Riemann pipeline
+
+The hand-derived components in `Examples/Schwarzschild.lean` and
+`Examples/SchwarzschildDeSitter.lean` are six separate computations.  This
+module replaces the pattern with one construction.  Given a metric as a
+function of the coordinates and its inverse in the same way, it *defines*
+
+`g` → `∂ g` → `Γ` → `∂ Γ` → `R^ρ_{σμν}` → `Ric_{σν}` → `S` → `G_{ij}`,
+
+so a component is a value of a formula rather than the conclusion of a
+bespoke proof.  The derivative is the coordinate partial derivative: the
+derivative of a component along the line through `x` in the direction `μ`, with
+the other coordinates held fixed.
+
+What remains to be proved for a particular metric is only that the partial
+derivatives evaluate as expected — differentiation of one-variable functions,
+not tensor algebra.  Two checks are included: a constant metric gives `Γ = 0`,
+`R = 0`, `Ric = 0`, `S = 0`, `G = 0` (so Minkowski is a *computed* vacuum
+solution), and the `Γ^t_{tr}` of the Schwarzschild metric computed by the
+pipeline is the value `M/(r²f)` derived by hand in `Examples/Schwarzschild.lean`.
+-/
+
+namespace Gravitation
+
+namespace Pipeline
+
+/-- The partial derivative of a scalar field along the coordinate `μ`: the
+derivative of `s ↦ f (x` with `x μ` replaced by `s)` at `x μ`. -/
+noncomputable def pd {n : ℕ} (μ : Fin n) (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) : ℝ :=
+  deriv (fun s : ℝ => f (Function.update x μ s)) (x μ)
+
+/-- The derivative of a constant field vanishes. -/
+theorem pd_const {n : ℕ} (μ : Fin n) (c : ℝ) (x : Fin n → ℝ) :
+    pd μ (fun _ => c) x = 0 := by
+  simp [pd]
+
+/-- `pd` only sees the values of the field. -/
+theorem pd_congr {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} (x : Fin n → ℝ)
+    (h : ∀ y, f y = g y) : pd μ f x = pd μ g x := by
+  simp only [pd]
+  exact congrArg (fun F => deriv F (x μ)) (funext fun s => h _)
+
+/-- Christoffel symbols of the second kind,
+`Γ^k_{ij} = ½ g^{kl}(∂_i g_{jl} + ∂_j g_{il} − ∂_l g_{ij})`, at the point `x`. -/
+noncomputable def christoffel {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ) (k i j : Fin n) : ℝ :=
+  (1 / 2) * ∑ l, ginv x k l *
+    (pd i (fun y => g y j l) x + pd j (fun y => g y i l) x
+      - pd l (fun y => g y i j) x)
+
+/-- The Riemann tensor
+`R^ρ_{σμν} = ∂_μ Γ^ρ_{νσ} − ∂_ν Γ^ρ_{μσ} + Γ^ρ_{μλ}Γ^λ_{νσ} − Γ^ρ_{νλ}Γ^λ_{μσ}`. -/
+noncomputable def riemann {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ) (ρ σ μ ν : Fin n) : ℝ :=
+  pd μ (fun y => christoffel g ginv y ρ ν σ) x
+    - pd ν (fun y => christoffel g ginv y ρ μ σ) x
+    + ∑ l, (christoffel g ginv x ρ μ l * christoffel g ginv x l ν σ
+          - christoffel g ginv x ρ ν l * christoffel g ginv x l μ σ)
+
+/-- The Ricci tensor `Ric_{σν} = Σ_ρ R^ρ_{σρν}`. -/
+noncomputable def ricciOf {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ) (σ ν : Fin n) : ℝ :=
+  ∑ ρ, riemann g ginv x ρ σ ρ ν
+
+/-- The scalar curvature `S = g^{σν} Ric_{σν}`. -/
+noncomputable def scalarOf {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ) : ℝ :=
+  ∑ σ, ∑ ν, ginv x σ ν * ricciOf g ginv x σ ν
+
+/-- The Einstein tensor `G_{ij} = Ric_{ij} − ½ S g_{ij}`. -/
+noncomputable def einsteinOf {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ) (i j : Fin n) : ℝ :=
+  ricciOf g ginv x i j - (1 / 2) * scalarOf g ginv x * g x i j
+
+/-! ## Constant metrics: flatness is computed, not assumed -/
+
+/-- **A constant metric has no Christoffel symbols.**  Only derivatives of the
+metric appear in `Γ`, so the pipeline returns zero at every point. -/
+theorem christoffel_const {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (G : Tensor2 n)
+    (hg : ∀ x, g x = G) (x : Fin n → ℝ) (k i j : Fin n) :
+    christoffel g ginv x k i j = 0 := by
+  have hpd : ∀ (μ a b : Fin n), pd μ (fun y => g y a b) x = 0 := by
+    intro μ a b
+    rw [pd_congr μ x (fun y => by rw [hg y])]
+    exact pd_const μ (G a b) x
+  simp only [christoffel]
+  rw [Finset.sum_eq_zero (fun l _ => by rw [hpd i j l, hpd j i l, hpd l i j]; ring)]
+  ring
+
+/-- **A constant metric has no curvature.**  `Γ = 0` at every point, so its
+derivatives vanish and every product of Christoffel symbols does too. -/
+theorem riemann_const {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (G : Tensor2 n)
+    (hg : ∀ x, g x = G) (x : Fin n → ℝ) (ρ σ μ ν : Fin n) :
+    riemann g ginv x ρ σ μ ν = 0 := by
+  have hc := fun y => christoffel_const g ginv G hg y
+  have h1 : pd μ (fun y => christoffel g ginv y ρ ν σ) x = 0 := by
+    rw [pd_congr μ x (fun y => hc y ρ ν σ)]
+    exact pd_const μ 0 x
+  have h2 : pd ν (fun y => christoffel g ginv y ρ μ σ) x = 0 := by
+    rw [pd_congr ν x (fun y => hc y ρ μ σ)]
+    exact pd_const ν 0 x
+  have h3 : (∑ l, (christoffel g ginv x ρ μ l * christoffel g ginv x l ν σ
+              - christoffel g ginv x ρ ν l * christoffel g ginv x l μ σ)) = 0 := by
+    apply Finset.sum_eq_zero
+    intro l _
+    rw [hc x ρ μ l, hc x ρ ν l, hc x l ν σ, hc x l μ σ]
+    ring
+  rw [riemann, h1, h2, h3]
+  ring
+
+/-- A constant metric is Ricci flat, as computed by the pipeline. -/
+theorem ricciOf_const {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (G : Tensor2 n)
+    (hg : ∀ x, g x = G) (x : Fin n → ℝ) (σ ν : Fin n) :
+    ricciOf g ginv x σ ν = 0 := by
+  simp only [ricciOf]
+  apply Finset.sum_eq_zero
+  intro ρ _
+  exact riemann_const g ginv G hg x ρ σ ρ ν
+
+/-- A constant metric has zero scalar curvature. -/
+theorem scalarOf_const {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (G : Tensor2 n)
+    (hg : ∀ x, g x = G) (x : Fin n → ℝ) : scalarOf g ginv x = 0 := by
+  simp only [scalarOf]
+  apply Finset.sum_eq_zero
+  intro σ _
+  apply Finset.sum_eq_zero
+  intro ν _
+  rw [ricciOf_const g ginv G hg x σ ν]
+  ring
+
+/-- **A constant metric is a vacuum solution, as computed**: `G_{ij} = 0`. -/
+theorem einsteinOf_const {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (G : Tensor2 n)
+    (hg : ∀ x, g x = G) (x : Fin n → ℝ) (i j : Fin n) :
+    einsteinOf g ginv x i j = 0 := by
+  simp only [einsteinOf]
+  rw [ricciOf_const g ginv G hg x i j, scalarOf_const g ginv G hg x]
+  ring
+
+/-! ## Minkowski as a computed vacuum solution -/
+
+/-- The Minkowski metric as a field of components. -/
+noncomputable def minkowskiG : (Fin 4 → ℝ) → Tensor2 4 := fun _ => eta4
+
+/-- The pipeline gives no Christoffel symbols for Minkowski spacetime. -/
+theorem minkowski_christoffel (x : Fin 4 → ℝ) (k i j : Fin 4) :
+    christoffel minkowskiG minkowskiG x k i j = 0 :=
+  christoffel_const minkowskiG minkowskiG eta4 (fun _ => rfl) x k i j
+
+/-- The pipeline gives no curvature for Minkowski spacetime. -/
+theorem minkowski_riemann (x : Fin 4 → ℝ) (ρ σ μ ν : Fin 4) :
+    riemann minkowskiG minkowskiG x ρ σ μ ν = 0 :=
+  riemann_const minkowskiG minkowskiG eta4 (fun _ => rfl) x ρ σ μ ν
+
+/-- **Minkowski is a vacuum solution of the Einstein equations, computed from
+the metric rather than assumed.** -/
+theorem minkowski_einstein (x : Fin 4 → ℝ) (i j : Fin 4) :
+    einsteinOf minkowskiG minkowskiG x i j = 0 :=
+  einsteinOf_const minkowskiG minkowskiG eta4 (fun _ => rfl) x i j
+
+/-! ## The Schwarzschild Christoffel symbol, computed by the pipeline -/
+
+/-- The Schwarzschild metric as a field of components. -/
+noncomputable def schwarzschildG (M : ℝ) : (Fin 4 → ℝ) → Tensor2 4 :=
+  fun x => Schwarzschild.schwarzschildMetric M x
+
+/-- The Schwarzschild inverse metric as a field of components. -/
+noncomputable def schwarzschildGinv (M : ℝ) : (Fin 4 → ℝ) → Tensor2 4 :=
+  fun x i j =>
+    if i = j then
+      if i = 0 then -(Schwarzschild.schwarzschildF M (x 1))⁻¹
+      else if i = 1 then Schwarzschild.schwarzschildF M (x 1)
+      else if i = 2 then (x 1 ^ 2)⁻¹
+      else (x 1 ^ 2 * Real.sin (x 2) ^ 2)⁻¹
+    else 0
+
+/-- The `tt` entry of the inverse metric. -/
+theorem schwarzschildGinv_00 (M : ℝ) (x : Fin 4 → ℝ) :
+    schwarzschildGinv M x 0 0 = -(Schwarzschild.schwarzschildF M (x 1))⁻¹ := by
+  simp [schwarzschildGinv]
+
+/-- The inverse metric is diagonal. -/
+theorem schwarzschildGinv_off (M : ℝ) (x : Fin 4 → ℝ) {k l : Fin 4} (h : k ≠ l) :
+    schwarzschildGinv M x k l = 0 := by
+  simp [schwarzschildGinv, h]
+
+/-- The `tt` component of the metric does not depend on `t`, so its `t`
+derivative is zero. -/
+theorem pd_zero_of_schwarzschild_offdiag (M : ℝ) (x : Fin 4 → ℝ) :
+    pd 0 (fun y => Schwarzschild.schwarzschildMetric M y 1 0) x = 0 := by
+  have h : (fun s : ℝ => Schwarzschild.schwarzschildMetric M (Function.update x 0 s) 1 0)
+      = fun _ => 0 := by
+    funext s
+    simp [Schwarzschild.schwarzschildMetric]
+  rw [pd, h]
+  simp
+
+/-- The `r` derivative of `g_tt = −f` is `−2M/r²`. -/
+theorem pd_schwarzschild_tt (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => Schwarzschild.schwarzschildMetric M y 0 0) x
+      = -(2 * M / (x 1) ^ 2) := by
+  have hfun : (fun s : ℝ => Schwarzschild.schwarzschildMetric M (Function.update x 1 s) 0 0)
+      = fun s : ℝ => -(1 - 2 * M / s) := by
+    funext s
+    simp [Schwarzschild.schwarzschildMetric]
+  have hmul : HasDerivAt (fun s : ℝ => -1 * (1 - 2 * M / s))
+      (-1 * (2 * M / (x 1) ^ 2)) (x 1) :=
+    (Schwarzschild.hasDerivAt_gtt M (x 1) hr).const_mul (-1)
+  have hfun2 : (fun s : ℝ => -(1 - 2 * M / s)) = fun s : ℝ => -1 * (1 - 2 * M / s) := by
+    funext s
+    ring
+  rw [pd, hfun, hfun2, hmul.deriv]
+  ring
+
+/-- **`Γ^t_{tr}` of the Schwarzschild metric, computed by the pipeline**, is
+the value `M/(r²f)` proved by hand in `Examples/Schwarzschild.lean`.  Only the
+`l = 0` term of the sum survives: the inverse is diagonal and the metric is
+static. -/
+theorem schwarzschild_christoffel_tr (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) :
+    christoffel (schwarzschildG M) (schwarzschildGinv M) x 0 1 0
+      = M / ((x 1) ^ 2 * Schwarzschild.schwarzschildF M (x 1)) := by
+  have hoff := pd_zero_of_schwarzschild_offdiag M x
+  have htt := pd_schwarzschild_tt M x hr
+  have hr2 : (x 1) ^ 2 ≠ 0 := pow_ne_zero 2 hr
+  simp only [christoffel, schwarzschildG, Fin.sum_univ_four]
+  rw [schwarzschildGinv_00 M x,
+      schwarzschildGinv_off M x (by decide : (0 : Fin 4) ≠ 1),
+      schwarzschildGinv_off M x (by decide : (0 : Fin 4) ≠ 2),
+      schwarzschildGinv_off M x (by decide : (0 : Fin 4) ≠ 3),
+      hoff, htt]
+  field_simp [hf, hr, hr2]
+  ring
+
+end Pipeline
+
+end Gravitation

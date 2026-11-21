@@ -6,6 +6,7 @@ import Gravitation.Einstein
 import Gravitation.Geodesics
 import Gravitation.InitialValue
 import Gravitation.Ostrogradsky
+import Gravitation.Pipeline
 import Gravitation.ScalarTensor
 import Gravitation.Screening
 import Gravitation.Examples.Minkowski
