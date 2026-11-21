@@ -261,6 +261,16 @@ noncomputable def riemannFromData {n : ℕ}
   dG μ x ρ ν σ - dG ν x ρ μ σ
     + ∑ l, (G x ρ μ l * G x l ν σ - G x ρ ν l * G x l μ σ)
 
+/-- `riemannFromData` reads its derivative data only at the two slots
+`(μ, ρ, ν, σ)` and `(ν, ρ, μ, σ)`, so two derivative tables that agree there
+give the same component. -/
+theorem riemannFromData_congr {n : ℕ} (G : (Fin n → ℝ) → Fin n → Fin n → Fin n → ℝ)
+    {dG dG' : Fin n → (Fin n → ℝ) → Fin n → Fin n → Fin n → ℝ}
+    (x : Fin n → ℝ) (ρ σ μ ν : Fin n)
+    (h1 : dG μ x ρ ν σ = dG' μ x ρ ν σ) (h2 : dG ν x ρ μ σ = dG' ν x ρ μ σ) :
+    riemannFromData G dG x ρ σ μ ν = riemannFromData G dG' x ρ σ μ ν := by
+  simp only [riemannFromData, h1, h2]
+
 /-- **The data form is the pipeline**: feeding `riemannFromData` the metric's
 actual partial derivatives of the Christoffel symbols reproduces `riemann`
 definitionally, so nothing is assumed in passing to derivatives as data. -/
@@ -768,6 +778,165 @@ theorem riemann_components_christoffel (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 �
             (schDG M) x 2 3 2 3 = (2 * M / (x 1)) * Real.sin (x 2) ^ 2) := by
   simp only [riemannFromData_christoffel_eq M x hr hf hsin]
   exact riemann_components_pipeline M x hr hf hsin
+
+/-! ### The derivative table is the derivative of the closed-form table
+
+`schDG` was read off from the differentiated symbols.  `riemannFromData` reads
+`dG` at exactly twelve slots for the six components, and at each of them
+`∂_μ schG` is `schDG`: the `rt` entry is `deriv_gammaTtr`, and the other three
+nonzero entries are the product rule for `r f`, `r sin²θ f` and `sin θ cos θ`.
+The remaining eight slots are constant in the variable that differentiates
+them.
+-/
+
+/-- `∂_r Γ^t_{tr} = −2M(r−M)/(r(r−2M))²`, which is `deriv_gammaTtr`. -/
+theorem pd_schG_rt (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) :
+    pd 1 (fun y => schG M y 0 0 1) x = schDG M 1 x 0 0 1 := by
+  have hfun : (fun s : ℝ => schG M (Function.update x 1 s) 0 0 1)
+      = fun s : ℝ => M / (s ^ 2 * Schwarzschild.schwarzschildF M s) := by
+    funext s
+    simp [schG, pow_two]
+  have hderiv : deriv (fun s : ℝ => M / (s ^ 2 * Schwarzschild.schwarzschildF M s)) (x 1)
+      = -2 * M * (x 1 - M) / (x 1 * (x 1 - 2 * M)) ^ 2 :=
+    Schwarzschild.deriv_gammaTtr M (x 1) hr hf
+  rw [pd, hfun, hderiv, schDG]
+  simp
+
+/-- `∂_r Γ^r_{θθ} = −f − 2M/r`, the product rule for `r f` with `f' = 2M/r²`. -/
+theorem pd_schG_r_thetatheta (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => schG M y 1 2 2) x = schDG M 1 x 1 2 2 := by
+  have hfun : (fun s : ℝ => schG M (Function.update x 1 s) 1 2 2)
+      = fun s : ℝ => -(s * Schwarzschild.schwarzschildF M s) := by
+    funext s
+    simp [schG]
+  have hd : HasDerivAt (fun s : ℝ => -(s * Schwarzschild.schwarzschildF M s))
+      (-(Schwarzschild.schwarzschildF M (x 1)) - 2 * M / (x 1)) (x 1) := by
+    have h := ((hasDerivAt_id (x 1)).mul (Schwarzschild.hasDerivAt_gtt M (x 1) hr)).neg
+    convert h using 1
+    · funext s
+      simp [Schwarzschild.schwarzschildF]
+    · simp [Schwarzschild.schwarzschildF]
+      field_simp [hr]
+      ring
+  have hderiv : deriv (fun s : ℝ => -(s * Schwarzschild.schwarzschildF M s)) (x 1)
+      = -(Schwarzschild.schwarzschildF M (x 1)) - 2 * M / (x 1) := hd.deriv
+  rw [pd, hfun, hderiv, schDG]
+  simp
+
+/-- `∂_r Γ^r_{φφ} = −(f + 2M/r) sin²θ`, the same product rule times `sin²θ`. -/
+theorem pd_schG_r_phiphi (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0) :
+    pd 1 (fun y => schG M y 1 3 3) x = schDG M 1 x 1 3 3 := by
+  have hfun : (fun s : ℝ => schG M (Function.update x 1 s) 1 3 3)
+      = fun s : ℝ => -(s * Real.sin (x 2) ^ 2 * Schwarzschild.schwarzschildF M s) := by
+    funext s
+    simp [schG]
+  have hd : HasDerivAt
+      (fun s : ℝ => -(s * Real.sin (x 2) ^ 2 * Schwarzschild.schwarzschildF M s))
+      (-(Real.sin (x 2) ^ 2 * (Schwarzschild.schwarzschildF M (x 1) + 2 * M / (x 1))))
+      (x 1) := by
+    have h := ((hasDerivAt_id (x 1)).mul
+      ((Schwarzschild.hasDerivAt_gtt M (x 1) hr).const_mul (Real.sin (x 2) ^ 2))).neg
+    convert h using 1
+    · funext s
+      simp [Schwarzschild.schwarzschildF]
+      ring
+    · simp [Schwarzschild.schwarzschildF]
+      field_simp [hr]
+      ring
+  have hderiv : deriv
+      (fun s : ℝ => -(s * Real.sin (x 2) ^ 2 * Schwarzschild.schwarzschildF M s)) (x 1)
+      = -(Real.sin (x 2) ^ 2 * (Schwarzschild.schwarzschildF M (x 1) + 2 * M / (x 1))) :=
+    hd.deriv
+  rw [pd, hfun, hderiv, schDG]
+  simp
+
+/-- `∂_θ Γ^θ_{φφ} = sin²θ − cos²θ`, the product rule for `sin θ cos θ`. -/
+theorem pd_schG_theta_phiphi (M : ℝ) (x : Fin 4 → ℝ) :
+    pd 2 (fun y => schG M y 2 3 3) x = schDG M 2 x 2 3 3 := by
+  have hfun : (fun s : ℝ => schG M (Function.update x 2 s) 2 3 3)
+      = fun s : ℝ => -(Real.sin s * Real.cos s) := by
+    funext s
+    simp [schG]
+  have hd : HasDerivAt (fun s : ℝ => -(Real.sin s * Real.cos s))
+      (Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2) (x 2) := by
+    have h := ((Real.hasDerivAt_sin (x 2)).mul (Real.hasDerivAt_cos (x 2))).neg
+    convert h using 1
+    ring
+  have hderiv : deriv (fun s : ℝ => -(Real.sin s * Real.cos s)) (x 2)
+      = Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2 := hd.deriv
+  rw [pd, hfun, hderiv, schDG]
+  simp
+
+/-- **At every slot the six components read, the derivative table is the
+derivative of the closed-form Christoffel table.**  Together with
+`riemannFromData_congr` this turns the transcribed `schDG` into a computed
+table. -/
+theorem pd_schG_eq_schDG (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) :
+    (pd 0 (fun y => schG M y 0 1 1) x = schDG M 0 x 0 1 1)
+      ∧ (pd 1 (fun y => schG M y 0 0 1) x = schDG M 1 x 0 0 1)
+      ∧ (pd 0 (fun y => schG M y 0 2 2) x = schDG M 0 x 0 2 2)
+      ∧ (pd 2 (fun y => schG M y 0 0 2) x = schDG M 2 x 0 0 2)
+      ∧ (pd 0 (fun y => schG M y 0 3 3) x = schDG M 0 x 0 3 3)
+      ∧ (pd 3 (fun y => schG M y 0 0 3) x = schDG M 3 x 0 0 3)
+      ∧ (pd 1 (fun y => schG M y 1 2 2) x = schDG M 1 x 1 2 2)
+      ∧ (pd 2 (fun y => schG M y 1 1 2) x = schDG M 2 x 1 1 2)
+      ∧ (pd 1 (fun y => schG M y 1 3 3) x = schDG M 1 x 1 3 3)
+      ∧ (pd 3 (fun y => schG M y 1 1 3) x = schDG M 3 x 1 1 3)
+      ∧ (pd 2 (fun y => schG M y 2 3 3) x = schDG M 2 x 2 3 3)
+      ∧ (pd 3 (fun y => schG M y 2 2 3) x = schDG M 3 x 2 2 3) := by
+  refine ⟨by simp [pd, schG, schDG], pd_schG_rt M x hr hf, by simp [pd, schG, schDG],
+    by simp [pd, schG, schDG], by simp [pd, schG, schDG], by simp [pd, schG, schDG],
+    pd_schG_r_thetatheta M x hr, by simp [pd, schG, schDG], pd_schG_r_phiphi M x hr,
+    by simp [pd, schG, schDG], pd_schG_theta_phiphi M x, by simp [pd, schG, schDG]⟩
+
+/-- **The pipeline on the closed-form table, differentiated.**  Replacing the
+transcribed `schDG` by the actual partial derivatives of `schG` leaves the six
+components unchanged, so the six values follow from the Christoffel table alone:
+there is no derivative data left to check. -/
+theorem riemann_components_deriv (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemannFromData (schG M) (fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+          x 0 1 0 1 = 2 * M / ((x 1) ^ 3 * Schwarzschild.schwarzschildF M (x 1)))
+      ∧ (riemannFromData (schG M) (fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+            x 0 2 0 2 = -M / (x 1))
+      ∧ (riemannFromData (schG M) (fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+            x 0 3 0 3 = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (schG M) (fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+            x 1 2 1 2 = -M / (x 1))
+      ∧ (riemannFromData (schG M) (fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+            x 1 3 1 3 = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (schG M) (fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+            x 2 3 2 3 = (2 * M / (x 1)) * Real.sin (x 2) ^ 2) := by
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ :=
+    pd_schG_eq_schDG M x hr hf
+  obtain ⟨p1, p2, p3, p4, p5, p6⟩ := riemann_components_pipeline M x hr hf hsin
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · refine (riemannFromData_congr (G := schG M)
+        (dG := fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+        (dG' := schDG M) x 0 1 0 1 h1 h2).trans ?_
+    exact p1
+  · refine (riemannFromData_congr (G := schG M)
+        (dG := fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+        (dG' := schDG M) x 0 2 0 2 h3 h4).trans ?_
+    exact p2
+  · refine (riemannFromData_congr (G := schG M)
+        (dG := fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+        (dG' := schDG M) x 0 3 0 3 h5 h6).trans ?_
+    exact p3
+  · refine (riemannFromData_congr (G := schG M)
+        (dG := fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+        (dG' := schDG M) x 1 2 1 2 h7 h8).trans ?_
+    exact p4
+  · refine (riemannFromData_congr (G := schG M)
+        (dG := fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+        (dG' := schDG M) x 1 3 1 3 h9 h10).trans ?_
+    exact p5
+  · refine (riemannFromData_congr (G := schG M)
+        (dG := fun μ y a b c => pd μ (fun z => schG M z a b c) y)
+        (dG' := schDG M) x 2 3 2 3 h11 h12).trans ?_
+    exact p6
 
 /-- The de Sitter evaluation with the pipeline's own Christoffel table. -/
 theorem riemannFromData_christoffel_eq_sds (M Λ : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)

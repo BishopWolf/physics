@@ -226,6 +226,7 @@ of date.
 | `Gravitation.Pipeline.pd_schwarzschild_tt` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.schwarzschild_christoffel_tr` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.riemannFromData_congr` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemann_eq_riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.minkowski_riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.schG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -251,6 +252,12 @@ of date.
 | `Gravitation.Pipeline.christoffel_eq_sdsG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemannFromData_christoffel_eq` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemann_components_christoffel` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schG_rt` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schG_r_thetatheta` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schG_r_phiphi` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schG_theta_phiphi` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.pd_schG_eq_schDG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.riemann_components_deriv` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemannFromData_christoffel_eq_sds` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemann_components_christoffel_sds` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
