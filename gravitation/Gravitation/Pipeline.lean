@@ -5,6 +5,7 @@ import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.LinearCombination
 
 /-!
 # The metric → Christoffel → Riemann pipeline
@@ -166,7 +167,6 @@ theorem minkowski_einstein (x : Fin 4 → ℝ) (i j : Fin 4) :
     einsteinOf minkowskiG minkowskiG x i j = 0 :=
   einsteinOf_const minkowskiG minkowskiG eta4 (fun _ => rfl) x i j
 
-/-! ## The Schwarzschild Christoffel symbol, computed by the pipeline -/
 
 /-- The Schwarzschild metric as a field of components. -/
 noncomputable def schwarzschildG (M : ℝ) : (Fin 4 → ℝ) → Tensor2 4 :=
@@ -278,6 +278,94 @@ theorem minkowski_riemannFromData (x : Fin 4 → ℝ) (ρ σ μ ν : Fin 4) :
       x ρ σ μ ν = 0 := by
   rw [← riemann_eq_riemannFromData]
   exact minkowski_riemann x ρ σ μ ν
+
+/-! ## The Schwarzschild curvature from one evaluation of the data pipeline
+
+`schG` is the Christoffel table of `g = diag(−f, 1/f, r², r²sin²θ)` in closed
+form, and `schDG` its partial derivatives.  Feeding the pair to
+`riemannFromData` gives all six independent components at once, which is
+`riemann_components_pipeline`; the entries are the ones the hand computations in
+`Examples/Schwarzschild.lean` differentiate term by term.
+-/
+
+/-- The Schwarzschild Christoffel symbols in `(t, r, θ, φ)` coordinates:
+`Γ^t_{tr} = M/(r²f)`, `Γ^r_{rr} = −M/(r²f)`, `Γ^r_{θθ} = −rf`,
+`Γ^r_{φφ} = −rf sin²θ`, `Γ^θ_{rθ} = Γ^φ_{rφ} = 1/r`,
+`Γ^θ_{φφ} = −sinθ cosθ` and `Γ^φ_{θφ} = cosθ/sinθ`. -/
+noncomputable def schG (M : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) : ℝ :=
+  if k = 0 then
+    (if (i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 1) then
+      M / ((x 1) ^ 2 * Schwarzschild.schwarzschildF M (x 1)) else 0)
+  else if k = 1 then
+    (if i = 1 ∧ j = 1 then (-M) / ((x 1) ^ 2 * Schwarzschild.schwarzschildF M (x 1))
+     else if i = 2 ∧ j = 2 then -(x 1 * Schwarzschild.schwarzschildF M (x 1))
+     else if i = 3 ∧ j = 3 then
+       -(x 1 * Real.sin (x 2) ^ 2 * Schwarzschild.schwarzschildF M (x 1))
+     else 0)
+  else if k = 2 then
+    (if (i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1) then 1 / (x 1)
+     else if i = 3 ∧ j = 3 then -(Real.sin (x 2) * Real.cos (x 2)) else 0)
+  else
+    (if (i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1) then 1 / (x 1)
+     else if (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then
+       Real.cos (x 2) / Real.sin (x 2) else 0)
+
+/-- The partial derivatives of the Schwarzschild Christoffel table:
+`∂_r Γ^t_{tr} = (M/(r²f))'`, `∂_r Γ^r_{θθ} = −f − 2M/r`,
+`∂_r Γ^r_{φφ} = −(f + 2M/r) sin²θ` and `∂_θ Γ^θ_{φφ} = sin²θ − cos²θ`, with
+all other partial derivatives zero. -/
+noncomputable def schDG (M : ℝ) (μ : Fin 4) (x : Fin 4 → ℝ)
+    (ρ ν σ : Fin 4) : ℝ :=
+  if μ = 1 ∧ ρ = 0 ∧ ν = 0 ∧ σ = 1 then
+    deriv (fun s : ℝ => M / (s ^ 2 * Schwarzschild.schwarzschildF M s)) (x 1)
+  else if μ = 1 ∧ ρ = 1 ∧ ν = 2 ∧ σ = 2 then
+    -(Schwarzschild.schwarzschildF M (x 1)) - 2 * M / (x 1)
+  else if μ = 1 ∧ ρ = 1 ∧ ν = 3 ∧ σ = 3 then
+    -(Real.sin (x 2) ^ 2) * (Schwarzschild.schwarzschildF M (x 1) + 2 * M / (x 1))
+  else if μ = 2 ∧ ρ = 2 ∧ ν = 3 ∧ σ = 3 then
+    Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2
+  else 0
+
+/-- **One evaluation of the pipeline yields all six Schwarzschild components.**
+The closed-form table `schG` and its derivative table `schDG`, fed to
+`riemannFromData`, give the six independent curvature components of §4.4 — the
+same `2M/(r³f)`, `−M/r`, `−(M/r)sin²θ`, `−M/r`, `−(M/r)sin²θ` and
+`(2M/r)sin²θ` that the per-component derivations establish, now read off a
+single evaluation rather than one proof each. -/
+theorem riemann_components_pipeline (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : Schwarzschild.schwarzschildF M (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0) :
+    (riemannFromData (schG M) (schDG M) x 0 1 0 1
+        = 2 * M / ((x 1) ^ 3 * Schwarzschild.schwarzschildF M (x 1)))
+      ∧ (riemannFromData (schG M) (schDG M) x 0 2 0 2 = -M / (x 1))
+      ∧ (riemannFromData (schG M) (schDG M) x 0 3 0 3
+          = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (schG M) (schDG M) x 1 2 1 2 = -M / (x 1))
+      ∧ (riemannFromData (schG M) (schDG M) x 1 3 1 3
+          = -(M / (x 1)) * Real.sin (x 2) ^ 2)
+      ∧ (riemannFromData (schG M) (schDG M) x 2 3 2 3
+          = (2 * M / (x 1)) * Real.sin (x 2) ^ 2) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · have hden : x 1 * x 1 * Schwarzschild.schwarzschildF M (x 1)
+        = x 1 * (x 1 - 2 * M) := by
+      unfold Schwarzschild.schwarzschildF
+      field_simp
+    have h := Schwarzschild.riemann_t_rtr_from_metric M (x 1) hr hf
+    simp [riemannFromData, schG, schDG, Fin.sum_univ_four, hden, add_assoc,
+      sub_eq_add_neg, pow_two] at h ⊢
+    linear_combination h
+  · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four] using
+      Schwarzschild.riemann_t_thetatheta_from_metric M (x 1) hr hf
+  · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four] using
+      Schwarzschild.riemann_t_phitphi_from_metric M (x 1) (x 2) hr hf
+  · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] using
+      Schwarzschild.riemann_r_thetar_from_metric M (x 1) hr hf
+  · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] using
+      Schwarzschild.riemann_r_phirphi_from_metric M (x 1) (x 2) hr hf
+  · simpa [riemannFromData, schG, schDG, Fin.sum_univ_four, add_assoc,
+      sub_eq_add_neg, pow_two] using
+      Schwarzschild.riemann_theta_phitheta_from_metric M (x 1) (x 2) hr hsin
 
 end Pipeline
 

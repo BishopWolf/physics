@@ -228,6 +228,9 @@ of date.
 | `Gravitation.Pipeline.riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.riemann_eq_riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.minkowski_riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.schG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.schDG` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.riemann_components_pipeline` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma_eq_one_sub` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma_bounds` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
