@@ -240,6 +240,45 @@ theorem schwarzschild_christoffel_tr (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠
   field_simp [hf, hr, hr2]
   ring
 
+
+/-! ## Curvature from Christoffel data
+
+The metric pipeline differentiates inside `riemann`.  This variant takes the
+Christoffel symbols and their partial derivatives as *parameters*, which is what
+lets a metric with a known derivative table be evaluated by algebra; the two are
+the same definition, as `riemann_eq_riemannFromData` shows.
+-/
+
+/-- The Riemann tensor from Christoffel symbols and their partial derivatives as
+data: `R^ρ_{σμν} = ∂_μΓ^ρ_{νσ} − ∂_νΓ^ρ_{μσ}
++ Γ^ρ_{μλ}Γ^λ_{νσ} − Γ^ρ_{νλ}Γ^λ_{μσ}`. -/
+noncomputable def riemannFromData {n : ℕ}
+    (G : (Fin n → ℝ) → Fin n → Fin n → Fin n → ℝ)
+    (dG : Fin n → (Fin n → ℝ) → Fin n → Fin n → Fin n → ℝ)
+    (x : Fin n → ℝ) (ρ σ μ ν : Fin n) : ℝ :=
+  dG μ x ρ ν σ - dG ν x ρ μ σ
+    + ∑ l, (G x ρ μ l * G x l ν σ - G x ρ ν l * G x l μ σ)
+
+/-- **The data form is the pipeline**: feeding `riemannFromData` the metric's
+actual partial derivatives of the Christoffel symbols reproduces `riemann`
+definitionally, so nothing is assumed in passing to derivatives as data. -/
+theorem riemann_eq_riemannFromData {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ) (ρ σ μ ν : Fin n) :
+    riemann g ginv x ρ σ μ ν =
+      riemannFromData (christoffel g ginv)
+        (fun μ y a b c => pd μ (fun z => christoffel g ginv z a b c) y)
+        x ρ σ μ ν :=
+  rfl
+
+/-- The data form gives Minkowski's vanishing curvature, matching
+`minkowski_riemann` through the same definition. -/
+theorem minkowski_riemannFromData (x : Fin 4 → ℝ) (ρ σ μ ν : Fin 4) :
+    riemannFromData (christoffel minkowskiG minkowskiG)
+      (fun μ y a b c => pd μ (fun z => christoffel minkowskiG minkowskiG z a b c) y)
+      x ρ σ μ ν = 0 := by
+  rw [← riemann_eq_riemannFromData]
+  exact minkowski_riemann x ρ σ μ ν
+
 end Pipeline
 
 end Gravitation

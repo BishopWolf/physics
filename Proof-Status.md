@@ -225,6 +225,9 @@ of date.
 | `Gravitation.Pipeline.pd_zero_of_schwarzschild_offdiag` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.pd_schwarzschild_tt` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.Pipeline.schwarzschild_christoffel_tr` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.riemann_eq_riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Gravitation.Pipeline.minkowski_riemannFromData` | `Pipeline.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma_eq_one_sub` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Gravitation.BransDicke.gamma_bounds` | `ScalarTensor.lean` | propext, Classical.choice, Quot.sound | proved |

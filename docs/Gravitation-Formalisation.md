@@ -177,13 +177,12 @@ This is a regression test for the shader and for the closed forms, not evidence 
 
 ## 6. Limitations
 
-1. **The pipeline is not yet composed with the component theorems.** `Gravitation/Pipeline.lean` defines $g\mapsto\partial g\mapsto\Gamma\mapsto R\mapsto\mathrm{Ric}\mapsto S\mapsto G$ as one chain of definitions, proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$, and evaluates Schwarzschild's $\Gamma^t{}_{tr}$ to $M/(r^2f)$. But the six component theorems of §4.4–4.5 are still separate proofs, and only that one component has been shown to agree with the pipeline. Evaluating the pipeline's partial derivatives for the two metrics and matching all six closed forms is the next step.
-2. **Ricci flatness is verified in the frame.** For Schwarzschild, Ricci flatness is proved for the frame curvature tensor with $k=M/r^3$, and the components are separately derived from $g$; the two are linked by the electric-part theorems. They are not yet composed into a single theorem "the metric's Ricci tensor vanishes".
+1. **The pipeline takes derivative data; the metric's derivative table is the remaining work.** `Gravitation/Pipeline.lean` evaluates $R^\rho{}_{\sigma\mu\nu}$ from $\Gamma$ and $\partial\Gamma$ supplied as parameters (`riemannFromData`), and `riemann_eq_riemannFromData` proves that feeding the metric's actual partial derivatives reproduces the pipeline definitionally, so no assumption separates the two. What remains is to write Schwarzschild's and Schwarzschild–de Sitter's $\partial\Gamma$ as closed forms — the derivative lemmas already exist (`deriv_gammaTtr`, `deriv_sdsF`, `deriv_sdsHalf`) — and to read the six components off one evaluation each.
+2. **Ricci flatness is a frame statement.** For Schwarzschild–de Sitter the frame tensors satisfy $R_{\mu\nu}=\Lambda\eta_{\mu\nu}$, $S=4\Lambda$ and $G_{\mu\nu}=-\Lambda\eta_{\mu\nu}$ for every $r$, and vanish at $\Lambda=0$; the link back to the metric runs through the electric-part theorems rather than a single theorem "the metric's Ricci tensor vanishes".
 3. **No global existence theory.** The constraints are formalised; existence and uniqueness for the Cauchy problem of the field equations are not, and are not axiomatised.
 4. **The contracted Bianchi identity is a hypothesis** (§4.7).
-5. **Chart restrictions.** Every component theorem assumes $r\neq0$ and $f\neq0$. For $\Lambda>0$ the latter excludes the horizon roots, which is the correct domain for the static chart but should be stated wherever the results are quoted.
+5. **Chart restrictions apply to the metric-level theorems.** The frame-level results — Weyl, Kretschmann, Ricci, Einstein — carry no hypotheses at all; the six component derivations assume $r\neq0$ and $f\neq0$, and for $\Lambda>0$ the latter excludes the horizon roots.
 6. **Alternatives are structural shadows.** The MOND, MOG, TeVeS and screening results are algebraic statements in one or two variables, not field theories. The paper's claims about them are correspondingly narrow.
-7. **The numerical check is not a proof**, and its tolerance is dominated by finite differences, not by any disagreement with the closed forms.
 
 ## 7. Reproducibility
 
@@ -197,7 +196,7 @@ bash ../scripts/proof_status.sh --check
 cd vulkan && make && ./gr_vulkan shaders/tensor.comp.spv
 ```
 
-CI (`.github/workflows/axioms.yml`) runs the silent-build check, the axiom audit and the proof-status check on every push and pull request, and runs the Vulkan pass on the lavapipe software driver, so no GPU runner is required. The shader is compiled with `glslc`; the host needs only `libvulkan`.
+The numerical pass is not a proof, and does not need to be: it now checks quantities that are themselves theorems (`kretschmann_sds`, `sdsRic_eq`), so it tests the implementation against the mathematics rather than substituting for it. CI (`.github/workflows/axioms.yml`) runs the silent-build check, the axiom audit and the proof-status check on every push and pull request, and runs the Vulkan pass on the lavapipe software driver, so no GPU runner is required. The shader is compiled with `glslc`; the host needs only `libvulkan`.
 
 ## 8. Conclusion
 
@@ -209,8 +208,8 @@ The solution theory of general relativity is formalisable, at least for the stat
 | --- | --- |
 | `Examples/Schwarzschild.lean` | 46 |
 | `Examples/SchwarzschildDeSitter.lean` | 45 |
+| `Pipeline.lean` | 27 |
 | `ScalarTensor.lean` | 26 |
-| `Pipeline.lean` | 24 |
 | `Screening.lean` | 24 |
 | `InitialValue.lean` | 20 |
 | `Alternatives.lean` | 15 |
@@ -221,9 +220,9 @@ The solution theory of general relativity is formalisable, at least for the stat
 | `Conservation.lean` | 7 |
 | `Ostrogradsky.lean` | 7 |
 | `Examples/Minkowski.lean` | 5 |
-| **Total** | **265** |
+| **Total** | **268** |
 
-All 265 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
+All 268 are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is `Proof-Status.md`.
 
 ## References
 
