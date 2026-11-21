@@ -12,7 +12,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install elan
         run: |
@@ -20,7 +20,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Cache toolchain and Lake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.elan
@@ -45,3 +45,25 @@ jobs:
 
       - name: Proof-status table is current
         run: bash scripts/proof_status.sh --check
+
+  # The Vulkan check runs on a software driver, so it needs no GPU runner.
+  vulkan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install a software Vulkan driver and shader compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libvulkan-dev mesa-vulkan-drivers glslc
+
+      - name: Build the tensor pass
+        working-directory: gravitation/vulkan
+        run: make
+
+      - name: Run the Kretschmann check on lavapipe
+        working-directory: gravitation/vulkan
+        env:
+          VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+        run: ./gr_vulkan shaders/tensor.comp.spv

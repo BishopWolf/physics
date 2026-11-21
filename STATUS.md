@@ -106,6 +106,9 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   warnings were removed by rewriting the proofs, not by disabling linters, and
   Lake's module-system advisory is opted out with `allowNonModules = true`.
   `scripts/check_messages.sh` fails if a message reappears; CI runs it.
+* GPU check — the Vulkan tensor pass runs in double precision and, for the
+  Schwarzschild metric, reproduces the proved `48M²/r⁶` to `1.2e-7`. CI runs it
+  on the lavapipe software driver, so no GPU runner is needed.
 * `gravitation/Gravitation/Examples/Schwarzschild.lean` — the Schwarzschild
   curvature in an orthonormal frame: proved Ricci flat for every mass
   parameter, with the Kretschmann sum `48 M²/r⁶`. The electric part is derived

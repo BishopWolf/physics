@@ -162,7 +162,7 @@ int main(int argc, char **argv)
     const uint32_t total = (uint32_t)G[0] * (uint32_t)G[1] * (uint32_t)G[2] *
                            (uint32_t)G[3];
     const int    STRIDE  = 50;
-    const size_t bufSize = (size_t)total * STRIDE * sizeof(float);
+    const size_t bufSize = (size_t)total * STRIDE * sizeof(double);
 
     VkApplicationInfo app = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
     app.pApplicationName = "gr-tensor-vulkan";
@@ -182,9 +182,20 @@ int main(int argc, char **argv)
     qci.queueCount = 1;
     qci.pQueuePriorities = &prio;
 
+    VkPhysicalDeviceFeatures feats;
+    vkGetPhysicalDeviceFeatures(gPhys, &feats);
+    if (!feats.shaderFloat64) {
+        fprintf(stderr, "this device does not support shaderFloat64, which "
+                        "tensor.comp needs for double precision\n");
+        exit(2);
+    }
+    VkPhysicalDeviceFeatures enable = {0};
+    enable.shaderFloat64 = VK_TRUE;
+
     VkDeviceCreateInfo dci = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
     dci.queueCreateInfoCount = 1;
     dci.pQueueCreateInfos = &qci;
+    dci.pEnabledFeatures = &enable;
     CHECK(vkCreateDevice(gPhys, &dci, NULL, &gDev));
     vkGetDeviceQueue(gDev, qf, 0, &gQueue);
 
@@ -266,9 +277,9 @@ int main(int argc, char **argv)
     vkDestroyShaderModule(gDev, sm, NULL);
 
     const Case cases[] = {
-        {0, "Minkowski (flat)", 1.0f, 0.0f, 1e-3},
-        {1, "Schwarzschild (vacuum)", 1.0f, 0.0f, 2e-2},
-        {2, "Schwarzschild-de Sitter", 1.0f, 0.1f, 2e-2},
+        {0, "Minkowski (flat)", 1.0f, 0.0f, 1e-6},
+        {1, "Schwarzschild (vacuum)", 1.0f, 0.0f, 1e-6},
+        {2, "Schwarzschild-de Sitter", 1.0f, 0.1f, 1e-6},
     };
 
     int failures = 0;
@@ -280,7 +291,7 @@ int main(int argc, char **argv)
         P.metricId = cases[c].id;
         P.massM    = cases[c].M;
         P.lambdaC  = cases[c].Lambda;
-        P.h        = 1e-2f;
+        P.h        = 1e-4f;
         P.lo[0] = 0.0f; P.lo[1] = 3.0f; P.lo[2] = 0.5f; P.lo[3] = 0.3f;
         P.stepv[0] = 0.1f; P.stepv[1] = 0.15f; P.stepv[2] = 0.2f; P.stepv[3] = 0.2f;
         for (int k = 0; k < 4; ++k)
@@ -321,17 +332,17 @@ int main(int argc, char **argv)
 
         void *mapped;
         CHECK(vkMapMemory(gDev, gMem, 0, bufSize, 0, &mapped));
-        const float *d = mapped;
+        const double *d = mapped;
 
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
         double maxKrel = 0.0;
-        const double kTol = 5e-2;
+        const double kTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
-            const float *o   = d + (size_t)p * STRIDE;
-            const float *g   = o;
-            const float *ric = o + 16;
-            double       R   = o[32];
-            const float *Gm  = o + 33;
+            const double *o   = d + (size_t)p * STRIDE;
+            const double *g   = o;
+            const double *ric = o + 16;
+            double        R   = o[32];
+            const double *Gm  = o + 33;
 
             for (int i = 0; i < 16; ++i) {
                 double ric_i = ric[i];

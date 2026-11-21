@@ -305,8 +305,9 @@ make
 ./gr_vulkan shaders/tensor.comp.spv
 ```
 
-Requires `glslc` (shaderc), `libvulkan` and an ICD; exits nonzero if a case
-exceeds tolerance. `torchvulkan` is not needed — the pipeline is a native
+Requires `glslc` (shaderc), `libvulkan`, an ICD and a device with
+`shaderFloat64`; exits nonzero if a case exceeds tolerance. CI runs it on the
+lavapipe software driver, so the check needs no GPU runner. `torchvulkan` is not needed — the pipeline is a native
 compute shader with no PyTorch dependency.
 
 ## Axiom policy
