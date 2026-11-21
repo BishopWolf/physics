@@ -24,7 +24,7 @@ gravitation/
 │   ├── Alternatives.lean        MOND, MOG and TeVeS: proved structural properties
 │   └── Examples/Minkowski.lean  Minkowski as a proved vacuum solution
 ├── Gravitation.lean             library root
-├── lakefile.toml                Mathlib v4.36.0, Lean v4.36.0
+├── lakefile.toml                Physlib 56430c6 (Mathlib v4.36.0), Lean v4.36.0
 └── vulkan/
     ├── shaders/tensor.comp      GLSL compute: Γ, Ric, R, G on a spacetime lattice
     ├── src/gr_vulkan.c          Vulkan host: dispatch, readback, tolerance checks
@@ -33,7 +33,7 @@ gravitation/
 
 ## What is proved in Lean
 
-All in `gravitation/`, checked by the Lean kernel against Mathlib v4.36.0, no
+All in `gravitation/`, checked by the Lean kernel against Physlib / Mathlib v4.36.0, no
 `sorry`, no added axioms.
 
 | Result | Statement |
@@ -308,7 +308,7 @@ not a proof, and finite differences say nothing about the analytic solution.
 
 ## Build and run
 
-Lean (first build fetches Mathlib):
+Lean (first build fetches Physlib and transitive Mathlib):
 
 ```sh
 cd gravitation

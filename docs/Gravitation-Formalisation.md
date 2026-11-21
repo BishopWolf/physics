@@ -48,7 +48,7 @@ Two conclusions follow. First, curvature *definitions* are not the bottleneck. S
 
 ## 3. Framework and verification regime
 
-The development is Lean 4 against Mathlib `v4.36.0`.
+The development is Lean 4 with Physlib (`56430c6`), which pulls Mathlib `v4.36.0` transitively.
 
 **Interfaces.** Curvature is a bundled structure carrying the algebraic symmetries it must satisfy — antisymmetry in the last pair, pair symmetry, and the first Bianchi identity — so that a "Riemann tensor" cannot be constructed without them. A `Metric` carries its inverse and the proof that the two compose to the identity, so contractions use the inverse actually proved for that metric. Ricci, the scalar curvature and the Einstein tensor are defined by contraction and are therefore available for any bundle satisfying the interface.
 
