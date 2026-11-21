@@ -291,6 +291,26 @@ Requires `glslc` (shaderc), `libvulkan` and an ICD; exits nonzero if a case
 exceeds tolerance. `torchvulkan` is not needed — the pipeline is a native
 compute shader with no PyTorch dependency.
 
+## Axiom policy
+
+The development may use only axioms that the base libraries already assume.
+In practice that is `propext`, `Classical.choice` and `Quot.sound` — the three
+axioms Mathlib (and PhysLib) are built on. This repository declares no `axiom`,
+`constant` or `opaque` of its own, contains no `sorry`, `admit`,
+`native_decide` or `Lean.trustCompiler`, and every theorem is checked to stay
+inside the base set.
+
+The check is automated:
+
+```sh
+scripts/audit_axioms.sh
+```
+
+It fails on any forbidden declaration, generates `#print axioms` for every
+theorem under `gravitation/Gravitation/`, and rejects any axiom outside
+`{propext, Classical.choice, Quot.sound}`. Nothing in the library is justified
+by an assumption introduced here.
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Alex Vergara Gil.

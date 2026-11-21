@@ -93,9 +93,13 @@ a GPU numerical check of the solutions the Lean side cannot yet reach.
   density-dependent mass, the shrinking Compton range, exponential Yukawa
   suppression beyond it, and the thin-shell cap on the fifth force.
 * `gravitation/Gravitation/Ostrogradsky.lean` — the Ostrogradsky instability:
-a  degenerate velocity Hessian for `L = ½q̈² + V`, a Hamiltonian affine in one
+  a degenerate velocity Hessian for `L = ½q̈² + V`, a Hamiltonian affine in one
   momentum and unbounded below, contrasted with a positive-definite quadratic
   kinetic term.
+* Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
+  `native_decide` anywhere in `Gravitation/`; `scripts/audit_axioms.sh` checks
+  every theorem against `{propext, Classical.choice, Quot.sound}`, the axioms
+  the base libraries already assume.
 * `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
   accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
   conserved combination of `Ric` and `S g`.
