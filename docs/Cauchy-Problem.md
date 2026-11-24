@@ -38,8 +38,9 @@ concrete formalisation roadmap. The energy method then proves zero-data
 uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
-energy and uniqueness modules, together with the 3D divergence foundation,
-contribute 154 of the 858 audited declarations in Paper I's development.
+energy, uniqueness, chart-manifold, and general Bianchi modules, together with
+the 3D divergence foundation, contribute 199 of the 903 audited declarations in
+Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -200,8 +201,13 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `ChartSpacetime.covariantDerivVector` | coordinate covariant derivative of a vector field |
 | `minkowskiChart_covariantDerivVector_const` | constant fields are parallel in the Minkowski chart |
 | `ChartSpacetime.christoffel_symm` | chart connection is torsion-free |
-| `ChartSpacetime.metricCovariantDeriv` | coordinate covariant derivative of the metric |
-| `ChartSpacetime.IsLeviCivita`, `minkowskiChart_isLeviCivita` | chart-level Levi-Civita certificate and Minkowski instance |
+| `ChartSpacetime.metricCovariantDeriv`, `metricCovariantDeriv_eq_zero` | coordinate covariant derivative of any chart metric vanishes |
+| `ChartSpacetime.IsLeviCivita`, `ChartSpacetime.isLeviCivita` | every `ChartSpacetime` carries a canonical Levi-Civita connection |
+| `SmoothChartSpacetime`, `chartedSpace`, `minkowskiSmoothChart` | Mathlib `ChartedSpace` manifold atlas bridge on chart homeomorphisms |
+| `IsCauchySurface`, `IsGloballyHyperbolic`, `minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface (`t = 0`) and Minkowski global hyperbolicity |
+| `Bianchi.pd_comm_of_contDiffAt` | Schwarz mixed-partial symmetry from Mathlib `IsSymmSndFDerivAt` |
+| `Bianchi.metric_compat`, `Bianchi.inv_metric_compat` | general metric and inverse metric compatibility in `n` dimensions |
+| `Bianchi.second_bianchi`, `Bianchi.contracted_bianchi`, `Bianchi.covDiv_einstein_eq_zero` | general second and contracted Bianchi identities (`∇·G = 0`) |
 | `ChartSpacetime.causalCharacter_cases` | every vector has one of the three causal characters |
 | `lightlikeVector`, `minkowskiChart_null_lightlike` | explicit null vector in the Minkowski chart |
 | `ChartInitialData`, `minkowskiChartInitialData` | chart ADM data with flat vacuum instance |
@@ -338,22 +344,20 @@ development from the theorem above.
    solution of the reduced system satisfies the gauge condition and the full
    Einstein equations, that the constraints propagate, and that developments can
    be patched to a maximal one. Constraint propagation uses the contracted
-   Bianchi identity. Paper I proves that identity for the frame Einstein space
-   (`sds_frame_bianchi`), but the general `CurvDeriv` lemmas still take it as a
-   parameter, so the general covariant statement is also part of this layer.
-   Maximality then needs the Zorn argument of [1] or the construction of [2],
-   together with an isometry/embedding API.
+   Bianchi identity, which `Gravitation.Bianchi` now proves in general
+   coordinates and arbitrary dimension (`second_bianchi`, `contracted_bianchi`,
+   `covDiv_einstein_eq_zero`). Maximality then needs the Zorn argument of [1]
+   or the construction of [2], together with an isometry/embedding API.
 
 ## 7. A formalisation roadmap
 
-The layers above suggest an order in which the work can be made checkable. Each
-milestone has an acceptance criterion; none is claimed as done here.
+The layers above suggest an order in which the work can be made checkable.
 
 | Milestone | Content | Acceptance criterion |
 | --- | --- | --- |
 | M0 | Linear 3D wave model on a box: energy, conservation, zero-energy, zero-data and general-data uniqueness | **Done**: `waveEnergy3D_eq_initial_of_wave`, `eq_zero_of_waveEnergy3D_eq_zero`, `wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`; closed-box uniqueness under explicit regularity |
 | M0.5 | Linearized Einstein equations in wave gauge | **Interface**: `WaveGaugePerturbation` and `linEinstein_eq_zero_of_waveGauge`, with `ttWave_waveGauge` as a concrete TT-plane-wave instance; uses the existing `linEinstein_lorenz_gauge` reduction, not a manifold derivation |
-| M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality | **Complete at chart scope**: `ChartSpacetime`, chart metric/connection/curvature via `Pipeline`, torsion-free connection, Minkowski Levi-Civita certificate, causal classification, and covariant derivatives; smooth-manifold structure, a general Levi-Civita compatibility theorem, and global causality remain outside this chart interface |
+| M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality, Bianchi | **Done at chart/global-chart scope**: `SmoothChartSpacetime` (`ChartedSpace`), general `ChartSpacetime.isLeviCivita` (`metricCovariantDeriv_eq_zero`), `IsCauchySurface`, `minkowskiChart_globallyHyperbolic`, and general `Bianchi.second_bianchi` / `contracted_bianchi` / `covDiv_einstein_eq_zero`; arbitrary multi-chart manifold gluing remains outside |
 | M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Complete at chart scope**: smooth chart metric regularity, injective and smooth `t = 0` slice embedding, smooth induced spatial metric field, regular initial-data packaging, and zero constraint residuals with a Minkowski instance; manifold Sobolev `H^s` spaces, trace/embedding estimates, and constraint solving remain outside this chart interface |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | **Scoped model + interface**: `ReducedWave3D` proves existence and Cauchy data for an embedded linear 3D wave model; `ReducedLocalExistenceCertificate` states the missing quasilinear local-existence and uniqueness input. No quasilinear or gauge existence is proved. |
 | M4 | Gauge recovery and constraint propagation | **Interface only**: `GaugeRecoveryProblem` and `GaugeRecoveryCertificate` state the missing gauge-recovery, full-Einstein and constraint-preservation inputs. No certificate is constructed. |
@@ -363,11 +367,15 @@ milestone has an acceptance criterion; none is claimed as done here.
 M0 is complete for the linear constant-coefficient wave model; it is a model
 result, not an Einstein theorem. M0.5 is a concrete coordinate-level interface
 for the linearized wave-gauge equations, not a proof of the manifold-level
-reduction. M1 is complete at chart scope: `ChartSpacetime` carries coordinate Christoffel,
-Riemann, Ricci, scalar and Einstein tensors, Minkowski vanishing checks,
-timelike/null/spacelike classification, covariant derivatives, torsion-freeness,
-and a Minkowski Levi-Civita certificate. It does not provide a smooth manifold,
-a general Levi-Civita compatibility theorem, or global causality. M2 is complete
+reduction. M1 is complete at global-chart scope: `ChartSpacetime` carries
+coordinate Christoffel, Riemann, Ricci, scalar and Einstein tensors, Minkowski
+vanishing checks, timelike/null/spacelike classification, covariant derivatives,
+torsion-freeness, general metric compatibility for every `ChartSpacetime`
+(`ChartSpacetime.isLeviCivita`), a Mathlib `ChartedSpace` bridge
+(`SmoothChartSpacetime`), chart Cauchy surfaces and Minkowski global
+hyperbolicity (`minkowskiChart_globallyHyperbolic`), plus `Gravitation.Bianchi`
+for the general `n`-dimensional second and contracted Bianchi identities and
+`∇·G = 0`. Arbitrary multi-chart manifold gluing remains open. M2 is complete
 at chart scope: `ChartInitialData` carries the ADM bridge, smooth chart
 regularity, the slice embedding, the induced spatial metric field, and zero
 constraint residuals, with `minkowskiChartInitialData` as the flat instance. It
@@ -386,22 +394,23 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 858 declarations. It contains the
+The development audited in Paper I now has 903 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
-uniqueness theorems, the linearized wave-gauge interface and the chart-level M1
-interface discussed above, together with the solution theory, the alternative
-theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is 154 declarations across thirteen modules: `Gravitation.WaveCauchy`,
-`Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
-`Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
-`Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
-`Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge` and
-`Gravitation.ManifoldInterface`, `Gravitation.InitialDataInterface`,
+uniqueness theorems, the linearized wave-gauge interface, the chart-level M1
+interface, and the general Bianchi module discussed above, together with the
+solution theory, the alternative theories, the axiom audit and the numerical
+pass. This paper's Lean contribution is 199 declarations across fourteen
+modules: `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
+`Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
+`Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation`,
+`Gravitation.WaveEnergy3DWave`, `Gravitation.WaveUniqueness3D`,
+`Gravitation.LinearizedWaveGauge`, `Gravitation.ManifoldInterface`,
+`Gravitation.Bianchi`, `Gravitation.InitialDataInterface`,
 `Gravitation.CauchyInterfaces` and `Gravitation.ReducedWave3D`; the remainder is
-the written account of the initial-value side and of the roadmap. Every formal claim made here is therefore
-part of the same audit.
+the written account of the initial-value side and of the roadmap. Every formal
+claim made here is therefore part of the same audit.
 
 The two papers share a boundary. Paper I proves that explicit metrics solve
 their field equations on their coordinate domains; this paper asks whether
@@ -413,22 +422,21 @@ take for granted when they exhibit a solution.
 
 ## 9. Reproducibility and trust
 
-This paper adds prose and thirteen Lean modules, `Gravitation.WaveCauchy`,
+This paper adds prose and fourteen Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
-`Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge` and
-`Gravitation.ManifoldInterface`, `Gravitation.InitialDataInterface`,
-`Gravitation.CauchyInterfaces` and `Gravitation.ReducedWave3D`
-(154 declarations). The audited
-development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 858 declarations with axioms inside
+`Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge`,
+`Gravitation.ManifoldInterface`, `Gravitation.Bianchi`,
+`Gravitation.InitialDataInterface`, `Gravitation.CauchyInterfaces` and
+`Gravitation.ReducedWave3D` (199 declarations). The audited development is the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 903 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
 `PhyslibAlpha.Relativity.General.*`, with the same namespace and proofs.
 
-The fifteen formal modules named here can be read directly:
+The sixteen formal modules named here can be read directly:
 
 - `gravitation/Gravitation/WaveCauchy.lean`
 - `gravitation/Gravitation/WaveEnergy.lean`
@@ -440,6 +448,7 @@ The fifteen formal modules named here can be read directly:
 - `gravitation/Gravitation/WaveUniqueness3D.lean`
 - `gravitation/Gravitation/LinearizedWaveGauge.lean`
 - `gravitation/Gravitation/ManifoldInterface.lean`
+- `gravitation/Gravitation/Bianchi.lean`
 - `gravitation/Gravitation/InitialDataInterface.lean`
 - `gravitation/Gravitation/CauchyInterfaces.lean`
 - `gravitation/Gravitation/ReducedWave3D.lean`
@@ -453,12 +462,13 @@ The fifteen formal modules named here can be read directly:
 - No solution of the constraint equations, and no construction of `R3` from `h`
   or `dK` from `K`.
 - No global existence or maximal-interval theorem for geodesics.
-- No smooth-manifold, Levi-Civita compatibility, curvature-from-manifold-metric or
-  global causality layer. The M1 contribution is the chart-level `ChartSpacetime`
-  interface, its Pipeline-derived connection and curvature, a chart-level
+- No arbitrary multi-chart manifold gluing or general curved global hyperbolicity.
+  The M1 contribution is the chart-level `ChartSpacetime` and `SmoothChartSpacetime`
+  (`ChartedSpace`) interface, its Pipeline-derived connection and curvature,
   timelike/null/spacelike classification, covariant derivatives, torsion-freeness,
-  and a Minkowski Levi-Civita certificate. There is no smooth-manifold or general
-  Levi-Civita compatibility proof, and no global causality theorem. The formalised 3D wave theorem is linear
+  general Levi-Civita compatibility (`ChartSpacetime.isLeviCivita`), Minkowski
+  global hyperbolicity (`minkowskiChart_globallyHyperbolic`), and the general
+  `n`-dimensional second and contracted Bianchi identities (`Gravitation.Bianchi`). The formalised 3D wave theorem is linear
   and constant-coefficient.
 - No global uniqueness theorem for the wave Cauchy problem. The formalised
   results are zero-data uniqueness on `Icc 0 L` and, by applying it to the
@@ -479,10 +489,8 @@ The fifteen formal modules named here can be read directly:
   certificates; M6 has the Minkowski chart-development cross-check and an
   uninhabited explicit-recovery certificate. No quasilinear Einstein existence,
   gauge recovery, constraint propagation, maximal development, isometry
-  uniqueness, or Schwarzschild/de Sitter/Kerr/FLRW development is claimed. M1
-  and M2 are chart-level interfaces, not smooth-manifold or Sobolev theorems;
-  in particular M2 does not construct `H^s` spaces, prove trace/embedding
-  estimates, or solve the constraints.
+  uniqueness, or Schwarzschild/de Sitter/Kerr/FLRW development is claimed.
+  M2 is a chart-level interface, not a Sobolev or constraint-solving theorem.
 - No axiom, `sorry`, or cited theorem smuggled in as a hypothesis. The CBG
   statement in §5 is prose with references; it is not a Lean declaration.
 

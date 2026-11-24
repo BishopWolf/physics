@@ -20,6 +20,10 @@ module
 
 public import Gravitation.Relativity.General.Minkowski
 public import Gravitation.Relativity.General.Pipeline
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Geometry.Manifold.ChartedSpace
+public import Mathlib.Geometry.Manifold.IsManifold.Basic
 public import Mathlib.Topology.Basic
 public import Mathlib.Topology.Constructions
 public import Mathlib.Topology.Instances.Real.Lemmas
@@ -292,6 +296,75 @@ lemma minkowskiChart_metricCovariantDeriv_zero
   rw [hpd, h1, h2]
   ring
 
+/-- **General chart-level metric compatibility**: every `ChartSpacetime` has
+vanishing coordinate covariant derivative of the metric, `∇_i g_{jk} = 0`. -/
+lemma ChartSpacetime.metricCovariantDeriv_eq_zero (X : ChartSpacetime)
+    (x : SpacetimeChart) (i j k : Fin 4) :
+    X.metricCovariantDeriv x i j k = 0 := by
+  have hInv : ∀ m q : Fin 4,
+      (∑ l : Fin 4, X.coordinateInverseMetric x l m * X.coordinateMetric x l q) =
+        if m = q then 1 else 0 := by
+    intro m q
+    have hinvR := congrFun (congrFun (X.metric (X.chart.symm x)).inv_right m) q
+    have hgsym : ∀ a b, X.coordinateInverseMetric x a b = X.coordinateInverseMetric x b a :=
+      (X.metric (X.chart.symm x)).ginv_symm
+    calc
+      ∑ l : Fin 4, X.coordinateInverseMetric x l m * X.coordinateMetric x l q
+          = ∑ l : Fin 4, X.coordinateInverseMetric x m l * X.coordinateMetric x l q := by
+            apply Finset.sum_congr rfl
+            intro l _
+            rw [hgsym l m]
+      _ = if m = q then 1 else 0 := by
+            simpa [ChartSpacetime.coordinateMetric, ChartSpacetime.coordinateInverseMetric,
+              Matrix.mul_apply, Matrix.one_apply] using hinvR
+  have hsum : ∀ p q : Fin 4,
+      (∑ l : Fin 4, X.christoffel x l i p * X.coordinateMetric x l q) =
+        (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y p q) x
+          + Pipeline.pd p (fun y => X.coordinateMetric y i q) x
+          - Pipeline.pd q (fun y => X.coordinateMetric y i p) x) := by
+    intro p q
+    simp only [ChartSpacetime.christoffel, Pipeline.christoffel,
+      Finset.mul_sum, Finset.sum_mul]
+    rw [Finset.sum_comm]
+    calc
+      ∑ m : Fin 4, ∑ l : Fin 4, (1 / 2) * (X.coordinateInverseMetric x l m *
+          (Pipeline.pd i (fun y => X.coordinateMetric y p m) x
+            + Pipeline.pd p (fun y => X.coordinateMetric y i m) x
+            - Pipeline.pd m (fun y => X.coordinateMetric y i p) x)) *
+          X.coordinateMetric x l q
+          = ∑ m : Fin 4, (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y p m) x
+              + Pipeline.pd p (fun y => X.coordinateMetric y i m) x
+              - Pipeline.pd m (fun y => X.coordinateMetric y i p) x) *
+              (∑ l : Fin 4, X.coordinateInverseMetric x l m * X.coordinateMetric x l q) := by
+            apply Finset.sum_congr rfl
+            intro m _
+            rw [Finset.mul_sum]
+            apply Finset.sum_congr rfl
+            intro l _
+            ring
+      _ = (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y p q) x
+            + Pipeline.pd p (fun y => X.coordinateMetric y i q) x
+            - Pipeline.pd q (fun y => X.coordinateMetric y i p) x) := by
+            simp_rw [hInv]
+            simp
+  have hg2 : (∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x j l) =
+      (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y k j) x
+        + Pipeline.pd k (fun y => X.coordinateMetric y i j) x
+        - Pipeline.pd j (fun y => X.coordinateMetric y i k) x) := by
+    have hrewrite : (∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x j l) =
+        ∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x l j := by
+      apply Finset.sum_congr rfl
+      intro l _
+      have hsym : X.coordinateMetric x j l = X.coordinateMetric x l j :=
+        (X.metric (X.chart.symm x)).symm j l
+      rw [hsym]
+    rw [hrewrite, hsum k j]
+  have hpd_sym : Pipeline.pd i (fun y => X.coordinateMetric y k j) x =
+      Pipeline.pd i (fun y => X.coordinateMetric y j k) x :=
+    Pipeline.pd_congr i x fun y => (X.metric (X.chart.symm y)).symm k j
+  rw [ChartSpacetime.metricCovariantDeriv, hsum j k, hg2, hpd_sym]
+  ring
+
 /-- A chart-level Levi-Civita certificate: torsion-freeness together with metric
 compatibility. -/
 structure ChartSpacetime.IsLeviCivita (X : ChartSpacetime) : Prop where
@@ -302,10 +375,15 @@ structure ChartSpacetime.IsLeviCivita (X : ChartSpacetime) : Prop where
   metric_compatible : ∀ (x : SpacetimeChart) (i j k : Fin 4),
     X.metricCovariantDeriv x i j k = 0
 
+/-- Every `ChartSpacetime` carries a canonical torsion-free, metric-compatible
+Levi-Civita connection in its coordinate chart. -/
+lemma ChartSpacetime.isLeviCivita (X : ChartSpacetime) : X.IsLeviCivita where
+  torsion_free := X.christoffel_symm
+  metric_compatible := X.metricCovariantDeriv_eq_zero
+
 /-- The Minkowski chart carries a chart-level Levi-Civita connection. -/
-lemma minkowskiChart_isLeviCivita : minkowskiChart.IsLeviCivita where
-  torsion_free := minkowskiChart.christoffel_symm
-  metric_compatible := minkowskiChart_metricCovariantDeriv_zero
+lemma minkowskiChart_isLeviCivita : minkowskiChart.IsLeviCivita :=
+  minkowskiChart.isLeviCivita
 
 /-- Every chart tangent vector has one of the three causal characters. -/
 lemma ChartSpacetime.causalCharacter_cases (X : ChartSpacetime)
@@ -314,5 +392,89 @@ lemma ChartSpacetime.causalCharacter_cases (X : ChartSpacetime)
       X.causalCharacter x v = .null ∨
       X.causalCharacter x v = .spacelike := by
   cases X.causalCharacter x v <;> simp
+
+/-! ### Mathlib charted-manifold bridge and global hyperbolicity -/
+
+/-- A `ChartSpacetime` whose chart bijection is a Mathlib homeomorphism,
+equipping its carrier with a `ChartedSpace SpacetimeChart` manifold atlas. -/
+structure SmoothChartSpacetime extends ChartSpacetime where
+  /-- Global chart homeomorphism onto `ℝ⁴`. -/
+  chartHomeo : @Homeomorph carrier SpacetimeChart topology inferInstance
+  /-- Compatibility with `ChartSpacetime.chart`. -/
+  chart_eq : ∀ p, chart p = chartHomeo p
+
+/-- Construct a Mathlib `ChartedSpace SpacetimeChart` structure on any
+`SmoothChartSpacetime` carrier. -/
+@[instance_reducible]
+noncomputable def SmoothChartSpacetime.chartedSpace (X : SmoothChartSpacetime) :
+    @ChartedSpace SpacetimeChart _ X.carrier X.topology :=
+  let _ : TopologicalSpace X.carrier := X.topology
+  X.chartHomeo.symm.chartedSpace
+
+/-- Minkowski spacetime as a `SmoothChartSpacetime`. -/
+def minkowskiSmoothChart : SmoothChartSpacetime where
+  toChartSpacetime := minkowskiChart
+  chartHomeo := Homeomorph.refl SpacetimeChart
+  chart_eq := fun _ => rfl
+
+/-- A `C¹` future-directed timelike curve in a chart spacetime. -/
+def ChartSpacetime.IsFutureTimelikeCurve (X : ChartSpacetime)
+    (γ : ℝ → SpacetimeChart) : Prop :=
+  (∀ t, DifferentiableAt ℝ γ t) ∧
+  (∀ t, X.IsTimelike (γ t) (deriv γ t)) ∧
+  (∀ t, 0 < deriv γ t 0)
+
+/-- A `C¹` future-directed causal curve in a chart spacetime. -/
+def ChartSpacetime.IsFutureCausalCurve (X : ChartSpacetime)
+    (γ : ℝ → SpacetimeChart) : Prop :=
+  (∀ t, DifferentiableAt ℝ γ t) ∧
+  (∀ t, X.IsTimelike (γ t) (deriv γ t) ∨ X.IsNull (γ t) (deriv γ t)) ∧
+  (∀ t, 0 ≤ deriv γ t 0)
+
+/-- Causal precedence `p ≤ q` via a future-directed causal curve on `[0, 1]`. -/
+def ChartSpacetime.CausalPrecedes (X : ChartSpacetime)
+    (p q : SpacetimeChart) : Prop :=
+  ∃ γ : ℝ → SpacetimeChart, X.IsFutureCausalCurve γ ∧ γ 0 = p ∧ γ 1 = q
+
+/-- A set `S` is a chart Cauchy surface when every inextendible future-directed
+timelike curve (with unbounded coordinate time) meets `S` at a unique parameter
+value. -/
+def ChartSpacetime.IsCauchySurface (X : ChartSpacetime)
+    (S : Set SpacetimeChart) : Prop :=
+  ∀ γ : ℝ → SpacetimeChart,
+    X.IsFutureTimelikeCurve γ →
+    Function.Surjective (fun t => γ t 0) →
+    ∃! t : ℝ, γ t ∈ S
+
+/-- A chart spacetime is globally hyperbolic when it admits a Cauchy surface. -/
+def ChartSpacetime.IsGloballyHyperbolic (X : ChartSpacetime) : Prop :=
+  ∃ S : Set SpacetimeChart, X.IsCauchySurface S
+
+/-- Coordinate time along a future-directed timelike curve in `ℝ⁴` has positive
+time derivative. -/
+lemma hasDerivAt_coord_zero_pos {γ : ℝ → SpacetimeChart}
+    (hdiff : ∀ t, DifferentiableAt ℝ γ t) (hpos : ∀ t, 0 < deriv γ t 0)
+    (t : ℝ) :
+    0 < deriv (fun s => γ s 0) t := by
+  have hpi : HasDerivAt (fun s => γ s 0) (deriv γ t 0) t := by
+    have hd := (hdiff t).hasDerivAt
+    exact (hasDerivAt_pi.mp hd) 0
+  simpa [hpi.deriv] using hpos t
+
+/-- The constant-time slice `t = 0` is a Cauchy surface in `minkowskiChart`. -/
+theorem minkowskiChart_t0_cauchySurface :
+    minkowskiChart.IsCauchySurface {x : SpacetimeChart | x 0 = 0} := by
+  intro γ ⟨hdiff, _htime, hpos⟩ hsurj
+  obtain ⟨t₀, ht₀⟩ := hsurj 0
+  have hmono : StrictMono (fun t => γ t 0) :=
+    strictMono_of_deriv_pos (hasDerivAt_coord_zero_pos hdiff hpos)
+  refine ⟨t₀, ht₀, ?_⟩
+  intro t ht
+  exact hmono.injective (by simpa [Set.mem_ofPred_eq, ht₀] using ht)
+
+/-- Minkowski spacetime is globally hyperbolic. -/
+theorem minkowskiChart_globallyHyperbolic :
+    minkowskiChart.IsGloballyHyperbolic :=
+  ⟨{x : SpacetimeChart | x 0 = 0}, minkowskiChart_t0_cauchySurface⟩
 
 end GeneralRelativity
