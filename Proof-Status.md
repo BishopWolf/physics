@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 790
-declarations, 525 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 793
+declarations, 528 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -19,6 +19,9 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ChartSpacetime.spatialMetric` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_spatialMetric` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartInitialData.ham_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartInitialData.mom_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartInitialData.isVacuumData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChartInitialData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChartInitialData_metric` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChartInitialData_ham_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |

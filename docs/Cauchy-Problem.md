@@ -39,7 +39,7 @@ uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy and uniqueness modules, together with the 3D divergence foundation,
-contribute eighty-six of the 790 audited declarations in Paper I's development.
+contribute eighty-nine of the 793 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -199,6 +199,7 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `lightlikeVector`, `minkowskiChart_null_lightlike` | explicit null vector in the Minkowski chart |
 | `ChartInitialData`, `minkowskiChartInitialData` | chart ADM data with flat vacuum instance |
 | `minkowskiChartInitialData_metric` | induced spatial metric equals the flat ADM metric |
+| `ChartInitialData.ham_zero`, `mom_zero`, `isVacuumData` | constraint projections from chart ADM data |
 
 This is a real Cauchy theorem in the sense that the data are arbitrary
 functions with the stated differentiability, and the formula is proved to have
@@ -366,14 +367,14 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 790 declarations. It contains the
+The development audited in Paper I now has 793 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
 uniqueness theorems, the linearized wave-gauge interface and the chart-level M1
 interface discussed above, together with the solution theory, the alternative
 theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is eighty-six declarations across eleven modules: `Gravitation.WaveCauchy`,
+is eighty-nine declarations across eleven modules: `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -398,9 +399,9 @@ This paper adds prose and eleven Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
 `Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge` and
 `Gravitation.ManifoldInterface`, `Gravitation.InitialDataInterface`
-(eighty-six declarations). The audited
+(eighty-nine declarations). The audited
 development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 790 declarations with axioms inside
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 793 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are

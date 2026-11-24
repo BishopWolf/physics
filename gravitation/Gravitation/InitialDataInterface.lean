@@ -46,6 +46,20 @@ structure ChartInitialData (X : ChartSpacetime) where
   /-- The vacuum constraint equations. -/
   vacuum : data.IsVacuumData dK
 
+/-- Every bundled chart initial data set satisfies the Hamiltonian constraint. -/
+lemma ChartInitialData.ham_zero (D : ChartInitialData X) : D.data.ham = 0 :=
+  D.vacuum.1
+
+/-- Every bundled chart initial data set satisfies the momentum constraint. -/
+lemma ChartInitialData.mom_zero (D : ChartInitialData X) (i : Fin 3) :
+    momConstraint D.dK i = 0 :=
+  D.vacuum.2 i
+
+/-- The bundled vacuum predicate is exactly `InitialData.IsVacuumData`. -/
+lemma ChartInitialData.isVacuumData (D : ChartInitialData X) :
+    D.data.IsVacuumData D.dK :=
+  D.vacuum
+
 /-- Flat Minkowski initial data on the Minkowski chart. -/
 def minkowskiChartInitialData : ChartInitialData minkowskiChart where
   data := flatData
