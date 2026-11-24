@@ -125,4 +125,43 @@ lemma minkowskiChart_einstein_zero (x : SpacetimeChart) (i j : Fin 4) :
     Pipeline.einsteinOf_const minkowskiChart.coordinateMetric
       minkowskiChart.coordinateInverseMetric eta4 (fun _ => rfl) x i j
 
+/-- The squared Lorentzian norm of a chart tangent vector. -/
+noncomputable def ChartSpacetime.normSq (X : ChartSpacetime)
+    (x : SpacetimeChart) (v : Fin 4 → ℝ) : ℝ :=
+  ∑ i : Fin 4, ∑ j : Fin 4, X.coordinateMetric x i j * v i * v j
+
+/-- A chart vector is timelike when its squared Lorentzian norm is negative. -/
+def ChartSpacetime.IsTimelike (X : ChartSpacetime)
+    (x : SpacetimeChart) (v : Fin 4 → ℝ) : Prop :=
+  X.normSq x v < 0
+
+/-- A chart vector is null when its squared Lorentzian norm vanishes. -/
+def ChartSpacetime.IsNull (X : ChartSpacetime)
+    (x : SpacetimeChart) (v : Fin 4 → ℝ) : Prop :=
+  X.normSq x v = 0
+
+/-- A chart vector is spacelike when its squared Lorentzian norm is positive. -/
+def ChartSpacetime.IsSpacelike (X : ChartSpacetime)
+    (x : SpacetimeChart) (v : Fin 4 → ℝ) : Prop :=
+  0 < X.normSq x v
+
+lemma minkowskiChart_normSq (x : SpacetimeChart) (v : Fin 4 → ℝ) :
+    minkowskiChart.normSq x v =
+      -(v 0) ^ 2 + (v 1) ^ 2 + (v 2) ^ 2 + (v 3) ^ 2 := by
+  simp [ChartSpacetime.normSq, ChartSpacetime.coordinateMetric,
+    minkowskiChart, minkowski, eta4, Fin.sum_univ_four]
+  ring
+
+/-- The time basis vector is timelike in the Minkowski chart. -/
+lemma minkowskiChart_timelike_time (x : SpacetimeChart) :
+    minkowskiChart.IsTimelike x (Pi.single 0 1) := by
+  rw [ChartSpacetime.IsTimelike, minkowskiChart_normSq]
+  simp [Pi.single_eq_same, Pi.single_eq_of_ne]
+
+/-- A spatial basis vector is spacelike in the Minkowski chart. -/
+lemma minkowskiChart_spacelike_space (x : SpacetimeChart) :
+    minkowskiChart.IsSpacelike x (Pi.single 1 1) := by
+  rw [ChartSpacetime.IsSpacelike, minkowskiChart_normSq]
+  simp [Pi.single_eq_same, Pi.single_eq_of_ne]
+
 end GeneralRelativity

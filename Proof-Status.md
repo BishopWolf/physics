@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 775
-declarations, 518 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 782
+declarations, 521 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -39,6 +39,13 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.minkowskiChart_ricci_zero` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_scalar_zero` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_einstein_zero` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartSpacetime.normSq` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartSpacetime.IsTimelike` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartSpacetime.IsNull` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartSpacetime.IsSpacelike` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiChart_normSq` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiChart_timelike_time` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiChart_spacelike_space` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Tensor2` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsSymm` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.isSymm_zero` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
