@@ -39,7 +39,7 @@ uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy and uniqueness modules, together with the 3D divergence foundation,
-contribute fifty-two of the 756 audited declarations in Paper I's development.
+contribute fifty-four of the 758 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -192,6 +192,7 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `wave_zero_of_zero_data3D` | zero-data uniqueness on the closed 3D box |
 | `wave_unique3D_of_same_data` | general-data uniqueness on the closed 3D box |
 | `WaveGaugePerturbation`, `linEinstein_eq_zero_of_waveGauge` | wave-gauge perturbations with `□h̄ = 0` are linearized vacuum solutions |
+| `ttWave_waveGauge` | the TT plane wave is a concrete wave-gauge perturbation |
 
 This is a real Cauchy theorem in the sense that the data are arbitrary
 functions with the stated differentiability, and the formula is proved to have
@@ -255,8 +256,9 @@ derivative. This is uniqueness for the linear constant-coefficient wave
 equation, not for the Einstein equations. On top of this layer,
 `gravitation/Gravitation/LinearizedWaveGauge.lean` records the coordinate-level
 wave-gauge interface `WaveGaugePerturbation` and proves
-`linEinstein_eq_zero_of_waveGauge` from the vendored Lorenz-gauge reduction;
-the manifold-level layers remain open.
+`linEinstein_eq_zero_of_waveGauge` from the vendored Lorenz-gauge reduction.
+The existing TT plane wave is shown to satisfy this interface via
+`ttWave_waveGauge`. The manifold-level layers remain open.
 
 ## 5. The target: Choquet–Bruhat–Geroch
 
@@ -329,7 +331,7 @@ milestone has an acceptance criterion; none is claimed as done here.
 | Milestone | Content | Acceptance criterion |
 | --- | --- | --- |
 | M0 | Linear 3D wave model on a box: energy, conservation, zero-energy, zero-data and general-data uniqueness | **Done**: `waveEnergy3D_eq_initial_of_wave`, `eq_zero_of_waveEnergy3D_eq_zero`, `wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`; closed-box uniqueness under explicit regularity |
-| M0.5 | Linearized Einstein equations in wave gauge | **Interface**: `WaveGaugePerturbation` and `linEinstein_eq_zero_of_waveGauge`, using the existing `linEinstein_lorenz_gauge` reduction; not a manifold derivation |
+| M0.5 | Linearized Einstein equations in wave gauge | **Interface**: `WaveGaugePerturbation` and `linEinstein_eq_zero_of_waveGauge`, with `ttWave_waveGauge` as a concrete TT-plane-wave instance; uses the existing `linEinstein_lorenz_gauge` reduction, not a manifold derivation |
 | M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality | a manifold-level `Metric` with inverse, connection and Riemann tensor; `#print axioms` clean |
 | M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | `H^s` data type and the constraint equations stated on a manifold |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | a formal local-existence theorem for the reduced system |
@@ -353,13 +355,13 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 756 declarations. It contains the
+The development audited in Paper I now has 758 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
 uniqueness theorems and the linearized wave-gauge interface discussed above,
 together with the solution theory, the alternative theories, the axiom audit and
-the numerical pass. This paper's Lean contribution is the fifty-two-declaration
+the numerical pass. This paper's Lean contribution is the fifty-four-declaration
 nonet `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
 `Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
 `Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation`,
@@ -383,9 +385,9 @@ This paper adds prose and nine Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
 `Gravitation.WaveUniqueness3D` and `Gravitation.LinearizedWaveGauge`
-(fifty-two declarations). The audited development is the one described in
+(fifty-four declarations). The audited development is the one described in
 Paper I: `lake build` is silent, `scripts/check_messages.sh` passes,
-`scripts/audit_axioms.sh` reports 756 declarations with axioms inside
+`scripts/audit_axioms.sh` reports 758 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
@@ -425,8 +427,8 @@ The eleven formal modules named here can be read directly:
   and homogeneous Dirichlet data for both the field and its time derivative. They
   are not uniqueness theorems for the Einstein equations.
 - The linearized wave-gauge layer is a coordinate-level interface
-  (`WaveGaugePerturbation`), not a manifold-level derivation of the linearized
-  Einstein equations.
+  (`WaveGaugePerturbation`, instantiated by `ttWave_waveGauge`), not a
+  manifold-level derivation of the linearized Einstein equations.
 - The remaining PDE layers are the M1–M6 milestones of §7: manifold and
   Lorentzian geometry; manifold Sobolev spaces and the constraint problem;
   harmonic/wave gauge and the reduced quasilinear hyperbolic system; gauge

@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 756
-declarations, 509 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 758
+declarations, 511 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -19,6 +19,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Schwarzschild.kretschmann_scalar_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.kretschmann_sds_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Linearized.WaveGaugePerturbation` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Linearized.ttWave_contDiffAt` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Linearized.ttWave_waveGauge` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Linearized.linEinstein_eq_zero_of_waveGauge` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Tensor2` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsSymm` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |

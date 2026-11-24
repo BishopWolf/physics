@@ -40,6 +40,52 @@ structure WaveGaugePerturbation
   /-- The trace-reversed perturbation solves the component wave equations. -/
   wave : ∀ i j : Fin 4, boxEta (fun y => traceReversed (h y) i j) x = 0
 
+/-- A component of a plane-wave profile `f(t-z)` is `C²` when `f` is. -/
+private lemma contDiffAt_waveProfile
+    (c : ℝ) (f : ℝ → ℝ) (hf : ContDiff ℝ 2 f) (x : Fin 4 → ℝ) :
+    ContDiffAt ℝ 2 (fun y : Fin 4 → ℝ => c * f (y 0 - y 3)) x := by
+  have hlin : ContDiff ℝ 2 (fun y : Fin 4 → ℝ => y 0 - y 3) :=
+    (contDiff_pi.mp (contDiff_id (𝕜 := ℝ) (E := Fin 4 → ℝ)) 0).sub
+      (contDiff_pi.mp (contDiff_id (𝕜 := ℝ) (E := Fin 4 → ℝ)) 3)
+  exact contDiffAt_const.mul ((hf.comp hlin).contDiffAt)
+
+/-- The transverse-traceless plane wave has `C²` components. -/
+lemma ttWave_contDiffAt
+    (hPlus hCross : ℝ) (f : ℝ → ℝ) (hf : ContDiff ℝ 2 f)
+    (x : Fin 4 → ℝ) (i j : Fin 4) :
+    ContDiffAt ℝ 2 (fun y => ttWave hPlus hCross f y i j) x := by
+  fin_cases i <;> fin_cases j <;> simp only [ttWave] <;> norm_num
+  all_goals first
+    | exact contDiffAt_const
+    | exact contDiffAt_waveProfile hPlus f hf x
+    | exact (contDiffAt_waveProfile hPlus f hf x).neg
+    | exact contDiffAt_waveProfile hCross f hf x
+
+/-- The transverse-traceless plane wave is a wave-gauge perturbation. -/
+theorem ttWave_waveGauge
+    (hPlus hCross : ℝ) (f : ℝ → ℝ) (hf : ContDiff ℝ 2 f) (x : Fin 4 → ℝ) :
+    WaveGaugePerturbation (ttWave hPlus hCross f) x := by
+  refine {
+    symm := ttWave_symm hPlus hCross f
+    smooth := ttWave_contDiffAt hPlus hCross f hf x
+    gauge := Filter.Eventually.of_forall fun y k =>
+      ttWave_lorenz_gauge hPlus hCross f y k
+    wave := ?_ }
+  intro i j
+  have hsym : ∀ z a b,
+      ttWave hPlus hCross f z a b = ttWave hPlus hCross f z b a :=
+    ttWave_symm hPlus hCross f
+  have hc : ∀ a b, ContDiffAt ℝ 2
+      (fun z => ttWave hPlus hCross f z a b) x :=
+    ttWave_contDiffAt hPlus hCross f hf x
+  have hlz : ∀ᶠ y in nhds x, ∀ k,
+      lorenzGaugeCond (ttWave hPlus hCross f) y k :=
+    Filter.Eventually.of_forall fun y k =>
+      ttWave_lorenz_gauge hPlus hCross f y k
+  have hG := ttWave_linEinstein_zero hPlus hCross f hf x i j
+  rw [linEinstein_lorenz_gauge (ttWave hPlus hCross f) x hsym hc hlz i j] at hG
+  nlinarith
+
 /-- A wave-gauge perturbation is a linearized vacuum solution:
 `G^{(1)}_{ij} = 0`. -/
 theorem linEinstein_eq_zero_of_waveGauge
