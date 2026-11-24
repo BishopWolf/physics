@@ -38,8 +38,8 @@ concrete formalisation roadmap. The energy method then proves zero-data
 uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
-energy and uniqueness modules contribute twenty-eight of the 732 audited
-declarations in Paper I's development.
+energy and uniqueness modules, together with the 3D divergence foundation,
+contribute thirty of the 734 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -183,6 +183,7 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `wave_zero_of_zero_data_Icc` | zero-data uniqueness on the closed interval |
 | `WaveSolutionOn` | bundled regularity for a 1D wave solution |
 | `wave_unique_of_same_data` | two solutions with the same Cauchy data agree on the closed interval |
+| `integral_divergence_box_eq_zero` | the 3D box divergence theorem with vanishing boundary flux |
 
 This is a real Cauchy theorem in the sense that the data are arbitrary
 functions with the stated differentiability, and the formula is proved to have
@@ -214,6 +215,16 @@ boundary values agree on the closed interval. The proof applies
 difference energy integrand. This is closed-interval uniqueness under the stated
 regularity and boundary hypotheses; it is not a global uniqueness theorem, and
 it is not a uniqueness theorem for the Einstein equations.
+
+The spatial 3+1 layer begins with `gravitation/Gravitation/Divergence3D.lean`.
+Its theorem `integral_divergence_box_eq_zero` is Mathlib's Bochner divergence
+theorem specialized to a box in `Fin 3 → ℝ`: if the vector field is continuous,
+differentiable in the interior, and its normal component has zero integral on
+every face, then the integral of its divergence vanishes. This is the
+multidimensional integration-by-parts tool needed for the 3D energy method. It
+does not yet identify the time derivative of the 3D energy with the divergence
+of `u_t ∇u`; that identification and the resulting 3D uniqueness theorem remain
+the next step.
 
 ## 5. The target: Choquet–Bruhat–Geroch
 
@@ -305,14 +316,15 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 732 declarations. It contains the
-constraint module, the geodesic module and the wave, energy and uniqueness
-modules discussed above, together with the solution theory, the alternative
-theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is the twenty-eight-declaration trio `Gravitation.WaveCauchy`,
-`Gravitation.WaveEnergy` and `Gravitation.WaveUniqueness`; the remainder is the
-written account of the initial-value side and of the roadmap. Every formal claim
-made here is therefore part of the same audit.
+The development audited in Paper I now has 734 declarations. It contains the
+constraint module, the geodesic module, the wave/energy/uniqueness modules and
+the 3D divergence foundation discussed above, together with the solution
+theory, the alternative theories, the axiom audit and the numerical pass. This
+paper's Lean contribution is the thirty-declaration quartet
+`Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
+`Gravitation.WaveUniqueness` and `Gravitation.Divergence3D`; the remainder is
+the written account of the initial-value side and of the roadmap. Every formal
+claim made here is therefore part of the same audit.
 
 The two papers share a boundary. Paper I proves that explicit metrics solve
 their field equations on their coordinate domains; this paper asks whether
@@ -324,21 +336,23 @@ take for granted when they exhibit a solution.
 
 ## 9. Reproducibility and trust
 
-This paper adds prose and three Lean modules, `Gravitation.WaveCauchy`,
-`Gravitation.WaveEnergy` and `Gravitation.WaveUniqueness` (twenty-eight
-declarations). The audited development is the one described in Paper I:
-`lake build` is silent, `scripts/check_messages.sh` passes,
-`scripts/audit_axioms.sh` reports 732 declarations with axioms inside
+This paper adds prose and four Lean modules, `Gravitation.WaveCauchy`,
+`Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness` and
+`Gravitation.Divergence3D` (thirty declarations). The audited development is
+the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 734
+declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
 `PhyslibAlpha.Relativity.General.*`, with the same namespace and proofs.
 
-The five formal modules named here can be read directly:
+The six formal modules named here can be read directly:
 
 - `gravitation/Gravitation/WaveCauchy.lean`
 - `gravitation/Gravitation/WaveEnergy.lean`
 - `gravitation/Gravitation/WaveUniqueness.lean`
+- `gravitation/Gravitation/Divergence3D.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/InitialValue.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/Geodesics.lean`
 
@@ -357,6 +371,10 @@ The five formal modules named here can be read directly:
   same Cauchy and boundary data. Both require explicit regularity; the zero-data
   result uses homogeneous Dirichlet data, while the general result assumes
   matching boundary values.
+- No 3D wave energy conservation or 3D uniqueness theorem yet. The
+  `Gravitation.Divergence3D` module supplies only the box divergence theorem;
+  the energy-to-divergence identification and the 3+1 wave theorem are not
+  formalised.
 - No axiom, `sorry`, or cited theorem smuggled in as a hypothesis. The CBG
   statement in §5 is prose with references; it is not a Lean declaration.
 

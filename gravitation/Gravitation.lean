@@ -17,6 +17,7 @@ public import Gravitation.KretschmannTotal
 public import Gravitation.WaveCauchy
 public import Gravitation.WaveEnergy
 public import Gravitation.WaveUniqueness
+public import Gravitation.Divergence3D
 public import Gravitation.Relativity.General.Kerr.Basic
 public import Gravitation.Relativity.General.Kerr.Christoffel
 public import Gravitation.Relativity.General.Kerr.Vacuum
