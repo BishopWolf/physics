@@ -36,10 +36,10 @@ why that theorem cannot yet be stated, let alone proved, in the present
 pointwise framework. The missing layers are identified and ordered into a
 concrete formalisation roadmap. The energy method then proves zero-data
 uniqueness on the closed interval, and applying it to the difference of two
-solutions gives general-data uniqueness there, both under explicit regularity
-and homogeneous Dirichlet hypotheses. The wave, energy and uniqueness modules
-contribute twenty-eight of the 732 audited declarations in Paper I's
-development.
+solutions gives general-data uniqueness there, under explicit regularity and,
+respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
+energy and uniqueness modules contribute twenty-eight of the 732 audited
+declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -354,8 +354,9 @@ The five formal modules named here can be read directly:
 - No global uniqueness theorem for the wave Cauchy problem. The formalised
   results are zero-data uniqueness on `Icc 0 L` and, by applying it to the
   difference of two solutions, general-data uniqueness for two solutions with the
-  same Cauchy and Dirichlet data. Both require explicit regularity and
-  homogeneous Dirichlet hypotheses.
+  same Cauchy and boundary data. Both require explicit regularity; the zero-data
+  result uses homogeneous Dirichlet data, while the general result assumes
+  matching boundary values.
 - No axiom, `sorry`, or cited theorem smuggled in as a hypothesis. The CBG
   statement in §5 is prose with references; it is not a Lean declaration.
 

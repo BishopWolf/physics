@@ -22,8 +22,9 @@ open MeasureTheory
 namespace GeneralRelativity
 
 /-- A regular solution of the one-dimensional wave equation on `[0, L]`, with
-the derivative fields and homogeneous Dirichlet data used by the energy method.
-The bound `M` is a regularity bound on the differentiated energy density. -/
+the derivative fields and the differentiated homogeneous Dirichlet condition
+used by the energy method.  The bound `M` is a regularity bound on the
+differentiated energy density. -/
 structure WaveSolutionOn
     (u ut ux utt uxt utx uxx : ℝ → ℝ → ℝ) (L M : ℝ) : Prop where
   hu_t : ∀ s x, HasDerivAt (fun s : ℝ => u s x) (ut s x) s
