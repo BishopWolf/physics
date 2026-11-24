@@ -34,11 +34,12 @@ Choquet–Bruhat–Geroch theorem, which produces the unique maximal globally
 hyperbolic development of arbitrary constraint-satisfying data, and explains
 why that theorem cannot yet be stated, let alone proved, in the present
 pointwise framework. The missing layers are identified and ordered into a
-concrete formalisation roadmap. The energy method then proves interior
-zero-data uniqueness, and applying it to the difference of two solutions gives
-general-data uniqueness, both under explicit regularity and homogeneous
-Dirichlet hypotheses. The wave, energy and uniqueness modules contribute
-twenty-seven of the 731 audited declarations in Paper I's development.
+concrete formalisation roadmap. The energy method then proves zero-data
+uniqueness on the closed interval, and applying it to the difference of two
+solutions gives general-data uniqueness there, both under explicit regularity
+and homogeneous Dirichlet hypotheses. The wave, energy and uniqueness modules
+contribute twenty-eight of the 732 audited declarations in Paper I's
+development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -179,16 +180,17 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `eq_zero_of_waveEnergy_eq_zero` | vanishing energy forces `u_t = u_x = 0` pointwise |
 | `u_eq_initial_of_ut_zero` | vanishing time derivative makes the field constant in time |
 | `wave_zero_of_zero_data` | interior zero-data uniqueness for the 1D wave equation |
+| `wave_zero_of_zero_data_Icc` | zero-data uniqueness on the closed interval |
 | `WaveSolutionOn` | bundled regularity for a 1D wave solution |
-| `wave_unique_of_same_data` | two solutions with the same Cauchy data agree in the interior |
+| `wave_unique_of_same_data` | two solutions with the same Cauchy data agree on the closed interval |
 
 This is a real Cauchy theorem in the sense that the data are arbitrary
 functions with the stated differentiability, and the formula is proved to have
 the required derivatives. It is deliberately narrow. The equation is
 one-dimensional, linear and constant-coefficient; there is no quasilinear term,
 no three-dimensional spatial domain, no gauge and no constraint propagation.
-Uniqueness is now formalised in the interior by the energy method (below); it is
-not a global or boundary result. It is therefore a model of the reduced wave
+Uniqueness is now formalised on the closed interval by the energy method
+(below); it is not a global result. It is therefore a model of the reduced wave
 equations, not a proof
 of local existence for the Einstein equations. It does, however, remove one item
 from the "no PDE layer at all" column: the repository now has a kernel-checked
@@ -201,15 +203,17 @@ interval integral), `waveEnergyDerivIntegral_eq_zero` (integration by parts with
 homogeneous Dirichlet data), and `waveEnergy_eq_initial` (conservation in time).
 The zero-energy lemma `eq_zero_of_waveEnergy_eq_zero` and the constancy lemma
 `u_eq_initial_of_ut_zero` then yield `wave_zero_of_zero_data`: a solution with
-zero initial position and velocity vanishes in the interior `Ioo 0 L`. This is
-interior zero-data uniqueness under the stated regularity hypotheses.
+zero initial position and velocity vanishes in the interior `Ioo 0 L`. The
+boundary-inclusive form `wave_zero_of_zero_data_Icc` adds the homogeneous
+Dirichlet endpoints and gives zero-data uniqueness on `Icc 0 L`.
 `gravitation/Gravitation/WaveUniqueness.lean` packages the regularity as
 `WaveSolutionOn` and proves `wave_unique_of_same_data`: two regular solutions
-with the same initial position, velocity and spatial derivative agree in the
-interior. The proof applies `wave_zero_of_zero_data` to their difference, with an
-explicit bound on the difference energy integrand. This is still interior
-uniqueness; it is not a global or boundary uniqueness theorem, and it is not a
-uniqueness theorem for the Einstein equations.
+with the same initial position, velocity, spatial derivative and Dirichlet
+boundary values agree on the closed interval. The proof applies
+`wave_zero_of_zero_data_Icc` to their difference, with an explicit bound on the
+difference energy integrand. This is closed-interval uniqueness under the stated
+regularity and boundary hypotheses; it is not a global uniqueness theorem, and
+it is not a uniqueness theorem for the Einstein equations.
 
 ## 5. The target: Choquet–Bruhat–Geroch
 
@@ -301,11 +305,11 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 731 declarations. It contains the
+The development audited in Paper I now has 732 declarations. It contains the
 constraint module, the geodesic module and the wave, energy and uniqueness
 modules discussed above, together with the solution theory, the alternative
 theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is the twenty-seven-declaration trio `Gravitation.WaveCauchy`,
+is the twenty-eight-declaration trio `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy` and `Gravitation.WaveUniqueness`; the remainder is the
 written account of the initial-value side and of the roadmap. Every formal claim
 made here is therefore part of the same audit.
@@ -321,10 +325,10 @@ take for granted when they exhibit a solution.
 ## 9. Reproducibility and trust
 
 This paper adds prose and three Lean modules, `Gravitation.WaveCauchy`,
-`Gravitation.WaveEnergy` and `Gravitation.WaveUniqueness` (twenty-seven
+`Gravitation.WaveEnergy` and `Gravitation.WaveUniqueness` (twenty-eight
 declarations). The audited development is the one described in Paper I:
 `lake build` is silent, `scripts/check_messages.sh` passes,
-`scripts/audit_axioms.sh` reports 731 declarations with axioms inside
+`scripts/audit_axioms.sh` reports 732 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
@@ -347,10 +351,10 @@ The five formal modules named here can be read directly:
 - No global existence or maximal-interval theorem for geodesics.
 - No manifold, Sobolev, quasilinear-hyperbolic or causality layer. The wave
   theorem is one-dimensional, linear and constant-coefficient.
-- No global or boundary uniqueness theorem for the wave Cauchy problem. The
-  formalised results are interior zero-data uniqueness on `Ioo 0 L` and, by
-  applying it to the difference of two solutions, interior uniqueness for two
-  solutions with the same Cauchy data. Both require explicit regularity and
+- No global uniqueness theorem for the wave Cauchy problem. The formalised
+  results are zero-data uniqueness on `Icc 0 L` and, by applying it to the
+  difference of two solutions, general-data uniqueness for two solutions with the
+  same Cauchy and Dirichlet data. Both require explicit regularity and
   homogeneous Dirichlet hypotheses.
 - No axiom, `sorry`, or cited theorem smuggled in as a hypothesis. The CBG
   statement in §5 is prose with references; it is not a Lean declaration.

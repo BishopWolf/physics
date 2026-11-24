@@ -357,4 +357,41 @@ theorem wave_zero_of_zero_data (u ut ux utt uxt utx uxx : ℝ → ℝ → ℝ)
   have hconst := u_eq_initial_of_ut_zero u ut x (fun s => hu_t s x) hzero t
   rw [hconst, hinit x]
 
+/-- Zero-data uniqueness on the closed interval.  The interior is covered by
+the energy argument; the endpoints follow from the homogeneous Dirichlet
+boundary values. -/
+theorem wave_zero_of_zero_data_Icc
+    (u ut ux utt uxt utx uxx : ℝ → ℝ → ℝ)
+    (L M : ℝ) (hL : 0 < L)
+    (hu_t : ∀ s x, HasDerivAt (fun s : ℝ => u s x) (ut s x) s)
+    (hut : ∀ s x, HasDerivAt (fun s : ℝ => ut s x) (utt s x) s)
+    (hux : ∀ s x, HasDerivAt (fun s : ℝ => ux s x) (uxt s x) s)
+    (hut_x : ∀ s x, HasDerivAt (fun x : ℝ => ut s x) (utx s x) x)
+    (hux_x : ∀ s x, HasDerivAt (fun x : ℝ => ux s x) (uxx s x) x)
+    (hut_cont : Continuous (Function.uncurry ut))
+    (hux_cont : Continuous (Function.uncurry ux))
+    (hutt_cont : Continuous (Function.uncurry utt))
+    (huxt_cont : Continuous (Function.uncurry uxt))
+    (hutx_cont : Continuous (Function.uncurry utx))
+    (huxx_cont : Continuous (Function.uncurry uxx))
+    (hbound : ∀ s x, ‖waveEnergyDerivIntegrand ut ux utt uxt s x‖ ≤ M)
+    (hwave : ∀ s x, utt s x = uxx s x)
+    (hmixed : ∀ s x, uxt s x = utx s x)
+    (hbc0 : ∀ s, ut s 0 = 0) (hbcL : ∀ s, ut s L = 0)
+    (hinit : ∀ x, u 0 x = 0) (hvel : ∀ x, ut 0 x = 0)
+    (hux0 : ∀ x, ux 0 x = 0)
+    (hdir0 : ∀ s, u s 0 = 0) (hdirL : ∀ s, u s L = 0) :
+    ∀ t x, x ∈ Set.Icc 0 L → u t x = 0 := by
+  intro t x hx
+  rcases eq_or_lt_of_le hx.1 with hx0 | hx0
+  · have hx0' : x = 0 := hx0.symm
+    rw [hx0']
+    exact hdir0 t
+  rcases eq_or_lt_of_le hx.2 with hxL | hxL
+  · rw [hxL]
+    exact hdirL t
+  · exact wave_zero_of_zero_data u ut ux utt uxt utx uxx L M hL
+      hu_t hut hux hut_x hux_x hut_cont hux_cont hutt_cont huxt_cont hutx_cont
+      huxx_cont hbound hwave hmixed hbc0 hbcL hinit hvel hux0 t x ⟨hx0, hxL⟩
+
 end GeneralRelativity

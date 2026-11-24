@@ -44,8 +44,8 @@ structure WaveSolutionOn
   hbcL : ∀ s, ut s L = 0
 
 /-- **General-data uniqueness for the 1D wave Cauchy problem.**  Two regular
-solutions with the same initial position, velocity and spatial derivative agree
-in the interior. -/
+solutions with the same initial position, velocity and spatial derivative, and
+the same Dirichlet boundary values, agree on the closed interval. -/
 theorem wave_unique_of_same_data
     (u ut ux utt uxt utx uxx v vt vx vtt vxt vtx vxx : ℝ → ℝ → ℝ)
     (L Mu Mv Mw : ℝ) (hL : 0 < L)
@@ -58,8 +58,9 @@ theorem wave_unique_of_same_data
       (fun s x => uxt s x - vxt s x) s x‖ ≤ Mw)
     (hinit : ∀ x, u 0 x = v 0 x)
     (hvel : ∀ x, ut 0 x = vt 0 x)
-    (hux0 : ∀ x, ux 0 x = vx 0 x) :
-    ∀ t x, x ∈ Set.Ioo 0 L → u t x = v t x := by
+    (hux0 : ∀ x, ux 0 x = vx 0 x)
+    (hbd0 : ∀ s, u s 0 = v s 0) (hbdL : ∀ s, u s L = v s L) :
+    ∀ t x, x ∈ Set.Icc 0 L → u t x = v t x := by
   let w : ℝ → ℝ → ℝ := fun s x => u s x - v s x
   let wt : ℝ → ℝ → ℝ := fun s x => ut s x - vt s x
   let wx : ℝ → ℝ → ℝ := fun s x => ux s x - vx s x
@@ -130,11 +131,17 @@ theorem wave_unique_of_same_data
   have hux0w : ∀ x, wx 0 x = 0 := by
     intro x
     simp [wx, hux0 x]
+  have hbd0w : ∀ s, w s 0 = 0 := by
+    intro s
+    simp [w, hbd0 s]
+  have hbdLw : ∀ s, w s L = 0 := by
+    intro s
+    simp [w, hbdL s]
 
-  have hzero := wave_zero_of_zero_data w wt wx wtt wxt wtx wxx L Mw hL
+  have hzero := wave_zero_of_zero_data_Icc w wt wx wtt wxt wtx wxx L Mw hL
     hw_t hwt hwx hwt_x hwx_x
     hcont_wt hcont_wx hcont_wtt hcont_wxt hcont_wtx hcont_wxx
-    hboundw hwavew hmixedw hbc0w hbcLw hinitw hvelw hux0w
+    hboundw hwavew hmixedw hbc0w hbcLw hinitw hvelw hux0w hbd0w hbdLw
   intro t x hx
   have h := hzero t x hx
   simpa [w] using sub_eq_zero.mp h
