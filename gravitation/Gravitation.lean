@@ -23,6 +23,7 @@ public import Gravitation.WaveEnergy3DConservation
 public import Gravitation.WaveEnergy3DWave
 public import Gravitation.WaveUniqueness3D
 public import Gravitation.LinearizedWaveGauge
+public import Gravitation.ManifoldInterface
 public import Gravitation.Relativity.General.Kerr.Basic
 public import Gravitation.Relativity.General.Kerr.Christoffel
 public import Gravitation.Relativity.General.Kerr.Vacuum
