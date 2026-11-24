@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 742
-declarations, 499 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 746
+declarations, 501 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -701,6 +701,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.hasDerivAt_waveEnergy3DIntegrand` | `Gravitation/WaveEnergy3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_waveEnergy3D` | `Gravitation/WaveEnergy3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.waveEnergy3D_eq_initial_of_divergence` | `Gravitation/WaveEnergy3DConservation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveFlux3D` | `Gravitation/WaveEnergy3DWave.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveFlux3DDeriv` | `Gravitation/WaveEnergy3DWave.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasFDerivAt_waveFlux3D` | `Gravitation/WaveEnergy3DWave.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveEnergy3D_eq_initial_of_wave` | `Gravitation/WaveEnergy3DWave.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.WaveSolutionOn` | `Gravitation/WaveUniqueness.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.wave_unique_of_same_data` | `Gravitation/WaveUniqueness.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |

@@ -39,7 +39,7 @@ uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy and uniqueness modules, together with the 3D divergence foundation,
-contribute thirty-eight of the 742 audited declarations in Paper I's development.
+contribute forty-two of the 746 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -187,6 +187,7 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `waveEnergy3D` | the 3D wave energy on a spatial box |
 | `hasDerivAt_waveEnergy3D` | differentiation of the 3D energy under the box integral |
 | `waveEnergy3D_eq_initial_of_divergence` | 3D energy conservation conditional on an explicit divergence identity |
+| `waveEnergy3D_eq_initial_of_wave` | 3D wave energy conservation from `u_tt = Δu` |
 
 This is a real Cauchy theorem in the sense that the data are arbitrary
 functions with the stated differentiability, and the formula is proved to have
@@ -236,6 +237,13 @@ the energy derivative with the box divergence theorem to prove
 differentiated energy density is twice the divergence of an explicit vector
 field and the normal flux vanishes. The divergence identity is still an
 explicit hypothesis, not a consequence of `u_tt = Δu` claimed here.
+`gravitation/Gravitation/WaveEnergy3DWave.lean` closes that gap for the wave
+case: it defines `F = u_t ∇u`, proves the flux derivative and the divergence
+identity from `u_tt = Δu` and the mixed-partial relation
+`∇u_t = (∇u)_t`, and concludes `waveEnergy3D_eq_initial_of_wave`. The energy is
+conserved under explicit regularity and homogeneous Dirichlet data. This is
+still not a 3D uniqueness theorem; the zero-energy argument remains to be
+formalised.
 
 ## 5. The target: Choquet–Bruhat–Geroch
 
@@ -327,17 +335,18 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 742 declarations. It contains the
+The development audited in Paper I now has 746 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
-3D divergence foundation, the 3D energy derivative and conditional 3D energy
-conservation discussed above, together with the solution theory, the alternative
-theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is the thirty-eight-declaration sextet `Gravitation.WaveCauchy`,
-`Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
-`Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D` and
-`Gravitation.WaveEnergy3DConservation`; the remainder is the written account of
-the initial-value side and of the roadmap. Every formal claim made here is
-therefore part of the same audit.
+3D divergence foundation, the 3D energy derivative, conditional 3D energy
+conservation and the wave-flux instantiation discussed above, together with the
+solution theory, the alternative theories, the axiom audit and the numerical
+pass. This paper's Lean contribution is the forty-two-declaration septet
+`Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
+`Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
+`Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation` and
+`Gravitation.WaveEnergy3DWave`; the remainder is the written account of the
+initial-value side and of the roadmap. Every formal claim made here is therefore
+part of the same audit.
 
 The two papers share a boundary. Paper I proves that explicit metrics solve
 their field equations on their coordinate domains; this paper asks whether
@@ -349,19 +358,19 @@ take for granted when they exhibit a solution.
 
 ## 9. Reproducibility and trust
 
-This paper adds prose and six Lean modules, `Gravitation.WaveCauchy`,
+This paper adds prose and seven Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
-`Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D` and
-`Gravitation.WaveEnergy3DConservation` (thirty-eight declarations). The audited
-development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 742
-declarations with axioms inside
+`Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
+`Gravitation.WaveEnergy3DConservation` and `Gravitation.WaveEnergy3DWave`
+(forty-two declarations). The audited development is the one described in
+Paper I: `lake build` is silent, `scripts/check_messages.sh` passes,
+`scripts/audit_axioms.sh` reports 746 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
 `PhyslibAlpha.Relativity.General.*`, with the same namespace and proofs.
 
-The eight formal modules named here can be read directly:
+The nine formal modules named here can be read directly:
 
 - `gravitation/Gravitation/WaveCauchy.lean`
 - `gravitation/Gravitation/WaveEnergy.lean`
@@ -369,6 +378,7 @@ The eight formal modules named here can be read directly:
 - `gravitation/Gravitation/Divergence3D.lean`
 - `gravitation/Gravitation/WaveEnergy3D.lean`
 - `gravitation/Gravitation/WaveEnergy3DConservation.lean`
+- `gravitation/Gravitation/WaveEnergy3DWave.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/InitialValue.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/Geodesics.lean`
 
@@ -387,10 +397,10 @@ The eight formal modules named here can be read directly:
   same Cauchy and boundary data. Both require explicit regularity; the zero-data
   result uses homogeneous Dirichlet data, while the general result assumes
   matching boundary values.
-- No unconditional 3D wave energy conservation or 3D uniqueness theorem yet.
-  `WaveEnergy3DConservation` proves conservation conditional on an explicit
-  divergence identity and vanishing boundary flux; deriving that identity from
-  `u_tt = Δu`, and the 3+1 wave theorem, are not formalised.
+- No 3D wave uniqueness theorem yet. The 3D energy is conserved under explicit
+  regularity and homogeneous Dirichlet data (`waveEnergy3D_eq_initial_of_wave`);
+  the zero-energy pointwise argument and closed-box 3D uniqueness are not
+  formalised.
 - No axiom, `sorry`, or cited theorem smuggled in as a hypothesis. The CBG
   statement in §5 is prose with references; it is not a Lean declaration.
 

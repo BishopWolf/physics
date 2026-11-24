@@ -46,7 +46,7 @@ theorem waveEnergy3D_eq_initial_of_divergence
       (∫ x in Box.Icc (I.face i), F s (i.insertNth (I.lower i) x) i) = 0)
     (hdiv : ∀ s x,
       (∑ i, F' s x (Pi.single i 1) i) =
-        2 * waveEnergy3DDerivIntegrand ut utt grad gradt s x) :
+        (1 / 2) * waveEnergy3DDerivIntegrand ut utt grad gradt s x) :
     ∀ t, waveEnergy3D ut grad I t = waveEnergy3D ut grad I 0 := by
   have hzero : ∀ s, HasDerivAt (waveEnergy3D ut grad I) 0 s := by
     intro s
@@ -55,7 +55,7 @@ theorem waveEnergy3D_eq_initial_of_divergence
     have hdivzero := integral_divergence_box_eq_zero I (F s) (F' s)
       (hF_cont s) (hF_deriv s) (hdiv_int s) (hface_upper s) (hface_lower s)
     have hEq : (∫ x in Box.Icc I, ∑ i, F' s x (Pi.single i 1) i) =
-        ∫ x in Box.Icc I, 2 * waveEnergy3DDerivIntegrand ut utt grad gradt s x := by
+        ∫ x in Box.Icc I, (1 / 2) * waveEnergy3DDerivIntegrand ut utt grad gradt s x := by
       congr 1
       funext x
       exact hdiv s x
