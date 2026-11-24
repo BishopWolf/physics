@@ -86,9 +86,10 @@ the 37 unmerged modules are **vendored** here under
 branch commit `41abde06`, while the `physlib` requirement points at merged master `cbd02238`
 — the merge base the branch was written against, which also supplies the
 already-merged `Schwarzschild.IncompressibleSphere` and the base library. The
-741 audited declarations are those sources plus the local
+742 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
-`Gravitation.Divergence3D` and `Gravitation.WaveEnergy3D` modules, imported through
+`Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D` and
+`Gravitation.WaveEnergy3DConservation` modules, imported through
 `gravitation/Gravitation.lean`; deleting `vendor/` is the migration once the
 branch lands.
 
@@ -99,7 +100,7 @@ branch lands.
   (the contracted Bianchi identity is proved for the frame Einstein space,
   `sds_frame_bianchi`, rather than assumed), the ADM constraints, the geodesic Cauchy problem, the d'Alembert one-dimensional wave Cauchy theorem
   (`dAlembert_wave_equation`), the wave energy conservation theorem
-  (`waveEnergy_eq_initial`), zero-data uniqueness (`wave_zero_of_zero_data`, `wave_zero_of_zero_data_Icc`), closed-interval general-data uniqueness (`wave_unique_of_same_data`), the 3D box divergence theorem (`integral_divergence_box_eq_zero`) and the 3D energy derivative (`hasDerivAt_waveEnergy3D`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
+  (`waveEnergy_eq_initial`), zero-data uniqueness (`wave_zero_of_zero_data`, `wave_zero_of_zero_data_Icc`), closed-interval general-data uniqueness (`wave_unique_of_same_data`), the 3D box divergence theorem (`integral_divergence_box_eq_zero`), the 3D energy derivative (`hasDerivAt_waveEnergy3D`) and conditional 3D energy conservation (`waveEnergy3D_eq_initial_of_divergence`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
 * Exact solutions — Minkowski; Schwarzschild with its orthonormal frame, all six
   Riemann components and the Kretschmann scalar `48M²/r⁶`; the interior
   incompressible sphere (TOV profile, Buchdahl bound); Schwarzschild–de Sitter
@@ -120,7 +121,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 741 declarations (498 theorem-like) and rejects anything outside
+  all 742 declarations (499 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`
