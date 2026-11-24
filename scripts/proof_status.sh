@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Maintains the proof-status table in Proof-Status.md.
 #
-# Every declaration under gravitation/Gravitation/ is listed with the axioms its
-# proof depends on, as reported by the audit.  A declaration is "proved" when the
+# Every declaration of the repository's own module and of the Physlib
+# `PhyslibAlpha/Relativity/General/` subtree is listed with the axioms its proof
+# depends on, as reported by the audit.  A declaration is "proved" when the
 # audit has a `#print axioms` report for it and that report stays inside the base
 # axiom set; the audit itself fails first if any declaration uses `sorry` or
 # declares an axiom of its own.
@@ -20,6 +21,8 @@ export LC_ALL=C
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJ="$ROOT/gravitation"
+DEP="$PROJ/.lake/packages/physlib/PhyslibAlpha/Relativity/General"
+VENDOR="$PROJ/vendor/Gravitation/Relativity/General"
 DECLS="$PROJ/.lake/decls.tsv"
 AXIOMS="$PROJ/.lake/axioms.tsv"
 ROWS="$PROJ/.lake/proof_rows.tsv"
@@ -39,7 +42,7 @@ mode="${1:-write}"
 stale=0
 if [ ! -s "$DECLS" ] || [ ! -s "$AXIOMS" ]; then
   stale=1
-elif [ -n "$(find "$PROJ/Gravitation" -name '*.lean' -newer "$DECLS" -print -quit)" ]; then
+elif [ -n "$(find "$PROJ/Gravitation" "$VENDOR" "$DEP" -name '*.lean' -newer "$DECLS" -print -quit)" ]; then
   stale=1
 fi
 
@@ -63,8 +66,7 @@ awk -F'\t' '
   echo "| Declaration | File | Axioms | Status |"
   echo "| --- | --- | --- | --- |"
   awk -F'\t' '{
-    f = $1; sub(/.*\//, "", f)
-    printf "| `%s` | `%s` | %s | %s |\n", $3, f, $4, $5
+    printf "| `%s` | `%s` | %s | %s |\n", $3, $1, $4, $5
   }' "$ROWS"
 } > "$TABLE"
 

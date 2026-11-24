@@ -14,6 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # The GR modules are vendored from an unmerged branch; fail if the branch
+      # tip or any vendored file moved without a matching re-vendor.
+      - name: Vendored copy matches the Physlib gravity branch
+        run: bash scripts/check_vendor_sync.sh
+
       - name: Install elan
         run: |
           curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y

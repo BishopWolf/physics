@@ -31,9 +31,10 @@
 layout(local_size_x = 64) in;
 
 layout(push_constant) uniform Params {
-    int   metricId;   // 0 Minkowski, 1 Schwarzschild, 2 Schwarzschild-de Sitter
+    int   metricId;   // 0 Minkowski, 1 Schwarzschild, 2 Schwarzschild-de Sitter,
+                      // 3 Kerr, 4 Reissner-Nordstrom
     float massM;
-    float lambdaC;
+    float lambdaC;    // Lambda for id 2, spin a for id 3, charge Q for id 4
     float h;          // finite-difference step
     vec4  lo;         // lower corner in (t, r, theta, phi)
     vec4  stepv;      // lattice step per coordinate
@@ -46,9 +47,28 @@ layout(std430, binding = 0) writeonly buffer Out {
 
 const int STRIDE = 70;
 
+// GLSL has no double-precision `sin`.  Each lattice line fixes theta to
+// theta0 + delta with tiny |delta|, so expand around float sin/cos at theta0:
+// the metric then stays a smooth function of theta, which is what the
+// difference quotients differentiate.
+double sinTheta(double th)
+{
+    double sz = double(P.stepv.z);
+    double t0 = double(P.lo.z)
+              + (sz != 0.0 ? round((th - double(P.lo.z)) / sz) : 0.0) * sz;
+    double d  = th - t0;
+    double s0 = double(sin(float(t0)));
+    double c0 = double(cos(float(t0)));
+    return s0 + c0 * d - 0.5 * s0 * d * d - c0 * d * d * d / 6.0;
+}
+
 void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
 {
     for (int i = 0; i < 16; ++i) g[i] = 0.0;
+
+    double r   = x.y;
+    double sth = sinTheta(x.z);
+    double s2  = sth * sth;
 
     if (id == 0) {
         // Minkowski, signature (-,+,+,+)
@@ -56,10 +76,59 @@ void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
         g[5] = 1.0;
         g[10] = 1.0;
         g[15] = 1.0;
+    } else if (id == 3) {
+        // Kerr in Boyer-Lindquist coordinates with spin a = lc (M = mm):
+        // Sigma = r^2 + a^2 cos^2 theta, Delta = r^2 - 2 M r + a^2,
+        // g_tt = -(1 - 2 M r / Sigma), g_tphi = -2 M a r sin^2 theta / Sigma,
+        // g_rr = Sigma / Delta, g_thetatheta = Sigma,
+        // g_phiphi = ((r^2 + a^2)^2 - a^2 Delta sin^2 theta) sin^2 / Sigma.
+        double a   = lc;
+        double c2  = 1.0 - s2;
+        double sig = r * r + a * a * c2;
+        double del = r * r - 2.0 * mm * r + a * a;
+        double bB  = (r * r + a * a) * (r * r + a * a) - a * a * del * s2;
+        g[0]  = -(1.0 - 2.0 * mm * r / sig);
+        g[3]  = -2.0 * mm * a * r * s2 / sig;
+        g[12] = g[3];
+        g[5]  = sig / del;
+        g[10] = sig;
+        g[15] = bB * s2 / sig;
+    } else if (id == 4) {
+        // Reissner-Nordstrom with charge Q = lc: f = 1 - 2 M / r + Q^2 / r^2.
+        double q = lc;
+        double f = 1.0 - 2.0 * mm / r + q * q / (r * r);
+        g[0]  = -f;
+        g[5]  = 1.0 / f;
+        g[10] = r * r;
+        g[15] = r * r * s2;
+    } else if (id == 5) {
+        // FLRW in comoving coordinates: a(t) = 1 + H t + t^2, spatial
+        // curvature k = lc, so a' = H + 2t and a'' = 2 are exact.
+        double t  = x.x;
+        double H  = mm;
+        double k  = lc;
+        double a  = 1.0 + H * t + t * t;
+        double a2 = a * a;
+        g[0]  = -1.0;
+        g[5]  = a2 / (1.0 - k * r * r);
+        g[10] = a2 * r * r;
+        g[15] = a2 * r * r * s2;
+    } else if (id == 6) {
+        // Interior Schwarzschild (incompressible sphere): curvature radius
+        // Rc = mm, areal radius Ra = lc, with g_tt = -A^2 where
+        // A = 3/2 cos chi_a - 1/2 sqrt(1 - r^2/Rc^2) and g_rr = 1/(1 - r^2/Rc^2).
+        double Rc = mm;
+        double Ra = lc;
+        double c  = sqrt(1.0 - Ra * Ra / (Rc * Rc));
+        double u  = 1.0 - r * r / (Rc * Rc);
+        double cc = sqrt(u > 0.0 ? u : 0.0);
+        double A  = 1.5 * c - 0.5 * cc;
+        g[0]  = -(A * A);
+        g[5]  = 1.0 / u;
+        g[10] = r * r;
+        g[15] = r * r * s2;
     } else {
-        double r  = x.y;
-        double th = x.z;
-        double f  = 1.0 - 2.0 * mm / r;
+        double f = 1.0 - 2.0 * mm / r;
         if (id == 2) {
             // Schwarzschild-de Sitter: Ric = Lambda * g
             f -= (lc / 3.0) * r * r;
@@ -67,18 +136,7 @@ void metricAt(int id, double mm, double lc, dvec4 x, out double g[16])
         g[0]  = -f;
         g[5]  = 1.0 / f;
         g[10] = r * r;
-        // GLSL has no double-precision `sin`.  Each lattice line fixes theta to
-        // theta0 + delta with tiny |delta|, so expand around float sin/cos at
-        // theta0: the metric then stays a smooth function of theta, which is what
-        // the difference quotients differentiate.
-        double sz = double(P.stepv.z);
-        double t0 = double(P.lo.z)
-                  + (sz != 0.0 ? round((th - double(P.lo.z)) / sz) : 0.0) * sz;
-        double d  = th - t0;
-        double s0 = double(sin(float(t0)));
-        double c0 = double(cos(float(t0)));
-        double sth = s0 + c0 * d - 0.5 * s0 * d * d - c0 * d * d * d / 6.0;
-        g[15] = r * r * sth * sth;
+        g[15] = r * r * s2;
     }
 }
 

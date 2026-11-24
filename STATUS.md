@@ -33,8 +33,11 @@ a curvature tensor.
   `Physlib/Relativity/` contains `MinkowskiMatrix.lean`, `LorentzGroup/`,
   `LorentzAlgebra/`, `Tensors/`, `Special/`, `Causality/`, `Poincare/`,
   `Bispinors/`, `Fermions/`, `SL2C/`, `PauliMatrices/`. That is
-  special-relativistic kinematics and Lorentz/Poincaré representation theory;
-  there is no Einstein field equation and no curvature tensor.
+  special-relativistic kinematics and Lorentz/Poincaré representation theory.
+  As of November 2026 its **`gravity` branch** additionally contains the full
+  development surveyed below — curvature, the coordinate pipeline, the exact
+  solutions, the Cauchy problem and the modified theories — but that branch is
+  not yet merged into `master`.
 * HepLean (Tooby-Smith) — high-energy physics: particles, gauge theory,
   spinors; not gravitation.
 * `TataSatyaPratheek/mathematical-physics-lean` — a from-scratch,
@@ -67,113 +70,74 @@ a curvature tensor.
 
 So the meaningful gap is not "definitions of curvature" but "theorems about
 solutions". This repository is a small, kernel-checked step into that gap, plus
-a GPU numerical check of the solutions the Lean side cannot yet reach.
+a GPU numerical check of the solutions the Lean side cannot yet reach. The
+survey above records the state before the unmerged `gravity` branch existed; the
+branch, and the vendored copy of it here, now prove the solution-theory results
+listed at the end of this document.
 
 ## What this repository adds
 
-* `gravitation/Gravitation/` — Mathlib-based, `sorry`-free component
-  formalisation: metric with explicit inverse, Riemann tensor with its
-  algebraic symmetries, Ricci, scalar curvature, Einstein tensor; proved
-  symmetry of `G`, the trace identity `g^{ij}G_{ij} = (1 - n/2)S`, and
-  `G = 0 ↔ Ric = 0` in four dimensions; Minkowski as a proved vacuum solution.
-  (The structure carries three symmetries — pair symmetry, antisymmetry in the
-  last pair, and the first Bianchi identity — and `skew_first` is proved from
-  them. Ricci contracts with the diagonal inverse metric.)
-* `gravitation/Gravitation/InitialValue.lean` — the initial value problem's
-  constraint equations: `H = ³R + (tr K)² − K_ij K^ij`, `M_i = ∂_j K_ij −
-  ∂_i tr K`, the moment-of-time-symmetry reduction to scalar flatness, the
-  maximal-slicing form, and a non-vacuum example proving the constraints are not
-  automatic. Development existence (Choquet–Bruhat–Geroch) is deliberately not
-  claimed and not axiomatised.
-* `gravitation/Gravitation/ScalarTensor.lean` — Brans–Dicke PPN parameters, the
-  `ω → ∞` GR limit and coupling bounds, the `f(R)` linear case, Starobinsky
-  potentials/masses, the four-dimensional trace equation and the
-  one-dimensional Galileon total-derivative structure.
-* `gravitation/Gravitation/Screening.lean` — chameleon screening: the
-  density-dependent mass, the shrinking Compton range, exponential Yukawa
-  suppression beyond it, and the thin-shell cap on the fifth force.
-* `gravitation/Gravitation/Ostrogradsky.lean` — the Ostrogradsky instability:
-  a degenerate velocity Hessian for `L = ½q̈² + V`, a Hamiltonian affine in one
-  momentum and unbounded below, contrasted with a positive-definite quadratic
-  kinetic term.
+The general-relativity development lives in Physlib on the `gravity` branch
+(`PhyslibAlpha/Relativity/General`, 38 Lean modules, namespace
+`GeneralRelativity`), which is not yet merged upstream. Since 24 November 2026
+the 37 unmerged modules are **vendored** here under
+`gravitation/vendor/Gravitation/Relativity/General/` (module path
+`Gravitation.Relativity.General.*`, namespace `GeneralRelativity` unchanged) at
+branch commit `41abde06`, while the `physlib` requirement points at merged master `cbd02238`
+— the merge base the branch was written against, which also supplies the
+already-merged `Schwarzschild.IncompressibleSphere` and the base library. The
+704 audited declarations are those sources, imported through
+`gravitation/Gravitation.lean`; deleting `vendor/` is the migration once the
+branch lands.
+
+* Core development — metric with a certified inverse, Riemann/Ricci/scalar
+  curvature and the Einstein tensor, the coordinate pipeline
+  `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G`, the Einstein-tensor trace identity and
+  `G = 0 ↔ Ric = 0` in four dimensions, conservation of the Einstein tensor
+  (the contracted Bianchi identity is proved for the frame Einstein space,
+  `sds_frame_bianchi`, rather than assumed), the ADM constraints, the geodesic Cauchy problem, linearized gravity, and
+  Newton's gravitational constant with its natural-unit systems.
+* Exact solutions — Minkowski; Schwarzschild with its orthonormal frame, all six
+  Riemann components and the Kretschmann scalar `48M²/r⁶`; the interior
+  incompressible sphere (TOV profile, Buchdahl bound); Schwarzschild–de Sitter
+  for general `Λ`, with `Ric = Λg`, `S = 4Λ`, `G = −Λg` and the `Λ`-independent
+  Weyl part; Reissner–Nordström, where `G = 8πT^{EM}` is proved from the metric;
+  Kerr in Boyer–Lindquist coordinates, proved Ricci flat together with its
+  horizons, ergosphere and ZAMO frame dragging; and FLRW, where the metric-level
+  Einstein equations are proved equivalent to the Friedmann equations and
+  bridged to `Physlib.Cosmology.FLRW`.
+* Alternative and modified theories — machine-checked cores of sixteen theories:
+  Einstein–Cartan (torsion, contorsion uniqueness, Cartan spin–torsion
+  inversion), teleparallel/TEGR (`R = −T + B` and `f(T)` Friedmann), Kaluza–Klein
+  (5D inverse, `R⁵ = R⁴ − ¼F²`), Lovelock/Gauss–Bonnet (vanishing variation for
+  `n ≤ 4`), Einstein–Aether (mode speeds, GW170817), massive gravity (Fierz–Pauli,
+  vDVZ, dRGT), the full Will–Nordtvedt PPN parameterisation, Brans–Dicke,
+  `f(R)`/Starobinsky, chameleon screening, MOND, MOG, TeVeS, Nordström,
+  Galileon and Ostrogradsky. Depth varies by theory and is stated per module.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
-  `native_decide` anywhere in `Gravitation/`; `scripts/audit_axioms.sh` checks
-  every declaration against `{propext, Classical.choice, Quot.sound}`, the
-  axioms the base libraries already assume, and runs in CI on every push.
-  `Proof-Status.md` carries a per-declaration proof-status table generated by
-  `scripts/proof_status.sh`; CI fails if the table goes stale. It refreshes the audit data whenever it is missing or older than a
-  source file, so a cached `.lake` from an earlier commit cannot make the
-  table look current.
-* Silent build — `lake build` emits no messages. Tactic and unused-variable
-  warnings were removed by rewriting the proofs, not by disabling linters, and
-  Lake's module-system advisory is opted out with `allowNonModules = true`.
-  `scripts/check_messages.sh` fails if a message reappears; CI runs it.
-* GPU check — the Vulkan tensor pass runs in double precision and reproduces
-  the proved `48M²/r⁶` to `1.2e-7` and the electric part `diag(0, −2k, k, k)`
-  to `2.6e-9`; for Schwarzschild and Schwarzschild–de Sitter with `Λ = 0.1` it
-  also matches the four closed-form Riemann components derived in Lean —
-  `R^t_rtr` to `7.8e-9` and `5.9e-7`, `R^t_θtθ` to `3.7e-10`, `R^r_θrθ` to
-  `1.5e-8`, `R^θ_φθφ` to `5.5e-9` — and the `Λ`-independent Weyl part to
-  `1.4e-8`. CI runs it on the lavapipe software driver, so no GPU runner is
-  needed.
-* `gravitation/Gravitation/Examples/Schwarzschild.lean` — the Schwarzschild
-  curvature in an orthonormal frame: proved Ricci flat for every mass
-  parameter, with the Kretschmann sum `48 M²/r⁶`. The electric part is derived
-  rather than asserted: `g_tt = −(1 + 2Φ)` fixes `Φ = −M/r`, and the tidal
-  eigenvalues `Φ'' = −2M/r³`, `Φ'/r = M/r³` are proved from the potential, so
-  the tensor is `electricPart` at `k = M/r³` and is trace free because `Φ` is
-  harmonic. Every component of the curvature is also derived from the metric by
-  differentiating the Christoffel symbols — `R^t{}_{rtr} = 2M/(r³f)`,
-  `R^t{}_{θtθ} = −M/r`, `R^t{}_{φtφ} = −(M/r)sin²θ`, `R^r{}_{θrθ} = −M/r`,
-  `R^r{}_{φrφ} = −(M/r)sin²θ` and `R^θ{}_{φθφ} = (2M/r)sin²θ` — and scaled to
-  the electric eigenvalues `−2k, k, k`.
-* `gravitation/Gravitation/Examples/SchwarzschildDeSitter.lean` — the same
-  curvature with a cosmological constant, for general `Λ`: with
-  `f = 1 − 2M/r − Λr²/3` and `n = f'/2 = M/r² − Λr/3`, the components are
-  `R^t{}_{rtr} = (2M/r³ + Λ/3)/f`, `R^t{}_{θtθ} = R^r{}_{θrθ} = Λr²/3 − M/r`,
-  `R^t{}_{φtφ} = R^r{}_{φrφ} = (Λr²/3 − M/r)sin²θ` and
-  `R^θ{}_{φθφ} = (2M/r + Λr²/3)sin²θ`. The frame Weyl electric part is proved
-  to be `diag(0, −2M/r³, M/r³, M/r³)` for every `Λ`: since
-  `C_{titj} = R_{titj} + (Λ/3)g_ij`, the cosmological constant enters the
-  Riemann tensor only through the trace the Weyl tensor removes, so de Sitter
-  changes Ricci and leaves the free gravitational field alone. Squaring the
-  whole frame tensor gives the Kretschmann scalar `48M²/r⁶ + 8Λ²/3`
-  (`kretschmann_sds`), the Weyl square plus `(Λ/3)²·24`, so `Λ` survives in `K`
-  even though it cancels from the eigenvalues. Contracting that split gives the
-  Ricci tensor: the Weyl part is trace free (`weylRic_zero`) and the trace part
-  contracts to `Λη` (`traceRic_eq`), so `Ric = Λη`, `S = 4Λ` and `G = −Λη`
-  (`sdsRic_eq`, `sdsScalar_eq`, `sdsEinstein_eq`) — the `Λ` that cancelled from
-  the Weyl eigenvalues is exactly the Ricci curvature.
-  The frame Weyl tensor is purely electric — every component with a single
-  temporal index vanishes (`weyl_purely_electric`). At `Λ = 0` the same theorems give Schwarzschild's
-  vacuum: `schwarzschild_ricci_zero`, `schwarzschild_scalar_zero` and
-  `schwarzschild_einstein_zero`, and the Vulkan pass checks the frame Ricci
-  tensor against `Λη` (`2.0e-8`). At `Λ = 0` the lapse reduces to
-  `schwarzschildF`.
-* `gravitation/Gravitation/Pipeline.lean` — end-to-end coordinate pipeline
-  `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G` directly from component metrics:
-  proves Minkowski is flat, equates `christoffel` with `schG`/`sdsG` and its
-  coordinate derivatives with `schDG`/`sdsDGFull`, evaluates all six Riemann
-  components directly from `g` and `g⁻¹` (`riemann_sds_components`,
-  `riemann_schwarzschild_components`), and proves full metric-level field
-  equations (`ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds`,
-  `ricciOf_sds_frame`, `ricciOf_schwarzschild`, `scalarOf_schwarzschild`,
-  `einsteinOf_schwarzschild`).
-* `gravitation/Gravitation/Conservation.lean` — the contracted Bianchi identity
-  accepted as a hypothesis, yielding `∇·G = 0` and the uniqueness of `G` as the
-  conserved combination of `Ric` and `S g`.
-* `gravitation/Gravitation/Geodesics.lean` — the geodesic Cauchy problem:
-  local existence from initial position and velocity via Mathlib's
-  Picard–Lindelöf theorem, uniqueness under an explicit Lipschitz hypothesis,
-  and the flat-space straight lines.
-* `gravitation/Gravitation/Alternatives.lean` — MOND, MOG and TeVeS stated as
-  used, with proved structural theorems (deep-MOND flat rotation, MOG's bounded
-  enhancement, TeVeS's preserved Lorentzian signature) and the empirical
-  strengths/weaknesses recorded in prose, not as theorems.
-* `gravitation/vulkan/` — Vulkan compute path computing `Γ`, `Ric`, `R`, `G`
-  from any metric supplied as an analytic function of the coordinates, used to
-  check numerically that Schwarzschild is Ricci flat and that
-  Schwarzschild–de Sitter has `Ric = Λg`.
+  `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
+  both the local module and the Physlib GR subtree, prints `#print axioms` for
+  all 704 declarations (470 theorem-like) and rejects anything outside
+  `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
+  from that audit and CI fails if it is stale.
+* Silent build — `lake build` emits no messages; `scripts/check_messages.sh`
+  fails if one reappears.
+* Numerical check — the Vulkan tensor pass now covers seven metrics. Besides
+  Minkowski, Schwarzschild and Schwarzschild–de Sitter (Kretschmann, Weyl part
+  and four Riemann components), it verifies the Kerr vacuum (`2.10e-7` on
+  `|Ric|` and `1.42e-7` on `|G|` at `a = 0.5`), the Reissner–Nordström
+  Einstein–Maxwell equation (`1.085e-7` on `|G − 8πT|` at `Q = 0.5`), the FLRW
+  closed forms for `a = 1 + Ht + t²` (`1.27e-6` on `Ric`, `R` and `G`, so the
+  `a''` term is exercised), and the interior Schwarzschild constant-density
+  Einstein tensor (`8.90e-8` at `Rc = 5`, `Ra = 4`). CI runs it on the lavapipe
+  software driver.
+* Vendor drift guard — `scripts/check_vendor_sync.sh` fetches the `gravity`
+  branch, fails if its tip has moved from `vendor/REVISION`, and diffs every
+  vendored module against the branch after the import rewrite. CI runs it
+  before the build, so the temporary copy cannot go stale silently.
+* References — `docs/references.bib` collects the standards texts, original
+  solution papers and modified-gravity literature; each Physlib module cites its
+  sources in its own references section as `[ref: key]`.
 
 ## Sources
 

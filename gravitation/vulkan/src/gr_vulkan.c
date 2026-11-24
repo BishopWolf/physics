@@ -1,7 +1,8 @@
 // gr_vulkan.c — minimal Vulkan compute host for general-relativity tensor
 // contractions.  Dispatches shaders/tensor.comp over a lattice of spacetime
 // points, reports the maximum |Ricci|, |R| and |G| it finds, and checks the
-// frame Ricci tensor against Lambda * eta (which vanishes for Schwarzschild).
+// closed forms proved in Physlib: Schwarzschild-de Sitter curvature against
+// Lambda, Kerr vacuum, and the Reissner-Nordstrom Einstein-Maxwell equations.
 //
 // Build:  make
 // Run:    ./gr_vulkan shaders/tensor.comp.spv
@@ -153,6 +154,8 @@ typedef struct {
     float       M;
     float       Lambda;
     double      tol;
+    float       lo[4];
+    float       stepv[4];
 } Case;
 
 int main(int argc, char **argv)
@@ -278,9 +281,20 @@ int main(int argc, char **argv)
     vkDestroyShaderModule(gDev, sm, NULL);
 
     const Case cases[] = {
-        {0, "Minkowski (flat)", 1.0f, 0.0f, 1e-6},
-        {1, "Schwarzschild (vacuum)", 1.0f, 0.0f, 1e-6},
-        {2, "Schwarzschild-de Sitter", 1.0f, 0.1f, 1e-6},
+        {0, "Minkowski (flat)", 1.0f, 0.0f, 1e-6,
+         {0.0f, 3.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
+        {1, "Schwarzschild (vacuum)", 1.0f, 0.0f, 1e-6,
+         {0.0f, 3.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
+        {2, "Schwarzschild-de Sitter", 1.0f, 0.1f, 1e-6,
+         {0.0f, 3.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
+        {3, "Kerr (a = 0.5, vacuum)", 1.0f, 0.5f, 1e-5,
+         {0.0f, 3.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
+        {4, "Reissner-Nordstrom (Q = 0.5)", 1.0f, 0.5f, 1e-6,
+         {0.0f, 3.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
+        {5, "FLRW (a = 1 + Ht + t^2, k = 0.3)", 1.0f, 0.3f, 1e-5,
+         {0.0f, 0.5f, 0.5f, 0.3f}, {0.1f, 0.12f, 0.2f, 0.2f}},
+        {6, "Interior Schwarzschild (Rc = 5, Ra = 4)", 5.0f, 4.0f, 1e-5,
+         {0.0f, 1.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
     };
 
     int failures = 0;
@@ -293,8 +307,10 @@ int main(int argc, char **argv)
         P.massM    = cases[c].M;
         P.lambdaC  = cases[c].Lambda;
         P.h        = 1e-4f;
-        P.lo[0] = 0.0f; P.lo[1] = 3.0f; P.lo[2] = 0.5f; P.lo[3] = 0.3f;
-        P.stepv[0] = 0.1f; P.stepv[1] = 0.15f; P.stepv[2] = 0.2f; P.stepv[3] = 0.2f;
+        for (int k = 0; k < 4; ++k) {
+            P.lo[k] = cases[c].lo[k];
+            P.stepv[k] = cases[c].stepv[k];
+        }
         for (int k = 0; k < 4; ++k)
             P.grid[k] = G[k];
 
@@ -338,7 +354,9 @@ int main(int argc, char **argv)
         double maxRic = 0.0, maxR = 0.0, maxG = 0.0, maxDev = 0.0;
         double maxKrel = 0.0, maxEdev = 0.0, maxRtr = 0.0;
         double maxRtt = 0.0, maxRrr = 0.0, maxRtp = 0.0;
-        double maxKsds = 0.0, maxRicFrame = 0.0;
+        double maxKsds = 0.0, maxRicFrame = 0.0, maxMaxwell = 0.0;
+        double maxFlrw = 0.0, maxInterior = 0.0;
+        const double PI = 3.14159265358979323846;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
@@ -353,16 +371,19 @@ int main(int argc, char **argv)
                 double g_i   = g[i];
                 if (fabs(ric_i) > maxRic) maxRic = fabs(ric_i);
                 if (fabs((double)Gm[i]) > maxG) maxG = fabs((double)Gm[i]);
-                double expect = (cases[c].id == 2) ? (double)cases[c].Lambda * g_i : 0.0;
-                double dev = fabs(ric_i - expect);
-                if (dev > maxDev) maxDev = dev;
+                if (cases[c].id <= 2) {
+                    double expect =
+                        (cases[c].id == 2) ? (double)cases[c].Lambda * g_i : 0.0;
+                    double dev = fabs(ric_i - expect);
+                    if (dev > maxDev) maxDev = dev;
+                }
             }
             // The frame statement proved in Lean: Ric = Lambda eta in the
             // orthonormal frame.  The metric is diagonal, so the frame
             // component is Ric_ab / sqrt(|g_aa g_bb|), which must be
             // Lambda * diag(-1, 1, 1, 1).  At Lambda = 0 this is the vanishing
             // of the Schwarzschild frame Ricci tensor.
-            {
+            if (cases[c].id <= 2) {
                 double eta[16] = {0};
                 double L       = (double)cases[c].Lambda;
                 eta[0] = -1.0; eta[5] = 1.0; eta[10] = 1.0; eta[15] = 1.0;
@@ -380,7 +401,7 @@ int main(int argc, char **argv)
             // Kretschmann and the Riemann components proved in Lean: the
             // Schwarzschild-de Sitter forms with general Lambda, of which
             // Schwarzschild is the Lambda = 0 special case.
-            if (cases[c].id >= 1) {
+            if (cases[c].id == 1 || cases[c].id == 2) {
                 int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
                 double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
                 double M  = (double)cases[c].M;
@@ -437,42 +458,138 @@ int main(int argc, char **argv)
                     if (dev > maxEdev) maxEdev = dev;
                 }
             }
+
+            // Reissner-Nordstrom: G_ij = 8 pi T_ij for the Maxwell field
+            // F_01 = -Q/r^2 (einsteinOf_rn_eq_maxwell).  The metric is diagonal,
+            // so 8 pi T = diag(Q^2 f/r^4, -Q^2/(f r^4), Q^2/r^2,
+            // Q^2 sin^2 theta/r^2).
+            if (cases[c].id == 4) {
+                int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double M  = (double)cases[c].M;
+                double q  = (double)cases[c].Lambda;
+                double q2 = q * q;
+                double r4 = rr * rr * rr * rr;
+                double ff = 1.0 - 2.0 * M / rr + q2 / (rr * rr);
+                double s2 = g[15] / g[10];
+                double expect[16] = {0};
+                expect[0]  = q2 * ff / r4;
+                expect[5]  = -q2 / (ff * r4);
+                expect[10] = q2 / (rr * rr);
+                expect[15] = q2 * s2 / (rr * rr);
+                for (int i = 0; i < 16; ++i) {
+                    double dev = fabs(Gm[i] - expect[i]);
+                    if (dev > maxMaxwell) maxMaxwell = dev;
+                }
+            }
+
+            // FLRW: a(t) = 1 + H t + t^2 and spatial curvature k.  The closed
+            // forms are ricciOf_flrw, scalarOf_flrw and einsteinOf_flrw; with
+            // a'' = 2 the second-derivative term is exercised.
+            if (cases[c].id == 5) {
+                int i0 = (int)(p % (uint32_t)G[0]);
+                int i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double t  = (double)P.lo[0] + (double)i0 * (double)P.stepv[0];
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double H  = (double)cases[c].M;
+                double kk = (double)cases[c].Lambda;
+                double a  = 1.0 + H * t + t * t;
+                double ap = H + 2.0 * t;
+                double app = 2.0;
+                double s2 = g[15] / g[10];
+                double c1 = a * app + 2.0 * ap * ap + 2.0 * kk;
+                double expect[16] = {0};
+                expect[0]  = -3.0 * app / a;
+                expect[5]  = c1 / (1.0 - kk * rr * rr);
+                expect[10] = c1 * rr * rr;
+                expect[15] = c1 * rr * rr * s2;
+                for (int i = 0; i < 16; ++i) {
+                    double dev = fabs(ric[i] - expect[i]);
+                    if (dev > maxFlrw) maxFlrw = dev;
+                }
+                double sexp = 6.0 * (app / a + (ap / a) * (ap / a)
+                                     + kk / (a * a));
+                double sdev = fabs(R - sexp);
+                if (sdev > maxFlrw) maxFlrw = sdev;
+                double gdev = fabs(Gm[0] - 3.0 * ((ap / a) * (ap / a)
+                                                  + kk / (a * a)));
+                if (gdev > maxFlrw) maxFlrw = gdev;
+            }
+
+            // Interior Schwarzschild (incompressible sphere): constant density
+            // rho = 3/(8 pi Rc^2) and pressure
+            // p = rho (2 cos chi_a / (3 cos chi_a - cos chi) - 1), with
+            // cos chi = sqrt(1 - r^2/Rc^2).  Checks the Einstein tensor of the
+            // interior metric; the Lean module proves the junction, not the
+            // field equations.
+            if (cases[c].id == 6) {
+                int i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double Rc = (double)cases[c].M;
+                double Ra = (double)cases[c].Lambda;
+                double c  = sqrt(1.0 - Ra * Ra / (Rc * Rc));
+                double u  = 1.0 - rr * rr / (Rc * Rc);
+                double cc = sqrt(u);
+                double A  = 1.5 * c - 0.5 * cc;
+                double rho = 3.0 / (8.0 * PI * Rc * Rc);
+                double pr  = rho * (2.0 * c / (3.0 * c - cc) - 1.0);
+                double s2  = g[15] / g[10];
+                double expect[16] = {0};
+                expect[0]  = 3.0 * (A * A) / (Rc * Rc);
+                expect[5]  = (8.0 * PI * pr) / u;
+                expect[10] = 8.0 * PI * pr * rr * rr;
+                expect[15] = 8.0 * PI * pr * rr * rr * s2;
+                for (int i = 0; i < 16; ++i) {
+                    double dev = fabs(Gm[i] - expect[i]);
+                    if (dev > maxInterior) maxInterior = dev;
+                }
+            }
         }
         vkUnmapMemory(gDev, gMem);
 
-        const char *verdict = (maxDev <= cases[c].tol) ? "ok" : "FAIL";
-        if (maxDev > cases[c].tol) failures++;
-        if (cases[c].id == 1 && maxKrel > kTol) {
-            verdict = "FAIL";
-            failures++;
-        }
-        if (cases[c].id >= 1 &&
+        int bad = 0;
+        if (cases[c].id <= 2 && maxDev > cases[c].tol) bad = 1;
+        if ((cases[c].id == 1 || cases[c].id == 2) &&
             (maxEdev > eTol || maxRtr > eTol || maxRtt > eTol ||
-             maxRrr > eTol || maxRtp > eTol)) {
-            verdict = "FAIL";
-            failures++;
-        }
-        if (cases[c].id == 2 && maxKsds > kTol) {
-            verdict = "FAIL";
-            failures++;
-        }
-        if (maxRicFrame > eTol) {
-            verdict = "FAIL";
-            failures++;
-        }
+             maxRrr > eTol || maxRtp > eTol))
+            bad = 1;
+        if (cases[c].id == 1 && maxKrel > kTol) bad = 1;
+        if (cases[c].id == 2 && maxKsds > kTol) bad = 1;
+        if (cases[c].id == 3 &&
+            (maxRic > cases[c].tol || maxG > cases[c].tol))
+            bad = 1;
+        if (cases[c].id == 4 && maxMaxwell > cases[c].tol) bad = 1;
+        if (cases[c].id == 5 && maxFlrw > cases[c].tol) bad = 1;
+        if (cases[c].id == 6 && maxInterior > cases[c].tol) bad = 1;
+        if (cases[c].id <= 2 && maxRicFrame > eTol) bad = 1;
+        if (bad) failures++;
+        const char *verdict = bad ? "FAIL" : "ok";
 
-        printf("case %d  %-26s\n", cases[c].id, cases[c].name);
+        printf("case %d  %-32s\n", cases[c].id, cases[c].name);
         printf("        max|Ric| = %.3e   max|R| = %.3e   max|G| = %.3e\n",
                maxRic, maxR, maxG);
         if (cases[c].id == 2)
             printf("        max|Ric - Lambda g| = %.3e  (tol %.0e)  [%s]\n",
                    maxDev, cases[c].tol, verdict);
+        else if (cases[c].id == 3)
+            printf("        vacuum  max|Ric|, max|G| = %.3e  (tol %.0e)  [%s]\n",
+                   fmax(maxRic, maxG), cases[c].tol, verdict);
+        else if (cases[c].id == 4)
+            printf("        max|G - 8 pi T_Maxwell| = %.3e  (tol %.0e)  [%s]\n",
+                   maxMaxwell, cases[c].tol, verdict);
+        else if (cases[c].id == 5)
+            printf("        max|Ric, R, G - FLRW closed form| = %.3e  (tol %.0e)  [%s]\n",
+                   maxFlrw, cases[c].tol, verdict);
+        else if (cases[c].id == 6)
+            printf("        max|G - 8 pi diag(rho, p, p, p)| = %.3e  (tol %.0e)  [%s]\n",
+                   maxInterior, cases[c].tol, verdict);
         else
             printf("        max|Ric| = %.3e  (tol %.0e)  [%s]\n", maxDev,
                    cases[c].tol, verdict);
-        printf("        frame Ricci |Ric - Lambda eta| = %.3e  (tol %.0e)  [%s]\n",
-               maxRicFrame, eTol, maxRicFrame <= eTol ? "ok" : "FAIL");
-        if (cases[c].id >= 1) {
+        if (cases[c].id <= 2)
+            printf("        frame Ricci |Ric - Lambda eta| = %.3e  (tol %.0e)  [%s]\n",
+                   maxRicFrame, eTol, maxRicFrame <= eTol ? "ok" : "FAIL");
+        if (cases[c].id == 1 || cases[c].id == 2) {
             if (cases[c].id == 1)
                 printf("        Kretschmann |K - 48M^2/r^6| / (48M^2/r^6) = %.3e  (tol %.0e)  [%s]\n",
                        maxKrel, kTol, maxKrel <= kTol ? "ok" : "FAIL");

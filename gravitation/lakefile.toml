@@ -1,16 +1,31 @@
 name = "gravitation"
 version = "0.1.0"
 defaultTargets = ["Gravitation"]
-# This development does not use Lean's module system. Mathlib does, so Lake
-# otherwise emits a module-system advisory for every Mathlib import; this option
-# records the choice explicitly so the build is silent.
+# This development does not use Lean's module system for its own root module,
+# but Mathlib and Physlib do; the option keeps Lake from emitting a
+# module-system advisory for every import so the build stays silent.
 allowNonModules = true
 
 [[lean_lib]]
 name = "Gravitation"
-globs = ["Gravitation", "Gravitation.+"]
+globs = ["Gravitation"]
 
+# Temporary home of the unmerged `gravity` branch.  The vendored modules use
+# the `Gravitation.Relativity.General.*` module path so they cannot collide with
+# the dependency's `PhyslibAlpha.*` library globs; their namespace is still
+# `GeneralRelativity` and the proofs are unchanged.  To migrate: delete
+# `vendor/` and switch the umbrella imports back to `PhyslibAlpha.Relativity.General.*`.
+[[lean_lib]]
+name = "GravitationVendor"
+srcDir = "vendor"
+globs = ["Gravitation.Relativity.+"]
+
+# Physlib provides the base library (units, cosmology) and the already-merged
+# `Schwarzschild.IncompressibleSphere` theorem.  The rest of the general-
+# relativity development is on the unmerged `gravity` branch and is carried in
+# `vendor/` until that branch lands upstream; this revision is Physlib master,
+# the merge base the vendored modules were built against.
 [[require]]
 name = "physlib"
 git = "https://github.com/leanprover-community/physlib.git"
-rev = "56430c65b76f73c7c25fc03eed46be1d888520bb"
+rev = "cbd02238fd1414edd9fa34871acc2a0fcdc20c21"
