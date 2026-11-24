@@ -17,6 +17,7 @@ the normal flux vanish on every face.
 module
 
 public import Gravitation.WaveEnergy3DConservation
+public import Mathlib.MeasureTheory.Measure.OpenPos
 
 @[expose] public section
 
@@ -122,5 +123,78 @@ theorem waveEnergy3D_eq_initial_of_wave
     (waveFlux3D ut grad) (waveFlux3DDeriv ut grad Dut Dgrad) I M
     hut hgrad hut_cont hgrad_cont hutt_cont hgradt_cont hbound
     hF_cont hF_deriv hdiv_int hface_upper hface_lower hdiv
+
+/-- The 3D energy density is nonnegative. -/
+lemma waveEnergy3DIntegrand_nonneg
+    (ut : Space3 → ℝ) (grad : Space3 → Space3) (x : Space3) :
+    0 ≤ waveEnergy3DIntegrand ut grad x := by
+  unfold waveEnergy3DIntegrand
+  exact add_nonneg (sq_nonneg (ut x))
+    (Finset.sum_nonneg fun i _ => sq_nonneg (grad x i))
+
+/-- **Zero box energy gives zero pointwise data.**  If the energy on a box
+vanishes, then both `u_t` and `∇u` vanish at every interior point. -/
+lemma eq_zero_of_waveEnergy3D_eq_zero
+    (ut : ℝ → Space3 → ℝ) (grad : ℝ → Space3 → Space3)
+    {I : Box (Fin 3)} {t : ℝ}
+    (hut_cont : Continuous (Function.uncurry ut))
+    (hgrad_cont : Continuous (Function.uncurry grad))
+    (hE : waveEnergy3D ut grad I t = 0) :
+    ∀ x ∈ Box.Ioo I, ut t x = 0 ∧ grad t x = 0 := by
+  have hInt :
+      (∫ x in Box.Icc I, waveEnergy3DIntegrand (ut t) (grad t) x) = 0 := by
+    have h := hE
+    unfold waveEnergy3D at h
+    exact (mul_eq_zero.mp h).resolve_left (by norm_num)
+  have hcont : Continuous
+      (fun x : Space3 => waveEnergy3DIntegrand (ut t) (grad t) x) :=
+    continuous_waveEnergy3DIntegrand_section ut grad hut_cont hgrad_cont t
+  have hIntble : Integrable
+      (fun x : Space3 => waveEnergy3DIntegrand (ut t) (grad t) x)
+      (volume.restrict (Box.Icc I)) :=
+    hcont.continuousOn.integrableOn_compact I.isCompact_Icc
+  have hnonneg : ∀ x : Space3,
+      0 ≤ waveEnergy3DIntegrand (ut t) (grad t) x :=
+    fun x => waveEnergy3DIntegrand_nonneg (ut t) (grad t) x
+  have hAE : (fun x : Space3 => waveEnergy3DIntegrand (ut t) (grad t) x)
+      =ᵐ[volume.restrict (Box.Icc I)] 0 :=
+    (integral_eq_zero_iff_of_nonneg hnonneg hIntble).mp hInt
+  have hAEIoo : (fun x : Space3 => waveEnergy3DIntegrand (ut t) (grad t) x)
+      =ᵐ[volume.restrict (Box.Ioo I)] 0 :=
+    ae_restrict_of_ae_restrict_of_subset I.Ioo_subset_Icc hAE
+  have hIoo_open : IsOpen (Box.Ioo I) := by
+    change IsOpen (Set.univ.pi fun i : Fin 3 =>
+      Set.Ioo (I.lower i) (I.upper i))
+    exact isOpen_set_pi Set.finite_univ fun i (_ : i ∈ Set.univ) => isOpen_Ioo
+  have hEqOn : Set.EqOn (fun x : Space3 =>
+      waveEnergy3DIntegrand (ut t) (grad t) x) 0 (Box.Ioo I) :=
+    Measure.eqOn_open_of_ae_eq hAEIoo hIoo_open hcont.continuousOn
+      continuousOn_const
+  intro x hx
+  have hx0 : waveEnergy3DIntegrand (ut t) (grad t) x = 0 := hEqOn hx
+  have hsum_nonneg : 0 ≤ ∑ i : Fin 3, grad t x i ^ 2 :=
+    Finset.sum_nonneg fun i _ => sq_nonneg (grad t x i)
+  have hsq : ut t x ^ 2 = 0 := by
+    unfold waveEnergy3DIntegrand at hx0
+    nlinarith [sq_nonneg (ut t x), hsum_nonneg]
+  have hgsum : (∑ i : Fin 3, grad t x i ^ 2) = 0 := by
+    unfold waveEnergy3DIntegrand at hx0
+    nlinarith [sq_nonneg (ut t x), hsum_nonneg]
+  constructor
+  · exact sq_eq_zero_iff.mp hsq
+  · funext i
+    have hi : grad t x i ^ 2 = 0 :=
+      (Finset.sum_eq_zero_iff_of_nonneg
+        (fun j _ => sq_nonneg (grad t x j))).mp hgsum i (Finset.mem_univ i)
+    exact sq_eq_zero_iff.mp hi
+
+/-- The energy at time zero vanishes when the initial velocity and the initial
+spatial gradient vanish. -/
+lemma waveEnergy3D_eq_zero_initial
+    (ut : ℝ → Space3 → ℝ) (grad : ℝ → Space3 → Space3) (I : Box (Fin 3))
+    (hut0 : ∀ x, ut 0 x = 0) (hgrad0 : ∀ x i, grad 0 x i = 0) :
+    waveEnergy3D ut grad I 0 = 0 := by
+  unfold waveEnergy3D waveEnergy3DIntegrand
+  simp [hut0, hgrad0]
 
 end GeneralRelativity
