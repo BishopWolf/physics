@@ -85,7 +85,7 @@ the 37 unmerged modules are **vendored** here under
 `Gravitation.Relativity.General.*`, namespace `GeneralRelativity` unchanged) at
 branch commit `41abde06`, while the `physlib` requirement points at merged master `cbd02238`
 — the merge base the branch was written against, which also supplies the
-already-merged `Schwarzschild.IncompressibleSphere` and the base library. The793 audited declarations are those sources plus the local
+already-merged `Schwarzschild.IncompressibleSphere` and the base library. The798 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -102,7 +102,7 @@ branch lands.
   (the contracted Bianchi identity is proved for the frame Einstein space,
   `sds_frame_bianchi`, rather than assumed), the ADM constraints, the geodesic Cauchy problem, the d'Alembert one-dimensional wave Cauchy theorem
   (`dAlembert_wave_equation`), the wave energy conservation theorem
-  (`waveEnergy_eq_initial`), zero-data uniqueness (`wave_zero_of_zero_data`, `wave_zero_of_zero_data_Icc`), closed-interval general-data uniqueness (`wave_unique_of_same_data`), the 3D box divergence theorem (`integral_divergence_box_eq_zero`), the 3D energy derivative (`hasDerivAt_waveEnergy3D`), conditional 3D energy conservation (`waveEnergy3D_eq_initial_of_divergence`), 3D wave energy conservation (`waveEnergy3D_eq_initial_of_wave`), 3D zero-energy data (`eq_zero_of_waveEnergy3D_eq_zero`), 3D wave uniqueness on the closed box (`wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`) and the linearized wave-gauge interface (`WaveGaugePerturbation`, `linEinstein_eq_zero_of_waveGauge`, with the TT-wave instantiation `ttWave_waveGauge`) and the chart-level M1 interface (`ChartSpacetime`, its Pipeline-derived connection and curvature, Minkowski vanishing checks, and chart-level causal classification including a null-vector example), the chart-level ADM initial-data interface (`ChartInitialData`, `minkowskiChartInitialData`, with the induced-metric equality `minkowskiChartInitialData_metric` and constraint projections `ham_zero`, `mom_zero`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
+  (`waveEnergy_eq_initial`), zero-data uniqueness (`wave_zero_of_zero_data`, `wave_zero_of_zero_data_Icc`), closed-interval general-data uniqueness (`wave_unique_of_same_data`), the 3D box divergence theorem (`integral_divergence_box_eq_zero`), the 3D energy derivative (`hasDerivAt_waveEnergy3D`), conditional 3D energy conservation (`waveEnergy3D_eq_initial_of_divergence`), 3D wave energy conservation (`waveEnergy3D_eq_initial_of_wave`), 3D zero-energy data (`eq_zero_of_waveEnergy3D_eq_zero`), 3D wave uniqueness on the closed box (`wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`) and the linearized wave-gauge interface (`WaveGaugePerturbation`, `linEinstein_eq_zero_of_waveGauge`, with the TT-wave instantiation `ttWave_waveGauge`) and the chart-level M1 interface (`ChartSpacetime`, its Pipeline-derived connection and curvature, Minkowski vanishing checks, and chart-level causal classification including a null-vector example and a three-valued causal character), the chart-level ADM initial-data interface (`ChartInitialData`, `minkowskiChartInitialData`, with the induced-metric equality `minkowskiChartInitialData_metric` and constraint projections `ham_zero`, `mom_zero`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
 * Exact solutions — Minkowski; Schwarzschild with its orthonormal frame, all six
   Riemann components and the Kretschmann scalar `48M²/r⁶`; the interior
   incompressible sphere (TOV profile, Buchdahl bound); Schwarzschild–de Sitter
@@ -123,7 +123,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 793 declarations (528 theorem-like) and rejects anything outside
+  all 798 declarations (531 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`

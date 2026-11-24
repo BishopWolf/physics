@@ -98,7 +98,7 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the one-dimensional wave theorem is
-local. The audit covers 793 declarations, 528 of them theorem-like.
+local. The audit covers 798 declarations, 531 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -173,6 +173,7 @@ Weyl tensor removes.
 | `GeneralRelativity.minkowskiChart` | Minkowski spacetime as a chart-level instance |
 | `GeneralRelativity.minkowskiChart_einstein_zero` | Minkowski chart has vanishing Einstein tensor |
 | `GeneralRelativity.ChartSpacetime.normSq`, `IsTimelike`, `IsNull`, `IsSpacelike` | chart-level causal classification of tangent vectors |
+| `GeneralRelativity.CausalCharacter`, `ChartSpacetime.causalCharacter` | three-valued causal character with classification lemmas |
 | `GeneralRelativity.minkowskiChart_timelike_time`, `minkowskiChart_spacelike_space` | Minkowski timelike and spacelike examples |
 | `GeneralRelativity.lightlikeVector`, `minkowskiChart_null_lightlike` | explicit null vector in the Minkowski chart |
 | `GeneralRelativity.ChartSpacetime.spatialMetric` | induced spatial metric on the `t = 0` chart slice |
@@ -297,7 +298,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (793 at this revision, 528 theorem-like) and rejects any axiom outside
+declaration (798 at this revision, 531 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

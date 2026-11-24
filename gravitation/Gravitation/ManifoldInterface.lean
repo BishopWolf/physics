@@ -174,4 +174,52 @@ lemma minkowskiChart_null_lightlike (x : SpacetimeChart) :
   rw [ChartSpacetime.IsNull, minkowskiChart_normSq]
   simp [lightlikeVector]
 
+/-- The three causal characters of a Lorentzian tangent vector. -/
+inductive CausalCharacter
+  | timelike
+  | null
+  | spacelike
+  deriving DecidableEq, Repr
+
+/-- The causal character of a chart tangent vector. -/
+noncomputable def ChartSpacetime.causalCharacter (X : ChartSpacetime)
+    (x : SpacetimeChart) (v : Fin 4 → ℝ) : CausalCharacter := by
+  classical
+  exact if X.IsTimelike x v then .timelike
+    else if X.IsNull x v then .null
+    else .spacelike
+
+lemma ChartSpacetime.causalCharacter_eq_timelike_of_neg
+    (X : ChartSpacetime) (x : SpacetimeChart) (v : Fin 4 → ℝ)
+    (h : X.IsTimelike x v) :
+    X.causalCharacter x v = .timelike := by
+  simp [ChartSpacetime.causalCharacter, h]
+
+lemma ChartSpacetime.causalCharacter_eq_null_of_eq
+    (X : ChartSpacetime) (x : SpacetimeChart) (v : Fin 4 → ℝ)
+    (h : X.IsNull x v) :
+    X.causalCharacter x v = .null := by
+  have ht : ¬ X.IsTimelike x v := by
+    intro ht
+    rw [ChartSpacetime.IsTimelike] at ht
+    rw [ChartSpacetime.IsNull] at h
+    linarith
+  simp [ChartSpacetime.causalCharacter, ht, h]
+
+lemma ChartSpacetime.causalCharacter_eq_spacelike_of_pos
+    (X : ChartSpacetime) (x : SpacetimeChart) (v : Fin 4 → ℝ)
+    (h : X.IsSpacelike x v) :
+    X.causalCharacter x v = .spacelike := by
+  have ht : ¬ X.IsTimelike x v := by
+    intro ht
+    rw [ChartSpacetime.IsTimelike] at ht
+    rw [ChartSpacetime.IsSpacelike] at h
+    linarith
+  have hn : ¬ X.IsNull x v := by
+    intro hn
+    rw [ChartSpacetime.IsNull] at hn
+    rw [ChartSpacetime.IsSpacelike] at h
+    linarith
+  simp [ChartSpacetime.causalCharacter, ht, hn]
+
 end GeneralRelativity
