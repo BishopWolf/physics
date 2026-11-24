@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 753
-declarations, 507 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 756
+declarations, 509 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -18,6 +18,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.kretschmann_scalar_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.kretschmann_sds_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Linearized.WaveGaugePerturbation` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Linearized.linEinstein_eq_zero_of_waveGauge` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Tensor2` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsSymm` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.isSymm_zero` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -712,6 +714,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.wave_unique_of_same_data` | `Gravitation/WaveUniqueness.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.WaveSolution3D` | `Gravitation/WaveUniqueness3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.u_eq_initial_of_ut_zero3D` | `Gravitation/WaveUniqueness3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.exists_coord_eq_bound_of_mem_Icc_not_mem_Ioo` | `Gravitation/WaveUniqueness3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.wave_zero_of_zero_data3D` | `Gravitation/WaveUniqueness3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.wave_unique3D_of_same_data` | `Gravitation/WaveUniqueness3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
