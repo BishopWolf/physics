@@ -98,7 +98,7 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the one-dimensional wave theorem is
-local. The audit covers 800 declarations, 532 of them theorem-like.
+local. The audit covers 806 declarations, 536 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -176,6 +176,11 @@ Weyl tensor removes.
 | `GeneralRelativity.CausalCharacter`, `ChartSpacetime.causalCharacter` | three-valued causal character with classification lemmas |
 | `GeneralRelativity.ChartSpacetime.covariantDerivVector` | coordinate covariant derivative of a vector field |
 | `GeneralRelativity.minkowskiChart_covariantDerivVector_const` | constant fields are parallel in the Minkowski chart |
+| `GeneralRelativity.ChartSpacetime.christoffel_symm` | chart connection is torsion-free |
+| `GeneralRelativity.ChartSpacetime.metricCovariantDeriv` | coordinate covariant derivative of the metric |
+| `GeneralRelativity.ChartSpacetime.IsLeviCivita` | chart-level torsion-free and metric-compatible certificate |
+| `GeneralRelativity.minkowskiChart_isLeviCivita` | Minkowski chart satisfies the certificate |
+| `GeneralRelativity.ChartSpacetime.causalCharacter_cases` | every vector has one of the three causal characters |
 | `GeneralRelativity.minkowskiChart_timelike_time`, `minkowskiChart_spacelike_space` | Minkowski timelike and spacelike examples |
 | `GeneralRelativity.lightlikeVector`, `minkowskiChart_null_lightlike` | explicit null vector in the Minkowski chart |
 | `GeneralRelativity.ChartSpacetime.spatialMetric` | induced spatial metric on the `t = 0` chart slice |
@@ -300,7 +305,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (800 at this revision, 532 theorem-like) and rejects any axiom outside
+declaration (806 at this revision, 536 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

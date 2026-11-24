@@ -4,11 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Chart-level spacetime interface
 
-This file begins the manifold/Lorentzian layer at the only level supported by the
-current component-based development: a spacetime chart domain with a metric
-field.  It intentionally does not claim a smooth manifold, a Levi-Civita
-connection, curvature from a manifold metric, or causality.  Those are the
-remaining M1 obligations.
+This file provides the chart-level M1 layer supported by the current
+component-based development: a spacetime chart domain, a metric field, the
+coordinate connection and curvature, chart causal classification, and a
+coordinate covariant derivative.  It proves torsion-freeness and Minkowski
+metric compatibility.  It does not claim a smooth manifold, a general
+Levi-Civita compatibility theorem, or global causality; those remain outside
+this chart interface.
 
 The point of the interface is to give the later layers a concrete type to extend,
 with Minkowski spacetime as its first instance.
@@ -236,5 +238,81 @@ lemma minkowskiChart_covariantDerivVector_const
     (v : Fin 4 → ℝ) (x : SpacetimeChart) (i k : Fin 4) :
     minkowskiChart.covariantDerivVector (fun _ => v) x i k = 0 := by
   simp [ChartSpacetime.covariantDerivVector, minkowskiChart_christoffel_zero]
+
+/-- The chart Christoffel symbols are torsion-free: `Γ^k_{ij} = Γ^k_{ji}`. -/
+lemma ChartSpacetime.christoffel_symm (X : ChartSpacetime)
+    (x : SpacetimeChart) (k i j : Fin 4) :
+    X.christoffel x k i j = X.christoffel x k j i := by
+  simp only [ChartSpacetime.christoffel, Pipeline.christoffel]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro l _
+  have hsymm : Pipeline.pd l (fun y => X.coordinateMetric y i j) x =
+      Pipeline.pd l (fun y => X.coordinateMetric y j i) x := by
+    apply Pipeline.pd_congr
+    intro y
+    exact (X.metric (X.chart.symm y)).symm i j
+  rw [hsymm]
+  ring
+
+/-- The coordinate covariant derivative of the metric,
+`∇_i g_{jk} = ∂_i g_{jk} - Γ^l_{ij} g_{lk} - Γ^l_{ik} g_{jl}`. -/
+noncomputable def ChartSpacetime.metricCovariantDeriv
+    (X : ChartSpacetime) (x : SpacetimeChart) (i j k : Fin 4) : ℝ :=
+  Pipeline.pd i (fun y => X.coordinateMetric y j k) x
+    - ∑ l : Fin 4, X.christoffel x l i j * X.coordinateMetric x l k
+    - ∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x j l
+
+/-- The Minkowski chart is metric compatible: the covariant derivative of the
+metric vanishes. -/
+lemma minkowskiChart_metricCovariantDeriv_zero
+    (x : SpacetimeChart) (i j k : Fin 4) :
+    minkowskiChart.metricCovariantDeriv x i j k = 0 := by
+  rw [ChartSpacetime.metricCovariantDeriv]
+  have hpd : Pipeline.pd i (fun y => minkowskiChart.coordinateMetric y j k) x = 0 := by
+    have hconst : ∀ y, minkowskiChart.coordinateMetric y j k = eta4 j k := by
+      intro y
+      simp [ChartSpacetime.coordinateMetric, minkowskiChart, minkowski]
+    rw [Pipeline.pd_congr i x hconst]
+    exact Pipeline.pd_const i (eta4 j k) x
+  have h1 :
+      (∑ l : Fin 4,
+        minkowskiChart.christoffel x l i j * minkowskiChart.coordinateMetric x l k) = 0 := by
+    apply Finset.sum_eq_zero
+    intro l _
+    rw [minkowskiChart_christoffel_zero]
+    ring
+  have h2 :
+      (∑ l : Fin 4,
+        minkowskiChart.christoffel x l i k * minkowskiChart.coordinateMetric x j l) = 0 := by
+    apply Finset.sum_eq_zero
+    intro l _
+    rw [minkowskiChart_christoffel_zero]
+    ring
+  rw [hpd, h1, h2]
+  ring
+
+/-- A chart-level Levi-Civita certificate: torsion-freeness together with metric
+compatibility. -/
+structure ChartSpacetime.IsLeviCivita (X : ChartSpacetime) : Prop where
+  /-- The coordinate connection is torsion-free. -/
+  torsion_free : ∀ (x : SpacetimeChart) (k i j : Fin 4),
+    X.christoffel x k i j = X.christoffel x k j i
+  /-- The coordinate covariant derivative of the metric vanishes. -/
+  metric_compatible : ∀ (x : SpacetimeChart) (i j k : Fin 4),
+    X.metricCovariantDeriv x i j k = 0
+
+/-- The Minkowski chart carries a chart-level Levi-Civita connection. -/
+lemma minkowskiChart_isLeviCivita : minkowskiChart.IsLeviCivita where
+  torsion_free := minkowskiChart.christoffel_symm
+  metric_compatible := minkowskiChart_metricCovariantDeriv_zero
+
+/-- Every chart tangent vector has one of the three causal characters. -/
+lemma ChartSpacetime.causalCharacter_cases (X : ChartSpacetime)
+    (x : SpacetimeChart) (v : Fin 4 → ℝ) :
+    X.causalCharacter x v = .timelike ∨
+      X.causalCharacter x v = .null ∨
+      X.causalCharacter x v = .spacelike := by
+  cases X.causalCharacter x v <;> simp
 
 end GeneralRelativity
