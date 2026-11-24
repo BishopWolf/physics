@@ -222,4 +222,19 @@ lemma ChartSpacetime.causalCharacter_eq_spacelike_of_pos
     linarith
   simp [ChartSpacetime.causalCharacter, ht, hn]
 
+/-- The coordinate covariant derivative of a vector field,
+`∇_i v^k = ∂_i v^k + Γ^k_{ij} v^j`. -/
+noncomputable def ChartSpacetime.covariantDerivVector
+    (X : ChartSpacetime) (v : SpacetimeChart → Fin 4 → ℝ)
+    (x : SpacetimeChart) (i k : Fin 4) : ℝ :=
+  fderiv ℝ (fun y => v y k) x (Pi.single i 1) +
+    ∑ j : Fin 4, X.christoffel x k i j * v x j
+
+/-- A constant vector field has vanishing coordinate covariant derivative in the
+Minkowski chart. -/
+lemma minkowskiChart_covariantDerivVector_const
+    (v : Fin 4 → ℝ) (x : SpacetimeChart) (i k : Fin 4) :
+    minkowskiChart.covariantDerivVector (fun _ => v) x i k = 0 := by
+  simp [ChartSpacetime.covariantDerivVector, minkowskiChart_christoffel_zero]
+
 end GeneralRelativity

@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 798
-declarations, 531 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 800
+declarations, 532 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -62,6 +62,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ChartSpacetime.causalCharacter_eq_timelike_of_neg` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartSpacetime.causalCharacter_eq_null_of_eq` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartSpacetime.causalCharacter_eq_spacelike_of_pos` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartSpacetime.covariantDerivVector` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiChart_covariantDerivVector_const` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Tensor2` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsSymm` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.isSymm_zero` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |

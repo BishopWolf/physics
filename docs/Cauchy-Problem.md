@@ -39,7 +39,7 @@ uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy and uniqueness modules, together with the 3D divergence foundation,
-contribute ninety-four of the 798 audited declarations in Paper I's development.
+contribute ninety-six of the 800 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -197,6 +197,8 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `ChartSpacetime.christoffel`, `riemann`, `einstein` | chart connection and curvature from the coordinate metric, with Minkowski vanishing checks |
 | `ChartSpacetime.normSq`, `IsTimelike`, `IsNull`, `IsSpacelike` | chart-level causal classification of tangent vectors |
 | `CausalCharacter`, `ChartSpacetime.causalCharacter` | three-valued causal character with classification lemmas |
+| `ChartSpacetime.covariantDerivVector` | coordinate covariant derivative of a vector field |
+| `minkowskiChart_covariantDerivVector_const` | constant fields are parallel in the Minkowski chart |
 | `lightlikeVector`, `minkowskiChart_null_lightlike` | explicit null vector in the Minkowski chart |
 | `ChartInitialData`, `minkowskiChartInitialData` | chart ADM data with flat vacuum instance |
 | `minkowskiChartInitialData_metric` | induced spatial metric equals the flat ADM metric |
@@ -340,7 +342,7 @@ milestone has an acceptance criterion; none is claimed as done here.
 | --- | --- | --- |
 | M0 | Linear 3D wave model on a box: energy, conservation, zero-energy, zero-data and general-data uniqueness | **Done**: `waveEnergy3D_eq_initial_of_wave`, `eq_zero_of_waveEnergy3D_eq_zero`, `wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`; closed-box uniqueness under explicit regularity |
 | M0.5 | Linearized Einstein equations in wave gauge | **Interface**: `WaveGaugePerturbation` and `linEinstein_eq_zero_of_waveGauge`, with `ttWave_waveGauge` as a concrete TT-plane-wave instance; uses the existing `linEinstein_lorenz_gauge` reduction, not a manifold derivation |
-| M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality | **Started**: `ChartSpacetime`, chart metric/connection/curvature via `Pipeline`, Minkowski vanishing checks, and chart-level causal classification with a null-vector example and a three-valued causal character; smoothness, Levi-Civita compatibility and global causality remain open |
+| M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality | **Started**: `ChartSpacetime`, chart metric/connection/curvature via `Pipeline`, Minkowski vanishing checks, and chart-level causal classification with a null-vector example a three-valued causal character and a coordinate covariant derivative; smoothness, Levi-Civita compatibility and global causality remain open |
 | M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Started**: `ChartInitialData` and the flat vacuum instance; Sobolev regularity and manifold constraints remain open |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | a formal local-existence theorem for the reduced system |
 | M4 | Gauge recovery and constraint propagation | a proof that reduced solutions satisfy the full Einstein equations and preserve the constraints |
@@ -368,14 +370,14 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 798 declarations. It contains the
+The development audited in Paper I now has 800 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
 uniqueness theorems, the linearized wave-gauge interface and the chart-level M1
 interface discussed above, together with the solution theory, the alternative
 theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is ninety-four declarations across eleven modules: `Gravitation.WaveCauchy`,
+is ninety-six declarations across eleven modules: `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -400,9 +402,9 @@ This paper adds prose and eleven Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
 `Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge` and
 `Gravitation.ManifoldInterface`, `Gravitation.InitialDataInterface`
-(ninety-four declarations). The audited
+(ninety-six declarations). The audited
 development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 798 declarations with axioms inside
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 800 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
@@ -433,8 +435,9 @@ The thirteen formal modules named here can be read directly:
 - No global existence or maximal-interval theorem for geodesics.
 - No smooth-manifold, Levi-Civita compatibility, curvature-from-manifold-metric or
   global causality layer. The M1 contribution is the chart-level `ChartSpacetime`
-  interface, its Pipeline-derived connection and curvature, and a chart-level
-  timelike/null/spacelike classification including a null-vector example. The formalised 3D wave theorem is linear
+  interface, its Pipeline-derived connection and curvature, a chart-level
+  timelike/null/spacelike classification, and a coordinate covariant derivative.
+  There is no tensor-bundle or Levi-Civita compatibility proof. The formalised 3D wave theorem is linear
   and constant-coefficient.
 - No global uniqueness theorem for the wave Cauchy problem. The formalised
   results are zero-data uniqueness on `Icc 0 L` and, by applying it to the
