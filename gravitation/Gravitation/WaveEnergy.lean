@@ -19,6 +19,7 @@ module
 public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
+public import Mathlib.MeasureTheory.Measure.OpenPos
 
 @[expose] public section
 
@@ -255,5 +256,105 @@ lemma waveEnergy_eq_initial
   have hderiv : ∀ s, deriv (waveEnergy ut ux L) s = 0 := fun s => (hzero s).deriv
   intro t
   exact (is_const_of_deriv_eq_zero (fun s => (hzero s).differentiableAt) hderiv 0 t).symm
+
+/-- The energy at time zero vanishes when both initial data vanish. -/
+lemma waveEnergy_eq_zero_initial (ut ux : ℝ → ℝ → ℝ) (L : ℝ)
+    (hut0 : ∀ x, ut 0 x = 0) (hux0 : ∀ x, ux 0 x = 0) :
+    waveEnergy ut ux L 0 = 0 := by
+  unfold waveEnergy waveEnergyIntegrand
+  simp [hut0, hux0]
+
+/-- If the energy vanishes, then both first derivatives vanish pointwise on the
+half-open interval.  This is the step from the integral identity to pointwise
+information, using continuity and the positivity of the interval measure. -/
+lemma eq_zero_of_waveEnergy_eq_zero (ut ux : ℝ → ℝ → ℝ) {L t : ℝ}
+    (hut_cont : Continuous (fun x : ℝ => ut t x))
+    (hux_cont : Continuous (fun x : ℝ => ux t x))
+    (hL : 0 < L) (hE : waveEnergy ut ux L t = 0) :
+    ∀ x ∈ Set.Ioc 0 L, ut t x = 0 ∧ ux t x = 0 := by
+  have hInt : (∫ x in (0 : ℝ)..L, waveEnergyIntegrand ut ux t x) = 0 := by
+    have h := hE
+    unfold waveEnergy at h
+    exact (mul_eq_zero.mp h).resolve_left (by norm_num)
+  have hcont : Continuous (fun x : ℝ => waveEnergyIntegrand ut ux t x) := by
+    unfold waveEnergyIntegrand
+    exact (hut_cont.pow 2).add (hux_cont.pow 2)
+  have hfi : IntervalIntegrable (fun x : ℝ => waveEnergyIntegrand ut ux t x)
+      volume (0 : ℝ) L :=
+    hcont.intervalIntegrable (0 : ℝ) L
+  have hnonneg : ∀ x, 0 ≤ waveEnergyIntegrand ut ux t x := by
+    intro x
+    unfold waveEnergyIntegrand
+    nlinarith [sq_nonneg (ut t x), sq_nonneg (ux t x)]
+  have hAE : (fun x : ℝ => waveEnergyIntegrand ut ux t x) =ᵐ[
+      volume.restrict (Set.Ioc 0 L)] 0 :=
+    (intervalIntegral.integral_eq_zero_iff_of_le_of_nonneg_ae (le_of_lt hL)
+      (Filter.Eventually.of_forall hnonneg) hfi).mp hInt
+  have hEq : Set.EqOn (fun x : ℝ => waveEnergyIntegrand ut ux t x) 0 (Set.Ioc 0 L) :=
+    Measure.eqOn_Ioc_of_ae_eq (μ := volume) hAE hcont.continuousOn continuousOn_const
+  intro x hx
+  have hx0 : waveEnergyIntegrand ut ux t x = 0 := hEq hx
+  unfold waveEnergyIntegrand at hx0
+  constructor
+  · have h1 : ut t x ^ 2 = 0 := by
+      nlinarith [sq_nonneg (ut t x), sq_nonneg (ux t x)]
+    exact sq_eq_zero_iff.mp h1
+  · have h2 : ux t x ^ 2 = 0 := by
+      nlinarith [sq_nonneg (ut t x), sq_nonneg (ux t x)]
+    exact sq_eq_zero_iff.mp h2
+
+/-- If the time derivative vanishes at every time, the field is constant in
+time at that spatial point. -/
+lemma u_eq_initial_of_ut_zero (u ut : ℝ → ℝ → ℝ) (x : ℝ)
+    (hu_t : ∀ s, HasDerivAt (fun s : ℝ => u s x) (ut s x) s)
+    (hut0 : ∀ s, ut s x = 0) :
+    ∀ t, u t x = u 0 x := by
+  have hderiv : ∀ s, deriv (fun s : ℝ => u s x) s = 0 := by
+    intro s
+    rw [(hu_t s).deriv, hut0 s]
+  exact fun t => is_const_of_deriv_eq_zero
+    (fun s => (hu_t s).differentiableAt) hderiv t 0
+
+/-- Interior zero-data uniqueness for the one-dimensional wave equation, proved
+by the energy method.  The hypotheses bundle the differentiability, continuity,
+mixed-partial symmetry and homogeneous Dirichlet data used by the energy
+identity; these are regularity assumptions, not additional physical premises. -/
+theorem wave_zero_of_zero_data (u ut ux utt uxt utx uxx : ℝ → ℝ → ℝ)
+    (L M : ℝ) (hL : 0 < L)
+    (hu_t : ∀ s x, HasDerivAt (fun s : ℝ => u s x) (ut s x) s)
+    (hut : ∀ s x, HasDerivAt (fun s : ℝ => ut s x) (utt s x) s)
+    (hux : ∀ s x, HasDerivAt (fun s : ℝ => ux s x) (uxt s x) s)
+    (hut_x : ∀ s x, HasDerivAt (fun x : ℝ => ut s x) (utx s x) x)
+    (hux_x : ∀ s x, HasDerivAt (fun x : ℝ => ux s x) (uxx s x) x)
+    (hut_cont : Continuous (Function.uncurry ut))
+    (hux_cont : Continuous (Function.uncurry ux))
+    (hutt_cont : Continuous (Function.uncurry utt))
+    (huxt_cont : Continuous (Function.uncurry uxt))
+    (hutx_cont : Continuous (Function.uncurry utx))
+    (huxx_cont : Continuous (Function.uncurry uxx))
+    (hbound : ∀ s x, ‖waveEnergyDerivIntegrand ut ux utt uxt s x‖ ≤ M)
+    (hwave : ∀ s x, utt s x = uxx s x)
+    (hmixed : ∀ s x, uxt s x = utx s x)
+    (hbc0 : ∀ s, ut s 0 = 0) (hbcL : ∀ s, ut s L = 0)
+    (hinit : ∀ x, u 0 x = 0) (hvel : ∀ x, ut 0 x = 0)
+    (hux0 : ∀ x, ux 0 x = 0) :
+    ∀ t x, x ∈ Set.Ioo 0 L → u t x = 0 := by
+  intro t x hx
+  have hE0 : waveEnergy ut ux L 0 = 0 :=
+    waveEnergy_eq_zero_initial ut ux L hvel hux0
+  have hEconst : ∀ s, waveEnergy ut ux L s = waveEnergy ut ux L 0 :=
+    waveEnergy_eq_initial ut ux utt uxt utx uxx L M hut hux hut_x hux_x
+      hut_cont hux_cont hutt_cont huxt_cont hutx_cont huxx_cont hbound hwave hmixed hbc0 hbcL
+  have hsec_ut : ∀ s, Continuous (fun x : ℝ => ut s x) := fun s =>
+    hut_cont.comp (continuous_const.prodMk continuous_id)
+  have hsec_ux : ∀ s, Continuous (fun x : ℝ => ux s x) := fun s =>
+    hux_cont.comp (continuous_const.prodMk continuous_id)
+  have hzero : ∀ s, ut s x = 0 := by
+    intro s
+    have hEs : waveEnergy ut ux L s = 0 := by rw [hEconst s, hE0]
+    exact (eq_zero_of_waveEnergy_eq_zero ut ux (hsec_ut s) (hsec_ux s) hL hEs
+      x ⟨hx.1, le_of_lt hx.2⟩).1
+  have hconst := u_eq_initial_of_ut_zero u ut x (fun s => hu_t s x) hzero t
+  rw [hconst, hinit x]
 
 end GeneralRelativity

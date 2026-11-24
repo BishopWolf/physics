@@ -86,7 +86,7 @@ the 37 unmerged modules are **vendored** here under
 branch commit `41abde06`, while the `physlib` requirement points at merged master `cbd02238`
 — the merge base the branch was written against, which also supplies the
 already-merged `Schwarzschild.IncompressibleSphere` and the base library. The
-725 audited declarations are those sources plus the local
+729 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy` and `Gravitation.WaveEnergy` modules, imported through
 `gravitation/Gravitation.lean`; deleting `vendor/` is the migration once the
 branch lands.
@@ -98,7 +98,7 @@ branch lands.
   (the contracted Bianchi identity is proved for the frame Einstein space,
   `sds_frame_bianchi`, rather than assumed), the ADM constraints, the geodesic Cauchy problem, the d'Alembert one-dimensional wave Cauchy theorem
   (`dAlembert_wave_equation`), the wave energy conservation theorem
-  (`waveEnergy_eq_initial`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
+  (`waveEnergy_eq_initial`) and interior zero-data uniqueness (`wave_zero_of_zero_data`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
 * Exact solutions — Minkowski; Schwarzschild with its orthonormal frame, all six
   Riemann components and the Kretschmann scalar `48M²/r⁶`; the interior
   incompressible sphere (TOV profile, Buchdahl bound); Schwarzschild–de Sitter
@@ -119,7 +119,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 725 declarations (487 theorem-like) and rejects anything outside
+  all 729 declarations (491 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`
