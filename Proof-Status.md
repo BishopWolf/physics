@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 823
-declarations, 547 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 858
+declarations, 569 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -14,6 +14,28 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 <!-- proof-status:begin -->
 | Declaration | File | Axioms | Status |
 | --- | --- | --- | --- |
+| `GeneralRelativity.ReducedCauchyProblem` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ReducedLocalExistenceCertificate` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ReducedLocalExistenceCertificate.exists_solution` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ReducedLocalExistenceCertificate.unique_solution` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.GaugeRecoveryProblem` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.GaugeRecoveryCertificate` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.GaugeRecoveryCertificate.gaugeRecovered` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.GaugeRecoveryCertificate.satisfiesEinstein` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.GaugeRecoveryCertificate.preservesConstraints` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.DevelopmentInterface` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.MaximalDevelopmentCertificate` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.MaximalDevelopmentCertificate.exists_maximal` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.MaximalDevelopmentCertificate.unique_up_to_isometry` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ChartSpacetime.IsChartDevelopment` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiChart_isChartDevelopment` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiChart_explicit_development` | `Gravitation/CauchyInterfaces.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ExplicitDevelopmentObligations` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ExplicitDevelopmentCertificate` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ExplicitDevelopmentCertificate.schwarzschild_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ExplicitDevelopmentCertificate.deSitter_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ExplicitDevelopmentCertificate.kerr_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ExplicitDevelopmentCertificate.flrw_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
 | `GeneralRelativity.Space3` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.spacetimeSlice` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -87,6 +109,19 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ChartSpacetime.IsLeviCivita` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_isLeviCivita` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartSpacetime.causalCharacter_cases` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.coordDeriv` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.coordDeriv2` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.spatialLaplacian3D` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.planeWave3D` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.coordDeriv_planeWave3D_zero` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.coordDeriv_planeWave3D_succ` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.coordDeriv2_planeWave3D_zero` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.coordDeriv2_planeWave3D_succ` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.spatialLaplacian3D_planeWave3D` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.planeWave3D_wave_equation` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.planeWave3D_zero` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_planeWave3D_zero` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.planeWave3D_cauchy_data` | `Gravitation/ReducedWave3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Tensor2` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsSymm` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.isSymm_zero` | `Gravitation/Relativity/General/Basic.lean` | propext, Classical.choice, Quot.sound | proved |

@@ -39,6 +39,8 @@ gravitation/
 ├── Gravitation/LinearizedWaveGauge.lean  linearized Einstein wave-gauge interface
 ├── Gravitation/ManifoldInterface.lean   chart-level spacetime and Minkowski interface
 ├── Gravitation/InitialDataInterface.lean chart-level ADM initial-data interface
+├── Gravitation/CauchyInterfaces.lean    uninhabited M3–M6 interface certificates
+├── Gravitation/ReducedWave3D.lean       3D linear reduced-wave existence model
 ├── vendor/                              temporary copy of the unmerged branch
 │   └── Gravitation/Relativity/General/ 37 modules, commit 41abde06
 └── vulkan/
@@ -98,7 +100,7 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the one-dimensional wave theorem is
-local. The audit covers 823 declarations, 547 of them theorem-like.
+local. The audit covers 858 declarations, 569 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -197,6 +199,13 @@ Weyl tensor removes.
 | `GeneralRelativity.ChartInitialData.Regular` | chart-level regularity package for initial data |
 | `GeneralRelativity.ConstraintResidual` | packaged Hamiltonian and momentum residuals |
 | `GeneralRelativity.ChartInitialData.constraintResidual_eq_zero` | chart vacuum data have zero constraint residual |
+| `GeneralRelativity.spatialLaplacian3D`, `planeWave3D_wave_equation` | scoped 3D linear wave existence model |
+| `GeneralRelativity.planeWave3D_cauchy_data` | the model has the prescribed Cauchy data |
+| `GeneralRelativity.ReducedCauchyProblem`, `ReducedLocalExistenceCertificate` | uninhabited M3 local-existence interface |
+| `GeneralRelativity.GaugeRecoveryProblem`, `GaugeRecoveryCertificate` | uninhabited M4 gauge/constraint interface |
+| `GeneralRelativity.DevelopmentInterface`, `MaximalDevelopmentCertificate` | uninhabited M5 maximal-development interface |
+| `GeneralRelativity.ExplicitDevelopmentObligations`, `ExplicitDevelopmentCertificate` | uninhabited M6 recovery interface |
+| `GeneralRelativity.ChartSpacetime.IsChartDevelopment`, `minkowskiChart_explicit_development` | scoped Minkowski chart-development cross-check |
 | `GeneralRelativity.minkowskiChartInitialData_regular`, `_constraintResidual_eq_zero` | regular Minkowski data with zero residual |
 | `Linearized.linEinstein_lorenz_gauge` | in Lorenz gauge the linearized Einstein tensor is `−½ □ h̄` |
 | `Linearized.ttWave_linEinstein_zero` | transverse–traceless gravitational waves solve the linearized vacuum equations |
@@ -315,7 +324,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (823 at this revision, 547 theorem-like) and rejects any axiom outside
+declaration (858 at this revision, 569 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 
