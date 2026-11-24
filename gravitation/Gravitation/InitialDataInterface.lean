@@ -52,6 +52,13 @@ def minkowskiChartInitialData : ChartInitialData minkowskiChart where
   dK := fun _ => 0
   vacuum := flatData_isVacuum
 
+/-- The induced spatial metric on the Minkowski slice is the metric carried by
+the flat chart initial data. -/
+lemma minkowskiChartInitialData_metric :
+    minkowskiChart.spatialMetric = minkowskiChartInitialData.data.h.g := by
+  rw [minkowskiChart_spatialMetric]
+  rfl
+
 /-- The flat instance has vanishing Hamiltonian constraint. -/
 lemma minkowskiChartInitialData_ham_zero :
     minkowskiChartInitialData.data.ham = 0 :=
