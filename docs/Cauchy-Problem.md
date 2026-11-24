@@ -34,8 +34,8 @@ Choquet–Bruhat–Geroch theorem, which produces the unique maximal globally
 hyperbolic development of arbitrary constraint-satisfying data, and explains
 why that theorem cannot yet be stated, let alone proved, in the present
 pointwise framework. The missing layers are identified and ordered into a
-concrete formalisation roadmap. The wave module contributes eleven of the
-715 audited declarations in Paper I's development.
+concrete formalisation roadmap. The wave and energy modules contribute
+twenty-one of the 725 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -170,6 +170,9 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `hasDerivAt_waveT`, `hasDerivAt_waveX` | the second derivatives of those expressions |
 | `dAlembert_wave_equation` | `∂ₜ²u = ∂ₓ²u` |
 | `dAlembert_cauchy_data` | both initial conditions together |
+| `waveEnergy`, `hasDerivAt_waveEnergy` | the energy functional and its time derivative |
+| `waveEnergyDerivIntegral_eq_zero` | the integration-by-parts identity for homogeneous Dirichlet data |
+| `waveEnergy_eq_initial` | energy conservation in time |
 
 This is a real Cauchy theorem in the sense that the data are arbitrary
 functions with the stated differentiability, and the formula is proved to have
@@ -273,11 +276,12 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 715 declarations. It contains the
-constraint module, the geodesic module and the wave module discussed above,
-together with the solution theory, the alternative theories, the axiom audit
-and the numerical pass. This paper's Lean contribution is the eleven-declaration
-`Gravitation.WaveCauchy` module; the remainder is the written account of the
+The development audited in Paper I now has 725 declarations. It contains the
+constraint module, the geodesic module and the wave and energy modules discussed
+above, together with the solution theory, the alternative theories, the axiom
+audit and the numerical pass. This paper's Lean contribution is the
+twenty-one-declaration pair `Gravitation.WaveCauchy` and
+`Gravitation.WaveEnergy`; the remainder is the written account of the
 initial-value side and of the roadmap. Every formal claim made here is therefore
 part of the same audit.
 
@@ -291,18 +295,20 @@ take for granted when they exhibit a solution.
 
 ## 9. Reproducibility and trust
 
-This paper adds prose and one Lean module, `Gravitation.WaveCauchy` (eleven
-declarations). The audited development is the one described in Paper I:
-`lake build` is silent, `scripts/check_messages.sh` passes,
-`scripts/audit_axioms.sh` reports 715 declarations with axioms inside
+This paper adds prose and two Lean modules, `Gravitation.WaveCauchy` and
+`Gravitation.WaveEnergy` (twenty-one declarations). The audited development is
+the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 725
+declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
 `PhyslibAlpha.Relativity.General.*`, with the same namespace and proofs.
 
-The three formal modules named here can be read directly:
+The four formal modules named here can be read directly:
 
 - `gravitation/Gravitation/WaveCauchy.lean`
+- `gravitation/Gravitation/WaveEnergy.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/InitialValue.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/Geodesics.lean`
 

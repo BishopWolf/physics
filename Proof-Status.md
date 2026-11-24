@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 715
-declarations, 480 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 725
+declarations, 487 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -676,6 +676,16 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.hasDerivAt_waveX` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dAlembert_wave_equation` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dAlembert_cauchy_data` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveEnergyIntegrand` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveEnergy` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveEnergyDerivIntegrand` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.continuous_waveEnergyIntegrand_section` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.continuous_waveEnergyDerivIntegrand_section` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_waveEnergyIntegrand` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_waveEnergy` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveEnergyDerivIntegral_eq_zero` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_waveEnergy_zero` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.waveEnergy_eq_initial` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere.rs` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere.chia` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
