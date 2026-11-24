@@ -32,6 +32,7 @@ gravitation/
 ├── Gravitation/WaveEnergy.lean          energy conservation and zero-data uniqueness
 ├── Gravitation/WaveUniqueness.lean      general-data uniqueness by the difference argument
 ├── Gravitation/Divergence3D.lean       box divergence theorem with vanishing boundary flux
+├── Gravitation/WaveEnergy3D.lean       3D wave energy and differentiation under the box integral
 ├── vendor/                              temporary copy of the unmerged branch
 │   └── Gravitation/Relativity/General/ 37 modules, commit 41abde06
 └── vulkan/
@@ -91,7 +92,7 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the one-dimensional wave theorem is
-local. The audit covers 734 declarations, 494 of them theorem-like.
+local. The audit covers 741 declarations, 498 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -152,6 +153,8 @@ Weyl tensor removes.
 | `GeneralRelativity.wave_zero_of_zero_data_Icc` | zero-data uniqueness on the closed interval |
 | `GeneralRelativity.wave_unique_of_same_data` | general-data uniqueness on the closed interval |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | 3D box divergence theorem with vanishing boundary flux |
+| `GeneralRelativity.waveEnergy3D` | 3D wave energy on a spatial box |
+| `GeneralRelativity.hasDerivAt_waveEnergy3D` | differentiation of the 3D energy under the box integral |
 | `Linearized.linEinstein_lorenz_gauge` | in Lorenz gauge the linearized Einstein tensor is `−½ □ h̄` |
 | `Linearized.ttWave_linEinstein_zero` | transverse–traceless gravitational waves solve the linearized vacuum equations |
 | `Linearized.newtonianPerturb_poisson_iff` | the Newtonian limit is Poisson's equation `∇²Φ = 4πρ` |
@@ -269,7 +272,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (734 at this revision, 494 theorem-like) and rejects any axiom outside
+declaration (741 at this revision, 498 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 
