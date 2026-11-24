@@ -39,7 +39,7 @@ uniqueness on the closed interval, and applying it to the difference of two
 solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy and uniqueness modules, together with the 3D divergence foundation,
-contribute 102 of the 806 audited declarations in Paper I's development.
+contribute 119 of the 823 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
 Mathlib · Choquet–Bruhat–Geroch · formal verification
@@ -347,7 +347,7 @@ milestone has an acceptance criterion; none is claimed as done here.
 | M0 | Linear 3D wave model on a box: energy, conservation, zero-energy, zero-data and general-data uniqueness | **Done**: `waveEnergy3D_eq_initial_of_wave`, `eq_zero_of_waveEnergy3D_eq_zero`, `wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`; closed-box uniqueness under explicit regularity |
 | M0.5 | Linearized Einstein equations in wave gauge | **Interface**: `WaveGaugePerturbation` and `linEinstein_eq_zero_of_waveGauge`, with `ttWave_waveGauge` as a concrete TT-plane-wave instance; uses the existing `linEinstein_lorenz_gauge` reduction, not a manifold derivation |
 | M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality | **Complete at chart scope**: `ChartSpacetime`, chart metric/connection/curvature via `Pipeline`, torsion-free connection, Minkowski Levi-Civita certificate, causal classification, and covariant derivatives; smooth-manifold structure, a general Levi-Civita compatibility theorem, and global causality remain outside this chart interface |
-| M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Started**: `ChartInitialData` and the flat vacuum instance; Sobolev regularity and manifold constraints remain open |
+| M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Complete at chart scope**: smooth chart metric regularity, injective and smooth `t = 0` slice embedding, smooth induced spatial metric field, regular initial-data packaging, and zero constraint residuals with a Minkowski instance; manifold Sobolev `H^s` spaces, trace/embedding estimates, and constraint solving remain outside this chart interface |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | a formal local-existence theorem for the reduced system |
 | M4 | Gauge recovery and constraint propagation | a proof that reduced solutions satisfy the full Einstein equations and preserve the constraints |
 | M5 | Maximal development | patching of developments, Zorn or Sbierski construction, uniqueness up to isometry |
@@ -360,15 +360,15 @@ reduction. M1 is complete at chart scope: `ChartSpacetime` carries coordinate Ch
 Riemann, Ricci, scalar and Einstein tensors, Minkowski vanishing checks,
 timelike/null/spacelike classification, covariant derivatives, torsion-freeness,
 and a Minkowski Levi-Civita certificate. It does not provide a smooth manifold,
-a general Levi-Civita compatibility theorem, or global causality. M2 has a
-chart-level ADM bridge (`ChartInitialData`) and a flat vacuum instance, but no
-Sobolev or manifold-constraint theory. The
-remaining milestones M1–M6 are deliberately stated as interfaces first. M1 is
-complete at chart scope, M2 is chart-started, and both are foundational and
-reusable; M3 is the
-analytic bottleneck; M4 depends on the general Bianchi identity; M5 is
-order-theoretic once M3 and M4 exist; M6 is the regression test that ties the
-abstract theorem back to Paper I's explicit metrics.
+a general Levi-Civita compatibility theorem, or global causality. M2 is complete
+at chart scope: `ChartInitialData` carries the ADM bridge, smooth chart
+regularity, the slice embedding, the induced spatial metric field, and zero
+constraint residuals, with `minkowskiChartInitialData` as the flat instance. It
+does not provide manifold Sobolev `H^s` spaces, trace/embedding estimates, or a
+constraint-solving theorem. M3–M6 remain open. M3 is the analytic bottleneck,
+M4 depends on the general Bianchi identity, M5 is order-theoretic once M3 and
+M4 exist, and M6 is the regression test that ties the abstract theorem back to
+Paper I's explicit metrics.
 
 A useful intermediate target, weaker than full Choquet–Bruhat–Geroch, is local
 existence in a fixed gauge for smooth data. It would already give a
@@ -377,14 +377,14 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 806 declarations. It contains the
+The development audited in Paper I now has 823 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
 uniqueness theorems, the linearized wave-gauge interface and the chart-level M1
 interface discussed above, together with the solution theory, the alternative
 theories, the axiom audit and the numerical pass. This paper's Lean contribution
-is 102 declarations across eleven modules: `Gravitation.WaveCauchy`,
+is 119 declarations across eleven modules: `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -409,9 +409,9 @@ This paper adds prose and eleven Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
 `Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge` and
 `Gravitation.ManifoldInterface`, `Gravitation.InitialDataInterface`
-(102 declarations). The audited
+(119 declarations). The audited
 development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 806 declarations with axioms inside
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 823 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
@@ -460,11 +460,12 @@ The thirteen formal modules named here can be read directly:
 - The linearized wave-gauge layer is a coordinate-level interface
   (`WaveGaugePerturbation`, instantiated by `ttWave_waveGauge`), not a
   manifold-level derivation of the linearized Einstein equations.
-- The remaining PDE layers are the M1–M6 milestones of §7: smooth manifold and
-  Lorentzian geometry (M1 is chart-started); manifold Sobolev spaces and the
-  constraint problem (M2 is chart-started); harmonic/wave gauge and the reduced
+- The remaining PDE layers are M3–M6 of §7: harmonic/wave gauge and the reduced
   quasilinear hyperbolic system; gauge recovery and constraint propagation;
-  maximal development; and cross-checks against explicit solutions.
+  maximal development; and cross-checks against explicit solutions. M1 and M2
+  are chart-level interfaces, not smooth-manifold or Sobolev theorems; in
+  particular M2 does not construct `H^s` spaces, prove trace/embedding
+  estimates, or solve the constraints.
 - No axiom, `sorry`, or cited theorem smuggled in as a hypothesis. The CBG
   statement in §5 is prose with references; it is not a Lean declaration.
 

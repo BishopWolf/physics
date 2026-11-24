@@ -98,7 +98,7 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the one-dimensional wave theorem is
-local. The audit covers 806 declarations, 536 of them theorem-like.
+local. The audit covers 823 declarations, 547 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -188,6 +188,16 @@ Weyl tensor removes.
 | `GeneralRelativity.minkowskiChartInitialData` | flat vacuum chart initial data |
 | `GeneralRelativity.minkowskiChartInitialData_metric` | induced spatial metric equals the flat ADM metric |
 | `GeneralRelativity.ChartInitialData.ham_zero`, `mom_zero`, `isVacuumData` | constraint projections from chart ADM data |
+| `GeneralRelativity.spacetimeSlice`, `spacetimeSlice_injective` | injective `t = 0` chart slice |
+| `GeneralRelativity.contDiff_spacetimeSlice` | the slice embedding is smooth |
+| `GeneralRelativity.ChartSpacetime.IsSmooth` | smooth chart metric components |
+| `GeneralRelativity.ChartSpacetime.spatialMetricField` | induced spatial metric as a field on the slice |
+| `GeneralRelativity.ChartSpacetime.spatialMetricField_zero` | the field restricts to the slice metric |
+| `GeneralRelativity.ChartSpacetime.spatialMetricField_contDiff` | smooth metrics restrict to smooth spatial metrics |
+| `GeneralRelativity.ChartInitialData.Regular` | chart-level regularity package for initial data |
+| `GeneralRelativity.ConstraintResidual` | packaged Hamiltonian and momentum residuals |
+| `GeneralRelativity.ChartInitialData.constraintResidual_eq_zero` | chart vacuum data have zero constraint residual |
+| `GeneralRelativity.minkowskiChartInitialData_regular`, `_constraintResidual_eq_zero` | regular Minkowski data with zero residual |
 | `Linearized.linEinstein_lorenz_gauge` | in Lorenz gauge the linearized Einstein tensor is `−½ □ h̄` |
 | `Linearized.ttWave_linEinstein_zero` | transverse–traceless gravitational waves solve the linearized vacuum equations |
 | `Linearized.newtonianPerturb_poisson_iff` | the Newtonian limit is Poisson's equation `∇²Φ = 4πρ` |
@@ -305,7 +315,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (806 at this revision, 536 theorem-like) and rejects any axiom outside
+declaration (823 at this revision, 547 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 
