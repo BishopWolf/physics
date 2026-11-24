@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 704
-declarations, 470 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 715
+declarations, 480 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -665,6 +665,17 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.StaticSpherical.ricciOf_staticSpherical` | `Gravitation/Relativity/General/StaticSpherical.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.StaticSpherical.scalarOf_staticSpherical` | `Gravitation/Relativity/General/StaticSpherical.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.StaticSpherical.einsteinOf_staticSpherical` | `Gravitation/Relativity/General/StaticSpherical.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.dAlembert` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_integral_shift_t` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_integral_shift_x` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_dAlembert_t` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_dAlembert_x` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.dAlembert_zero` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_dAlembert_zero` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_waveT` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_waveX` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.dAlembert_wave_equation` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.dAlembert_cauchy_data` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere.rs` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere.chia` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |

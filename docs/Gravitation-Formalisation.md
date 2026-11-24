@@ -10,20 +10,21 @@
 > that branch is not yet merged, this repository vendors its modules under
 > `gravitation/vendor/Gravitation/Relativity/General/` (module path
 > `Gravitation.Relativity.General.*`; proofs and namespace unchanged) and
-> depends on Physlib master for the base library. Module paths below refer to the
-> Physlib tree: `Gravitation/Basic.lean` is
-> `PhyslibAlpha/Relativity/General/Basic.lean`, and so on. Two further changes are
-> recorded in this revision: the development now also proves the Kerr,
-> Reissner–Nordström, FLRW and linearized-gravity results (Section 4.8), and the
-> numerical pass checks Kerr and Reissner–Nordström as well as the static
-> solutions (Section 5). Appendix A has been regenerated from the audit.
+> depends on Physlib master for the base library. Module names below are the vendored
+> `Gravitation.Relativity.General.*` paths; in Physlib they are
+> `PhyslibAlpha.Relativity.General.*`, with the same namespace and proofs. Further
+> changes recorded in this revision: the Kerr, Reissner–Nordström, FLRW and
+> linearized-gravity results (Section 4.8); the numerical pass also covers Kerr,
+> Reissner–Nordström, FLRW and the interior sphere (Section 5); the contracted
+> Bianchi identity and the alternative-theory sector are stated at their proved
+> strength (Sections 4.6–4.7); Appendix A is regenerated from the audit; a companion paper [15] isolates the Cauchy problem; and the local `Gravitation.WaveCauchy` module adds a formalised one-dimensional wave Cauchy theorem, included in the audit below.
 
 ---
 
 ## Abstract
 
-General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 704 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two end-to-end metric-level solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat both in the orthonormal frame and directly at the metric level from $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ (`ricciOf_schwarzschild`, `scalarOf_schwarzschild`, `einsteinOf_schwarzschild`), the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* (`riemann_schwarzschild_components`) by differentiating the metric's own Christoffel symbols, with no hand-supplied table entering the final theorem. For Schwarzschild–de Sitter the same metric-level derivation is carried out for general $\Lambda$, giving `riemann_sds_components`, `ricciOf_sds` ($\mathrm{Ric}=\Lambda g$), `scalarOf_sds` ($S=4\Lambda$), `einsteinOf_sds` ($G=-\Lambda g$) and
-$R^t{}_{rtr}=(2M/r^3+\Lambda/3)/f$, $R^t{}_{\theta t\theta}=R^r{}_{\theta r\theta}=\Lambda r^2/3-M/r$ and $R^\theta{}_{\varphi\theta\varphi}=(2M/r+\Lambda r^2/3)\sin^2\theta$, together with a proof that the frame electric part of the Weyl tensor is $\mathrm{diag}(0,-2M/r^3,M/r^3,M/r^3)$ for **every** $\Lambda$: a cosmological constant enters the Riemann tensor only through the trace that the Weyl tensor removes. The same pipeline also proves that the Kerr metric in Boyer–Lindquist coordinates is Ricci flat, that Reissner–Nordström satisfies the Einstein–Maxwell equations $G=8\pi T^{\mathrm{EM}}$, that the FLRW Einstein equations are equivalent to the Friedmann equations, and that the linearized Einstein tensor reduces to $-\tfrac12\Box\bar h$ in Lorenz gauge. Alongside these, the development formalises the initial-value constraints, geodesic local existence, and the defining structures and field-equation reductions of sixteen alternative theories — among them Einstein–Cartan, teleparallel, Kaluza–Klein, Lovelock, Einstein–Aether, massive gravity, Brans–Dicke, $f(R)$/Starobinsky, MOND, MOG, TeVeS and the full Will–Nordtvedt PPN formalism. As an independent check, a double-precision Vulkan compute pass evaluates the same tensors from the same metrics and reproduces every closed form proved in Lean at the $10^{-6}$ level (at worst $1.3\times10^{-6}$) — including the $\Lambda$-independent Weyl part of de Sitter to $1.4\times 10^{-8}$.
+General relativity is the one major theory of physics for which the *solution theory* — statements about particular metrics, rather than the algebraic identities satisfied by curvature tensors — has not been formalised. We report a Lean 4 development, built on Mathlib, that takes a step into that gap. It contains 715 kernel-checked declarations with no `sorry` and no axiom of its own: every declaration depends only on `propext`, `Classical.choice` and `Quot.sound`, the axioms the base libraries already assume, and a CI job checks this on every push. The central results are two end-to-end metric-level solution theories of the Einstein equations. For Schwarzschild, the curvature is proved Ricci flat both in the orthonormal frame and directly at the metric level from $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ (`ricciOf_schwarzschild`, `scalarOf_schwarzschild`, `einsteinOf_schwarzschild`), the Kretschmann scalar is proved to be $48M^2/r^6$, and all six independent Riemann components are *derived from the metric* (`riemann_schwarzschild_components`) by differentiating the metric's own Christoffel symbols, with no hand-supplied table entering the final theorem. For Schwarzschild–de Sitter the same metric-level derivation is carried out for general $\Lambda$, giving `riemann_sds_components`, `ricciOf_sds` ($\mathrm{Ric}=\Lambda g$), `scalarOf_sds` ($S=4\Lambda$), `einsteinOf_sds` ($G=-\Lambda g$) and
+$R^t{}_{rtr}=(2M/r^3+\Lambda/3)/f$, $R^t{}_{\theta t\theta}=R^r{}_{\theta r\theta}=\Lambda r^2/3-M/r$ and $R^\theta{}_{\varphi\theta\varphi}=(2M/r+\Lambda r^2/3)\sin^2\theta$, together with a proof that the frame electric part of the Weyl tensor is $\mathrm{diag}(0,-2M/r^3,M/r^3,M/r^3)$ for **every** $\Lambda$: a cosmological constant enters the Riemann tensor only through the trace that the Weyl tensor removes. The same pipeline also proves that the Kerr metric in Boyer–Lindquist coordinates is Ricci flat, that Reissner–Nordström satisfies the Einstein–Maxwell equations $G=8\pi T^{\mathrm{EM}}$, that the FLRW Einstein equations are equivalent to the Friedmann equations, and that the linearized Einstein tensor reduces to $-\tfrac12\Box\bar h$ in Lorenz gauge. Alongside these, the development formalises the initial-value constraints, geodesic local existence, a formalised one-dimensional wave Cauchy theorem, and the defining structures and field-equation reductions of sixteen alternative theories — among them Einstein–Cartan, teleparallel, Kaluza–Klein, Lovelock, Einstein–Aether, massive gravity, Brans–Dicke, $f(R)$/Starobinsky, MOND, MOG, TeVeS and the full Will–Nordtvedt PPN formalism. As an independent check, a double-precision Vulkan compute pass evaluates the same tensors from the same metrics and reproduces every closed form proved in Lean at the $10^{-6}$ level (at worst $1.3\times10^{-6}$) — including the $\Lambda$-independent Weyl part of de Sitter to $1.4\times 10^{-8}$.
 
 **Keywords:** general relativity · Lean 4 · Mathlib · formal verification · exact solutions · cosmological constant · alternative theories of gravity · GPU validation
 
@@ -39,7 +40,7 @@ This paper reports a development that closes that gap for the static, sphericall
 
 1. **Two solution theories derived end to end from the metric.** Schwarzschild and Schwarzschild–de Sitter, with every independent Riemann component, the full Ricci tensor (`Ric = 0` and `Ric = Λg`), the scalar curvature (`S = 0` and `S = 4Λ`) and the Einstein tensor (`G = 0` and `G = -Λg`) computed directly by `Pipeline` from the metric $g$ and its inverse $g^{-1}$ (`riemann_sds_components`, `riemann_schwarzschild_components`, `ricciOf_sds`, `einsteinOf_sds`, `ricciOf_schwarzschild`, `einsteinOf_schwarzschild`). Closed-form tables assist the proof internally (`christoffel_eq_sdsG`, `pd_christoffel_eq_pd_sdsG`, `pd_sdsG_eq_sdsDGFull`), while the top-level theorems mention only the metric itself.
 2. **A structural result about the cosmological constant.** The frame electric part of the Weyl tensor of Schwarzschild–de Sitter is proved to equal that of Schwarzschild, for every $\Lambda$; the de Sitter contribution is pure trace.
-3. **The surrounding theory, formalised to the same standard.** Einstein-tensor identities, the initial-value constraints, geodesic local existence, and the defining structures and field equations of the alternative theories.
+3. **The surrounding theory, formalised to the same standard.** Einstein-tensor identities, the initial-value constraints, geodesic local existence, a formalised one-dimensional wave Cauchy theorem, and the defining structures and field equations of the alternative theories.
 4. **An independent numerical cross-check.** A Vulkan compute pass, in double precision, evaluates the same tensors from the same metrics and is compared against the Lean closed forms, with the agreement reported below.
 5. **A verification regime that is itself checked.** A silent build, an axiom audit, and a per-declaration proof-status table, all enforced in CI.
 
@@ -53,7 +54,7 @@ A survey of the relevant repositories (November 2026) motivates the scope.
 | `anthropics/fermats-last-theorem` | complete formalisation of Fermat's Last Theorem | none |
 | `openai/ten-proofs` | Lean certificates for ten results | none |
 | `openai/math` | 722 manuscripts, 162 with Lean formalisations | none |
-| `leanprover-community/physlib` | classical mechanics, EM, QFT, QM, relativity | special-relativistic kinematics, Lorentz/Poincaré representation theory; **no field equation, no curvature tensor** |
+| `leanprover-community/physlib` | classical mechanics, EM, QFT, QM, relativity | master: special-relativistic kinematics, Lorentz/Poincaré representation theory, **no field equation or curvature tensor**; the unmerged `gravity` branch adds the development reported here |
 | HepLean | particles, gauge theory, spinors | not gravitation |
 | `TataSatyaPratheek/mathematical-physics-lean` | dimension-parametric Einstein tensor and field equations | 0 `sorry` but 365 axioms; the trust surface is the axioms, not the kernel |
 | QIQT (Zenodo 20837810) | conditional derivation of the field equations from an information bound | explicitly conditional |
@@ -66,11 +67,12 @@ The development is Lean 4 with Physlib master (`cbd02238`), which pulls Mathlib 
 
 **Interfaces.** Curvature is a bundled structure carrying the algebraic symmetries it must satisfy — antisymmetry in the last pair, pair symmetry, and the first Bianchi identity — so that a "Riemann tensor" cannot be constructed without them. A `Metric` carries its inverse and the proof that the two compose to the identity, so contractions use the inverse actually proved for that metric. Ricci, the scalar curvature and the Einstein tensor are defined by contraction and are therefore available for any bundle satisfying the interface.
 
-**One pipeline.** `Gravitation/Pipeline.lean` defines the chain
+**One pipeline.** The vendored `Gravitation.Relativity.General.Pipeline` module
+(`gravitation/vendor/Gravitation/Relativity/General/Pipeline.lean`) defines the chain
 $$g \mapsto \partial g \mapsto \Gamma^k{}_{ij} \mapsto \partial\Gamma \mapsto R^\rho{}_{\sigma\mu\nu} \mapsto \mathrm{Ric}_{\sigma\nu} \mapsto S \mapsto G_{ij}$$
-for an arbitrary component field $g$ and its inverse, with $\partial_\mu$ the coordinate partial derivative: differentiate a component along the line through $x$ with the other coordinates fixed. A component is then the value of a formula rather than the conclusion of a bespoke proof, and what remains per metric is the evaluation of one-variable derivatives. The module proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$ — Minkowski as a *computed* vacuum solution — and that Schwarzschild's $\Gamma^t{}_{tr}$ evaluates to the $M/(r^2f)$ that §4.4 derives by hand. Crucially, `pd_christoffel_eq_pd_sdsG` and `pd_christoffel_eq_pd_schG` push the Christoffel identity through `deriv` using a local neighborhood where $r \neq 0$, $f \neq 0$, and $\sin\theta \neq 0$, while `pd_sdsG_eq_sdsDGFull` evaluates every one of the 256 partial-derivative slots $\partial_\mu\Gamma^k{}_{ij}$ into closed form `sdsDGFull`. Hence `riemann_sds_components`, `riemann_schwarzschild_components`, `ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds`, `ricciOf_sds_frame`, `ricciOf_schwarzschild`, `scalarOf_schwarzschild`, and `einsteinOf_schwarzschild` evaluate the pipeline definitions `riemann`, `ricciOf`, `scalarOf`, and `einsteinOf` directly on the metrics with no hand-supplied tables in the theorem statements.
+for an arbitrary component field $g$ and its inverse, with $\partial_\mu$ the coordinate partial derivative: differentiate a component along the line through $x$ with the other coordinates fixed. A component is then the value of a formula rather than the conclusion of a bespoke proof, and what remains per metric is the evaluation of one-variable derivatives. The development proves outright that a constant metric gives $\Gamma=R=\mathrm{Ric}=S=G=0$ — Minkowski as a *computed* vacuum solution — and that Schwarzschild's $\Gamma^t{}_{tr}$ evaluates to the $M/(r^2f)$ that §4.4 derives by hand (`gammaTtr_from_metric`). Crucially, `pd_christoffel_eq_pd_sdsG` pushes the Christoffel identity through `deriv` using a local neighborhood where $r \neq 0$, $f \neq 0$, and $\sin\theta \neq 0$, while `pd_sdsG_eq_sdsDGFull` evaluates every one of the 256 partial-derivative slots $\partial_\mu\Gamma^k{}_{ij}$ into closed form `sdsDGFull`; the Schwarzschild case is its $\Lambda=0$ specialisation (`sdsMetric_zero_lambda`, `sdsMetricInv_zero_lambda`), not a separate table. Hence `riemann_sds_components`, `riemann_schwarzschild_components`, `ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds`, `ricciOf_sds_frame`, `ricciOf_schwarzschild`, `scalarOf_schwarzschild`, and `einsteinOf_schwarzschild` evaluate the pipeline definitions `riemann`, `ricciOf`, `scalarOf`, and `einsteinOf` directly on the metrics with no hand-supplied tables in the theorem statements.
 
-**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 704 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
+**Axiom policy.** No `axiom`, `constant`, `opaque`, `sorry`, `admit`, `native_decide` or `Lean.trustCompiler` anywhere in the library. `scripts/audit_axioms.sh` generates `#print axioms` for every declaration and rejects any axiom outside `{propext, Classical.choice, Quot.sound}`. As of this writing it passes for all 715 declarations. This is a stronger statement than "no `sorry`": it certifies that nothing in the library is justified by an assumption introduced locally.
 
 **Silence as a test.** `lake build` emits no message at all — no errors and no warnings. Tactic and unused-variable warnings were removed by rewriting proofs, not by disabling linters, and `scripts/check_messages.sh` fails CI if a message reappears.
 
@@ -88,7 +90,7 @@ is proved for dimension $n$, and in four dimensions $G=0 \iff \mathrm{Ric}=0$ is
 
 The constraint equations are formalised in the standard form
 $$H = {}^{3}R + (\mathrm{tr}\,K)^2 - K_{ij}K^{ij}, \qquad M_i = \partial_j K^{i}{}_{j} - \partial_i \mathrm{tr}\,K,$$
-together with the moment-of-time-symmetry reduction to scalar flatness and the maximal-slicing form. A non-vacuum example is included to show that the constraints are not automatic. Development existence (Choquet–Bruhat–Geroch) is neither claimed nor axiomatised.
+together with the moment-of-time-symmetry reduction to scalar flatness and the maximal-slicing form. A non-vacuum example is included to show that the constraints are not automatic. The general Cauchy development, and a formalised one-dimensional wave Cauchy theorem as a model PDE layer, are the subject of the companion paper [15]; here the constraints are used only as the initial-value layer.
 
 ### 4.3 Geodesics
 
@@ -109,9 +111,9 @@ The electric part is then *derived* twice over. From the potential: $g_{tt}=-(1+
 | $R^r{}_{\varphi r\varphi}$ | $-(M/r)\sin^2\theta$ |
 | $R^\theta{}_{\varphi\theta\varphi}$ | $(2M/r)\sin^2\theta$ |
 
-Each is assembled from small product identities instead of one large rational identity, because the closure tactic (`field_simp` followed by `ring`) leaves an uncancellable $(r-2M)^{-1}$ in this chart; the products are closed by an explicit cancellation against $r^2f\neq 0$.
+Each component is proved from the corresponding Christoffel product identities (for example `gammaRrr_mul_gammaRthth` and `gammaRthth_mul_gammaThetar`); the $rtr$ component instead differentiates $\Gamma^t{}_{tr}$ directly (`deriv_gammaTtr`) and closes with `field_simp` and `ring`. The products are cancelled against $r^2 f \neq 0$.
 
-One evaluation now closes the entire pipeline directly from the metric. Internally, `schG` and `schDG` give the closed-form tables, `christoffel_eq_schG` identifies `christoffel (schwarzschildG M) (schwarzschildGinv M)` with `schG`, `pd_christoffel_eq_pd_schG` pushes that equality through coordinate differentiation, and `riemann_schwarzschild_components` evaluates `riemann (schwarzschildG M) (schwarzschildGinv M)` directly to all six independent components tabulated above. Contracting in the coordinate basis yields full metric-level Ricci flatness (`ricciOf_schwarzschild`), vanishing scalar curvature (`scalarOf_schwarzschild`), and the vacuum Einstein equation (`einsteinOf_schwarzschild`) directly from $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ via specialisation of the Schwarzschild–de Sitter family at $\Lambda=0$. The same construction for general $\Lambda$ is §4.5.
+One evaluation now closes the entire pipeline directly from the metric. The closed-form tables `sdsG` and `sdsDGFull` are the Schwarzschild–de Sitter ones; `christoffel_eq_sdsG` identifies `christoffel (sdsMetric M Λ) (sdsMetricInv M Λ)` with `sdsG`, `pd_christoffel_eq_pd_sdsG` pushes that equality through coordinate differentiation, and `riemann_schwarzschild_components` specialises `riemann_sds_components` at $\Lambda=0$ to all six independent components tabulated above. Contracting in the coordinate basis yields full metric-level Ricci flatness (`ricciOf_schwarzschild`), vanishing scalar curvature (`scalarOf_schwarzschild`), and the vacuum Einstein equation (`einsteinOf_schwarzschild`) directly from $g=\mathrm{diag}(-f,1/f,r^2,r^2\sin^2\theta)$ via `sdsMetric_zero_lambda` and `sdsMetricInv_zero_lambda`. The same construction for general $\Lambda$ is §4.5.
 
 ### 4.5 Schwarzschild–de Sitter, for general $\Lambda$
 
@@ -152,7 +154,7 @@ for every $\Lambda$ — the Schwarzschild answer. In words: a cosmological const
 
 **Figure 2.** Kretschmann scalar $K=R_{\rho\sigma\mu\nu}R^{\rho\sigma\mu\nu}$ against $r$, for $M=1$ and $\Lambda=0$ (blue), $0.05$ (orange), $0.1$ (green). Because the Weyl part is $\Lambda$-independent, $K=48M^2/r^6+\tfrac83\Lambda^2$: each de Sitter curve is the Schwarzschild one lifted by the constant $(8/3)\Lambda^2$ (dotted), so instead of decaying to zero the curvature tends to $8\Lambda^2/3$. That lift is the trace part again — the same $\Lambda$ that cancels from the electric Weyl eigenvalues in Figure 1 survives in the full Riemann square. The dashed curve is the Weyl-only invariant $48M^2/r^6$ (`kretschmann_scalar`); the full identity is `kretschmann_sds`; the GPU pass checks the sum for $\Lambda=0.1$ to $1.9\times10^{-7}$ relative. Generated by `docs/figures/make_kretschmann_figure.py`.
 
-All statements hold where $r\neq0$ and $f\neq0$; for $\Lambda>0$ the latter excludes the roots of the cubic $3r - 6M - \Lambda r^3$.
+The metric-level statements hold where $r\neq0$, $f\neq0$ and $\sin\theta\neq0$; for $\Lambda>0$ the middle condition excludes the roots of the cubic $3r - 6M - \Lambda r^3$.
 
 ### 4.6 Alternative theories
 
@@ -244,8 +246,9 @@ luminality condition (`EinsteinAether`), Fierz–Pauli and dRGT massive gravity
 (`MassiveGravity`), the Kaluza–Klein miracle (`KaluzaKlein`), Lovelock's
 Gauss–Bonnet theorem in $n\le4$ (`Lovelock`), Einstein–Cartan contorsion
 (`EinsteinCartan`), teleparallel TEGR and $f(T)$ cosmology (`Teleparallel`), and
-Nordström's scalar gravity (`Nordstrom`). These remain structural statements,
-not full field theories.
+Nordström's scalar gravity (`Nordstrom`). Section 4.6 records the depth of each:
+several now carry their field equations or exact reductions, while MOND, MOG and
+TeVeS remain structural.
 
 ## 5. Numerical cross-check
 
@@ -270,14 +273,13 @@ Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 lattice points, 
 
 The de Sitter case is the control: it has genuinely nonzero Ricci curvature, recovered at the same noise level as the vacuum case, so the vacuum test is not vacuous — and `sdsRic_eq` says the measured entries are exactly $\Lambda\eta_{\mu\nu}$. The FLRW and interior-sphere cases are further non-vacuum controls: FLRW exercises the expansion terms (including $a''=2$) against `ricciOf_flrw` and `einsteinOf_flrw` to $1.27\times10^{-6}$, and the interior sphere checks the constant-density Einstein tensor to $8.9\times10^{-8}$. The host now forms the frame components $R_{ab}/\sqrt{|g_{aa}g_{bb}|}$ and checks them against $\Lambda\,\mathrm{diag}(-1,1,1,1)$, which lands at $2.0\times10^{-8}$ for both static cases and is, at $\Lambda=0$, the vanishing of `schwarzschild_ricci_zero`. It also confirms the lifted Kretschmann scalar of Figure 2, $48M^2/r^6+\tfrac83\Lambda^2$ — now the theorem `kretschmann_sds` — to $1.9\times10^{-7}$ relative. In that case the emitted frame Riemann part is $R_{titj} = C_{titj} - (\Lambda/3)\delta_{ij}$, so the Weyl statement is checked by adding $\Lambda/3$ back, which reproduces $\mathrm{diag}(0,-2k,k,k)$ to $1.4\times10^{-8}$.
 
-This is a regression test for the shader and for the closed forms, not evidence for the theorems. Finite differences say nothing about an analytic solution; the Lean statement is exact, while the numerical agreement is second-order accurate at $h^2\approx10^{-8}$ with roundoff $\varepsilon/h^2\approx10^{-8}$. The measured de Sitter $R^t{}_{rtr}$ deviation of $5.9\times10^{-7}$ is the largest, and is consistent with the larger curvature scale there ($\Lambda/3$).
+This is a regression test for the shader and for the closed forms, not evidence for the theorems. Finite differences say nothing about an analytic solution; the Lean statement is exact, while the numerical agreement is second-order accurate at $h^2\approx10^{-8}$ with roundoff $\varepsilon/h^2\approx10^{-8}$. The measured de Sitter $R^t{}_{rtr}$ deviation of $5.9\times10^{-7}$ is the largest of the static cases, and is consistent with the larger curvature scale there ($\Lambda/3$).
 
 ## 6. Limitations
 
-This section is the backlog, not a disclaimer: each item says what is not proved and why it stays.
+This section is the backlog, not a disclaimer: each item says what is not proved and why it stays. The general Cauchy problem is treated separately in the companion paper [15]; it is not a limitation of the solution-theory results here.
 
-1. **No global existence theory.** The constraints are formalised; existence and uniqueness for the Cauchy problem of the field equations are not, and are not axiomatised. *Out of scope: this paper is about solution theory, not the initial-value problem.*
-2. **Chart restrictions are inherent to the metric-level theorems.** The frame-level results — Weyl, Kretschmann, Ricci and Einstein — carry no hypotheses: `kretschmann_scalar_total` and `kretschmann_sds_total` remove the last `r ≠ 0` from the frame Kretschmann statements, and `sdsRic_eq` and `sds_frame_einstein_conserved` are total. The metric-level derivations (`riemann_sds_components`, `ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds`, and their Schwarzschild specialisations) assume `r ≠ 0`, `f ≠ 0` and `sin θ ≠ 0`. These are not removable in Schwarzschild coordinates: at `r = 0`, `sdsF M Λ 0 = 1`, so `g = diag(-1, 1, 0, 0)` while `g⁻¹` is the same matrix, whose product is not the identity; at `sin θ = 0` the `φφ` slot of `g⁻¹` is zero, so the trace misses the `Λ` contribution and `scalarOf_sds` cannot give `4Λ`. The computed curvature is then not `Λg`, so the identities genuinely fail at those loci. The frame-level statements avoid the issue by using the orthonormal frame. *Not removable without a different chart (Kruskal–Szekeres or Eddington–Finkelstein), which is outside this development.*
+1. **Chart restrictions are inherent to the metric-level theorems.** The frame-level results — Weyl, Kretschmann, Ricci and Einstein — carry no chart hypotheses: `kretschmann_scalar_total` and `kretschmann_sds_total` remove the last `r ≠ 0` from the frame Kretschmann statements, and `sdsRic_eq` and `sds_frame_einstein_conserved` are total. The metric-level derivations (`riemann_sds_components`, `ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds`, and their Schwarzschild specialisations) assume `r ≠ 0`, `f ≠ 0` and `sin θ ≠ 0`. These are not removable in Schwarzschild coordinates: at `r = 0`, `sdsF M Λ 0 = 1`, so `g = diag(-1, 1, 0, 0)` while `g⁻¹` is the same matrix, whose product is not the identity; at `sin θ = 0` the `φφ` slot of `g⁻¹` is zero, so the inverse degenerates there as well. The identities are therefore not stated at those loci, and the computed curvature is not guaranteed to be `Λg`. The frame-level statements avoid the issue by using the orthonormal frame. *Not removable without a different chart (Kruskal–Szekeres or Eddington–Finkelstein), which is outside this development.*
 
 ## 7. Reproducibility
 
@@ -330,6 +332,7 @@ names in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Modified.Teleparallel` | 17 |
 | `Gravitation.Relativity.General.Schwarzschild.Frame` | 17 |
 | `Gravitation.Relativity.General.Basic` | 15 |
+| `Gravitation.WaveCauchy` | 11 |
 | `Gravitation.Relativity.General.StaticSpherical` | 15 |
 | `Gravitation.Relativity.General.Einstein` | 13 |
 | `Gravitation.Relativity.General.Modified.FRGravity` | 13 |
@@ -347,9 +350,9 @@ names in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Minkowski` | 6 |
 | `Gravitation.Relativity.General.Modified.Galileon` | 3 |
 | `Gravitation.KretschmannTotal` | 2 |
-| **Total** | **704** |
+| **Total** | **715** |
 
-All 704 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 715 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References
@@ -368,6 +371,7 @@ All 704 declarations are `proved` against `{propext, Classical.choice, Quot.soun
 12. J. W. Moffat. *Scalar–tensor–vector gravity theory.* JCAP 03 (2006) 004.
 13. J. D. Bekenstein. *Relativistic gravitation theory for the modified Newtonian dynamics paradigm.* Phys. Rev. D 70 (2004) 083509.
 14. M. Ostrogradsky. *Mémoires sur les équations différentielles, relatives au problème des isopérimètres.* Mem. Acad. St. Petersbourg 6 (1850) 385.
+15. A. Vergara Gil. *The Cauchy Problem for the Einstein Equations in Lean 4: Formalised Constraints, a Wave Model, and a Roadmap.* Companion manuscript, `docs/Cauchy-Problem.md`, 2026.
 
 ## Appendix B. Source format
 

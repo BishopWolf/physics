@@ -14,6 +14,7 @@ public import Gravitation.Relativity.General.Geodesics
 public import Gravitation.Relativity.General.GravitationalConstant
 public import Gravitation.Relativity.General.InitialValue
 public import Gravitation.KretschmannTotal
+public import Gravitation.WaveCauchy
 public import Gravitation.Relativity.General.Kerr.Basic
 public import Gravitation.Relativity.General.Kerr.Christoffel
 public import Gravitation.Relativity.General.Kerr.Vacuum
