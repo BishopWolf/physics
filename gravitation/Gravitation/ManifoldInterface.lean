@@ -164,4 +164,14 @@ lemma minkowskiChart_spacelike_space (x : SpacetimeChart) :
   rw [ChartSpacetime.IsSpacelike, minkowskiChart_normSq]
   simp [Pi.single_eq_same, Pi.single_eq_of_ne]
 
+/-- The lightlike vector `(1, 1, 0, 0)`. -/
+def lightlikeVector : Fin 4 → ℝ :=
+  fun i => if i = 0 then 1 else if i = 1 then 1 else 0
+
+/-- `(1, 1, 0, 0)` is null in the Minkowski chart. -/
+lemma minkowskiChart_null_lightlike (x : SpacetimeChart) :
+    minkowskiChart.IsNull x lightlikeVector := by
+  rw [ChartSpacetime.IsNull, minkowskiChart_normSq]
+  simp [lightlikeVector]
+
 end GeneralRelativity
