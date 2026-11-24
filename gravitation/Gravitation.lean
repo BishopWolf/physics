@@ -26,6 +26,7 @@ public import Gravitation.LinearizedWaveGauge
 public import Gravitation.ManifoldInterface
 public import Gravitation.Bianchi
 public import Gravitation.InitialDataInterface
+public import Gravitation.SobolevInitialData
 public import Gravitation.CauchyInterfaces
 public import Gravitation.ReducedWave3D
 public import Gravitation.Relativity.General.Kerr.Basic
