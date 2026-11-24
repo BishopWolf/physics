@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 729
-declarations, 491 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 731
+declarations, 492 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -690,6 +690,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.eq_zero_of_waveEnergy_eq_zero` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.u_eq_initial_of_ut_zero` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.wave_zero_of_zero_data` | `Gravitation/WaveEnergy.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.WaveSolutionOn` | `Gravitation/WaveUniqueness.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.wave_unique_of_same_data` | `Gravitation/WaveUniqueness.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere.rs` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IncompressibleSphere.chia` | `PhyslibAlpha/Relativity/General/Schwarzschild/IncompressibleSphere.lean` | propext, Classical.choice, Quot.sound | proved |
