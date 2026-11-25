@@ -40,7 +40,7 @@ solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy, uniqueness, chart-manifold, general Bianchi, Sobolev/initial-data,
 reduced Cauchy, gauge-recovery, maximal-development, and explicit-development
-modules, together with the 3D divergence foundation, contribute 313 of the 1105
+modules, together with the 3D divergence foundation, contribute 314 of the 1106
 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
@@ -95,9 +95,9 @@ M_i = \partial_j K^{i}{}_{j} - \partial_i \operatorname{tr} K,$$
 
 with `InitialData.hamiltonianConstraint` and `InitialData.momentumConstraint`
 as their Lean definitions and
-`InitialData.IsVacuumData` as the conjunction `H = 0 ∧ M = 0`. The momentum
-constraint takes the derivative field `dK` as an argument; it does not derive
-`dK` from `K`.
+`InitialData.IsVacuumData` as the conjunction `H = 0 ∧ M = 0`. The vendored
+constraint still takes the derivative field `dK` as an argument; the chart
+layer derives it from `K` through `extrinsicDerivativeOf`.
 
 The formalised reductions and examples are:
 
@@ -112,13 +112,21 @@ The formalised reductions and examples are:
 | `squeezedData_ham` | flat `ℝ³` with `K = diag(1,1,0)` has `H = 2` |
 | `squeezedData_ham_ne_zero` | so the vacuum constraints are not automatic |
 
-Two restrictions matter for what follows. First, `R3` is a field of
-`InitialData`, not a function of `h`: the module checks the constraint
-equation, not that `R3` is the curvature of `h`. Second, `h` and `R3` are
-matrices and tensors at a point in a chart, not objects on a manifold. The
-module therefore formalises the *algebra* of the constraints, which is exactly
-what a pointwise development can do, and stops short of the geometric data a
-Cauchy theorem needs.
+The derived-data bridge is exercised end to end on Minkowski:
+`minkowskiChartInitialDataDerived` rebuilds the flat chart data using
+`spatialRiemannTensorOf` and `extrinsicDerivativeOf`, with
+`spatialRiemannTensorOf_const` and `extrinsicDerivativeOf_const` supplying the
+flat/constant checks.
+
+Two restrictions matter for what follows. First, `R3` remains a field of
+`InitialData`: the vendored module checks the constraint equation. The local
+chart layer now derives a spatial Riemann tensor from a metric field
+(`spatialRiemannTensorOf`) and packages it with `ChartInitialData.ofDerivedData`;
+the manifold-level identification of that tensor with the curvature of `h`
+remains outside. Second, `h` and `R3` are matrices and tensors at a point in a
+chart, not objects on a manifold. The module therefore formalises the *algebra*
+of the constraints, which is exactly what a pointwise development can do, and
+stops short of the geometric data a Cauchy theorem needs.
 
 ## 3. Formalised geodesic Cauchy problem
 
@@ -213,6 +221,7 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `ChartSpacetime.causalCharacter_cases` | every vector has one of the three causal characters |
 | `lightlikeVector`, `minkowskiChart_null_lightlike` | explicit null vector in the Minkowski chart |
 | `ChartInitialData`, `minkowskiChartInitialData` | chart ADM data with flat vacuum instance |
+| `spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `minkowskiChartInitialDataDerived` | derived `R3`/`dK` and end-to-end Minkowski reconstruction |
 | `minkowskiChartInitialData_metric` | induced spatial metric equals the flat ADM metric |
 | `ChartInitialData.ham_zero`, `mom_zero`, `isVacuumData` | constraint projections from chart ADM data |
 | `sobolev_embedding_1D`, `trace_estimate_1D` | 1D `H¹([0, L])` Sobolev embedding and boundary trace inequality |
@@ -330,13 +339,12 @@ distance to it is visible.
 
 ## 6. What is missing
 
-Five layers separate the present pointwise development from the theorem above.
+Four layers separate the present pointwise development from the theorem above.
 
-1. **Manifold and Lorentzian geometry.** The current `Metric` and `MetricTensor` are matrices with a proved two-sided inverse at a point. A Cauchy development needs a smooth 3-manifold `Σ`, a Lorentzian 4-manifold `M`, an embedding, an induced metric, an extrinsic curvature and isometries. Mathlib has smooth manifolds, but this repository has no pseudo-Riemannian layer, manifold Levi-Civita connection or causality theory.
-2. **Curvature and derivative data from geometry.** `InitialData` supplies `R3` and `dK`; a Cauchy theorem must derive them from `h` and `K`. The coordinate Riemann tensor now carries pair symmetry and the algebraic Bianchi identity (`riemann_bianchi`, `riemann_lower_bianchi`, `riemann_lower_pair_symm`), and the chart layer now provides `spatialRiemannTensorOf` and `extrinsicDerivativeOf`, together with `ChartInitialData.ofDerivedData`; `spatialRiemannTensorOf_const` and `extrinsicDerivativeOf_const` check the flat/constant case. What remains is supplying the metric-inverse, Christoffel-symmetry and vacuum-constraint hypotheses for arbitrary data, and lifting the pipeline to a manifold.
-3. **Sobolev spaces and the constraint problem.** The theorem is usually stated for Sobolev data `H^s` with `s` large, or for smooth data. Mathlib's Sobolev module works on `ℝⁿ`, not on manifolds, and the repository has no elliptic theory for solving the constraints. The present module checks the constraints; it does not solve them.
-4. **Quasilinear hyperbolic existence.** In harmonic/wave gauge the vacuum Einstein equations become a quasilinear symmetric hyperbolic system; local existence for that system is the analytic core of [4]. No Mathlib or dependency PDE theorem supplies it, and the surveyed Lean PDE projects are elliptic or Navier–Stokes formalisations. The linear wave theorem of §4 is a constant-coefficient model, not this layer.
-5. **Gauge and constraint propagation, then maximality.** One must show that a reduced solution satisfies the gauge condition and the full Einstein equations, that the constraints propagate, and that developments patch to a maximal one. Propagation uses the contracted Bianchi identity, proved in `Gravitation.Bianchi` (`second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero`). Maximality needs the Zorn argument of [1] or the construction of [2]. The chart-level isometry/embedding API is now present (`ChartSpacetime.Isometry`, `ChartSpacetime.Embedding`, with identity, inverse and composition lemmas); geometric 4D Lorentzian patching and isometric amalgamation remain open.
+1. **Manifold and Lorentzian geometry.** The current `Metric` and `MetricTensor` are matrices with a proved two-sided inverse at a point. A Cauchy development needs a smooth 3-manifold `Σ`, a Lorentzian 4-manifold `M`, an embedding, an induced metric, an extrinsic curvature and isometries. The chart layer now derives the spatial Riemann tensor and momentum derivative from component fields (`spatialRiemannTensorOf`, `extrinsicDerivativeOf`) and reconstructs the Minkowski chart data through `ChartInitialData.ofDerivedData` (`minkowskiChartInitialDataDerived`); what remains is the manifold-level definition, the metric-inverse and Christoffel hypotheses for arbitrary data, and the geometric embedding and isometries. Mathlib has smooth manifolds, but this repository has no pseudo-Riemannian layer, manifold Levi-Civita connection or causality theory.
+2. **Sobolev spaces and the constraint problem.** The theorem is usually stated for Sobolev data `H^s` with `s` large, or for smooth data. Mathlib's Sobolev module works on `ℝⁿ`, not on manifolds, and the repository has no elliptic theory for solving the constraints. The present module checks the constraints; it does not solve them.
+3. **Quasilinear hyperbolic existence.** In harmonic/wave gauge the vacuum Einstein equations become a quasilinear symmetric hyperbolic system; local existence for that system is the analytic core of [4]. No Mathlib or dependency PDE theorem supplies it, and the surveyed Lean PDE projects are elliptic or Navier–Stokes formalisations. The linear wave theorem of §4 is a constant-coefficient model, not this layer.
+4. **Gauge and constraint propagation, then maximality.** One must show that a reduced solution satisfies the gauge condition and the full Einstein equations, that the constraints propagate, and that developments patch to a maximal one. Propagation uses the contracted Bianchi identity, proved in `Gravitation.Bianchi` (`second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero`). Maximality needs the Zorn argument of [1] or the construction of [2]. The chart-level isometry/embedding API is now present (`ChartSpacetime.Isometry`, `ChartSpacetime.Embedding`, with identity, inverse and composition lemmas); geometric 4D Lorentzian patching and isometric amalgamation remain open.
 
 ## 7. A formalisation roadmap
 
@@ -347,7 +355,7 @@ The layers above suggest an order in which the work can be made checkable.
 | M0 | Linear 3D wave model on a box: energy, conservation, zero-energy, zero-data and general-data uniqueness | **Done**: `waveEnergy3D_eq_initial_of_wave`, `eq_zero_of_waveEnergy3D_eq_zero`, `wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`; closed-box uniqueness under explicit regularity |
 | M0.5 | Linearized Einstein equations in wave gauge | **Interface**: `WaveGaugePerturbation` and `linEinstein_eq_zero_of_waveGauge`, with `ttWave_waveGauge` as a concrete TT-plane-wave instance; uses the existing `linEinstein_lorenz_gauge` reduction, not a manifold derivation |
 | M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality, Bianchi | **Done at chart/global-chart scope**: `SmoothChartSpacetime` (`ChartedSpace`), general `ChartSpacetime.isLeviCivita` (`metricCovariantDeriv_eq_zero`), `IsCauchySurface`, `minkowskiChart_globallyHyperbolic`, and general `Bianchi.riemann_bianchi` / `riemann_lower_bianchi` / `riemann_lower_pair_symm` and `second_bianchi` / `contracted_bianchi` / `covDiv_einstein_eq_zero`; arbitrary multi-chart manifold gluing remains outside |
-| M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Done at 1D/3D-box Sobolev and curved-slice scope**: chart regularity (`ChartInitialData`), derived spatial curvature and momentum derivative (`spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `ChartInitialData.ofDerivedData`), 1D `H¹` Sobolev embedding & trace estimate (`sobolev_embedding_1D`, `trace_estimate_1D`), 3D box `H¹` norm (`sobolevH1NormSq3D`), derived 3D spatial curvature & ADM constraints (`hamiltonianConstraintOf`, `momentumConstraintOf`), Brill–Lindquist harmonic conformal factor (`Δφ = 0`), curved Schwarzschild–de Sitter 3D slice (`³R = 2Λ`, `H = 0` for `Λ = 0`), and flat FLRW initial data (`flrw_initial_constraints`); general elliptic constraint solving on arbitrary 3-manifolds remains outside |
+| M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Done at 1D/3D-box Sobolev and curved-slice scope**: chart regularity (`ChartInitialData`), derived spatial curvature and momentum derivative (`spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `ChartInitialData.ofDerivedData`), end-to-end Minkowski reconstruction (`minkowskiChartInitialDataDerived`), 1D `H¹` Sobolev embedding & trace estimate (`sobolev_embedding_1D`, `trace_estimate_1D`), 3D box `H¹` norm (`sobolevH1NormSq3D`), derived 3D spatial curvature & ADM constraints (`hamiltonianConstraintOf`, `momentumConstraintOf`), Brill–Lindquist harmonic conformal factor (`Δφ = 0`), curved Schwarzschild–de Sitter 3D slice (`³R = 2Λ`, `H = 0` for `Λ = 0`), and flat FLRW initial data (`flrw_initial_constraints`); general elliptic constraint solving on arbitrary 3-manifolds remains outside |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | **Done at linearized 3D box & nonlinear FLRW scope**: directional 3D plane waves (`directionalWave3D_wave_equation`), superposition (`spatialLaplacian3D_add`), nonlinear harmonic gauge (`harmonicGaugeCond`, `minkowski_harmonicGauge`), plus concrete `ReducedLocalExistenceCertificate` instances for the linearized 3D wave-gauge box problem (`linearizedBox_reducedLocalExistence`, `ttWave_reduced_solution`) and the nonlinear 4D flat FLRW reduced Einstein ODE via Picard–Lindelöf (`flrw_reducedLocalExistence`); full `H^s(ℝ³)` quasilinear symmetric hyperbolic existence without symmetry remains outside |
 | M4 | Gauge recovery and constraint propagation | **Done at linearized 3D box & nonlinear FLRW scope**: general nonlinear Bianchi split (`bianchi_constraint_propagation_split`), plus concrete `GaugeRecoveryCertificate` instances for the linearized 3D wave-gauge system via `wave_zero_of_zero_data3D` (`linearizedBox_gaugeRecovery`) and for nonlinear 4D flat FLRW via constraint propagation and `einsteinTensorOf_flrw_iff_friedmann` (`flrw_gaugeRecovery`); non-symmetric nonlinear 4D `H^s` constraint propagation remains outside |
 | M5 | Maximal development | **Done at abstract Zorn & 1D open-domain scope**: `OrderedDevelopmentSystem` proves Zorn maximal existence (`exists_maximal`), amalgamation uniqueness up to isometry (`unique_up_to_isometry`), and inhabits `MaximalDevelopmentCertificate`, instantiated without extra hypotheses by `intervalMaximalDevelopmentCertificate` on open sets containing `0`; the chart-level interface `chartDevelopmentInterface` uses `ChartSpacetime.IsIsometric` for uniqueness, while geometric 4D Lorentzian patching/isometry axioms remain outside |
@@ -418,7 +426,7 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 1105 declarations. It contains the
+The development audited in Paper I now has 1106 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
@@ -428,7 +436,7 @@ curved initial-data module, the M3 reduced Cauchy module, the M4
 gauge-recovery module, the M5 maximal-development module, and the M6
 explicit-developments module discussed above, together with the
 solution theory, the alternative theories, the axiom audit and the numerical
-pass. This paper's Lean contribution is 313 declarations across twenty
+pass. This paper's Lean contribution is 314 declarations across twenty
 modules: `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
 `Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
 `Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation`,
@@ -462,8 +470,8 @@ This paper adds prose and twenty Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.CauchyInterfaces`,
 `Gravitation.ReducedWave3D`, `Gravitation.ReducedCauchy`,
 `Gravitation.GaugeRecovery`, `Gravitation.MaximalDevelopment` and
-`Gravitation.ExplicitDevelopments` (313 declarations). The audited development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1105 declarations with axioms inside
+`Gravitation.ExplicitDevelopments` (314 declarations). The audited development is the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1106 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are

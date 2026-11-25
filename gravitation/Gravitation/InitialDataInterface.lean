@@ -27,6 +27,8 @@ constraint solving remain outside this interface.
   derived from an extrinsic-curvature field.
 - `ChartInitialData`, `ChartInitialData.ofDerivedData` : bundled chart initial
   data and the constructor taking the derived curvature and derivative data.
+- `minkowskiChartInitialDataDerived` : the Minkowski chart data reconstructed
+  through the derived curvature and momentum constructors.
 - `ChartInitialData.constraintResidual_eq_zero` : bundled vacuum data have zero
   constraint residual.
 
@@ -319,5 +321,46 @@ lemma minkowskiChartInitialData_constraintResidual_eq_zero :
     minkowskiChartInitialData.constraintResidual.ham = 0 ∧
       ∀ i, minkowskiChartInitialData.constraintResidual.mom i = 0 :=
   minkowskiChartInitialData.constraintResidual_eq_zero
+
+/-- The Minkowski chart data are also obtained from the derived curvature and
+momentum constructors: the constant Euclidean metric gives `R3 = flat 3`, and
+zero extrinsic curvature gives `dK = 0`. -/
+noncomputable def minkowskiChartInitialDataDerived : ChartInitialData minkowskiChart := by
+  let h : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.g
+  let hinv : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.ginv
+  let hgSymm : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ i j, h y i j = h y j i := by
+    filter_upwards with y i j
+    simp [h, euclid3, Matrix.one_apply, eq_comm]
+  let hInv : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ m j,
+      ∑ a, hinv y a m * h y a j = if m = j then 1 else 0 := by
+    filter_upwards with y m j
+    simp [h, hinv, euclid3, Matrix.one_apply, eq_comm]
+  let hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) 0 := by
+    intro i j
+    exact contDiffAt_const
+  let hΓD : ∀ k i j,
+      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) 0 := by
+    intro k i j
+    have hc : (fun y : Fin 3 → ℝ => Pipeline.christoffel h hinv y k i j) = fun _ => 0 := by
+      funext y
+      exact Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j
+    rw [hc]
+    exact differentiableAt_const 0
+  let hΓ : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ k i j,
+      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i := by
+    filter_upwards with y k i j
+    rw [Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j,
+      Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k j i]
+  let R3 := spatialRiemannTensorOf h hinv 0 hgSymm hInv hgC2 hΓD hΓ
+  have hR3 : R3 = RiemannTensor.flat 3 :=
+    spatialRiemannTensorOf_const euclid3.g h hinv 0 (fun _ => rfl) hgSymm hInv hgC2 hΓD hΓ
+  let K : Tensor2 3 := 0
+  let dK := extrinsicDerivativeOf (fun _ : Fin 3 → ℝ => K) 0
+  have hdK : dK = fun _ => 0 := by
+    funext μ
+    exact extrinsicDerivativeOf_const K 0 μ
+  refine ChartInitialData.ofDerivedData minkowskiChart euclid3 K Matrix.isSymm_zero R3 dK ?_
+  rw [hR3, hdK]
+  simpa [flatData] using flatData_isVacuum
 
 end GeneralRelativity
