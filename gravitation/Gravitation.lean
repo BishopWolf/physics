@@ -106,6 +106,9 @@ general relativity.
   `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G`.
 - `GeneralRelativity.Riemann.skew_first`, `ricci_symm`, `vacuum_iff_ricci_flat` :
   the algebraic symmetries of curvature and `G = 0 ↔ Ric = 0` in four dimensions.
+- `GeneralRelativity.Bianchi.riemann_bianchi`, `riemann_lower_bianchi`,
+  `riemann_lower_pair_symm` : the coordinate first Bianchi identity and pair
+  symmetry of the lowered Riemann tensor.
 - `GeneralRelativity.InitialData.hamiltonianConstraint`, `momentumConstraint` :
   the ADM Hamiltonian and momentum constraints.
 - `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` :

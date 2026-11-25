@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Interface certificates for M3–M6
 
+## i. Overview
+
 This file records the data and the unresolved propositions that a full
 formalisation of the Cauchy problem would have to supply.  The certificates are
 specifications, not existence theorems: no certificate is constructed here, and
@@ -14,6 +16,31 @@ explicit-solution recovery input.
 The chart-level M1 and M2 layers live in `ManifoldInterface` and
 `InitialDataInterface`; this module deliberately adds no manifold, Sobolev, PDE,
 or causality theory.
+
+## ii. Key results
+
+- `ReducedCauchyProblem`, `ReducedLocalExistenceCertificate` : the M3 reduced
+  Cauchy interface and its missing local existence/uniqueness input.
+- `GaugeRecoveryProblem`, `GaugeRecoveryCertificate` : the M4 gauge and
+  constraint-propagation interface.
+- `DevelopmentInterface`, `MaximalDevelopmentCertificate` : the M5 maximal
+  development and uniqueness-up-to-isometry interface, universe-polymorphic in
+  its data and spacetime types.
+- `ExplicitDevelopmentObligations`, `ExplicitDevelopmentCertificate` : the M6
+  explicit-solution recovery interface.
+
+## iii. Table of contents
+
+- M3: reduced quasilinear hyperbolic system
+- M4: gauge recovery and constraint propagation
+- M5: maximal development
+- M6: explicit-solution cross-checks
+
+## iv. References
+
+* J. Sbierski, *On the existence of a maximal Cauchy development for the
+  Einstein equations — a dezornification*, arXiv:1309.7591, §2, p. 2.
+  [ref: sbierski_2013, p. 2]
 -/
 
 module
@@ -23,6 +50,8 @@ public import Gravitation.InitialDataInterface
 @[expose] public section
 
 namespace GeneralRelativity
+
+universe u v
 
 /-! ## M3: reduced quasilinear hyperbolic system -/
 
@@ -119,9 +148,10 @@ structure records only the interface needed to state the maximal-development
 obligation; it constructs no development. -/
 structure DevelopmentInterface where
   /-- The type of initial-data sets. -/
-  Data : Type
-  /-- The type of candidate spacetimes. -/
-  Spacetime : Type
+  Data : Type u
+  /-- The type of candidate spacetimes.  Universe-polymorphic so that the
+  chart-level interface can use `ChartSpacetime` directly. -/
+  Spacetime : Type v
   /-- `IsDevelopment M data` says that `M` develops `data`. -/
   IsDevelopment : Spacetime → Data → Prop
   /-- Maximality among developments of the same data. -/
@@ -130,7 +160,7 @@ structure DevelopmentInterface where
   IsIsometric : Spacetime → Spacetime → Prop
 
 /-- The missing M5 maximal-existence and uniqueness-up-to-isometry input. -/
-structure MaximalDevelopmentCertificate (D : DevelopmentInterface) : Prop where
+structure MaximalDevelopmentCertificate (D : DevelopmentInterface.{u, v}) : Prop where
   /-- Every data set has a maximal development. -/
   maximal_existence : ∀ data : D.Data,
     ∃ M : D.Spacetime, D.IsDevelopment M data ∧ D.IsMaximal M

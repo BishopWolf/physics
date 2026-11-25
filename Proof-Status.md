@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1092 declarations, 678 of them theorem-like. The table below is the
+1099 declarations, 683 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -38,6 +38,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Bianchi.inv_metric_compat` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.riemann_skew_last` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.riemann_lower_skew_first` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Bianchi.pair_symm_of_skew_bianchi` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Bianchi.riemann_bianchi` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Bianchi.riemann_lower_bianchi` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Bianchi.riemann_lower_pair_symm` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.second_bianchi_of` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.second_bianchi` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.differentiableAt_riemann` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -221,6 +225,9 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.OrderedDevelopmentSystem.exists_maximal` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem.unique_up_to_isometry` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem.maximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.chartDevelopmentInterface` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartMaximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartMaximalDevelopmentCertificate.unique_up_to_isometry` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.intervalDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.intervalMaximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

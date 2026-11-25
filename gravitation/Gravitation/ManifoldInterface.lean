@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Chart-level spacetime interface
 
+## i. Overview
+
 This file provides the chart-level M1 layer supported by the current
 component-based development: a spacetime chart domain, a metric field, the
 coordinate connection and curvature, chart causal classification, and a
@@ -14,6 +16,33 @@ this chart interface.
 
 The point of the interface is to give the later layers a concrete type to extend,
 with Minkowski spacetime as its first instance.
+
+## ii. Key results
+
+- `ChartSpacetime`, `minkowskiChart` : the chart domain and its Minkowski
+  instance.
+- `ChartSpacetime.christoffel`, `ChartSpacetime.riemann` : the coordinate
+  connection and curvature pipeline on a chart.
+- `ChartSpacetime.IsCauchySurface`, `ChartSpacetime.IsGloballyHyperbolic`,
+  `minkowskiChart_globallyHyperbolic` : chart causal classification and the
+  Minkowski instance.
+- `ChartSpacetime.Isometry`, `ChartSpacetime.Embedding`,
+  `ChartSpacetime.IsIsometric` : chart-level isometry and embedding API with
+  identity, inverse and composition lemmas.
+
+## iii. Table of contents
+
+- A. Chart spacetime and the Minkowski model
+- B. Coordinate connection and curvature
+- C. Chart causal classification
+- D. Chart-level isometries and embeddings
+
+## iv. References
+
+* S. M. Carroll, *Lecture Notes on General Relativity*, arXiv:gr-qc/9712019,
+  §3.2, pp. 58 and 72–73. [ref: Carroll1997]
+* B. O'Neill, *Semi-Riemannian Geometry With Applications to Relativity*,
+  Ch. 3. [ref: oneill_1983_semi_riemannian]
 -/
 
 module

@@ -2,10 +2,14 @@
 Copyright (c) 2026 The Gravitation formalisation contributors.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Covariant derivatives, the second Bianchi identity, and Einstein conservation
+# Covariant derivatives, the Bianchi identities, and Einstein conservation
+
+## i. Overview
 
 This module proves the general differential curvature identities in arbitrary
-dimension `n : ℕ` for any smooth coordinate metric `(g, ginv)`:
+dimension `n : ℕ` for any smooth coordinate metric `(g, ginv)`.
+
+## ii. Key results
 
 * Schwarz symmetry of coordinate partial derivatives `pd_comm_of_contDiffAt`
   from Mathlib's `ContDiffAt.isSymmSndFDerivAt`;
@@ -13,12 +17,32 @@ dimension `n : ℕ` for any smooth coordinate metric `(g, ginv)`:
   metric compatibility `inv_metric_compat` (`∇_λ g^{ij} = 0`);
 * skew-symmetry of the lowered Riemann tensor in its first pair
   `riemann_lower_skew_first` (`R_{ασμν} + R_{σαμν} = 0`);
+* the algebraic first Bianchi identity `riemann_bianchi`
+  (`R^ρ_{σμν} + R^ρ_{μνσ} + R^ρ_{νσμ} = 0`);
+* the lowered first Bianchi identity `riemann_lower_bianchi` and pair symmetry
+  `riemann_lower_pair_symm` (`R_{ασμν} = R_{μνασ}`);
 * the general second Bianchi identity `second_bianchi` in arbitrary coordinates
   (without assuming normal coordinates);
 * the general contracted Bianchi identity `contracted_bianchi`
   (`∇^μ Ric_{μλ} = ½ ∂_λ S`) and Einstein tensor conservation
   `covDiv_einstein_eq_zero` (`∇^μ G_{μλ} = 0`), together with their
   instantiation on any smooth `ChartSpacetime`.
+
+## iii. Table of contents
+
+- A. Partial-derivative calculus and Schwarz symmetry
+- B. Covariant derivatives and divergence
+- C. Metric compatibility and Riemann symmetries
+- D. General second Bianchi identity
+- E. General contracted Bianchi identity and Einstein conservation
+- F. Instantiation on a chart spacetime
+
+## iv. References
+
+* S. M. Carroll, *Lecture Notes on General Relativity*, arXiv:gr-qc/9712019,
+  §3.2, pp. 72–73. [ref: Carroll1997]
+* J. Sbierski, *On the existence of a maximal Cauchy development for the
+  Einstein equations — a dezornification*, arXiv:1309.7591, §2. [ref: sbierski_2013]
 -/
 
 module
@@ -422,7 +446,7 @@ lemma riemann_skew_last {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
 
 /-- **Skew-symmetry of the lowered Riemann tensor in its first pair**:
 `R_{ασμν} + R_{σαμν} = 0`, derived from `∂_μ ∂_ν g_{ασ} = ∂_ν ∂_μ g_{ασ}` and
-metric compatibility. -/
+metric compatibility.  See arXiv:gr-qc/9712019, p. 72. [ref: Carroll1997, p. 72] -/
 theorem riemann_lower_skew_first {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
     {x : Fin n → ℝ}
     (hgSymm : ∀ᶠ y in 𝓝 x, ∀ i j, g y i j = g y j i)
@@ -581,6 +605,127 @@ theorem riemann_lower_skew_first {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2
     ring
   rw [htarget]
   linarith
+
+/-- **Pair symmetry from the algebraic Bianchi identity** (MTW four-Bianchi
+argument): antisymmetry in both pairs plus
+`R_{ijkl} + R_{iklj} + R_{iljk} = 0` implies `R_{ijkl} = R_{klij}`.
+See arXiv:gr-qc/9712019, p. 73. [ref: Carroll1997, p. 73] -/
+lemma pair_symm_of_skew_bianchi {n : ℕ}
+    {R : Fin n → Fin n → Fin n → Fin n → ℝ}
+    (hskew_first : ∀ i j k l, R i j k l = -R j i k l)
+    (hskew_last : ∀ i j k l, R i j k l = -R i j l k)
+    (hbianchi : ∀ i j k l, R i j k l + R i k l j + R i l j k = 0)
+    (i j k l : Fin n) : R i j k l = R k l i j := by
+  have hcycle : R i j k l = 2 * R k l i j - R i j k l := by
+    calc
+      R i j k l = -R i j l k := hskew_last i j k l
+      _ = R j i l k := by rw [hskew_first i j l k]; ring
+      _ = -R j l k i - R j k i l := by
+            have h := hbianchi j i l k
+            linarith
+      _ = R l j k i + R k j i l := by
+            rw [hskew_first j l k i, hskew_first j k i l]
+            ring
+      _ = (-R l k i j - R l i j k) + (-R k i l j - R k l j i) := by
+            have h1 := hbianchi l j k i
+            have h2 := hbianchi k j i l
+            linarith
+      _ = 2 * R k l i j + R i l j k + R i k l j := by
+            rw [hskew_first l k i j, hskew_first l i j k,
+              hskew_first k i l j, hskew_last k l j i]
+            ring
+      _ = 2 * R k l i j - R i j k l := by
+            have h := hbianchi i l j k
+            linarith
+  linarith
+
+/-- **Algebraic first Bianchi identity for the coordinate Riemann tensor**:
+`R^ρ_{σμν} + R^ρ_{μνσ} + R^ρ_{νσμ} = 0`, using symmetry of the Christoffel
+symbols in a neighborhood.  See arXiv:gr-qc/9712019, p. 73.
+[ref: Carroll1997, p. 73] -/
+theorem riemann_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, christoffel g ginv y k i j =
+      christoffel g ginv y k j i)
+    (ρ σ μ ν : Fin n) :
+    riemann g ginv x ρ σ μ ν + riemann g ginv x ρ μ ν σ
+      + riemann g ginv x ρ ν σ μ = 0 := by
+  have hd : ∀ a k i j,
+      Pipeline.coordDeriv a (fun y => christoffel g ginv y k i j) x =
+        Pipeline.coordDeriv a (fun y => christoffel g ginv y k j i) x := by
+    intro a k i j
+    exact pd_congr_nhds a (hΓ.mono fun y hy => hy k i j)
+  simp only [riemann]
+  rw [hd ν ρ μ σ, hd σ ρ ν μ, hd μ ρ σ ν]
+  have hxΓ := hΓ.self_of_nhds
+  simp_rw [hxΓ]
+  set S1 : ℝ := ∑ l, (christoffel g ginv x ρ μ l *
+    christoffel g ginv x l σ ν -
+    christoffel g ginv x ρ ν l * christoffel g ginv x l σ μ) with hS1
+  set S2 : ℝ := ∑ l, (christoffel g ginv x ρ ν l *
+    christoffel g ginv x l σ μ -
+    christoffel g ginv x ρ σ l * christoffel g ginv x l μ ν) with hS2
+  set S3 : ℝ := ∑ l, (christoffel g ginv x ρ σ l *
+    christoffel g ginv x l μ ν -
+    christoffel g ginv x ρ μ l * christoffel g ginv x l σ ν) with hS3
+  have hsum : S1 + S2 + S3 = 0 := by
+    rw [hS1, hS2, hS3]
+    simp only [← Finset.sum_add_distrib]
+    apply Finset.sum_eq_zero
+    intro l _
+    ring
+  linear_combination hsum
+
+/-- **Lowered first Bianchi identity**: `R_{ασμν} + R_{αμνσ} + R_{ανσμ} = 0`.
+See arXiv:gr-qc/9712019, p. 73. [ref: Carroll1997, p. 73] -/
+theorem riemann_lower_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    (x : Fin n → ℝ)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, christoffel g ginv y k i j =
+      christoffel g ginv y k j i)
+    (α σ μ ν : Fin n) :
+    (∑ β, g x α β * riemann g ginv x β σ μ ν)
+      + (∑ β, g x α β * riemann g ginv x β μ ν σ)
+      + (∑ β, g x α β * riemann g ginv x β ν σ μ) = 0 := by
+  rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  apply Finset.sum_eq_zero
+  intro β _
+  have h := riemann_bianchi g ginv x hΓ β σ μ ν
+  linear_combination (g x α β) * h
+
+/-- **Pair symmetry of the lowered Riemann tensor**:
+`R_{ασμν} = R_{μνασ}`.  See arXiv:gr-qc/9712019, p. 73.
+[ref: Carroll1997, p. 73] -/
+theorem riemann_lower_pair_symm {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
+    {x : Fin n → ℝ}
+    (hgSymm : ∀ᶠ y in 𝓝 x, ∀ i j, g y i j = g y j i)
+    (hInv : ∀ᶠ y in 𝓝 x, ∀ m j, ∑ a, ginv y a m * g y a j = if m = j then 1 else 0)
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => g y i j) x)
+    (hΓD : ∀ k i j, DifferentiableAt ℝ (fun y => christoffel g ginv y k i j) x)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, christoffel g ginv y k i j =
+      christoffel g ginv y k j i)
+    (α σ μ ν : Fin n) :
+    (∑ β, g x α β * riemann g ginv x β σ μ ν) =
+      (∑ β, g x μ β * riemann g ginv x β ν α σ) := by
+  let R : Fin n → Fin n → Fin n → Fin n → ℝ :=
+    fun i j k l => ∑ β, g x i β * riemann g ginv x β j k l
+  change R α σ μ ν = R μ ν α σ
+  refine pair_symm_of_skew_bianchi ?_ ?_ ?_ α σ μ ν
+  · intro i j k l
+    have h := riemann_lower_skew_first g ginv hgSymm hInv hgC2 hΓD i j k l
+    simp only [R]
+    linarith
+  · intro i j k l
+    simp only [R]
+    calc
+      (∑ β, g x i β * riemann g ginv x β j k l)
+          = ∑ β, g x i β * (-riemann g ginv x β j l k) := by
+            apply Finset.sum_congr rfl
+            intro β _
+            rw [riemann_skew_last]
+      _ = -∑ β, g x i β * riemann g ginv x β j l k := by
+            simp_rw [mul_neg, Finset.sum_neg_distrib]
+  · intro i j k l
+    exact riemann_lower_bianchi g ginv x hΓ i j k l
 
 /-! ## D. General Second Bianchi Identity -/
 

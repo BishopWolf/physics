@@ -113,8 +113,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1092
-declarations, 678 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1099
+declarations, 683 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -214,6 +214,7 @@ Weyl tensor removes.
 | `GeneralRelativity.SmoothChartSpacetime`, `GeneralRelativity.SmoothChartSpacetime.chartedSpace`, `GeneralRelativity.minkowskiSmoothChart` | Mathlib `ChartedSpace` bridge on chart homeomorphisms |
 | `GeneralRelativity.ChartSpacetime.IsCauchySurface`, `GeneralRelativity.ChartSpacetime.IsGloballyHyperbolic`, `GeneralRelativity.minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface and Minkowski global hyperbolicity |
 | `GeneralRelativity.Bianchi.second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero` | general second and contracted Bianchi identities, `∇·G = 0` |
+| `GeneralRelativity.Bianchi.riemann_bianchi`, `riemann_lower_bianchi`, `riemann_lower_pair_symm` | coordinate first Bianchi identity, lowered Bianchi identity and pair symmetry |
 | `GeneralRelativity.sobolev_embedding_1D`, `trace_estimate_1D` | 1D `H¹` Sobolev embedding and boundary trace inequality |
 | `GeneralRelativity.sobolevH1NormSq3D`, `l2_le_sobolevH1_3D`, `grad_le_sobolevH1_3D` | 3D closed-box `H¹` norm and coercivity |
 | `GeneralRelativity.hamiltonianConstraintOf`, `momentumConstraintOf` | derived 3D spatial curvature and nonlinear ADM constraints |
@@ -226,6 +227,7 @@ Weyl tensor removes.
 | `GeneralRelativity.GaugeRecoveryProblem`, `GaugeRecoveryCertificate` | M4 interface, inhabited at linearized-box and FLRW scope |
 | `GeneralRelativity.linearizedBox_gaugeRecovery`, `flrw_gaugeRecovery` | concrete M4 gauge-recovery certificates |
 | `GeneralRelativity.DevelopmentInterface`, `MaximalDevelopmentCertificate` | M5 interface, inhabited at abstract-Zorn and open-domain scope |
+| `GeneralRelativity.MaximalDevelopment.chartDevelopmentInterface`, `ChartMaximalDevelopmentCertificate` | chart-level M5 interface using `ChartSpacetime.IsIsometric` for uniqueness |
 | `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` | chart-level isometry and embedding API, with identity, inverse and composition lemmas |
 | `GeneralRelativity.intervalMaximalDevelopmentCertificate` | zero-hypothesis open-domain maximal-development certificate |
 | `GeneralRelativity.ExplicitDevelopmentObligations`, `ExplicitDevelopmentCertificate` | M6 interface, inhabited via `explicitSolutions_certificate` |
@@ -351,7 +353,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1092 at this revision, 678 theorem-like) and rejects any axiom outside
+declaration (1099 at this revision, 683 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

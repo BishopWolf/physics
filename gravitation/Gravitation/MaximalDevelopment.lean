@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # M5: Maximal development via Choquet–Bruhat–Geroch Zorn argument
 
+## i. Overview
+
 This module formalises the Choquet–Bruhat–Geroch (1969) maximal-development
 construction at the extension/amalgamation interface level and inhabits
 `MaximalDevelopmentCertificate` in two settings:
@@ -26,6 +28,30 @@ Scope boundary: proving the geometric extension, isometric-amalgamation, and
 Zorn/Sbierski patching axioms for general globally hyperbolic 4D Lorentzian
 Einstein developments of arbitrary smooth 3-manifold data remains outside this
 abstract/1D domain layer.
+
+## ii. Key results
+
+- `OrderedDevelopmentSystem`, `OrderedDevelopmentSystem.exists_maximal`,
+  `unique_up_to_isometry` : the abstract Choquet–Bruhat–Geroch Zorn argument.
+- `OrderedDevelopmentSystem.maximalDevelopmentCertificate` : the abstract M5
+  certificate.
+- `chartDevelopmentInterface`, `ChartMaximalDevelopmentCertificate` : the
+  chart-level M5 interface, with `ChartSpacetime.IsIsometric` as its uniqueness
+  relation.
+- `intervalDevelopmentSystem`, `intervalMaximalDevelopmentCertificate` : the
+  concrete zero-hypothesis open-domain instance.
+
+## iii. Table of contents
+
+- A. Abstract Choquet–Bruhat–Geroch Zorn maximal development theorem
+- B. Chart-level isometry interface
+- C. Concrete zero-hypothesis open-domain maximal development
+
+## iv. References
+
+* J. Sbierski, *On the existence of a maximal Cauchy development for the
+  Einstein equations — a dezornification*, arXiv:1309.7591, §2, p. 2.
+  [ref: sbierski_2013, p. 2]
 -/
 
 module
@@ -39,6 +65,8 @@ open Set
 
 namespace GeneralRelativity
 
+universe u v
+
 /-! ## A. Abstract Choquet–Bruhat–Geroch Zorn maximal development theorem -/
 
 /-- Abstract Choquet–Bruhat–Geroch development system: a relation `IsDevelopment`
@@ -48,9 +76,9 @@ extension, chain upper bounds, and pairwise amalgamation of developments of the
 same initial data. -/
 structure OrderedDevelopmentSystem where
   /-- Initial-data type. -/
-  Data : Type
+  Data : Type u
   /-- Candidate spacetime-domain type. -/
-  Spacetime : Type
+  Spacetime : Type v
   /-- Development relation `IsDevelopment M d`. -/
   IsDevelopment : Spacetime → Data → Prop
   /-- Every development uniquely determines the initial data on its slice. -/
@@ -87,7 +115,7 @@ def OrderedDevelopmentSystem.IsMaximal (S : OrderedDevelopmentSystem)
 
 /-- Package an `OrderedDevelopmentSystem` as an M5 `DevelopmentInterface`. -/
 def OrderedDevelopmentSystem.toDevelopmentInterface
-    (S : OrderedDevelopmentSystem) : DevelopmentInterface where
+    (S : OrderedDevelopmentSystem.{u, v}) : DevelopmentInterface.{u, v} where
   Data := S.Data
   Spacetime := S.Spacetime
   IsDevelopment := S.IsDevelopment
@@ -149,7 +177,40 @@ theorem OrderedDevelopmentSystem.maximalDevelopmentCertificate
   uniqueness_up_to_isometry := fun M N d hM hN hmaxM hmaxN =>
     S.unique_up_to_isometry M N d hM hN hmaxM hmaxN
 
-/-! ## B. Concrete zero-hypothesis open-domain maximal development -/
+/-! ## B. Chart-level isometry interface -/
+
+/-- The chart-level M5 development interface: chart developments are chart
+initial data whose induced spatial metric is the chart metric, and its isometry
+relation is the chart-level `ChartSpacetime.IsIsometric` API.
+See arXiv:1309.7591, p. 2. [ref: sbierski_2013, p. 2] -/
+def chartDevelopmentInterface
+    (IsMaximal : ChartSpacetime → Prop) : DevelopmentInterface where
+  Data := Unit
+  Spacetime := ChartSpacetime
+  IsDevelopment := fun Y _ => ∃ D : ChartInitialData Y, Y.IsChartDevelopment D
+  IsMaximal := IsMaximal
+  IsIsometric := ChartSpacetime.IsIsometric
+
+/-- A chart-level maximal-development certificate, using the chart isometry API
+for uniqueness.  See arXiv:1309.7591, p. 2. [ref: sbierski_2013, p. 2] -/
+abbrev ChartMaximalDevelopmentCertificate
+    (IsMaximal : ChartSpacetime → Prop) : Prop :=
+  MaximalDevelopmentCertificate (chartDevelopmentInterface IsMaximal)
+
+/-- **Chart-level uniqueness up to isometry**: a maximal-development certificate
+for the chart interface yields an actual `ChartSpacetime.IsIsometric` witness.
+See arXiv:1309.7591, p. 2. [ref: sbierski_2013, p. 2] -/
+theorem ChartMaximalDevelopmentCertificate.unique_up_to_isometry
+    {IsMaximal : ChartSpacetime → Prop}
+    (h : ChartMaximalDevelopmentCertificate IsMaximal)
+    {M N : ChartSpacetime}
+    (hM : ∃ D : ChartInitialData M, M.IsChartDevelopment D)
+    (hN : ∃ D : ChartInitialData N, N.IsChartDevelopment D)
+    (hmaxM : IsMaximal M) (hmaxN : IsMaximal N) :
+    ChartSpacetime.IsIsometric M N :=
+  MaximalDevelopmentCertificate.unique_up_to_isometry (data := ()) h hM hN hmaxM hmaxN
+
+/-! ## C. Concrete zero-hypothesis open-domain maximal development -/
 
 /-- Concrete `OrderedDevelopmentSystem` on open time-evolution domains
 `U : Set ℝ` containing `t = 0`, ordered by inclusion `⊆` with union
