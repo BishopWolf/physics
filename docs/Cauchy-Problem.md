@@ -236,10 +236,12 @@ standard smooth form.
 > $\Sigma\to M$ inducing $h$ and $K$, which is maximal among globally
 > hyperbolic developments and unique up to isometry.
 
-The local existence and uniqueness half is Choquet-Bruhat's theorem [4]; the
-maximal-development and uniqueness half is the Choquet–Bruhat–Geroch paper
+The local existence and uniqueness half is Choquet-Bruhat's theorem [4],
+developed in her book [10] and recounted in the arXiv historical account [11];
+the maximal-development and uniqueness half is the Choquet–Bruhat–Geroch paper
 [1], with a Zorn-free construction by Sbierski [2]. Survey treatments are
-Rendall [3] and Chruściel [9].
+Rendall [3] and Chruściel [9]. The two founding papers [1,4] predate arXiv and
+have no arXiv version.
 
 This theorem is **not** stated in Lean anywhere in this repository, is not
 axiomatised, and is not a hidden hypothesis of any theorem in Paper I. It is
@@ -395,12 +397,14 @@ mathematical content is the content of this paper.
 
 ## References
 
-1. Y. Choquet-Bruhat, R. Geroch. *Global aspects of the Cauchy problem in general relativity.* Comm. Math. Phys. 14 (1969) 329–335.
+1. Y. Choquet-Bruhat, R. Geroch. *Global aspects of the Cauchy problem in general relativity.* Comm. Math. Phys. 14 (1969) 329–335. doi:10.1007/BF01645389. No arXiv version.
 2. J. Sbierski. *On the existence of a maximal Cauchy development for the Einstein equations — a dezornification.* arXiv:1309.7591 (2013).
-3. A. D. Rendall. *Theorems on existence and global dynamics for the Einstein equations.* Living Rev. Relativ. 8 (2005) 6.
-4. Y. Choquet-Bruhat. *Théorème d'existence pour certains systèmes d'équations aux dérivées partielles non linéaires.* Acta Math. 88 (1952) 141–225.
+3. A. D. Rendall. *Theorems on existence and global dynamics for the Einstein equations.* Living Rev. Relativ. 8 (2005) 6. arXiv:gr-qc/0505133.
+4. Y. Choquet-Bruhat. *Théorème d'existence pour certains systèmes d'équations aux dérivées partielles non linéaires.* Acta Math. 88 (1952) 141–225. doi:10.1007/BF02392131. No arXiv version.
 5. R. M. Wald. *General Relativity.* University of Chicago Press, 1984.
 6. A. Vergara Gil. *A Machine-Checked Solution Theory of General Relativity and Its Alternatives.* `docs/Gravitation-Formalisation.md`, 2026.
 7. The Mathlib Community. *The Lean Mathematical Library.* CPP 2020. `leanprover-community/mathlib4`, `v4.36.0`.
 8. `leanprover-community/physlib`. https://github.com/leanprover-community/physlib
-9. P. T. Chruściel. *Cauchy problems for the Einstein equations: an introduction.* Lecture notes, 2018.
+9. P. T. Chruściel. *Cauchy problems for the Einstein equations: an introduction.* Lecture notes, 2018. https://homepage.univie.ac.at/piotr.chrusciel/teaching/Cauchy/Roscoff.pdf
+10. Y. Choquet-Bruhat. *General Relativity and the Einstein Equations.* Oxford Mathematical Monographs, Oxford University Press, 2009.
+11. Y. Choquet-Bruhat. *Beginnings of the Cauchy problem.* arXiv:1410.3490 (2014).

@@ -218,8 +218,11 @@ while flat space with $K=\mathrm{diag}(1,1,0)$ has $H=2$: the constraints
 are not automatic.
 
 The general existence theory for these data is the subject of the companion
-paper. Here the constraints are used as the initial-value layer that the exact
-solutions must satisfy. The manifold wrapper also carries isometric chart
+paper. The founding local-existence and maximal-development papers are
+Choquet-Bruhat [16] and Choquet-Bruhat–Geroch [10]; [17] is Choquet-Bruhat's
+arXiv historical account, and [18] is her later book treatment. Here the
+constraints are used as the initial-value layer that the exact solutions must
+satisfy. The manifold wrapper also carries isometric chart
 transitions: on an overlap, the induced spatial metric and the ADM data are
 proved compatible, while arbitrary multi-chart atlas gluing remains outside.
 A regular exterior Schwarzschild chart gives a concrete manifold-level
@@ -733,6 +736,9 @@ All 1194 declarations are `proved` against `{propext, Classical.choice, Quot.sou
 13. J. D. Bekenstein. *Relativistic gravitation theory for the modified Newtonian dynamics paradigm.* Phys. Rev. D 70 (2004) 083509.
 14. M. Ostrogradsky. *Mémoires sur les équations différentielles, relatives au problème des isopérimètres.* Mem. Acad. St. Petersbourg 6 (1850) 385.
 15. A. Vergara Gil. *The Cauchy Problem for the Einstein Equations in Lean 4: Formalised Constraints, a Wave Model, and a Roadmap.* Companion manuscript, `docs/Cauchy-Problem.md`, 2026.
+16. Y. Choquet-Bruhat. *Théorème d'existence pour certains systèmes d'équations aux dérivées partielles non linéaires.* Acta Math. 88 (1952) 141–225. doi:10.1007/BF02392131. No arXiv version.
+17. Y. Choquet-Bruhat. *Beginnings of the Cauchy problem.* arXiv:1410.3490 (2014).
+18. Y. Choquet-Bruhat. *General Relativity and the Einstein Equations.* Oxford Mathematical Monographs, Oxford University Press, 2009.
 
 ## Appendix B. Source format
 
