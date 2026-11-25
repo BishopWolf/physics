@@ -70,6 +70,17 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ExplicitDevelopmentCertificate.flrw_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
 | `GeneralRelativity.Space3` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.bianchi_constraint_propagation_split` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsLinearizedGaugeReducedSol` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearizedGaugeReducedProblem` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearizedBoxGaugeProblem` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearizedBox_gaugeRecovery` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_flrw_constraint_invariant` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.flrw_constraint_propagates` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.flrw_full_einstein_of_reduced` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.flrwConstraintReducedProblem` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.flrwGaugeRecoveryProblem` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.flrw_gaugeRecovery` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.spacetimeSlice` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.spacetimeSlice_injective` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.contDiff_spacetimeSlice` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
