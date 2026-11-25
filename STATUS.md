@@ -125,7 +125,8 @@ branch lands.
   Kerr in Boyer–Lindquist coordinates, proved Ricci flat together with its
   horizons, ergosphere and ZAMO frame dragging; the ingoing Eddington–Finkelstein
   chart, where the coordinate Ricci tensor is proved flat directly from the EF
-  metric, including at the horizon; a Kruskal–Szekeres chart with a certified
+  metric, including at the horizon, and whose metric is packaged as a partial
+  chart on its restricted domain; a Kruskal–Szekeres chart with a certified
   nondegenerate metric across the horizon; and FLRW, where the metric-level
   Einstein equations are proved equivalent to the Friedmann equations and
   bridged to `Physlib.Cosmology.FLRW`.

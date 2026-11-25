@@ -187,6 +187,7 @@ Weyl tensor removes.
 | `GeneralRelativity.EddingtonFinkelstein.metricTensor` | ingoing Eddington–Finkelstein `MetricTensor 4` for `r ≠ 0`, `sin θ ≠ 0`, with no horizon hypothesis |
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor`, `horizonTensor_g_rr`, `horizonTensor_ginv_rr`, `horizonTensor_g_vr` | at `r = 2M`, `g_rr = 0`, `g^rr = 0` and `g_vr = 1`, so the horizon metric is nondegenerate |
 | `GeneralRelativity.EddingtonFinkelstein.ricciTensorOf_metric`, `ricciTensorOf_metric_horizon` | coordinate Ricci tensor computed directly from the EF metric vanishes for `r ≠ 0`, `sin θ ≠ 0`, including at `r = 2M` |
+| `GeneralRelativity.PartialChartSpacetime`, `GeneralRelativity.EddingtonFinkelstein.partialChart` | partial-chart packaging of the EF metric on the restricted domain `r ≠ 0`, `sin θ ≠ 0` |
 | `GeneralRelativity.KruskalSzekeres.metric`, `metricInv`, `metricTensor`, `horizonTensor`, `horizonTensor_g_00`, `horizonTensor_g_11`, `horizonTensor_ginv_00`, `horizonTensor_ginv_11` | Kruskal–Szekeres metric and inverse, with a finite nonzero conformal factor across the horizon |
 | `GeneralRelativity.ChartSpacetime` | chart-level spacetime interface with a metric field |
 | `GeneralRelativity.ChartSpacetime.christoffel`, `riemann`, `einstein` | chart connection and curvature from the coordinate metric |
