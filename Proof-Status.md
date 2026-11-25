@@ -70,6 +70,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ExplicitDevelopmentCertificate.flrw_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
 | `GeneralRelativity.Space3` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.explicitSolutionObligations` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.schwarzschild_explicit_development` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.sds_explicit_development` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.kerr_explicit_development` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.flrw_explicit_development` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.explicitSolutions_certificate` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.bianchi_constraint_propagation_split` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsLinearizedGaugeReducedSol` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.linearizedGaugeReducedProblem` | `Gravitation/GaugeRecovery.lean` | propext, Classical.choice, Quot.sound | proved |
