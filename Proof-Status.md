@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1122 declarations, 693 of them theorem-like. The table below is the
+1130 declarations, 698 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -147,6 +147,14 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.metricField_inv` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.metricField_christoffel_symm` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.differentiableAt_christoffel_of_contDiffAt_two` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedSpatialMetric` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedSpatialMetricInv` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedSpatialRiemann` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedChristoffel_011` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedChristoffel_001` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedChristoffel_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.warpedRiemann_0101` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.spatialRiemannTensorOf_warped_nonconstant` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.ofChartData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.Regular` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.ham_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |

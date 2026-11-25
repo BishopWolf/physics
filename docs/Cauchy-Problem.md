@@ -40,7 +40,7 @@ solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy, uniqueness, chart-manifold, general Bianchi, Sobolev/initial-data,
 reduced Cauchy, gauge-recovery, maximal-development, and explicit-development
-modules, together with the 3D divergence foundation, contribute 330 of the 1122
+modules, together with the 3D divergence foundation, contribute 338 of the 1130
 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
@@ -119,7 +119,11 @@ The derived-data bridge is exercised end to end on Minkowski:
 flat/constant checks. For a bundled `MetricTensor`, the constant case needs no
 hand inverse hypothesis: `spatialRiemannTensorOfConstMetric` discharges symmetry
 and the inverse relation, and `spatialRiemannTensorOfConstMetric_eq_flat`
-identifies the result with `RiemannTensor.flat 3`. At the field level,
+identifies the result with `RiemannTensor.flat 3`. A nonconstant validation is
+`spatialRiemannTensorOf_warped_nonconstant`: for
+`warpedSpatialMetric = dx₀² + (1+x₀²)(dx₁²+dx₂²)`, the derived `R_{0101}` is
+`-1`, so the pipeline produces nonzero curvature from nonconstant data, not
+only the flat constant case. At the field level,
 `ChartInitialData.ofFields` takes a pointwise `MetricTensor`, metric/inverse
 fields and `K`, computes `R3` and `dK`, and leaves the metric regularity,
 Christoffel and vacuum-constraint hypotheses explicit. The Minkowski
@@ -241,6 +245,7 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `ChartInitialData`, `minkowskiChartInitialData` | chart ADM data with flat vacuum instance |
 | `spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `minkowskiChartInitialDataDerived` | derived `R3`/`dK` and end-to-end Minkowski reconstruction |
 | `spatialRiemannTensorOfConstMetric`, `spatialRiemannTensorOfConstMetric_eq_flat` | constant bundled metric derives flat `R3` without hand inverse hypotheses |
+| `warpedSpatialMetric`, `warpedSpatialRiemann`, `spatialRiemannTensorOf_warped_nonconstant` | nonconstant warped metric derives `R0101 = -1` |
 | `ChartInitialData.ofFields` | field-level constructor computing `R3`/`dK` from metric and extrinsic-curvature fields |
 | `ChartInitialData.ofChartData`, `differentiableAt_christoffel_of_contDiffAt_two` | arbitrary metric-field data with inverse relation and Christoffel symmetry/differentiability derived |
 | `ManifoldSpacetime`, `ManifoldInitialData`, `minkowskiManifoldInitialData` | global-chart manifold packaging of the derived chart data |
@@ -448,7 +453,7 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 1122 declarations. It contains the
+The development audited in Paper I now has 1130 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
@@ -458,7 +463,7 @@ curved initial-data module, the M3 reduced Cauchy module, the M4
 gauge-recovery module, the M5 maximal-development module, and the M6
 explicit-developments module discussed above, together with the
 solution theory, the alternative theories, the axiom audit and the numerical
-pass. This paper's Lean contribution is 330 declarations across twenty
+pass. This paper's Lean contribution is 338 declarations across twenty
 modules: `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
 `Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
 `Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation`,
@@ -492,8 +497,8 @@ This paper adds prose and twenty Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.CauchyInterfaces`,
 `Gravitation.ReducedWave3D`, `Gravitation.ReducedCauchy`,
 `Gravitation.GaugeRecovery`, `Gravitation.MaximalDevelopment` and
-`Gravitation.ExplicitDevelopments` (330 declarations). The audited development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1122 declarations with axioms inside
+`Gravitation.ExplicitDevelopments` (338 declarations). The audited development is the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1130 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are

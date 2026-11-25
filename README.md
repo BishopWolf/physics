@@ -113,8 +113,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1122
-declarations, 693 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1130
+declarations, 698 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -213,6 +213,7 @@ Weyl tensor removes.
 | `GeneralRelativity.ChartInitialData.constraintResidual_eq_zero` | chart vacuum data have zero constraint residual |
 | `GeneralRelativity.spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `ChartInitialData.ofDerivedData`, `minkowskiChartInitialDataDerived` | derived 3D Riemann tensor and momentum derivative, with flat/constant and Minkowski checks |
 | `GeneralRelativity.spatialRiemannTensorOfConstMetric`, `spatialRiemannTensorOfConstMetric_eq_flat` | constant bundled metric derives flat `R3` without hand inverse hypotheses |
+| `GeneralRelativity.warpedSpatialMetric`, `warpedSpatialRiemann`, `spatialRiemannTensorOf_warped_nonconstant` | nonconstant warped metric validates derived curvature with `R0101 = -1` |
 | `GeneralRelativity.ChartInitialData.ofFields` | field-level chart data with `R3` and `dK` computed from metric/inverse and `K` |
 | `GeneralRelativity.ChartInitialData.ofChartData`, `differentiableAt_christoffel_of_contDiffAt_two` | arbitrary metric-field chart data with inverse relation and Christoffel symmetry derived |
 | `GeneralRelativity.ManifoldSpacetime`, `ManifoldInitialData`, `minkowskiManifoldInitialData` | global-chart manifold packaging of the derived chart data |
@@ -358,7 +359,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1122 at this revision, 693 theorem-like) and rejects any axiom outside
+declaration (1130 at this revision, 698 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

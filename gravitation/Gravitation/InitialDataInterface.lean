@@ -26,6 +26,10 @@ constraint solving remain outside this interface.
 - `spatialRiemannTensorOfConstMetric` :
   the constant bundled-metric specialization, with symmetry and inverse
   hypotheses discharged by `MetricTensor`.
+- `warpedSpatialMetric`, `warpedSpatialMetricInv`, `warpedSpatialRiemann` :
+  a nonconstant warped metric, its inverse, and its derived Riemann tensor.
+- `warpedRiemann_0101`, `spatialRiemannTensorOf_warped_nonconstant` :
+  the derived `R_{0101}` is `-1`, complementing the flat constant-metric check.
 - `extrinsicDerivativeOf` : the momentum-constraint table `dK_μij = ∂_μ K_ij`
   derived from an extrinsic-curvature field.
 - `ChartInitialData`, `ChartInitialData.ofDerivedData` : bundled chart initial
@@ -380,6 +384,154 @@ lemma differentiableAt_christoffel_of_contDiffAt_two {n : ℕ}
     exact (hginvD k l).mul (((hpdD i j l).add (hpdD j i l)).sub (hpdD l i j))
   unfold Pipeline.christoffel
   exact DifferentiableAt.const_mul (DifferentiableAt.fun_sum fun l _ => hterm l) _
+
+/-- Warped spatial metric `dx₀² + (1 + x₀²)(dx₁² + dx₂²)`. -/
+noncomputable def warpedSpatialMetric (x : Fin 3 → ℝ) : Tensor2 3 :=
+  fun i j => if i = j then (if i = 0 then 1 else 1 + (x 0) ^ 2) else 0
+
+/-- Inverse of `warpedSpatialMetric`. -/
+noncomputable def warpedSpatialMetricInv (x : Fin 3 → ℝ) : Tensor2 3 :=
+  fun i j => if i = j then (if i = 0 then 1 else (1 + (x 0) ^ 2)⁻¹) else 0
+
+/-- The derived Riemann tensor of the nonconstant warped metric. -/
+noncomputable def warpedSpatialRiemann : RiemannTensor 3 := by
+  have hsymmAll : ∀ (y : Fin 3 → ℝ) i j,
+      warpedSpatialMetric y i j = warpedSpatialMetric y j i := by
+    intro y i j
+    by_cases hij : i = j
+    · subst hij; rfl
+    · have hji : j ≠ i := Ne.symm hij
+      simp [warpedSpatialMetric, hij, hji]
+  have hC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => warpedSpatialMetric y i j) 0 := by
+    intro i j
+    by_cases hij : i = j
+    · subst hij
+      by_cases hi : i = 0
+      · have hfun : (fun y : Fin 3 → ℝ => warpedSpatialMetric y i i) =
+            fun _ : Fin 3 → ℝ => (1 : ℝ) := by
+          funext y
+          simp [warpedSpatialMetric, hi]
+        rw [hfun]
+        exact contDiffAt_const
+      · have hfun : (fun y : Fin 3 → ℝ => warpedSpatialMetric y i i) =
+            fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2 := by
+          funext y
+          simp [warpedSpatialMetric, hi]
+        rw [hfun]
+        fun_prop
+    · have hfun : (fun y : Fin 3 → ℝ => warpedSpatialMetric y i j) =
+          fun _ : Fin 3 → ℝ => (0 : ℝ) := by
+        funext y
+        simp [warpedSpatialMetric, hij]
+      rw [hfun]
+      exact contDiffAt_const
+  have hinvD : ∀ i j, DifferentiableAt ℝ (fun y => warpedSpatialMetricInv y i j) 0 := by
+    intro i j
+    by_cases hij : i = j
+    · subst hij
+      by_cases hi : i = 0
+      · have hfun : (fun y : Fin 3 → ℝ => warpedSpatialMetricInv y i i) =
+            fun _ : Fin 3 → ℝ => (1 : ℝ) := by
+          funext y
+          simp [warpedSpatialMetricInv, hi]
+        rw [hfun]
+        exact differentiableAt_const 1
+      · have hfun : (fun y : Fin 3 → ℝ => warpedSpatialMetricInv y i i) =
+            fun y : Fin 3 → ℝ => (1 + (y 0) ^ 2)⁻¹ := by
+          funext y
+          simp [warpedSpatialMetricInv, hi]
+        rw [hfun]
+        fun_prop (disch := positivity)
+    · have hfun : (fun y : Fin 3 → ℝ => warpedSpatialMetricInv y i j) =
+          fun _ : Fin 3 → ℝ => (0 : ℝ) := by
+        funext y
+        simp [warpedSpatialMetricInv, hij]
+      rw [hfun]
+      exact differentiableAt_const 0
+  refine spatialRiemannTensorOf warpedSpatialMetric warpedSpatialMetricInv 0
+    (Filter.Eventually.of_forall hsymmAll) ?_ hC2 ?_ ?_
+  · filter_upwards with y m j
+    have hf : 1 + (y 0) ^ 2 ≠ 0 := by nlinarith [sq_nonneg (y 0)]
+    fin_cases m <;> fin_cases j <;>
+      simp [warpedSpatialMetric, warpedSpatialMetricInv, hf]
+  · intro k i j
+    exact differentiableAt_christoffel_of_contDiffAt_two hC2 hinvD k i j
+  · filter_upwards with y k i j
+    exact Bianchi.christoffel_symm warpedSpatialMetric warpedSpatialMetricInv
+      (Filter.Eventually.of_forall hsymmAll) k i j
+
+lemma warpedChristoffel_011 (x : Fin 3 → ℝ) :
+    Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv x 0 1 1 = -x 0 := by
+  have hderiv : Pipeline.coordDeriv 0 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) x = 2 * x 0 := by
+    apply Pipeline.coordDeriv_of_hasDerivAt
+    have h : (fun s : ℝ => 1 + (Function.update x 0 s 0) ^ 2) =
+        fun s : ℝ => 1 + s ^ 2 := by
+      funext s
+      simp
+    rw [h]
+    convert (hasDerivAt_const (x 0) (1 : ℝ)).add (hasDerivAt_pow 2 (x 0)) using 1
+    ring
+  simp only [Pipeline.christoffel, warpedSpatialMetric, warpedSpatialMetricInv]
+  simp [hderiv, Pipeline.coordDeriv_const]
+
+lemma warpedChristoffel_001 (x : Fin 3 → ℝ) :
+    Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv x 0 0 1 = 0 := by
+  simp only [Pipeline.christoffel, warpedSpatialMetric, warpedSpatialMetricInv]
+  simp [Pipeline.coordDeriv_const]
+
+lemma warpedChristoffel_zero (x : Fin 3 → ℝ) (hx : x = 0) :
+    ∀ k i j, Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv x k i j = 0 := by
+  subst hx
+  have hderiv : Pipeline.coordDeriv 0 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
+    apply Pipeline.coordDeriv_of_hasDerivAt
+    have h : (fun s : ℝ => 1 + (Function.update (0 : Fin 3 → ℝ) 0 s 0) ^ 2) =
+        fun s : ℝ => 1 + s ^ 2 := by
+      funext s
+      simp
+    rw [h]
+    convert (hasDerivAt_const (0 : ℝ) (1 : ℝ)).add (hasDerivAt_pow 2 (0 : ℝ)) using 1
+    ring
+  have hderiv1 : Pipeline.coordDeriv 1 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
+    apply Pipeline.coordDeriv_const_slice 1 (c := 1 + ((0 : Fin 3 → ℝ) 0) ^ 2)
+    intro s
+    simp
+  have hderiv2 : Pipeline.coordDeriv 2 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
+    apply Pipeline.coordDeriv_const_slice 2 (c := 1 + ((0 : Fin 3 → ℝ) 0) ^ 2)
+    intro s
+    simp
+  intro k i j
+  fin_cases k <;> fin_cases i <;> fin_cases j <;>
+    simp [Pipeline.christoffel, warpedSpatialMetric, warpedSpatialMetricInv,
+      hderiv, hderiv1, hderiv2, Pipeline.coordDeriv_const]
+
+lemma warpedRiemann_0101 :
+    Pipeline.riemann warpedSpatialMetric warpedSpatialMetricInv 0 0 1 0 1 = -1 := by
+  have h1 : Pipeline.coordDeriv 0
+      (fun y => Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv y 0 1 1) 0 = -1 := by
+    rw [Pipeline.coordDeriv_congr 0 0 (fun y => warpedChristoffel_011 y)]
+    simp [Pipeline.coordDeriv]
+  have h2 : Pipeline.coordDeriv 1
+      (fun y => Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv y 0 0 1) 0 = 0 := by
+    rw [Pipeline.coordDeriv_congr 1 0 (fun y => warpedChristoffel_001 y)]
+    exact Pipeline.coordDeriv_const 1 0 0
+  have h3 : (∑ l : Fin 3,
+      (Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 0 0 l *
+        Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 l 1 1 -
+      Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 0 1 l *
+        Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 l 0 1)) = 0 := by
+    have hz := warpedChristoffel_zero 0 rfl
+    simp [hz]
+  simp only [Pipeline.riemann, h1, h2, h3]
+  ring
+
+/-- The nonconstant warped metric gives nonzero derived curvature: `R_{0101} = -1`. -/
+theorem spatialRiemannTensorOf_warped_nonconstant :
+    warpedSpatialRiemann.comp 0 1 0 1 = -1 := by
+  rw [warpedSpatialRiemann]
+  change (∑ e, warpedSpatialMetric 0 0 e *
+    Pipeline.riemann warpedSpatialMetric warpedSpatialMetricInv 0 e 1 0 1) = -1
+  rw [Fin.sum_univ_three]
+  norm_num [warpedSpatialMetric, warpedRiemann_0101]
 
 /-- Chart initial data from an arbitrary field of bundled 3-metrics.  The
 inverse relation and Christoffel symmetry are derived from `MetricTensor` and
