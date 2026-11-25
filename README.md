@@ -114,8 +114,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1143
-declarations, 706 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1157
+declarations, 714 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -220,6 +220,8 @@ Weyl tensor removes.
 | `GeneralRelativity.ChartInitialData.ofFields` | field-level chart data with `R3` and `dK` computed from metric/inverse and `K` |
 | `GeneralRelativity.ChartInitialData.ofChartData`, `differentiableAt_christoffel_of_contDiffAt_two` | arbitrary metric-field chart data with inverse relation and Christoffel symmetry derived |
 | `GeneralRelativity.ManifoldSpacetime`, `ManifoldInitialData`, `minkowskiManifoldInitialData` | global-chart manifold packaging of the derived chart data |
+| `GeneralRelativity.ManifoldTransition`, `ManifoldTransition.spatialMetric_eq`, `spatialMetricField_eq` | isometric chart transition preserving the induced spatial metric |
+| `GeneralRelativity.ManifoldInitialData.IsInduced`, `ManifoldInitialData.IsCompatible` | induced manifold data agree across chart transitions, with reflexivity, symmetry and transitivity |
 | `GeneralRelativity.SmoothChartSpacetime`, `GeneralRelativity.SmoothChartSpacetime.chartedSpace`, `GeneralRelativity.minkowskiSmoothChart` | Mathlib `ChartedSpace` bridge on chart homeomorphisms |
 | `GeneralRelativity.ChartSpacetime.IsCauchySurface`, `GeneralRelativity.ChartSpacetime.IsGloballyHyperbolic`, `GeneralRelativity.minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface and Minkowski global hyperbolicity |
 | `GeneralRelativity.Bianchi.second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero` | general second and contracted Bianchi identities, `∇·G = 0` |
@@ -362,7 +364,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1143 at this revision, 706 theorem-like) and rejects any axiom outside
+declaration (1157 at this revision, 714 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

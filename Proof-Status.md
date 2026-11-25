@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1143 declarations, 706 of them theorem-like. The table below is the
+1157 declarations, 714 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -188,12 +188,26 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.minkowskiChartInitialDataDerived` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ManifoldSpacetime` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ManifoldSpacetime.chartSpacetime` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldTransition` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldTransition.refl` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldTransition.symm` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldTransition.trans` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldTransition.spatialMetric_eq` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldTransition.spatialMetricField_eq` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ManifoldInitialData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldInitialData.IsInduced` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldInitialData.IsCompatible` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldInitialData.IsCompatible.metric_eq` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldInitialData.IsCompatible.refl` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldInitialData.IsCompatible.symm` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldInitialData.IsCompatible.trans` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ManifoldInitialData.ofChartData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ManifoldInitialData.regular` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ManifoldInitialData.constraintResidual_eq_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiManifold` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiManifoldInitialData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiManifoldInitialData_isInduced` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.minkowskiManifoldInitialData_isCompatible` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.kretschmann_scalar_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.kretschmann_sds_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Linearized.WaveGaugePerturbation` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |

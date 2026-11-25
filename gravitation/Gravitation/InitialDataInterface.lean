@@ -41,6 +41,14 @@ constraint solving remain outside this interface.
   `MetricTensor` fields and `Bianchi.christoffel_symm`.
 - `ManifoldSpacetime`, `ManifoldInitialData` : global-chart manifold
   packaging of the derived chart curvature and momentum data.
+- `ManifoldTransition` : an isometric transition between two global charts,
+  preserving the metric and inverse metric.
+- `ManifoldTransition.spatialMetric_eq`, `spatialMetricField_eq` : the
+  transition preserves the induced spatial metric, pointwise and on the slice.
+- `ManifoldInitialData.IsInduced` : the ADM metric agrees with the spatial
+  metric induced by the chart metric.
+- `ManifoldInitialData.IsCompatible` : induced initial data agree under a
+  chart transition; it is reflexive, symmetric and transitive.
 - `minkowskiManifoldInitialData` : the Minkowski manifold-level instance.
 - `minkowskiChartInitialDataDerived` : the Minkowski chart data reconstructed
   through the derived curvature and momentum constructors.
@@ -698,8 +706,11 @@ noncomputable def minkowskiChartInitialDataDerived : ChartInitialData minkowskiC
 
 This is a global-chart manifold interface: `ManifoldSpacetime` carries a
 `SmoothChartSpacetime` and a smoothness certificate, and `ManifoldInitialData`
-exposes the chart-derived curvature and momentum data at that level.  It does
-not claim arbitrary multi-chart gluing or a geometric 4D Lorentzian manifold.
+exposes the chart-derived curvature and momentum data at that level.  The
+`ManifoldTransition` layer records isometric overlaps between two such global
+charts and checks that the induced spatial metric and initial data agree there.
+It does not claim arbitrary multi-chart gluing or a geometric 4D Lorentzian
+manifold.
 -/
 
 /-- A manifold-level spacetime interface at global-chart scope. -/
@@ -717,6 +728,59 @@ def chartSpacetime (X : ManifoldSpacetime) : ChartSpacetime :=
 
 end ManifoldSpacetime
 
+/-- An isometric transition between the global charts of two manifold
+spacetimes.  It preserves the chart coordinate, the metric and the inverse
+metric; it is the chart-overlap compatibility certificate for the wrapper. -/
+abbrev ManifoldTransition (X Y : ManifoldSpacetime) :=
+  ChartSpacetime.Isometry X.chartSpacetime Y.chartSpacetime
+
+namespace ManifoldTransition
+
+/-- The identity transition. -/
+def refl (X : ManifoldSpacetime) : ManifoldTransition X X :=
+  ChartSpacetime.Isometry.refl X.chartSpacetime
+
+/-- The inverse of a chart transition. -/
+def symm {X Y : ManifoldSpacetime} (e : ManifoldTransition X Y) :
+    ManifoldTransition Y X :=
+  ChartSpacetime.Isometry.symm e
+
+/-- Composition of chart transitions. -/
+def trans {X Y Z : ManifoldSpacetime} (e : ManifoldTransition X Y)
+    (f : ManifoldTransition Y Z) : ManifoldTransition X Z :=
+  ChartSpacetime.Isometry.trans e f
+
+/-- A chart transition preserves the spatial metric induced at the coordinate
+origin. -/
+lemma spatialMetric_eq {X Y : ManifoldSpacetime} (e : ManifoldTransition X Y) :
+    Y.chartSpacetime.spatialMetric = X.chartSpacetime.spatialMetric := by
+  let p : X.chartSpacetime.carrier := X.chartSpacetime.chart.symm 0
+  have hp : e.toEquiv p = Y.chartSpacetime.chart.symm 0 := by
+    apply Y.chartSpacetime.chart.injective
+    simp [p, e.chart_comm]
+  ext i j
+  simp only [ChartSpacetime.spatialMetric, ChartSpacetime.coordinateMetric]
+  rw [← hp]
+  exact congrFun (congrFun (e.metric_pullback p) (Fin.succ i)) (Fin.succ j)
+
+/-- A chart transition preserves the induced spatial metric at every point of
+the `t = 0` slice. -/
+lemma spatialMetricField_eq {X Y : ManifoldSpacetime} (e : ManifoldTransition X Y)
+    (y : Fin 3 → ℝ) :
+    Y.chartSpacetime.spatialMetricField y =
+      X.chartSpacetime.spatialMetricField y := by
+  let p : X.chartSpacetime.carrier :=
+    X.chartSpacetime.chart.symm (spacetimeSlice y)
+  have hp : e.toEquiv p = Y.chartSpacetime.chart.symm (spacetimeSlice y) := by
+    apply Y.chartSpacetime.chart.injective
+    simp [p, e.chart_comm]
+  ext i j
+  simp only [ChartSpacetime.spatialMetricField, ChartSpacetime.coordinateMetric]
+  rw [← hp]
+  exact congrFun (congrFun (e.metric_pullback p) (Fin.succ i)) (Fin.succ j)
+
+end ManifoldTransition
+
 /-- Manifold-level initial data: chart initial data packaged against a
 `ManifoldSpacetime`. -/
 structure ManifoldInitialData (X : ManifoldSpacetime) where
@@ -724,6 +788,71 @@ structure ManifoldInitialData (X : ManifoldSpacetime) where
   data : ChartInitialData X.chartSpacetime
 
 namespace ManifoldInitialData
+
+/-- The ADM metric is the spatial metric induced by the chart metric.  This is
+the geometric condition needed for a transition to compare data across charts. -/
+def IsInduced {X : ManifoldSpacetime} (D : ManifoldInitialData X) : Prop :=
+  D.data.data.h.g = X.chartSpacetime.spatialMetric
+
+/-- Induced manifold initial data agree under a chart transition when their
+derived spatial curvature, extrinsic curvature and momentum derivative agree.
+The metric agreement is derived from the transition and `IsInduced`. -/
+structure IsCompatible {X Y : ManifoldSpacetime} (e : ManifoldTransition X Y)
+    (D : ManifoldInitialData X) (E : ManifoldInitialData Y) : Prop where
+  /-- The first data set is induced by its chart metric. -/
+  left_induced : D.IsInduced
+  /-- The second data set is induced by its chart metric. -/
+  right_induced : E.IsInduced
+  /-- The derived spatial Riemann tensors agree. -/
+  curvature_eq : D.data.data.R3 = E.data.data.R3
+  /-- The extrinsic curvatures agree. -/
+  extrinsic_eq : D.data.data.K = E.data.data.K
+  /-- The momentum-constraint derivatives agree. -/
+  derivative_eq : D.data.dK = E.data.dK
+
+/-- Compatible data have the same induced ADM metric components. -/
+lemma IsCompatible.metric_eq {X Y : ManifoldSpacetime} {e : ManifoldTransition X Y}
+    {D : ManifoldInitialData X} {E : ManifoldInitialData Y}
+    (h : IsCompatible e D E) :
+    D.data.data.h.g = E.data.data.h.g := by
+  calc
+    D.data.data.h.g = X.chartSpacetime.spatialMetric := h.left_induced
+    _ = Y.chartSpacetime.spatialMetric := (e.spatialMetric_eq).symm
+    _ = E.data.data.h.g := h.right_induced.symm
+
+/-- Transition compatibility is reflexive on induced data. -/
+theorem IsCompatible.refl {X : ManifoldSpacetime} (D : ManifoldInitialData X)
+    (hD : D.IsInduced) :
+    IsCompatible (ManifoldTransition.refl X) D D where
+  left_induced := hD
+  right_induced := hD
+  curvature_eq := rfl
+  extrinsic_eq := rfl
+  derivative_eq := rfl
+
+/-- Transition compatibility is symmetric. -/
+theorem IsCompatible.symm {X Y : ManifoldSpacetime} {e : ManifoldTransition X Y}
+    {D : ManifoldInitialData X} {E : ManifoldInitialData Y}
+    (h : IsCompatible e D E) :
+    IsCompatible (ManifoldTransition.symm e) E D where
+  left_induced := h.right_induced
+  right_induced := h.left_induced
+  curvature_eq := h.curvature_eq.symm
+  extrinsic_eq := h.extrinsic_eq.symm
+  derivative_eq := h.derivative_eq.symm
+
+/-- Transition compatibility is transitive. -/
+theorem IsCompatible.trans {X Y Z : ManifoldSpacetime}
+    {e : ManifoldTransition X Y} {f : ManifoldTransition Y Z}
+    {D : ManifoldInitialData X} {E : ManifoldInitialData Y}
+    {F : ManifoldInitialData Z}
+    (hDE : IsCompatible e D E) (hEF : IsCompatible f E F) :
+    IsCompatible (ManifoldTransition.trans e f) D F where
+  left_induced := hDE.left_induced
+  right_induced := hEF.right_induced
+  curvature_eq := hDE.curvature_eq.trans hEF.curvature_eq
+  extrinsic_eq := hDE.extrinsic_eq.trans hEF.extrinsic_eq
+  derivative_eq := hDE.derivative_eq.trans hEF.derivative_eq
 
 /-- Construct manifold-level data whose `R3` and `dK` are derived from an
 arbitrary field of bundled spatial metrics. -/
@@ -764,5 +893,21 @@ def minkowskiManifold : ManifoldSpacetime where
 /-- The Minkowski manifold-level initial data, using the derived chart data. -/
 noncomputable def minkowskiManifoldInitialData : ManifoldInitialData minkowskiManifold :=
   ⟨minkowskiChartInitialDataDerived⟩
+
+/-- The Minkowski manifold data are induced by the Minkowski chart metric. -/
+lemma minkowskiManifoldInitialData_isInduced :
+    ManifoldInitialData.IsInduced minkowskiManifoldInitialData := by
+  rw [ManifoldInitialData.IsInduced]
+  change euclid3.g = minkowskiChart.spatialMetric
+  exact minkowskiChart_spatialMetric.symm
+
+/-- The Minkowski manifold data are compatible with themselves under the
+identity chart transition. -/
+lemma minkowskiManifoldInitialData_isCompatible :
+    ManifoldInitialData.IsCompatible
+      (ManifoldTransition.refl minkowskiManifold)
+      minkowskiManifoldInitialData minkowskiManifoldInitialData :=
+  ManifoldInitialData.IsCompatible.refl minkowskiManifoldInitialData
+    minkowskiManifoldInitialData_isInduced
 
 end GeneralRelativity

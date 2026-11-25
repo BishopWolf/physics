@@ -125,6 +125,9 @@ general relativity.
   `minkowskiManifoldInitialData` :
   global-chart manifold packaging of the derived chart curvature and momentum
   data.
+- `GeneralRelativity.ManifoldTransition`, `ManifoldInitialData.IsCompatible` :
+  isometric chart transitions preserve the induced spatial metric, and induced
+  manifold initial data are compatible across them.
 - `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` :
   chart-level isometry and embedding API, with identity, inverse and composition.
 - `GeneralRelativity.Geodesics.geodesic_ivp_exists` : local existence for the
