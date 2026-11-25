@@ -127,8 +127,11 @@ general relativity.
   global-chart manifold packaging of the derived chart curvature and momentum
   data.
 - `GeneralRelativity.ManifoldTransition`, `ManifoldInitialData.IsCompatible` :
-  isometric chart transitions preserve the induced spatial metric, and induced
-  manifold initial data are compatible across them.
+  isometric chart transitions preserve the coordinate metric, inverse metric and
+  induced spatial metric, and induced manifold initial data are compatible
+  across them.
+- `GeneralRelativity.ManifoldInitialData.ham_zero`, `mom_zero`, `isVacuumData` :
+  direct wrapper accessors for the vacuum-constraint facts.
 - `GeneralRelativity.Schwarzschild.manifoldInitialData` :
   the exterior Schwarzschild manifold-level time-symmetric initial-data
   instance.

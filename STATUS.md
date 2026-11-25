@@ -87,7 +87,7 @@ Metrics,Tensors}/` and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lea
 `GeneralRelativity` unchanged) at branch commit `b81c896a`, while the `physlib`
 requirement points at merged master `7910f51f`
 — the merge base the branch was written against, which also supplies the
-already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1188 audited declarations are those sources plus the local
+already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1194 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -110,11 +110,13 @@ branch lands.
   (`dAlembert_wave_equation`), the wave energy conservation theorem
   (`waveEnergy_eq_initial`), zero-data uniqueness (`wave_zero_of_zero_data`, `wave_zero_of_zero_data_Icc`), closed-interval general-data uniqueness (`wave_unique_of_same_data`), the 3D box divergence theorem (`integral_divergence_box_eq_zero`), the 3D energy derivative (`hasDerivAt_waveEnergy3D`), conditional 3D energy conservation (`waveEnergy3D_eq_initial_of_divergence`), 3D wave energy conservation (`waveEnergy3D_eq_initial_of_wave`), 3D zero-energy data (`eq_zero_of_waveEnergy3D_eq_zero`), 3D wave uniqueness on the closed box (`wave_zero_of_zero_data3D`, `wave_unique3D_of_same_data`) and the linearized wave-gauge interface (`WaveGaugePerturbation`, `linEinstein_eq_zero_of_waveGauge`, with the TT-wave instantiation `ttWave_waveGauge`) and the M1 global-chart interface (`SmoothChartSpacetime`, general `ChartSpacetime.isLeviCivita`, `ChartSpacetime.IsCauchySurface`, `minkowskiChart_globallyHyperbolic`, the coordinate first Bianchi identity and pair symmetry (`Bianchi.riemann_lower_bianchi`, `Bianchi.riemann_lower_pair_symm`), the derived chart curvature and momentum data (`spatialRiemannTensorOf`, `spatialRiemannTensorOfConstMetric`, `spatialRiemannTensorOf_warped_nonconstant`, `extrinsicDerivativeOf`, `ChartInitialData.ofFields`, `ChartInitialData.ofChartData`, `ManifoldInitialData`, `minkowskiManifoldInitialData`, `minkowskiChartInitialDataDerived`), and the general `Bianchi.second_bianchi` / `contracted_bianchi` / `covDiv_einstein_eq_zero`), the M2 Sobolev and curved-slice initial-data layer (`ChartInitialData`, `sobolev_embedding_1D`, `trace_estimate_1D`, `sobolevH1NormSq3D`, `hamiltonianConstraintOf`, `momentumConstraintOf`, `flrw_initial_constraints`), the M3–M6 certificates and their inhabited scopes (`CauchyInterfaces`, `ReducedCauchy`, `GaugeRecovery`, `MaximalDevelopment`, `ExplicitDevelopments`: linearized 3D box, nonlinear flat FLRW, abstract Zorn/open-domain maximality, and explicit Schwarzschild–de Sitter/Kerr/FLRW recovery), the scoped 3D linear wave model (`ReducedWave3D`), linearized gravity, and Newton's gravitational constant with its natural-unit systems.
 * Multi-chart transition layer — isometric transitions between global-chart
-  spacetimes preserve the induced spatial metric, and induced manifold initial
-  data are proved compatible under them, with reflexivity, symmetry and
-  transitivity. Arbitrary multi-chart atlas gluing remains outside. A regular
-  exterior Schwarzschild chart supplies a concrete manifold-level instance
-  (`Schwarzschild.manifoldInitialData`) with its curved time-symmetric slice.
+  spacetimes preserve the full coordinate metric and inverse metric, the induced
+  spatial metric, and induced manifold initial data, with reflexivity, symmetry
+  and transitivity. The wrapper also exposes direct Hamiltonian, momentum and
+  vacuum-data accessors. Arbitrary multi-chart atlas gluing remains outside. A
+  regular exterior Schwarzschild chart supplies a concrete manifold-level
+  instance (`Schwarzschild.manifoldInitialData`) with its curved time-symmetric
+  slice.
 * Exact solutions — Minkowski; Schwarzschild with its orthonormal frame, all six
   Riemann components and the Kretschmann scalar `48M²/r⁶`; the interior
   incompressible sphere (TOV profile, Buchdahl bound); Schwarzschild–de Sitter
@@ -135,7 +137,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 1188 declarations (735 theorem-like) and rejects anything outside
+  all 1194 declarations (741 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`

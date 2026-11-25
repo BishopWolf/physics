@@ -43,12 +43,16 @@ constraint solving remain outside this interface.
   packaging of the derived chart curvature and momentum data.
 - `ManifoldTransition` : an isometric transition between two global charts,
   preserving the metric and inverse metric.
+- `ManifoldTransition.coordinateMetric_eq`, `coordinateInverseMetric_eq` : the
+  transition preserves all coordinate metric and inverse-metric components.
 - `ManifoldTransition.spatialMetric_eq`, `spatialMetricField_eq` : the
   transition preserves the induced spatial metric, pointwise and on the slice.
 - `ManifoldInitialData.IsInduced` : the ADM metric agrees with the spatial
   metric induced by the chart metric.
 - `ManifoldInitialData.IsCompatible` : induced initial data agree under a
   chart transition; it is reflexive, symmetric and transitive.
+- `ManifoldInitialData.ham_zero`, `mom_zero`, `isVacuumData` : direct wrapper
+  access to the Hamiltonian, momentum and vacuum-constraint facts.
 - `minkowskiManifoldInitialData` : the Minkowski manifold-level instance.
 - `minkowskiChartInitialDataDerived` : the Minkowski chart data reconstructed
   through the derived curvature and momentum constructors.
@@ -726,6 +730,9 @@ namespace ManifoldSpacetime
 def chartSpacetime (X : ManifoldSpacetime) : ChartSpacetime :=
   X.smoothChart.toChartSpacetime
 
+lemma chartSpacetime_def (X : ManifoldSpacetime) :
+    X.chartSpacetime = X.smoothChart.toChartSpacetime := rfl
+
 end ManifoldSpacetime
 
 /-- An isometric transition between the global charts of two manifold
@@ -762,6 +769,31 @@ lemma spatialMetric_eq {X Y : ManifoldSpacetime} (e : ManifoldTransition X Y) :
   simp only [ChartSpacetime.spatialMetric, ChartSpacetime.coordinateMetric]
   rw [← hp]
   exact congrFun (congrFun (e.metric_pullback p) (Fin.succ i)) (Fin.succ j)
+
+/-- A chart transition preserves all covariant coordinate metric components. -/
+lemma coordinateMetric_eq {X Y : ManifoldSpacetime} (e : ManifoldTransition X Y)
+    (x : SpacetimeChart) :
+    Y.chartSpacetime.coordinateMetric x = X.chartSpacetime.coordinateMetric x := by
+  let p : X.chartSpacetime.carrier := X.chartSpacetime.chart.symm x
+  have hp : e.toEquiv p = Y.chartSpacetime.chart.symm x := by
+    apply Y.chartSpacetime.chart.injective
+    simp [p, e.chart_comm]
+  simp only [ChartSpacetime.coordinateMetric]
+  rw [← hp]
+  exact e.metric_pullback p
+
+/-- A chart transition preserves all inverse coordinate metric components. -/
+lemma coordinateInverseMetric_eq {X Y : ManifoldSpacetime}
+    (e : ManifoldTransition X Y) (x : SpacetimeChart) :
+    Y.chartSpacetime.coordinateInverseMetric x =
+      X.chartSpacetime.coordinateInverseMetric x := by
+  let p : X.chartSpacetime.carrier := X.chartSpacetime.chart.symm x
+  have hp : e.toEquiv p = Y.chartSpacetime.chart.symm x := by
+    apply Y.chartSpacetime.chart.injective
+    simp [p, e.chart_comm]
+  simp only [ChartSpacetime.coordinateInverseMetric]
+  rw [← hp]
+  exact e.inverse_pullback p
 
 /-- A chart transition preserves the induced spatial metric at every point of
 the `t = 0` slice. -/
@@ -876,6 +908,21 @@ certificate. -/
 lemma regular {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
     D.data.Regular :=
   ChartInitialData.regular D.data X.metric_smooth
+
+/-- Manifold-level data have vanishing Hamiltonian residual. -/
+lemma ham_zero {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
+    D.data.data.hamiltonianConstraint = 0 :=
+  D.data.ham_zero
+
+/-- Manifold-level data have vanishing momentum residual. -/
+lemma mom_zero {X : ManifoldSpacetime} (D : ManifoldInitialData X) (i : Fin 3) :
+    D.data.data.momentumConstraint D.data.dK i = 0 :=
+  D.data.mom_zero i
+
+/-- Manifold-level data satisfy the vacuum constraints. -/
+lemma isVacuumData {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
+    D.data.data.IsVacuumData D.data.dK :=
+  D.data.isVacuumData
 
 /-- Manifold-level data have zero constraint residual. -/
 lemma constraintResidual_eq_zero {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
