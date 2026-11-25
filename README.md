@@ -40,7 +40,7 @@ gravitation/
 ├── Gravitation/WaveUniqueness3D.lean   3D closed-box zero-data and general-data uniqueness
 ├── Gravitation/LinearizedWaveGauge.lean  linearized Einstein wave-gauge interface
 ├── Gravitation/ManifoldInterface.lean   global-chart spacetime, Levi-Civita and causality
-├── Gravitation/EddingtonFinkelstein.lean  horizon-regular ingoing EF metric and inverse
+├── Gravitation/EddingtonFinkelstein.lean  horizon-regular ingoing EF metric, inverse and direct Ricci flatness
 ├── Gravitation/Bianchi.lean             general second and contracted Bianchi identities
 ├── Gravitation/InitialDataInterface.lean chart ADM initial data and slice regularity
 ├── Gravitation/SobolevInitialData.lean  1D/3D Sobolev estimates and curved initial data
@@ -114,8 +114,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1194
-declarations, 741 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1196
+declarations, 743 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -185,6 +185,7 @@ Weyl tensor removes.
 | `GeneralRelativity.Linearized.ttWave_waveGauge` | the TT plane wave is a concrete wave-gauge perturbation |
 | `GeneralRelativity.EddingtonFinkelstein.metricTensor` | ingoing Eddington–Finkelstein `MetricTensor 4` for `r ≠ 0`, `sin θ ≠ 0`, with no horizon hypothesis |
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor`, `horizonTensor_g_rr`, `horizonTensor_ginv_rr`, `horizonTensor_g_vr` | at `r = 2M`, `g_rr = 0`, `g^rr = 0` and `g_vr = 1`, so the horizon metric is nondegenerate |
+| `GeneralRelativity.EddingtonFinkelstein.ricciTensorOf_metric`, `ricciTensorOf_metric_horizon` | coordinate Ricci tensor computed directly from the EF metric vanishes for `r ≠ 0`, `sin θ ≠ 0`, including at `r = 2M` |
 | `GeneralRelativity.ChartSpacetime` | chart-level spacetime interface with a metric field |
 | `GeneralRelativity.ChartSpacetime.christoffel`, `riemann`, `einstein` | chart connection and curvature from the coordinate metric |
 | `GeneralRelativity.minkowskiChart` | Minkowski spacetime as a chart-level instance |
@@ -366,7 +367,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1194 at this revision, 741 theorem-like) and rejects any axiom outside
+declaration (1196 at this revision, 743 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

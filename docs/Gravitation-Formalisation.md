@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1194 declarations, 741 of them theorem-like. An independent Vulkan
+contains 1196 declarations, 743 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -84,10 +84,11 @@ replacements for general relativity. The main contributions are:
    Schwarzschild for every $\Lambda$. The de Sitter contribution is pure
    trace: it changes the Ricci tensor but not the free gravitational field.
 3. **A horizon-regular chart.** The ingoing Eddington–Finkelstein metric and
-   its inverse are given explicitly, and the metric is certified as a
-   nondegenerate tensor at $r=2M$. This removes the $f\neq0$ restriction of
-   the Schwarzschild-coordinate computation at the metric level, while leaving
-   the curvature transfer and the maximal extension as separate problems.
+   its inverse are given explicitly, the metric is certified as a nondegenerate
+   tensor at $r=2M$, and its coordinate Ricci tensor is proved flat directly
+   from the EF components, including at the horizon. This removes the
+   $f\neq0$ restriction for the metric and Ricci tensor, while leaving the full
+   Riemann transfer and the maximal extension as separate problems.
 4. **Further exact solutions and limits.** Kerr is proved Ricci flat in
    Boyer–Lindquist coordinates; Reissner–Nordström satisfies the
    Einstein–Maxwell equations; FLRW is equivalent to the Friedmann equations;
@@ -173,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1194 declarations, 741 of them theorem-like; no declaration uses `sorry`,
+1196 declarations, 743 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -309,8 +310,9 @@ The vanishing of the $rr$ component does not make the metric degenerate: the
 cross term $g_{vr}=1$ keeps the determinant nonzero. This is the precise
 sense in which the Eddington–Finkelstein chart removes the horizon obstruction.
 It still excludes the curvature singularity $r=0$ and the polar axis
-$\sin\theta=0$, and the curvature computation above remains in Schwarzschild
-coordinates.
+$\sin\theta=0$. The full Riemann computation above remains in Schwarzschild
+coordinates, but the coordinate Ricci tensor is also proved to vanish directly
+from the EF components, with no $f\neq0$ hypothesis, including at $r=2M$.
 
 ### 4.5 Schwarzschild–de Sitter for general $\Lambda$
 
@@ -584,9 +586,10 @@ angular coordinate $\varphi$ degenerates, as it does on any polar axis.
 
 The ingoing Eddington–Finkelstein chart removes the $f\neq0$ obstruction at
 the level of the metric and inverse: the metric is a nondegenerate tensor at
-$r=2M$, with $g_{rr}=0$, $g^{rr}=0$ and $g_{vr}=1$. It does not remove
-the curvature singularity or the axis, and the curvature theorems above remain
-stated in Schwarzschild coordinates. A full maximal extension still requires
+$r=2M$, with $g_{rr}=0$, $g^{rr}=0$ and $g_{vr}=1$. Its coordinate Ricci
+tensor is proved flat directly from the EF components, including at $r=2M$.
+It does not remove the curvature singularity or the axis, and the full Riemann
+component theorems above remain stated in Schwarzschild coordinates. A full maximal extension still requires
 Kruskal–Szekeres or a multi-chart atlas, and the general Cauchy development is
 treated in the companion paper.
 
@@ -618,8 +621,9 @@ A formalisation turns that cancellation into a theorem rather than a remark.
 The same chain $g\mapsto\partial g\mapsto\Gamma\mapsto\partial\Gamma\mapsto
 R\mapsto\mathrm{Ric}\mapsto S\mapsto G$ now runs from the line element to the
 field equation for Schwarzschild, Schwarzschild–de Sitter, Kerr,
-Reissner–Nordström and FLRW, and the horizon-regular Eddington–Finkelstein
-metric removes the first coordinate obstruction. What remains is the global
+Reissner–Nordström and FLRW. The horizon-regular Eddington–Finkelstein metric
+removes the first coordinate obstruction, and its coordinate Ricci tensor is
+proved flat directly, including at the horizon. What remains is the global
 initial-value problem: the existence and uniqueness of a maximal development
 for arbitrary constraint-satisfying data.
 
@@ -662,7 +666,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.GeodesicSystem` | 14 |
 | `Gravitation.Relativity.General.Linearized.LinearizedCurvature` | 14 |
 | `Gravitation.Relativity.General.Modified.FRGravity` | 14 |
-| `Gravitation.EddingtonFinkelstein` | 13 |
+| `Gravitation.EddingtonFinkelstein` | 15 |
 | `Gravitation.ReducedWave3D` | 13 |
 | `Gravitation.Relativity.General.Modified.KaluzaKlein.Basic` | 13 |
 | `Gravitation.Relativity.General.Kerr.Christoffel` | 12 |
@@ -714,9 +718,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Tensors.Tensor2` | 2 |
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1194** |
+| **Total** | **1196** |
 
-All 1194 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1196 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

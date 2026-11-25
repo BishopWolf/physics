@@ -20,7 +20,9 @@ polar axis `sin θ = 0`, but it removes the horizon obstruction.
 This is a chart-level metric and inverse.  It is not packaged as a
 `ChartSpacetime`, whose `chart` field is a global equivalence to all of
 `Fin 4 → ℝ`; the Eddington–Finkelstein domain is the open set
-`r ≠ 0 ∧ sin θ ≠ 0`.
+`r ≠ 0 ∧ sin θ ≠ 0`.  The coordinate curvature pipeline is evaluated directly
+on the EF components, so Ricci flatness below does not pass through the
+Schwarzschild chart and does not assume `1 - 2M/r ≠ 0`.
 
 ## ii. Key results
 
@@ -31,11 +33,16 @@ This is a chart-level metric and inverse.  It is not packaged as a
 - `horizonTensor` : the same bundle at `r = 2M` when `M ≠ 0`.
 - `horizonTensor_ginv_rr`, `horizonTensor_g_vr` : the inverse `rr` component
   vanishes while the cross component remains `1`, so the horizon is regular.
+- `ricciTensorOf_metric` : the coordinate Ricci tensor computed directly from
+  the EF metric is zero for every `r ≠ 0` and `sin θ ≠ 0`.
+- `ricciTensorOf_metric_horizon` : the same Ricci-flatness statement at
+  `r = 2M`.
 
 ## iii. Table of contents
 
 - A. Metric and inverse
 - B. The horizon `r = 2M`
+- C. Direct Ricci flatness
 
 ## iv. References
 
@@ -46,9 +53,15 @@ This is a chart-level metric and inverse.  It is not packaged as a
 module
 
 public import Gravitation.Relativity.Metrics.Basic
+public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 public import Mathlib.Tactic.FieldSimp
 public import Mathlib.Tactic.Ring
+import Mathlib.Analysis.Calculus.Deriv.Add
+import Mathlib.Analysis.Calculus.Deriv.Inv
+import Mathlib.Analysis.Calculus.Deriv.Mul
+import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Tactic
 
 @[expose] public section
 
@@ -104,6 +117,170 @@ lemma metricInv_mul (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     simp [metric, metricInv, Matrix.mul_apply, Fin.sum_univ_four]
   all_goals field_simp [hr, hsin]
 
+set_option linter.unusedTactic false
+set_option linter.unreachableTactic false
+
+/-! ### Direct Christoffel and Ricci computation -/
+
+@[simp] private lemma deriv_const_mul_inv_sq (M r : ℝ) (hr : r ≠ 0) :
+    deriv (fun s : ℝ => M * s⁻¹ ^ 2) r = -2 * M / r ^ 3 := by
+  have h := (hasDerivAt_inv hr).pow 2
+  have h' := h.const_mul M
+  have hfun : (fun s : ℝ => M * s⁻¹ ^ 2) = fun y => M * ((fun s : ℝ => s⁻¹) ^ 2) y := by
+    funext s
+    simp [Pi.pow_apply]
+  rw [hfun, h'.deriv]
+  field_simp [hr]
+  simp [hr]
+
+@[simp] private lemma deriv_const_mul_inv_cube (M r : ℝ) (hr : r ≠ 0) :
+    deriv (fun s : ℝ => M * s⁻¹ ^ 3) r = -3 * M / r ^ 4 := by
+  have h := (hasDerivAt_inv hr).pow 3
+  have h' := h.const_mul M
+  have hfun : (fun s : ℝ => M * s⁻¹ ^ 3) = fun y => M * ((fun s : ℝ => s⁻¹) ^ 3) y := by
+    funext s
+    simp [Pi.pow_apply]
+  rw [hfun, h'.deriv]
+  field_simp [hr]
+  simp [hr]
+
+@[simp] private lemma deriv_gamma_100 (M r : ℝ) (hr : r ≠ 0) :
+    deriv (fun s : ℝ => M * s⁻¹ ^ 2 - 2 * M ^ 2 * s⁻¹ ^ 3) r =
+      -2 * M / r ^ 3 + 6 * M ^ 2 / r ^ 4 := by
+  change deriv ((fun s : ℝ => M * s⁻¹ ^ 2) - fun s : ℝ => 2 * M ^ 2 * s⁻¹ ^ 3) r =
+    -2 * M / r ^ 3 + 6 * M ^ 2 / r ^ 4
+  rw [deriv_sub (by fun_prop) (by fun_prop)]
+  simp [hr]
+  field_simp [hr]
+  ring
+
+@[simp] private lemma deriv_gamma_100_alt (M r : ℝ) (hr : r ≠ 0) :
+    deriv (fun s : ℝ => M * s * s⁻¹ ^ 3 - M ^ 2 * s⁻¹ ^ 3 * 2) r =
+      -2 * M / r ^ 3 + 6 * M ^ 2 / r ^ 4 := by
+  have h : (fun s : ℝ => M * s * s⁻¹ ^ 3 - M ^ 2 * s⁻¹ ^ 3 * 2) =ᶠ[nhds r]
+      fun s => M * s⁻¹ ^ 2 - 2 * M ^ 2 * s⁻¹ ^ 3 := by
+    filter_upwards [eventually_ne_nhds hr] with s hs
+    field_simp [hs]
+  rw [h.deriv_eq]
+  exact deriv_gamma_100 M r hr
+
+@[simp] private lemma deriv_gamma_100_field (M r : ℝ) (hr : r ≠ 0) :
+    deriv (fun s : ℝ => M * (s - M * 2) / s ^ 3) r =
+      -2 * M / r ^ 3 + 6 * M ^ 2 / r ^ 4 := by
+  have h : (fun s : ℝ => M * (s - M * 2) / s ^ 3) =ᶠ[nhds r]
+      fun s => M * s⁻¹ ^ 2 - 2 * M ^ 2 * s⁻¹ ^ 3 := by
+    filter_upwards [eventually_ne_nhds hr] with s hs
+    field_simp [hs]
+  rw [h.deriv_eq]
+  exact deriv_gamma_100 M r hr
+
+/-- Explicit nonzero Christoffel symbols of the ingoing EF metric. -/
+private noncomputable def efGamma (M : ℝ) (x : Fin 4 → ℝ) (k i j : Fin 4) : ℝ :=
+  if k = 0 then
+    if i = 0 ∧ j = 0 then M / (x 1) ^ 2
+    else if i = 2 ∧ j = 2 then -(x 1)
+    else if i = 3 ∧ j = 3 then -(x 1) * Real.sin (x 2) ^ 2
+    else 0
+  else if k = 1 then
+    if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then -M / (x 1) ^ 2
+    else if i = 0 ∧ j = 0 then M * (x 1)⁻¹ ^ 2 - 2 * M ^ 2 * (x 1)⁻¹ ^ 3
+    else if i = 2 ∧ j = 2 then -(x 1) + 2 * M
+    else if i = 3 ∧ j = 3 then (-(x 1) + 2 * M) * Real.sin (x 2) ^ 2
+    else 0
+  else if k = 2 then
+    if (i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1) then 1 / (x 1)
+    else if i = 3 ∧ j = 3 then -Real.sin (x 2) * Real.cos (x 2)
+    else 0
+  else
+    if (i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1) then 1 / (x 1)
+    else if (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then
+      Real.cos (x 2) / Real.sin (x 2)
+    else 0
+
+/-- Coordinate derivatives of `efGamma`, including both radial and angular
+derivatives. -/
+private noncomputable def efGammaDeriv (M : ℝ) (x : Fin 4 → ℝ) (μ k i j : Fin 4) : ℝ :=
+  if μ = 1 then
+    if k = 0 ∧ i = 0 ∧ j = 0 then -2 * M / (x 1) ^ 3
+    else if k = 0 ∧ i = 2 ∧ j = 2 then -1
+    else if k = 0 ∧ i = 3 ∧ j = 3 then -Real.sin (x 2) ^ 2
+    else if k = 1 ∧ ((i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0)) then 2 * M / (x 1) ^ 3
+    else if k = 1 ∧ i = 0 ∧ j = 0 then
+      -2 * M / (x 1) ^ 3 + 6 * M ^ 2 / (x 1) ^ 4
+    else if k = 1 ∧ i = 2 ∧ j = 2 then -1
+    else if k = 1 ∧ i = 3 ∧ j = 3 then -Real.sin (x 2) ^ 2
+    else if k = 2 ∧ ((i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1)) then -1 / (x 1) ^ 2
+    else if k = 3 ∧ ((i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1)) then -1 / (x 1) ^ 2
+    else 0
+  else if μ = 2 then
+    if k = 0 ∧ i = 3 ∧ j = 3 then
+      -2 * (x 1) * Real.sin (x 2) * Real.cos (x 2)
+    else if k = 1 ∧ i = 3 ∧ j = 3 then
+      (-(x 1) + 2 * M) * (2 * Real.sin (x 2) * Real.cos (x 2))
+    else if k = 2 ∧ i = 3 ∧ j = 3 then
+      Real.sin (x 2) ^ 2 - Real.cos (x 2) ^ 2
+    else if k = 3 ∧ ((i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2)) then
+      -1 / Real.sin (x 2) ^ 2
+    else 0
+  else 0
+
+set_option maxHeartbeats 2000000 in
+private lemma christoffel_eq_efGamma (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hsin : Real.sin (x 2) ≠ 0) (k i j : Fin 4) :
+    Pipeline.christoffel (metric M) (metricInv M) x k i j = efGamma M x k i j := by
+  fin_cases k <;> fin_cases i <;> fin_cases j <;>
+    simp [Pipeline.christoffel, Pipeline.coordDeriv, efGamma, metric, metricInv,
+      Fin.sum_univ_four] <;>
+    try field_simp [hr, hsin] <;>
+    try ring_nf
+
+set_option maxHeartbeats 2000000 in
+private lemma coordDeriv_efGamma_eq (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hsin : Real.sin (x 2) ≠ 0) (μ k i j : Fin 4) :
+    Pipeline.coordDeriv μ (fun y => efGamma M y k i j) x = efGammaDeriv M x μ k i j := by
+  fin_cases μ <;> fin_cases k <;> fin_cases i <;> fin_cases j <;>
+    simp [Pipeline.coordDeriv, efGamma, efGammaDeriv, hr, hsin] <;>
+    try ring_nf <;>
+    try field_simp [hr, hsin] <;>
+    try rw [deriv_gamma_100_alt M (x 1) hr] <;>
+    try field_simp [hr, hsin] <;>
+    try rw [deriv_gamma_100_field M (x 1) hr] <;>
+    try field_simp [hr, hsin] <;>
+    try ring_nf
+  all_goals try rw [deriv_gamma_100_field M (x 1) hr]
+  all_goals try field_simp [hr, hsin]
+  all_goals try ring_nf
+  all_goals try nlinarith [Real.sin_sq_add_cos_sq (x 2)]
+
+set_option maxHeartbeats 4000000
+
+/-- **Direct Ricci flatness in Eddington–Finkelstein coordinates.**  The
+coordinate Ricci tensor obtained from `metric` and `metricInv` vanishes at every
+point with `r ≠ 0` and `sin θ ≠ 0`.  No condition on `1 - 2M/r` is used, so the
+statement includes the horizon `r = 2M`. -/
+lemma ricciTensorOf_metric (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hsin : Real.sin (x 2) ≠ 0) (σ ν : Fin 4) :
+    Pipeline.ricciTensorOf (metric M) (metricInv M) x σ ν = 0 := by
+  have hr' : ∀ᶠ y in nhds x, y 1 ≠ 0 :=
+    (continuous_apply 1).continuousAt.eventually_ne hr
+  have hsin' : ∀ᶠ y in nhds x, Real.sin (y 2) ≠ 0 :=
+    (Real.continuous_sin.continuousAt.comp (continuous_apply 2).continuousAt).eventually_ne hsin
+  have hcoord : ∀ (μ k i j : Fin 4),
+      Pipeline.coordDeriv μ
+        (fun y => Pipeline.christoffel (metric M) (metricInv M) y k i j) x =
+      Pipeline.coordDeriv μ (fun y => efGamma M y k i j) x := by
+    intro μ k i j
+    apply Pipeline.coordDeriv_congr_nhds
+    filter_upwards [hr', hsin'] with y hy1 hy2
+    exact christoffel_eq_efGamma M y hy1 hy2 k i j
+  fin_cases σ <;> fin_cases ν <;>
+    simp [Pipeline.ricciTensorOf, Pipeline.riemann, hcoord, coordDeriv_efGamma_eq,
+      christoffel_eq_efGamma, Fin.sum_univ_four, hr, hsin]
+  all_goals simp [efGamma, efGammaDeriv]
+  all_goals try field_simp [hr, hsin]
+  all_goals try ring_nf
+  all_goals try linear_combination (-(x 1)) * Real.sin_sq_add_cos_sq (x 2)
+
 /-- The ingoing Eddington–Finkelstein metric as a bundled `MetricTensor 4`.
 The only coordinate exclusions are the curvature singularity `r = 0` and the
 polar axis `sin θ = 0`; in particular there is no horizon hypothesis. -/
@@ -154,6 +331,20 @@ components do not make the metric degenerate. -/
 lemma horizonTensor_g_vr (M v θ φ : ℝ) (hM : M ≠ 0)
     (hsin : Real.sin θ ≠ 0) : (horizonTensor M v θ φ hM hsin).g 0 1 = 1 := by
   simp [horizonTensor, metricTensor, metric, horizonPoint]
+
+/-- **Ricci flatness at the horizon.**  The EF metric field at `r = 2M` has
+vanishing coordinate Ricci tensor.  This is the same direct computation as
+`ricciTensorOf_metric`, evaluated at the horizon, not a limit or an analytic
+continuation from the exterior Schwarzschild chart. -/
+lemma ricciTensorOf_metric_horizon (M v θ φ : ℝ) (hM : M ≠ 0)
+    (hsin : Real.sin θ ≠ 0) (σ ν : Fin 4) :
+    Pipeline.ricciTensorOf (metric M) (metricInv M) (horizonPoint M v θ φ) σ ν = 0 := by
+  exact ricciTensorOf_metric M (horizonPoint M v θ φ)
+    (by
+      simp only [horizonPoint_one]
+      exact mul_ne_zero two_ne_zero hM)
+    (by
+      simpa [horizonPoint] using hsin) σ ν
 
 end EddingtonFinkelstein
 

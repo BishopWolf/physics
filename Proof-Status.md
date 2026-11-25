@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1194 declarations, 741 of them theorem-like. The table below is the
+1196 declarations, 743 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -112,6 +112,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.EddingtonFinkelstein.metric_symm` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.metric_mul_inv` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.metricInv_mul` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.ricciTensorOf_metric` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.metricTensor` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.horizonPoint` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.horizonPoint_one` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -120,6 +121,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor_g_rr` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor_ginv_rr` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor_g_vr` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.ricciTensorOf_metric_horizon` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.explicitSolutionObligations` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.schwarzschild_explicit_development` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sds_explicit_development` | `Gravitation/ExplicitDevelopments.lean` | propext, Classical.choice, Quot.sound | proved |
