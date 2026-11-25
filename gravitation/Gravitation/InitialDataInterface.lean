@@ -35,6 +35,9 @@ constraint solving remain outside this interface.
 - `ChartInitialData.ofChartData` : field-of-bundled-metrics constructor
   deriving the inverse relation and Christoffel symmetry from the
   `MetricTensor` fields and `Bianchi.christoffel_symm`.
+- `ManifoldSpacetime`, `ManifoldInitialData` : global-chart manifold
+  packaging of the derived chart curvature and momentum data.
+- `minkowskiManifoldInitialData` : the Minkowski manifold-level instance.
 - `minkowskiChartInitialDataDerived` : the Minkowski chart data reconstructed
   through the derived curvature and momentum constructors.
 - `ChartInitialData.constraintResidual_eq_zero` : bundled vacuum data have zero
@@ -45,6 +48,7 @@ constraint solving remain outside this interface.
 - A. The chart slice and its induced metric
 - B. Derived curvature and extrinsic-curvature data
 - C. Bundled chart initial data and constraints
+- D. Manifold-level packaging
 
 ## iv. References
 
@@ -537,5 +541,76 @@ noncomputable def minkowskiChartInitialDataDerived : ChartInitialData minkowskiC
     Matrix.isSymm_zero ?_
   rw [hR3, hdK]
   simpa [h, K, flatData] using flatData_isVacuum
+
+/-! ## D. Manifold-level packaging
+
+This is a global-chart manifold interface: `ManifoldSpacetime` carries a
+`SmoothChartSpacetime` and a smoothness certificate, and `ManifoldInitialData`
+exposes the chart-derived curvature and momentum data at that level.  It does
+not claim arbitrary multi-chart gluing or a geometric 4D Lorentzian manifold.
+-/
+
+/-- A manifold-level spacetime interface at global-chart scope. -/
+structure ManifoldSpacetime where
+  /-- The underlying smooth chart spacetime. -/
+  smoothChart : SmoothChartSpacetime
+  /-- The chart metric is smooth. -/
+  metric_smooth : smoothChart.toChartSpacetime.IsSmooth
+
+namespace ManifoldSpacetime
+
+/-- The chart spacetime read by the manifold interface. -/
+def chartSpacetime (X : ManifoldSpacetime) : ChartSpacetime :=
+  X.smoothChart.toChartSpacetime
+
+end ManifoldSpacetime
+
+/-- Manifold-level initial data: chart initial data packaged against a
+`ManifoldSpacetime`. -/
+structure ManifoldInitialData (X : ManifoldSpacetime) where
+  /-- The underlying chart initial data. -/
+  data : ChartInitialData X.chartSpacetime
+
+namespace ManifoldInitialData
+
+/-- Construct manifold-level data whose `R3` and `dK` are derived from an
+arbitrary field of bundled spatial metrics. -/
+noncomputable def ofChartData
+    (X : ManifoldSpacetime) (M : (Fin 3 → ℝ) → MetricTensor 3)
+    (K : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ)
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => (M y).g i j) x)
+    (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => (M y).ginv i j) x)
+    (Ksymm : IsSymm (K x))
+    (vacuum : (InitialData.mk (M x)
+      (spatialRiemannTensorOf (fun y => (M y).g) (fun y => (M y).ginv) x
+        (metricField_symm M x) (metricField_inv M x) hgC2
+        (fun k i j => differentiableAt_christoffel_of_contDiffAt_two hgC2 hginvD k i j)
+        (metricField_christoffel_symm M x))
+      (K x) Ksymm).IsVacuumData (extrinsicDerivativeOf K x)) :
+    ManifoldInitialData X :=
+  ⟨ChartInitialData.ofChartData X.chartSpacetime M K x hgC2 hginvD Ksymm vacuum⟩
+
+/-- Manifold-level data inherit chart regularity from the smoothness
+certificate. -/
+lemma regular {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
+    D.data.Regular :=
+  ChartInitialData.regular D.data X.metric_smooth
+
+/-- Manifold-level data have zero constraint residual. -/
+lemma constraintResidual_eq_zero {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
+    D.data.constraintResidual.ham = 0 ∧
+      ∀ i, D.data.constraintResidual.mom i = 0 :=
+  D.data.constraintResidual_eq_zero
+
+end ManifoldInitialData
+
+/-- Minkowski as a global-chart manifold interface. -/
+def minkowskiManifold : ManifoldSpacetime where
+  smoothChart := minkowskiSmoothChart
+  metric_smooth := minkowskiChart_isSmooth
+
+/-- The Minkowski manifold-level initial data, using the derived chart data. -/
+noncomputable def minkowskiManifoldInitialData : ManifoldInitialData minkowskiManifold :=
+  ⟨minkowskiChartInitialDataDerived⟩
 
 end GeneralRelativity
