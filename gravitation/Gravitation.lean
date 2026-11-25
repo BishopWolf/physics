@@ -111,7 +111,8 @@ general relativity.
   symmetry of the lowered Riemann tensor.
 - `GeneralRelativity.InitialData.hamiltonianConstraint`, `momentumConstraint` :
   the ADM Hamiltonian and momentum constraints.
-- `GeneralRelativity.spatialRiemannTensorOf`, `extrinsicDerivativeOf`,
+- `GeneralRelativity.spatialRiemannTensorOf`,
+  `spatialRiemannTensorOfConstMetric`, `extrinsicDerivativeOf`,
   `minkowskiChartInitialDataDerived` :
   the 3D Riemann tensor and momentum-constraint derivative derived from the
   spatial metric and extrinsic-curvature fields, exercised on Minkowski.

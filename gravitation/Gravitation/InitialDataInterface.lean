@@ -23,6 +23,9 @@ constraint solving remain outside this interface.
 - `spatialRiemannTensorOf` : the 3D Riemann tensor derived from a metric field
   and packaged as a `RiemannTensor 3` using the coordinate skew, pair-symmetry
   and Bianchi theorems.
+- `spatialRiemannTensorOfConstMetric` :
+  the constant bundled-metric specialization, with symmetry and inverse
+  hypotheses discharged by `MetricTensor`.
 - `extrinsicDerivativeOf` : the momentum-constraint table `dK_μij = ∂_μ K_ij`
   derived from an extrinsic-curvature field.
 - `ChartInitialData`, `ChartInitialData.ofDerivedData` : bundled chart initial
@@ -182,6 +185,75 @@ theorem spatialRiemannTensorOf_const
   rw [Pipeline.riemann_const h hinv G hG x e b c d]
   ring
 
+/-- The derived Riemann tensor of a constant bundled metric.  Symmetry and the
+inverse relation are discharged by the `MetricTensor` fields, so no hand
+hypotheses are needed for the constant case. -/
+noncomputable def spatialRiemannTensorOfConstMetric
+    (M : MetricTensor 3) (x : Fin 3 → ℝ) : RiemannTensor 3 :=
+  spatialRiemannTensorOf (fun _ => M.g) (fun _ => M.ginv) x
+    (by
+      filter_upwards with _ i j
+      exact (M.symm.apply i j).symm)
+    (by
+      filter_upwards with _ m j
+      calc
+        (∑ a, M.ginv a m * M.g a j)
+            = ∑ a, M.ginv m a * M.g a j := by
+              apply Finset.sum_congr rfl
+              intro a _
+              rw [M.ginv_symm.apply m a]
+        _ = if m = j then 1 else 0 := M.sum_ginv_mul_g_left m j)
+    (fun _ _ => contDiffAt_const)
+    (by
+      intro k i j
+      have hc : (fun y : Fin 3 → ℝ =>
+          Pipeline.christoffel (fun _ => M.g) (fun _ => M.ginv) y k i j) = fun _ => 0 := by
+        funext y
+        exact Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+          (fun _ => rfl) y k i j
+      rw [hc]
+      exact differentiableAt_const 0)
+    (by
+      filter_upwards with y k i j
+      rw [Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+          (fun _ => rfl) y k i j,
+        Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+          (fun _ => rfl) y k j i])
+
+/-- A constant bundled metric has flat derived Riemann curvature. -/
+theorem spatialRiemannTensorOfConstMetric_eq_flat
+    (M : MetricTensor 3) (x : Fin 3 → ℝ) :
+    spatialRiemannTensorOfConstMetric M x = RiemannTensor.flat 3 :=
+  spatialRiemannTensorOf_const M.g (fun _ => M.g) (fun _ => M.ginv) x (fun _ => rfl)
+    (by
+      filter_upwards with _ i j
+      exact (M.symm.apply i j).symm)
+    (by
+      filter_upwards with _ m j
+      calc
+        (∑ a, M.ginv a m * M.g a j)
+            = ∑ a, M.ginv m a * M.g a j := by
+              apply Finset.sum_congr rfl
+              intro a _
+              rw [M.ginv_symm.apply m a]
+        _ = if m = j then 1 else 0 := M.sum_ginv_mul_g_left m j)
+    (fun _ _ => contDiffAt_const)
+    (by
+      intro k i j
+      have hc : (fun y : Fin 3 → ℝ =>
+          Pipeline.christoffel (fun _ => M.g) (fun _ => M.ginv) y k i j) = fun _ => 0 := by
+        funext y
+        exact Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+          (fun _ => rfl) y k i j
+      rw [hc]
+      exact differentiableAt_const 0)
+    (by
+      filter_upwards with y k i j
+      rw [Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+          (fun _ => rfl) y k i j,
+        Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+          (fun _ => rfl) y k j i])
+
 /-- The momentum-constraint derivative table `dK_μij = ∂_μ K_ij` derived from
 the extrinsic-curvature field. -/
 noncomputable def extrinsicDerivativeOf
@@ -326,35 +398,10 @@ lemma minkowskiChartInitialData_constraintResidual_eq_zero :
 momentum constructors: the constant Euclidean metric gives `R3 = flat 3`, and
 zero extrinsic curvature gives `dK = 0`. -/
 noncomputable def minkowskiChartInitialDataDerived : ChartInitialData minkowskiChart := by
-  let h : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.g
-  let hinv : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.ginv
-  let hgSymm : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ i j, h y i j = h y j i := by
-    filter_upwards with y i j
-    simp [h, euclid3, Matrix.one_apply, eq_comm]
-  let hInv : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ m j,
-      ∑ a, hinv y a m * h y a j = if m = j then 1 else 0 := by
-    filter_upwards with y m j
-    simp [h, hinv, euclid3, Matrix.one_apply, eq_comm]
-  let hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) 0 := by
-    intro i j
-    exact contDiffAt_const
-  let hΓD : ∀ k i j,
-      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) 0 := by
-    intro k i j
-    have hc : (fun y : Fin 3 → ℝ => Pipeline.christoffel h hinv y k i j) = fun _ => 0 := by
-      funext y
-      exact Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j
-    rw [hc]
-    exact differentiableAt_const 0
-  let hΓ : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ k i j,
-      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i := by
-    filter_upwards with y k i j
-    rw [Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j,
-      Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k j i]
-  let R3 := spatialRiemannTensorOf h hinv 0 hgSymm hInv hgC2 hΓD hΓ
-  have hR3 : R3 = RiemannTensor.flat 3 :=
-    spatialRiemannTensorOf_const euclid3.g h hinv 0 (fun _ => rfl) hgSymm hInv hgC2 hΓD hΓ
   let K : Tensor2 3 := 0
+  let R3 := spatialRiemannTensorOfConstMetric euclid3 0
+  have hR3 : R3 = RiemannTensor.flat 3 :=
+    spatialRiemannTensorOfConstMetric_eq_flat euclid3 0
   let dK := extrinsicDerivativeOf (fun _ : Fin 3 → ℝ => K) 0
   have hdK : dK = fun _ => 0 := by
     funext μ
