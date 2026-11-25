@@ -37,10 +37,16 @@ gravitation/
 ├── Gravitation/WaveEnergy3DWave.lean   3D wave energy conservation from u_tt = Δu
 ├── Gravitation/WaveUniqueness3D.lean   3D closed-box zero-data and general-data uniqueness
 ├── Gravitation/LinearizedWaveGauge.lean  linearized Einstein wave-gauge interface
-├── Gravitation/ManifoldInterface.lean   chart-level spacetime and Minkowski interface
-├── Gravitation/InitialDataInterface.lean chart-level ADM initial-data interface
-├── Gravitation/CauchyInterfaces.lean    uninhabited M3–M6 interface certificates
-├── Gravitation/ReducedWave3D.lean       3D linear reduced-wave existence model
+├── Gravitation/ManifoldInterface.lean   global-chart spacetime, Levi-Civita and causality
+├── Gravitation/Bianchi.lean             general second and contracted Bianchi identities
+├── Gravitation/InitialDataInterface.lean chart ADM initial data and slice regularity
+├── Gravitation/SobolevInitialData.lean  1D/3D Sobolev estimates and curved initial data
+├── Gravitation/CauchyInterfaces.lean    M3–M6 certificate interfaces
+├── Gravitation/ReducedWave3D.lean       scoped 3D linear reduced-wave existence model
+├── Gravitation/ReducedCauchy.lean       M3 linearized-box and FLRW certificates
+├── Gravitation/GaugeRecovery.lean       M4 gauge-recovery and constraint propagation
+├── Gravitation/MaximalDevelopment.lean  M5 Zorn and open-domain maximal development
+├── Gravitation/ExplicitDevelopments.lean M6 explicit-solution certificates
 ├── vendor/                              temporary copy of the unmerged branch
 │   └── Gravitation/Relativity/General/ 37 modules, commit 41abde06
 └── vulkan/
@@ -99,8 +105,9 @@ incremental.
 
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
-tree or the pinned upstream dependency; the one-dimensional wave theorem is
-local. The audit covers 858 declarations, 569 of them theorem-like.
+tree or the pinned upstream dependency; the local Cauchy-problem development
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 989
+declarations, 655 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -199,23 +206,37 @@ Weyl tensor removes.
 | `GeneralRelativity.ChartInitialData.Regular` | chart-level regularity package for initial data |
 | `GeneralRelativity.ConstraintResidual` | packaged Hamiltonian and momentum residuals |
 | `GeneralRelativity.ChartInitialData.constraintResidual_eq_zero` | chart vacuum data have zero constraint residual |
+| `GeneralRelativity.SmoothChartSpacetime`, `GeneralRelativity.SmoothChartSpacetime.chartedSpace`, `GeneralRelativity.minkowskiSmoothChart` | Mathlib `ChartedSpace` bridge on chart homeomorphisms |
+| `GeneralRelativity.ChartSpacetime.IsCauchySurface`, `GeneralRelativity.ChartSpacetime.IsGloballyHyperbolic`, `GeneralRelativity.minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface and Minkowski global hyperbolicity |
+| `GeneralRelativity.Bianchi.second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero` | general second and contracted Bianchi identities, `∇·G = 0` |
+| `GeneralRelativity.sobolev_embedding_1D`, `trace_estimate_1D` | 1D `H¹` Sobolev embedding and boundary trace inequality |
+| `GeneralRelativity.sobolevH1NormSq3D`, `l2_le_sobolevH1_3D`, `grad_le_sobolevH1_3D` | 3D closed-box `H¹` norm and coercivity |
+| `GeneralRelativity.hamiltonianConstraintOf`, `momentumConstraintOf` | derived 3D spatial curvature and nonlinear ADM constraints |
 | `GeneralRelativity.spatialLaplacian3D`, `planeWave3D_wave_equation` | scoped 3D linear wave existence model |
 | `GeneralRelativity.planeWave3D_cauchy_data` | the model has the prescribed Cauchy data |
-| `GeneralRelativity.ReducedCauchyProblem`, `ReducedLocalExistenceCertificate` | uninhabited M3 local-existence interface |
-| `GeneralRelativity.GaugeRecoveryProblem`, `GaugeRecoveryCertificate` | uninhabited M4 gauge/constraint interface |
-| `GeneralRelativity.DevelopmentInterface`, `MaximalDevelopmentCertificate` | uninhabited M5 maximal-development interface |
-| `GeneralRelativity.ExplicitDevelopmentObligations`, `ExplicitDevelopmentCertificate` | uninhabited M6 recovery interface |
-| `GeneralRelativity.ChartSpacetime.IsChartDevelopment`, `minkowskiChart_explicit_development` | scoped Minkowski chart-development cross-check |
+| `GeneralRelativity.directionalWave3D_wave_equation`, `spatialLaplacian3D_add` | directional plane waves and superposition |
+| `GeneralRelativity.harmonicGaugeCond`, `minkowski_harmonicGauge` | nonlinear harmonic gauge condition |
+| `GeneralRelativity.ReducedCauchyProblem`, `ReducedLocalExistenceCertificate` | M3 interface, inhabited at linearized-box and FLRW scope |
+| `GeneralRelativity.linearizedBox_reducedLocalExistence`, `flrw_reducedLocalExistence` | concrete M3 reduced-existence certificates |
+| `GeneralRelativity.GaugeRecoveryProblem`, `GaugeRecoveryCertificate` | M4 interface, inhabited at linearized-box and FLRW scope |
+| `GeneralRelativity.linearizedBox_gaugeRecovery`, `flrw_gaugeRecovery` | concrete M4 gauge-recovery certificates |
+| `GeneralRelativity.DevelopmentInterface`, `MaximalDevelopmentCertificate` | M5 interface, inhabited at abstract-Zorn and open-domain scope |
+| `GeneralRelativity.intervalMaximalDevelopmentCertificate` | zero-hypothesis open-domain maximal-development certificate |
+| `GeneralRelativity.ExplicitDevelopmentObligations`, `ExplicitDevelopmentCertificate` | M6 interface, inhabited via `explicitSolutions_certificate` |
+| `GeneralRelativity.explicitSolutions_certificate` | Schwarzschild, Schwarzschild–de Sitter, Kerr and FLRW recovery |
+| `GeneralRelativity.ChartSpacetime.IsChartDevelopment`, `minkowskiChart_explicit_development` | Minkowski chart-development cross-check |
 | `GeneralRelativity.minkowskiChartInitialData_regular`, `_constraintResidual_eq_zero` | regular Minkowski data with zero residual |
 | `Linearized.linEinstein_lorenz_gauge` | in Lorenz gauge the linearized Einstein tensor is `−½ □ h̄` |
 | `Linearized.ttWave_linEinstein_zero` | transverse–traceless gravitational waves solve the linearized vacuum equations |
 | `Linearized.newtonianPerturb_poisson_iff` | the Newtonian limit is Poisson's equation `∇²Φ = 4πρ` |
 | `GravitationalConstant` | dimension `L³ M⁻¹ T⁻²`, CODATA 2022 SI value, and natural units with `c = G = k_B = 1` |
 
-The wave theorem is a linear one-dimensional model, not a field-equation
-existence theorem. Development existence for the full field equations
-(Choquet–Bruhat–Geroch) is neither claimed nor axiomatised; `InitialValue` is a
-predicate on a slice.
+The 3D wave theorem is a linear constant-coefficient model, not a field-equation
+existence theorem. The M3–M6 results are scoped: linearized-box and nonlinear
+flat-FLRW reduced existence/recovery, abstract Zorn/open-domain maximality, and
+explicit-solution/initial-slice checks. Development existence for arbitrary
+data under the full Choquet–Bruhat–Geroch theorem is neither claimed nor
+axiomatised; `InitialValue` is a predicate on a slice.
 
 ### Modified and alternative theories
 
@@ -324,7 +345,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (858 at this revision, 569 theorem-like) and rejects any axiom outside
+declaration (989 at this revision, 655 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

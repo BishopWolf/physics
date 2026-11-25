@@ -204,8 +204,8 @@ separate theorems: `dAlembert_zero` proves `u(0,x)=f x`, and
 | `ChartSpacetime.christoffel_symm` | chart connection is torsion-free |
 | `ChartSpacetime.metricCovariantDeriv`, `metricCovariantDeriv_eq_zero` | coordinate covariant derivative of any chart metric vanishes |
 | `ChartSpacetime.IsLeviCivita`, `ChartSpacetime.isLeviCivita` | every `ChartSpacetime` carries a canonical Levi-Civita connection |
-| `SmoothChartSpacetime`, `chartedSpace`, `minkowskiSmoothChart` | Mathlib `ChartedSpace` manifold atlas bridge on chart homeomorphisms |
-| `IsCauchySurface`, `IsGloballyHyperbolic`, `minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface (`t = 0`) and Minkowski global hyperbolicity |
+| `SmoothChartSpacetime`, `SmoothChartSpacetime.chartedSpace`, `minkowskiSmoothChart` | Mathlib `ChartedSpace` manifold atlas bridge on chart homeomorphisms |
+| `ChartSpacetime.IsCauchySurface`, `ChartSpacetime.IsGloballyHyperbolic`, `minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface (`t = 0`) and Minkowski global hyperbolicity |
 | `Bianchi.pd_comm_of_contDiffAt` | Schwarz mixed-partial symmetry from Mathlib `IsSymmSndFDerivAt` |
 | `Bianchi.metric_compat`, `Bianchi.inv_metric_compat` | general metric and inverse metric compatibility in `n` dimensions |
 | `Bianchi.second_bianchi`, `Bianchi.contracted_bianchi`, `Bianchi.covDiv_einstein_eq_zero` | general second and contracted Bianchi identities (`∇·G = 0`) |
@@ -302,7 +302,8 @@ equation, not for the Einstein equations. On top of this layer,
 wave-gauge interface `WaveGaugePerturbation` and proves
 `linEinstein_eq_zero_of_waveGauge` from the vendored Lorenz-gauge reduction.
 The existing TT plane wave is shown to satisfy this interface via
-`ttWave_waveGauge`. The manifold-level layers remain open.
+`ttWave_waveGauge`. The manifold-level derivation of the linearized Einstein
+equations remains open.
 
 ## 5. The target: Choquet–Bruhat–Geroch
 

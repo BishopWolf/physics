@@ -5,8 +5,8 @@ of its own, and CI checks the axiom footprint of every declaration. The audited
 surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/Relativity/General/`,
 module path `Gravitation.Relativity.General.*`, commit `41abde06`) and the
-already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 858
-declarations, 569 of them theorem-like. The table below is the
+already-merged `Schwarzschild.IncompressibleSphere` from upstream master: 989
+declarations, 655 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
