@@ -38,6 +38,9 @@ provenance and removal, and `Proof-Status.md` for the declaration census.
   an arbitrary bundle is formalised.
 * The ADM constraints and the coordinate pipeline that feeds the Vulkan
   numerical pass.
+* The ingoing Eddington–Finkelstein chart metric and inverse
+  (`Gravitation/EddingtonFinkelstein.lean`), including a bundled
+  `MetricTensor 4` at `r = 2M` with no `f ≠ 0` hypothesis.
 
 ## Conventions
 
@@ -49,4 +52,5 @@ so the field equations read `G = 8πT`.
 
 Everything is pointwise in a coordinate chart: there is no smooth manifold
 structure, no global existence theory, and no PDE theory. The chart
-restrictions of the metric-level theorems are listed in the paper's §6.
+restrictions of the metric-level theorems are listed in the paper's §6, which
+records the Eddington–Finkelstein removal of the horizon condition.

@@ -19,6 +19,7 @@ public import Gravitation.WaveEnergy3DWave
 public import Gravitation.WaveUniqueness3D
 public import Gravitation.LinearizedWaveGauge
 public import Gravitation.ManifoldInterface
+public import Gravitation.EddingtonFinkelstein
 public import Gravitation.Bianchi
 public import Gravitation.InitialDataInterface
 public import Gravitation.SobolevInitialData
