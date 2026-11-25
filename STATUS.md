@@ -87,7 +87,7 @@ Metrics,Tensors}/` and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lea
 `GeneralRelativity` unchanged) at branch commit `b81c896a`, while the `physlib`
 requirement points at merged master `7910f51f`
 — the merge base the branch was written against, which also supplies the
-already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1231 audited declarations are those sources plus the local
+already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1240 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -125,9 +125,10 @@ branch lands.
   Kerr in Boyer–Lindquist coordinates, proved Ricci flat together with its
   horizons, ergosphere and ZAMO frame dragging; the ingoing Eddington–Finkelstein
   chart, where the coordinate Ricci tensor is proved flat directly from the EF
-  metric, including at the horizon, and whose metric is packaged as a partial
-  chart on its restricted domain; a Kruskal–Szekeres chart with a certified
-  nondegenerate metric across the horizon; and FLRW, where the metric-level
+  metric, including at the horizon, and whose metric is packaged as a smooth
+  partial chart on its restricted domain; a Kruskal–Szekeres chart with a
+  certified nondegenerate metric across the horizon, also packaged as a partial
+  chart; and FLRW, where the metric-level
   Einstein equations are proved equivalent to the Friedmann equations and
   bridged to `Physlib.Cosmology.FLRW`.
 * Alternative and modified theories — machine-checked cores of sixteen theories:
@@ -141,7 +142,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 1231 declarations (756 theorem-like) and rejects anything outside
+  all 1240 declarations (760 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`

@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1231 declarations, 756 of them theorem-like. The table below is the
+1240 declarations, 760 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -118,6 +118,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.EddingtonFinkelstein.partialChartDomain_isOpen` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.partialChart` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.partialChartSpacetime` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.contDiffOn_ef_metric_component` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.partialChart_isSmooth` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.restrictedChart` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.restrictedChartSpacetime` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.horizonPoint` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -238,8 +240,14 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.KruskalSzekeres.metric_mul_inv` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.metricInv_mul` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.metricTensor` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.partialChartDomain` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.partialChartDomain_isOpen` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.partialChart` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.partialChartSpacetime` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.restrictedChart` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonPoint` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonPoint_sq_diff` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonPoint_mem_partialChartDomain` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonTensor` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonConformalFactor` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonTensor_g_00` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -257,6 +265,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.PartialChartSpacetime` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.PartialChartSpacetime.coordinateMetric` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.PartialChartSpacetime.coordinateInverseMetric` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.PartialChartSpacetime.IsSmooth` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.PartialChart` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.RestrictedChart` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.RestrictedChartSpacetime` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |

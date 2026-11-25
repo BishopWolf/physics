@@ -34,6 +34,9 @@ metric and its inverse remain regular across `r = 2M`.  The singularity
   conformal factor and inverse at the horizon.
 - `horizonTensor_regular` : the horizon bundle is a certified
   `MetricTensor 4`.
+- `partialChart`, `partialChartDomain` : the Kruskal–Szekeres metric packaged
+  as a `PartialChartSpacetime` on its restricted domain.
+- `horizonPoint_mem_partialChartDomain` : the horizon lies in that domain.
 
 ## iii. Table of contents
 
@@ -49,6 +52,7 @@ metric and its inverse remain regular across `r = 2M`.  The singularity
 
 module
 
+public import Gravitation.ManifoldInterface
 public import Gravitation.Relativity.Metrics.Basic
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
@@ -219,6 +223,40 @@ noncomputable def metricTensor (M : ℝ) (x : Fin 4 → ℝ) (hM : 0 < M)
   inv_left := metric_mul_inv M x hM hsin
   inv_right := metricInv_mul M x hM hsin
 
+/-- The open Kruskal–Szekeres chart domain: outside the singularity, i.e.
+`X² - T² > -1`, and off the polar axis `sin θ ≠ 0`. -/
+def partialChartDomain : Set (Fin 4 → ℝ) :=
+  {x | -1 < x 1 ^ 2 - x 0 ^ 2 ∧ Real.sin (x 2) ≠ 0}
+
+/-- The Kruskal–Szekeres chart domain is open. -/
+lemma partialChartDomain_isOpen : IsOpen partialChartDomain := by
+  have hcont : Continuous (fun x : SpacetimeChart => x 1 ^ 2 - x 0 ^ 2) :=
+    ((continuous_apply 1).pow 2).sub ((continuous_apply 0).pow 2)
+  have h1 : IsOpen {x : SpacetimeChart | -1 < x 1 ^ 2 - x 0 ^ 2} :=
+    hcont.isOpen_preimage (Set.Ioi (-1)) isOpen_Ioi
+  have hsin_cont : Continuous (fun x : SpacetimeChart => Real.sin (x 2)) :=
+    Real.continuous_sin.comp (continuous_apply 2)
+  have h2 : IsOpen {x : SpacetimeChart | Real.sin (x 2) ≠ 0} :=
+    hsin_cont.isOpen_preimage ({0}ᶜ) isOpen_compl_singleton
+  rw [partialChartDomain, Set.ofPred_and]
+  exact h1.inter h2
+
+/-- The Kruskal–Szekeres metric packaged as a partial chart on its restricted
+domain.  The smoothness of the implicit radius is not certified here. -/
+noncomputable def partialChart (M : ℝ) (hM : 0 < M) : PartialChartSpacetime where
+  domain := partialChartDomain
+  domain_open := partialChartDomain_isOpen
+  metric := fun x hx => metricTensor M x hM hx.2
+
+/-- Alias for `partialChart`. -/
+noncomputable def partialChartSpacetime (M : ℝ) (hM : 0 < M) :
+    PartialChartSpacetime :=
+  partialChart M hM
+
+/-- Alias for `partialChart`. -/
+noncomputable def restrictedChart (M : ℝ) (hM : 0 < M) : PartialChartSpacetime :=
+  partialChart M hM
+
 /-- A horizon point has `X = T`, hence `X² - T² = 0` and `r = 2M`. -/
 def horizonPoint (_M T θ φ : ℝ) : Fin 4 → ℝ :=
   ![T, T, θ, φ]
@@ -226,6 +264,14 @@ def horizonPoint (_M T θ φ : ℝ) : Fin 4 → ℝ :=
 lemma horizonPoint_sq_diff (M T θ φ : ℝ) :
     (horizonPoint M T θ φ) 1 ^ 2 - (horizonPoint M T θ φ) 0 ^ 2 = 0 := by
   simp [horizonPoint]
+
+/-- A horizon point lies in the Kruskal–Szekeres chart domain. -/
+lemma horizonPoint_mem_partialChartDomain (M T θ φ : ℝ)
+    (hsin : Real.sin θ ≠ 0) :
+    horizonPoint M T θ φ ∈ partialChartDomain := by
+  refine ⟨?_, ?_⟩
+  · simp [horizonPoint]
+  · simpa [horizonPoint] using hsin
 
 /-- Bundled metric at a horizon point. -/
 noncomputable def horizonTensor (M T θ φ : ℝ) (hM : 0 < M)

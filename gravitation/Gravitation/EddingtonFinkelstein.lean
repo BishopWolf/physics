@@ -32,6 +32,8 @@ through the Schwarzschild chart and does not assume `1 - 2M/r ≠ 0`.
   with no `1 - 2M/r ≠ 0` hypothesis.
 - `partialChart`, `partialChartDomain` : the EF metric packaged as a
   `PartialChartSpacetime` on its restricted domain.
+- `partialChart_isSmooth` : the EF partial chart satisfies the smoothness
+  certificate `PartialChartSpacetime.IsSmooth`.
 - `horizonTensor` : the same bundle at `r = 2M` when `M ≠ 0`.
 - `horizonTensor_ginv_rr`, `horizonTensor_g_vr` : the inverse `rr` component
   vanishes while the cross component remains `1`, so the horizon is regular.
@@ -71,6 +73,8 @@ import Mathlib.Tactic
 namespace GeneralRelativity
 
 namespace EddingtonFinkelstein
+
+open scoped ContDiff
 
 /-- Ingoing Eddington–Finkelstein metric in `(v, r, θ, φ)` coordinates. -/
 noncomputable def metric (M : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
@@ -320,6 +324,54 @@ noncomputable def partialChart (M : ℝ) : PartialChartSpacetime where
 /-- Alias for `partialChart`. -/
 noncomputable def partialChartSpacetime (M : ℝ) : PartialChartSpacetime :=
   partialChart M
+
+lemma contDiffOn_ef_metric_component (M : ℝ) (i j : Fin 4) :
+    ContDiffOn ℝ ∞ (fun x : SpacetimeChart => metric M x i j) partialChartDomain := by
+  have hcoord (k : Fin 4) :
+      ContDiffOn ℝ ∞ (fun x : SpacetimeChart => x k) partialChartDomain :=
+    contDiffOn_apply (𝕜 := ℝ) (F' := fun _ : Fin 4 => ℝ) k partialChartDomain
+  have hsin : ContDiffOn ℝ ∞ (fun x : SpacetimeChart => Real.sin (x 2))
+      partialChartDomain :=
+    (Real.contDiff_sin.comp
+      (contDiff_apply (𝕜 := ℝ) (F' := fun _ : Fin 4 => ℝ) 2)).contDiffOn
+  have hinv : ContDiffOn ℝ ∞ (fun x : SpacetimeChart => (x 1)⁻¹)
+      partialChartDomain := by
+    refine ContDiffOn.comp (𝕜 := ℝ) (n := ∞)
+      (contDiffOn_inv (𝕜 := ℝ) (𝕜' := ℝ) (n := ∞)) (hcoord 1) ?_
+    intro x hx
+    exact hx.1
+  fin_cases i <;> fin_cases j <;>
+    simp [metric]
+  · have heq : (fun x : SpacetimeChart => 2 * M / x 1 - 1) =
+        (fun x : SpacetimeChart => 2 * M * (x 1)⁻¹ - 1) := by
+      funext x
+      rw [div_eq_mul_inv]
+    rw [heq]
+    exact ContDiffOn.sub
+      (ContDiffOn.mul (contDiffOn_const (c := 2 * M)) hinv)
+      (contDiffOn_const (c := (1 : ℝ)))
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact (hcoord 1).pow 2
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact contDiffOn_const
+  · exact ContDiffOn.mul ((hcoord 1).pow 2) (hsin.pow 2)
+
+/-- The Eddington–Finkelstein partial chart is smooth on its domain. -/
+lemma partialChart_isSmooth (M : ℝ) : (partialChart M).IsSmooth := by
+  intro i j
+  refine ⟨fun x => metric M x i j, contDiffOn_ef_metric_component M i j, ?_⟩
+  intro x hx
+  rfl
 
 /-- Alias for `partialChart`. -/
 noncomputable def restrictedChart (M : ℝ) : PartialChartSpacetime :=

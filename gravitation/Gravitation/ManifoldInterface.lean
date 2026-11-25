@@ -56,10 +56,13 @@ public import Mathlib.Geometry.Manifold.IsManifold.Basic
 public import Mathlib.Topology.Basic
 public import Mathlib.Topology.Constructions
 public import Mathlib.Topology.Instances.Real.Lemmas
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 @[expose] public section
 
 namespace GeneralRelativity
+
+open scoped ContDiff
 
 /-- The coordinate model for a four-dimensional chart. -/
 abbrev SpacetimeChart : Type := Fin 4 → ℝ
@@ -108,6 +111,14 @@ noncomputable def PartialChartSpacetime.coordinateInverseMetric
     (X : PartialChartSpacetime) (x : SpacetimeChart) (hx : x ∈ X.domain) :
     Tensor2 4 :=
   (X.metric x hx).ginv
+
+/-- Smoothness of a partial chart: every metric component is `C^∞` on the
+chart domain. -/
+def PartialChartSpacetime.IsSmooth (X : PartialChartSpacetime) : Prop :=
+  ∀ i j : Fin 4, ∃ f : SpacetimeChart → ℝ,
+    ContDiffOn ℝ ∞ f X.domain ∧
+      ∀ (x : SpacetimeChart) (hx : x ∈ X.domain),
+        f x = X.coordinateMetric x hx i j
 
 /-- Alias for `PartialChartSpacetime`. -/
 abbrev PartialChart := PartialChartSpacetime
