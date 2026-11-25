@@ -84,6 +84,40 @@ def minkowskiChart : ChartSpacetime where
   chart := Equiv.refl SpacetimeChart
   metric := fun _ => minkowski
 
+/-! ### Partial charts on restricted domains -/
+
+/-- A chart-level spacetime interface on a restricted, open subset of
+`SpacetimeChart`.  Unlike `ChartSpacetime`, whose `chart` is a global
+equivalence to all of `Fin 4 → ℝ`, a partial chart is defined only on its
+`domain`; the metric and its coordinate representatives are supplied there. -/
+structure PartialChartSpacetime where
+  /-- The open subset of `SpacetimeChart` on which the chart is defined. -/
+  domain : Set SpacetimeChart
+  /-- The chart domain is open. -/
+  domain_open : IsOpen domain
+  /-- The metric components at each point of the domain. -/
+  metric : (x : SpacetimeChart) → x ∈ domain → MetricTensor 4
+
+/-- The covariant metric components read on the partial chart domain. -/
+noncomputable def PartialChartSpacetime.coordinateMetric (X : PartialChartSpacetime)
+    (x : SpacetimeChart) (hx : x ∈ X.domain) : Tensor2 4 :=
+  (X.metric x hx).g
+
+/-- The inverse metric components read on the partial chart domain. -/
+noncomputable def PartialChartSpacetime.coordinateInverseMetric
+    (X : PartialChartSpacetime) (x : SpacetimeChart) (hx : x ∈ X.domain) :
+    Tensor2 4 :=
+  (X.metric x hx).ginv
+
+/-- Alias for `PartialChartSpacetime`. -/
+abbrev PartialChart := PartialChartSpacetime
+
+/-- Alias for `PartialChartSpacetime`. -/
+abbrev RestrictedChart := PartialChartSpacetime
+
+/-- Alias for `PartialChartSpacetime`. -/
+abbrev RestrictedChartSpacetime := PartialChartSpacetime
+
 /-- The Minkowski chart carries the Minkowski metric everywhere. -/
 lemma minkowskiChart_metric (x : SpacetimeChart) :
     minkowskiChart.metric x = minkowski := rfl

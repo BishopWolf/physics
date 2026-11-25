@@ -17,12 +17,12 @@ the Schwarzschild `(t, r, θ, φ)` components have `g_rr = (1 - 2M/r)⁻¹`
 divergent.  The chart still excludes the curvature singularity `r = 0` and the
 polar axis `sin θ = 0`, but it removes the horizon obstruction.
 
-This is a chart-level metric and inverse.  It is not packaged as a
+This is a chart-level metric and inverse.  It is not a global
 `ChartSpacetime`, whose `chart` field is a global equivalence to all of
-`Fin 4 → ℝ`; the Eddington–Finkelstein domain is the open set
-`r ≠ 0 ∧ sin θ ≠ 0`.  The coordinate curvature pipeline is evaluated directly
-on the EF components, so Ricci flatness below does not pass through the
-Schwarzschild chart and does not assume `1 - 2M/r ≠ 0`.
+`Fin 4 → ℝ`; instead it is packaged below as a `PartialChartSpacetime` on
+the open set `r ≠ 0 ∧ sin θ ≠ 0`.  The coordinate curvature pipeline is
+evaluated directly on the EF components, so Ricci flatness below does not pass
+through the Schwarzschild chart and does not assume `1 - 2M/r ≠ 0`.
 
 ## ii. Key results
 
@@ -30,6 +30,8 @@ Schwarzschild chart and does not assume `1 - 2M/r ≠ 0`.
   their explicit inverse.
 - `metricTensor` : a bundled `MetricTensor 4` for `r ≠ 0` and `sin θ ≠ 0`,
   with no `1 - 2M/r ≠ 0` hypothesis.
+- `partialChart`, `partialChartDomain` : the EF metric packaged as a
+  `PartialChartSpacetime` on its restricted domain.
 - `horizonTensor` : the same bundle at `r = 2M` when `M ≠ 0`.
 - `horizonTensor_ginv_rr`, `horizonTensor_g_vr` : the inverse `rr` component
   vanishes while the cross component remains `1`, so the horizon is regular.
@@ -52,6 +54,7 @@ Schwarzschild chart and does not assume `1 - 2M/r ≠ 0`.
 
 module
 
+public import Gravitation.ManifoldInterface
 public import Gravitation.Relativity.Metrics.Basic
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
@@ -292,6 +295,40 @@ noncomputable def metricTensor (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
   inv_left := metric_mul_inv M x hr hsin
   inv_right := metricInv_mul M x hr hsin
 
+/-- The open Eddington–Finkelstein chart domain: `r ≠ 0` and `sin θ ≠ 0`. -/
+def partialChartDomain : Set (Fin 4 → ℝ) :=
+  {x | x 1 ≠ 0 ∧ Real.sin (x 2) ≠ 0}
+
+/-- The Eddington–Finkelstein chart domain is open. -/
+lemma partialChartDomain_isOpen : IsOpen partialChartDomain := by
+  have h1 : IsOpen {x : SpacetimeChart | x 1 ≠ 0} :=
+    (continuous_apply 1).isOpen_preimage ({0}ᶜ) isOpen_compl_singleton
+  have hsin_cont : Continuous (fun x : SpacetimeChart => Real.sin (x 2)) :=
+    Real.continuous_sin.comp (continuous_apply 2)
+  have h2 : IsOpen {x : SpacetimeChart | Real.sin (x 2) ≠ 0} :=
+    hsin_cont.isOpen_preimage ({0}ᶜ) isOpen_compl_singleton
+  rw [partialChartDomain, Set.ofPred_and]
+  exact h1.inter h2
+
+/-- The Eddington–Finkelstein metric packaged as a partial chart on its
+restricted domain. -/
+noncomputable def partialChart (M : ℝ) : PartialChartSpacetime where
+  domain := partialChartDomain
+  domain_open := partialChartDomain_isOpen
+  metric := fun x hx => metricTensor M x hx.1 hx.2
+
+/-- Alias for `partialChart`. -/
+noncomputable def partialChartSpacetime (M : ℝ) : PartialChartSpacetime :=
+  partialChart M
+
+/-- Alias for `partialChart`. -/
+noncomputable def restrictedChart (M : ℝ) : PartialChartSpacetime :=
+  partialChart M
+
+/-- Alias for `partialChart`. -/
+noncomputable def restrictedChartSpacetime (M : ℝ) : PartialChartSpacetime :=
+  partialChart M
+
 /-- The horizon point `r = 2M` in Eddington–Finkelstein coordinates. -/
 def horizonPoint (M v θ φ : ℝ) : Fin 4 → ℝ :=
   ![v, 2 * M, θ, φ]
@@ -347,5 +384,22 @@ lemma ricciTensorOf_metric_horizon (M v θ φ : ℝ) (hM : M ≠ 0)
       simpa [horizonPoint] using hsin) σ ν
 
 end EddingtonFinkelstein
+
+/-- Global alias for the Eddington–Finkelstein partial chart. -/
+noncomputable def eddingtonFinkelsteinPartialChart (M : ℝ) : PartialChartSpacetime :=
+  EddingtonFinkelstein.partialChart M
+
+/-- Global alias for the Eddington–Finkelstein partial chart. -/
+noncomputable def eddingtonFinkelsteinPartialChartSpacetime (M : ℝ) :
+    PartialChartSpacetime :=
+  EddingtonFinkelstein.partialChart M
+
+/-- Global alias for the Eddington–Finkelstein partial chart. -/
+noncomputable def eddingtonFinkelsteinRestrictedChart (M : ℝ) : PartialChartSpacetime :=
+  EddingtonFinkelstein.partialChart M
+
+/-- Global alias for the Eddington–Finkelstein partial chart. -/
+noncomputable def eddingtonFinkelsteinChart (M : ℝ) : PartialChartSpacetime :=
+  EddingtonFinkelstein.partialChart M
 
 end GeneralRelativity
