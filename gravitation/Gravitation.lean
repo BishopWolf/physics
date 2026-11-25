@@ -23,6 +23,7 @@ public import Gravitation.EddingtonFinkelstein
 public import Gravitation.Bianchi
 public import Gravitation.InitialDataInterface
 public import Gravitation.SobolevInitialData
+public import Gravitation.SchwarzschildManifold
 public import Gravitation.CauchyInterfaces
 public import Gravitation.ReducedWave3D
 public import Gravitation.ReducedCauchy
@@ -128,6 +129,9 @@ general relativity.
 - `GeneralRelativity.ManifoldTransition`, `ManifoldInitialData.IsCompatible` :
   isometric chart transitions preserve the induced spatial metric, and induced
   manifold initial data are compatible across them.
+- `GeneralRelativity.Schwarzschild.manifoldInitialData` :
+  the exterior Schwarzschild manifold-level time-symmetric initial-data
+  instance.
 - `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` :
   chart-level isometry and embedding API, with identity, inverse and composition.
 - `GeneralRelativity.Geodesics.geodesic_ivp_exists` : local existence for the

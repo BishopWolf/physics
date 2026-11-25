@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1157 declarations, 714 of them theorem-like. An independent Vulkan
+contains 1188 declarations, 735 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -173,7 +173,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1157 declarations, 714 of them theorem-like; no declaration uses `sorry`,
+1188 declarations, 735 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -222,6 +222,8 @@ paper. Here the constraints are used as the initial-value layer that the exact
 solutions must satisfy. The manifold wrapper also carries isometric chart
 transitions: on an overlap, the induced spatial metric and the ADM data are
 proved compatible, while arbitrary multi-chart atlas gluing remains outside.
+A regular exterior Schwarzschild chart gives a concrete manifold-level
+instance with the curved time-symmetric slice.
 
 ### 4.3 Geodesics
 
@@ -637,6 +639,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.SobolevInitialData` | 39 |
 | `Gravitation.Bianchi` | 38 |
 | `Gravitation.Cosmology.FLRW.Metric` | 31 |
+| `Gravitation.SchwarzschildManifold` | 31 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.Basic` | 30 |
 | `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 29 |
 | `Gravitation.Relativity.General.Modified.ChameleonScreening` | 26 |
@@ -708,9 +711,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Tensors.Tensor2` | 2 |
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1157** |
+| **Total** | **1188** |
 
-All 1157 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1188 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

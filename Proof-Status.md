@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1157 declarations, 714 of them theorem-like. The table below is the
+1188 declarations, 735 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -1031,6 +1031,37 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.RiemannTensor.flat_comp` | `Gravitation/Relativity/Tensors/RiemannTensor.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Tensor2` | `Gravitation/Relativity/Tensors/Tensor2.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsSymm` | `Gravitation/Relativity/Tensors/Tensor2.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPoint` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPoint_radial_pos` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPoint_lapse_pos` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPoint_sin_pos` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiff_exteriorRadial` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiff_exteriorLapse` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiff_exteriorLapseInv` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiff_exteriorCosAtan` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiff_exteriorSin` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorMetric` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorChart` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorChart_coordinateMetric` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorChart_isSmooth` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorSmoothChart` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.manifold` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorSpatialPoint` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorSpatialPoint_radial_pos` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorSpatialPoint_lapse_pos` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorSpatialPoint_sin_pos` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.spatialMetricTensor` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.ricciScalar_spatialRiemannTensorOf` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.sdsSpatialMetric_isSymm` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiffAt_sdsLapse_zero` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiffAt_sdsLapse_zero_comp` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiffAt_sdsSpatialMetric` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.contDiffAt_sdsSpatialMetricInv` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorSpatialMetricTensor` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.chartInitialData` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.manifoldInitialData` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.manifoldInitialData_isInduced` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.manifoldInitialData_isCompatible` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sobolevH1NormSq1D` | `Gravitation/SobolevInitialData.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sobolevH1NormSq1D_nonneg` | `Gravitation/SobolevInitialData.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.l2_le_sobolevH1_1D` | `Gravitation/SobolevInitialData.lean` | propext, Classical.choice, Quot.sound | proved |

@@ -87,7 +87,7 @@ Metrics,Tensors}/` and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lea
 `GeneralRelativity` unchanged) at branch commit `b81c896a`, while the `physlib`
 requirement points at merged master `7910f51f`
 — the merge base the branch was written against, which also supplies the
-already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1157 audited declarations are those sources plus the local
+already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1188 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
@@ -112,7 +112,9 @@ branch lands.
 * Multi-chart transition layer — isometric transitions between global-chart
   spacetimes preserve the induced spatial metric, and induced manifold initial
   data are proved compatible under them, with reflexivity, symmetry and
-  transitivity. Arbitrary multi-chart atlas gluing remains outside.
+  transitivity. Arbitrary multi-chart atlas gluing remains outside. A regular
+  exterior Schwarzschild chart supplies a concrete manifold-level instance
+  (`Schwarzschild.manifoldInitialData`) with its curved time-symmetric slice.
 * Exact solutions — Minkowski; Schwarzschild with its orthonormal frame, all six
   Riemann components and the Kretschmann scalar `48M²/r⁶`; the interior
   incompressible sphere (TOV profile, Buchdahl bound); Schwarzschild–de Sitter
@@ -133,7 +135,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 1157 declarations (714 theorem-like) and rejects anything outside
+  all 1188 declarations (735 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`
