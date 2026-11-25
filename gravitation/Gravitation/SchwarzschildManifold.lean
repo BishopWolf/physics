@@ -30,6 +30,10 @@ not claim a global development.
   metric.
 - `manifoldInitialData_isCompatible` : the instance is compatible with itself
   under the identity chart transition.
+- `exteriorPartialDomain`, `exteriorPartialDomain_isOpen` : the Schwarzschild
+  exterior overlap set `r > 2M ∧ sin θ ≠ 0` and its openness.
+- `exteriorPartialChart` : the exterior Schwarzschild metric as a smooth
+  `PartialChartSpacetime`, the source chart of the EF overlap transition.
 -/
 
 module
@@ -155,6 +159,40 @@ lemma exteriorChart_isSmooth (M : ℝ) (hM : 0 < M) :
     | exact contDiff_exteriorLapseInv M hM
     | exact (contDiff_exteriorRadial M).pow 2
     | exact ((contDiff_exteriorRadial M).pow 2).mul (contDiff_exteriorSin.pow 2)
+
+/-- The exterior Schwarzschild domain in standard coordinates: `r > 2M` and
+off the polar axis. -/
+def exteriorPartialDomain (M : ℝ) : Set SpacetimeChart :=
+  {x | 2 * M < x 1 ∧ Real.sin (x 2) ≠ 0}
+
+/-- The exterior Schwarzschild domain is open. -/
+lemma exteriorPartialDomain_isOpen (M : ℝ) : IsOpen (exteriorPartialDomain M) := by
+  have hcont : Continuous (fun x : SpacetimeChart => x 1) := continuous_apply 1
+  have h1 : IsOpen {x : SpacetimeChart | 2 * M < x 1} :=
+    hcont.isOpen_preimage (Set.Ioi (2 * M)) isOpen_Ioi
+  have hsin_cont : Continuous (fun x : SpacetimeChart => Real.sin (x 2)) :=
+    Real.continuous_sin.comp (continuous_apply 2)
+  have h2 : IsOpen {x : SpacetimeChart | Real.sin (x 2) ≠ 0} :=
+    hsin_cont.isOpen_preimage ({0}ᶜ) isOpen_compl_singleton
+  rw [exteriorPartialDomain, Set.ofPred_and]
+  exact h1.inter h2
+
+/-- The exterior Schwarzschild metric as a partial chart on `r > 2M`. -/
+noncomputable def exteriorPartialChart (M : ℝ) (hM : 0 < M) : PartialChartSpacetime where
+  domain := exteriorPartialDomain M
+  domain_open := exteriorPartialDomain_isOpen M
+  metric := fun x hx => by
+    obtain ⟨hr, hsin⟩ := hx
+    have hx1 : (0 : ℝ) < x 1 := by linarith
+    exact StaticSpherical.staticSphericalMetricTensor (schwarzschildLapse M) x
+      hx1.ne'
+      (by
+        have hfrm : schwarzschildLapse M (x 1) = (x 1 - 2 * M) / x 1 := by
+          simp only [schwarzschildLapse]
+          field_simp [hx1.ne']
+        rw [hfrm]
+        exact div_ne_zero (by linarith) hx1.ne')
+      hsin
 
 /-- The exterior Schwarzschild chart with its smooth-chart homeomorphism. -/
 noncomputable def exteriorSmoothChart (M : ℝ) (hM : 0 < M) :

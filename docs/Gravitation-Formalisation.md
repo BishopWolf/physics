@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1248 declarations, 768 of them theorem-like. An independent Vulkan
+contains 1262 declarations, 774 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1248 declarations, 768 of them theorem-like; no declaration uses `sorry`,
+1262 declarations, 774 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -590,8 +590,10 @@ $r=2M$, with $g_{rr}=0$, $g^{rr}=0$ and $g_{vr}=1$. Its coordinate Ricci
 tensor is proved flat directly from the EF components, including at $r=2M$.
 It does not remove the curvature singularity or the axis, and the full Riemann
 component theorems above remain stated in Schwarzschild coordinates. A Kruskal–Szekeres chart is now available at metric level, with a certified
-nondegenerate metric across the horizon; a full maximal extension still requires
-multi-chart gluing and the general Cauchy development is treated in the
+nondegenerate metric across the horizon. The Eddington–Finkelstein and
+Schwarzschild exterior charts are proved to agree on their overlap, via the
+tortoise-coordinate transition map and a metric pullback identity; general
+multi-chart gluing still requires the Cauchy development treated in the
 companion paper.
 
 ## 7. Reproducibility
@@ -640,7 +642,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | Module | Declarations |
 | --- | --- |
 | `Gravitation.InitialDataInterface` | 77 |
-| `Gravitation.ManifoldInterface` | 70 |
+| `Gravitation.ManifoldInterface` | 72 |
 | `PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere` | 53 |
 | `Gravitation.Relativity.General.Schwarzschild.Basic` | 42 |
 | `Gravitation.Relativity.Metrics.CoordinateMetric` | 39 |
@@ -648,10 +650,10 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Bianchi` | 38 |
 | `Gravitation.KruskalSzekeres` | 33 |
 | `Gravitation.Cosmology.FLRW.Metric` | 31 |
-| `Gravitation.SchwarzschildManifold` | 31 |
+| `Gravitation.SchwarzschildManifold` | 34 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.Basic` | 30 |
 | `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 29 |
-| `Gravitation.EddingtonFinkelstein` | 27 |
+| `Gravitation.EddingtonFinkelstein` | 36 |
 | `Gravitation.Relativity.General.Modified.ChameleonScreening` | 26 |
 | `Gravitation.Relativity.General.Modified.EinsteinCartan` | 26 |
 | `Gravitation.Relativity.General.Kerr.Basic` | 25 |
@@ -720,9 +722,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Tensors.Tensor2` | 2 |
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1248** |
+| **Total** | **1262** |
 
-All 1248 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1262 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

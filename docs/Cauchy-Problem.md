@@ -43,7 +43,7 @@ the present pointwise framework. The missing layers are identified and ordered
 into a concrete roadmap: manifold Lorentzian geometry, Sobolev and elliptic
 theory for the constraints, quasilinear hyperbolic existence in a suitable
 gauge, and gauge/constraint propagation together with geometric maximality.
-The Cauchy-programme modules contribute 338 of the 1248 audited declarations
+The Cauchy-programme modules contribute 352 of the 1262 audited declarations
 in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints ·
@@ -261,8 +261,9 @@ Four layers separate the present pointwise development from the theorem above.
    construct an intrinsic manifold curvature or an arbitrary atlas. The
    horizon-regular Eddington–Finkelstein metric and inverse are available at
    chart level, including at $r=2M$, and its coordinate Ricci tensor is proved
-   flat directly there, but they are not a Cauchy development
-   and they do not glue charts. Mathlib has smooth manifolds, but this
+   flat directly there, but they are not a Cauchy development.
+   The only proved chart gluing is the Eddington–Finkelstein–Schwarzschild
+   exterior overlap, via a metric pullback identity. Mathlib has smooth manifolds, but this
    repository has no pseudo-Riemannian layer, manifold Levi-Civita connection
    or causality theory.
 2. **Sobolev spaces and the constraint problem.** The theorem is usually stated
@@ -298,7 +299,7 @@ The layers above suggest an order in which the work can be made checkable.
 | --- | --- | --- |
 | M0 | Linear 3D wave model on a box: energy, conservation, zero-energy, zero-data and general-data uniqueness | **Done** for the constant-coefficient wave equation on a closed box, under explicit regularity and Dirichlet data |
 | M0.5 | Linearized Einstein equations in wave gauge | **Interface** for wave-gauge perturbations with $\Box\bar h=0$, including a TT plane-wave instance; not a manifold derivation |
-| M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality, Bianchi | **Done at chart/global-chart scope**, including a horizon-regular Eddington–Finkelstein metric and inverse with direct Ricci flatness at the horizon, a Kruskal–Szekeres chart with a certified nondegenerate metric across the horizon, and isometric chart transitions preserving the induced metric and initial data; arbitrary multi-chart gluing and geometric patching remain outside |
+| M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality, Bianchi | **Done at chart/global-chart scope**, including a horizon-regular Eddington–Finkelstein metric and inverse with direct Ricci flatness at the horizon, a Kruskal–Szekeres chart with a certified nondegenerate metric across the horizon, and isometric chart transitions preserving the induced metric and initial data, including a proved Eddington–Finkelstein–Schwarzschild exterior overlap; arbitrary multi-chart gluing and geometric patching remain outside |
 | M2 | Manifold Sobolev spaces $H^s$, trace and embedding estimates, constraint data | **Done at 1D/3D-box Sobolev and curved-slice scope**: chart regularity, derived spatial curvature and momentum derivative, Minkowski and exterior Schwarzschild manifold-level instances, Brill–Lindquist conformal factor, Schwarzschild–de Sitter slice, flat FLRW data; general elliptic solving remains outside |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | **Done at linearized 3D box and nonlinear flat-FLRW scope**: directional plane waves, superposition, harmonic gauge condition, linearized-box existence, and the FLRW reduced Einstein ODE; full $H^s(\mathbb{R}^3)$ quasilinear existence remains outside |
 | M4 | Gauge recovery and constraint propagation | **Done at linearized 3D box and nonlinear flat-FLRW scope**: Bianchi constraint-propagation split, linearized gauge recovery, and FLRW propagation recovering the full Einstein equation; non-symmetric nonlinear 4D $H^s$ propagation remains outside |
@@ -314,8 +315,9 @@ covariant derivatives, torsion-freeness, metric compatibility, a chart Cauchy
 surface, Minkowski global hyperbolicity, and the general second and contracted
 Bianchi identities. The EF chart is a concrete instance with direct Ricci
 flatness, including at the horizon. Isometric chart transitions are checked,
-including compatibility of induced initial data; arbitrary multi-chart gluing
-remains open. M2 is complete
+including compatibility of induced initial data and the
+Eddington–Finkelstein–Schwarzschild exterior overlap; arbitrary multi-chart
+gluing remains open. M2 is complete
 at 1D/3D-box Sobolev and curved-slice scope, but general elliptic constraint
 solving on arbitrary 3-manifolds is open. M3 and M4 are complete at
 linearized-box and nonlinear-FLRW scope; the non-symmetric nonlinear 4D
@@ -330,12 +332,12 @@ the maximality problem until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I has 1248 declarations. It contains the
+The development audited in Paper I has 1262 declarations. It contains the
 constraint, geodesic, wave, energy, uniqueness, chart, Bianchi, Sobolev,
 reduced-Cauchy, gauge-recovery, maximal-development and explicit-development
 layers discussed here, together with the solution theory, the alternative
 theories, the axiom audit and the numerical pass. This paper's formal
-contribution is 338 declarations. The remainder of Paper I is the written
+contribution is 352 declarations. The remainder of Paper I is the written
 account of the exact solutions.
 
 The two papers share a boundary. Paper I proves that explicit metrics solve
@@ -351,7 +353,7 @@ take for granted when they exhibit a solution.
 The build is silent, no declaration uses `sorry`, `admit` or an axiom of its
 own, and every axiom report stays inside
 $\{\mathrm{propext},\mathrm{Classical.choice},\mathrm{Quot.sound}\}$. The
-axiom audit covers 1248 declarations, 768 of them theorem-like, and the
+axiom audit covers 1262 declarations, 774 of them theorem-like, and the
 generated proof-status table is checked against the audit. The commands are:
 
 ```sh

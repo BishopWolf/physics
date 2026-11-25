@@ -29,6 +29,11 @@ with Minkowski spacetime as its first instance.
 - `ChartSpacetime.Isometry`, `ChartSpacetime.Embedding`,
   `ChartSpacetime.IsIsometric` : chart-level isometry and embedding API with
   identity, inverse and composition lemmas.
+- `PartialChartSpacetime`, `PartialChartSpacetime.IsSmooth` : chart-level
+  spacetime on a restricted open domain with a smoothness certificate.
+- `PartialChartTransition`, `PartialChartTransition.refl` : isometric overlap
+  certificate between partial charts (open overlap, smooth transition map,
+  metric pullback through an explicit Jacobian) with the identity instance.
 
 ## iii. Table of contents
 
@@ -128,6 +133,51 @@ abbrev RestrictedChart := PartialChartSpacetime
 
 /-- Alias for `PartialChartSpacetime`. -/
 abbrev RestrictedChartSpacetime := PartialChartSpacetime
+
+/-- An isometric overlap between two partial charts: an open overlap set with
+a smooth transition map under which the source metric is the pullback of the
+target metric through an explicit Jacobian.  This is the chart-patching
+certificate for partial charts: it records that two coordinate descriptions
+agree where they overlap, without claiming a geometric manifold
+amalgamation. -/
+structure PartialChartTransition (X Y : PartialChartSpacetime) where
+  /-- The open overlap set, contained in the source domain. -/
+  overlap : Set SpacetimeChart
+  /-- The overlap is open. -/
+  overlap_open : IsOpen overlap
+  /-- The overlap lies in the source chart domain. -/
+  overlap_subset : overlap ⊆ X.domain
+  /-- The transition map into target coordinates. -/
+  toFun : SpacetimeChart → SpacetimeChart
+  /-- The transition map is smooth on the overlap. -/
+  smooth : ContDiffOn ℝ ∞ toFun overlap
+  /-- The transition map lands in the target domain. -/
+  maps_into : ∀ x ∈ overlap, toFun x ∈ Y.domain
+  /-- The Jacobian of the transition map. -/
+  jacobian : SpacetimeChart → Matrix (Fin 4) (Fin 4) ℝ
+  /-- The source metric is the pullback of the target metric through the
+  Jacobian: `g_X(x) = J(x)ᵀ · g_Y(Φ(x)) · J(x)` on the overlap. -/
+  metric_pullback : ∀ (x : SpacetimeChart) (hx : x ∈ overlap),
+    (X.metric x (overlap_subset hx)).g =
+      (jacobian x).transpose * (Y.metric (toFun x) (maps_into x hx)).g * jacobian x
+
+namespace PartialChartTransition
+
+/-- The identity transition on a partial chart. -/
+noncomputable def refl (X : PartialChartSpacetime) : PartialChartTransition X X where
+  overlap := X.domain
+  overlap_open := X.domain_open
+  overlap_subset := Set.Subset.rfl
+  toFun := id
+  smooth := contDiffOn_id
+  maps_into := fun x hx => hx
+  jacobian := fun _ => 1
+  metric_pullback := by
+    intro x hx
+    simp only [Matrix.transpose_one, Matrix.one_mul, Matrix.mul_one]
+    rfl
+
+end PartialChartTransition
 
 /-- The Minkowski chart carries the Minkowski metric everywhere. -/
 lemma minkowskiChart_metric (x : SpacetimeChart) :

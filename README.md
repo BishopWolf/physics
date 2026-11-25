@@ -115,8 +115,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1248
-declarations, 768 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1262
+declarations, 774 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -188,6 +188,9 @@ Weyl tensor removes.
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor`, `horizonTensor_g_rr`, `horizonTensor_ginv_rr`, `horizonTensor_g_vr` | at `r = 2M`, `g_rr = 0`, `g^rr = 0` and `g_vr = 1`, so the horizon metric is nondegenerate |
 | `GeneralRelativity.EddingtonFinkelstein.ricciTensorOf_metric`, `ricciTensorOf_metric_horizon` | coordinate Ricci tensor computed directly from the EF metric vanishes for `r ≠ 0`, `sin θ ≠ 0`, including at `r = 2M` |
 | `GeneralRelativity.PartialChartSpacetime`, `GeneralRelativity.EddingtonFinkelstein.partialChart`, `GeneralRelativity.EddingtonFinkelstein.partialChart_isSmooth` | partial-chart packaging of the EF metric on the restricted domain `r ≠ 0`, `sin θ ≠ 0`, with a smoothness certificate |
+| `GeneralRelativity.PartialChartTransition`, `PartialChartTransition.refl` | isometric overlap certificate between partial charts (smooth transition map, metric pullback through an explicit Jacobian), with the identity instance |
+| `GeneralRelativity.Schwarzschild.exteriorPartialDomain`, `exteriorPartialChart` | exterior Schwarzschild metric as a smooth partial chart on the open overlap `r > 2M`, `sin θ ≠ 0` |
+| `GeneralRelativity.EddingtonFinkelstein.tortoiseStar`, `deriv_tortoiseStar`, `schwarzschildToEF`, `transitionJacobian`, `schwarzschild_eq_pullback`, `schwarzschildEFTransition` | tortoise coordinate with derivative `(1 - 2M/r)⁻¹`, EF–Schwarzschild transition map and Jacobian, metric pullback identity, and the exterior overlap transition |
 | `GeneralRelativity.KruskalSzekeres.partialChart`, `GeneralRelativity.KruskalSzekeres.partialChart_isSmooth`, `GeneralRelativity.KruskalSzekeres.horizonPoint_mem_partialChartDomain` | partial-chart packaging of the Kruskal–Szekeres metric outside the singularity, with the horizon in its domain, with a smoothness certificate |
 | `GeneralRelativity.KruskalSzekeres.metric`, `metricInv`, `metricTensor`, `horizonTensor`, `horizonTensor_g_00`, `horizonTensor_g_11`, `horizonTensor_ginv_00`, `horizonTensor_ginv_11` | Kruskal–Szekeres metric and inverse, with a finite nonzero conformal factor across the horizon |
 | `GeneralRelativity.ChartSpacetime` | chart-level spacetime interface with a metric field |
@@ -371,7 +374,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1248 at this revision, 768 theorem-like) and rejects any axiom outside
+declaration (1262 at this revision, 774 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

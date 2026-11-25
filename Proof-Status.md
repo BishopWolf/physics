@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1248 declarations, 768 of them theorem-like. The table below is the
+1262 declarations, 774 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -130,6 +130,15 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor_ginv_rr` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.horizonTensor_g_vr` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.ricciTensorOf_metric_horizon` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.tortoiseStar` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.deriv_tortoiseStar` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.contDiffOn_tortoiseStar` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.schwarzschildToEF` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.contDiffOn_schwarzschildToEF` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.transitionJacobian` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.transitionJacobian_zero_one` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.schwarzschild_eq_pullback` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.EddingtonFinkelstein.schwarzschildEFTransition` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.eddingtonFinkelsteinPartialChart` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.eddingtonFinkelsteinPartialChartSpacetime` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.eddingtonFinkelsteinRestrictedChart` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -277,6 +286,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.PartialChart` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.RestrictedChart` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.RestrictedChartSpacetime` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.PartialChartTransition` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.PartialChartTransition.refl` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_metric` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_chart` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartSpacetime.coordinateMetric` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -1104,6 +1115,9 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Schwarzschild.exteriorChart` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.exteriorChart_coordinateMetric` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.exteriorChart_isSmooth` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPartialDomain` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPartialDomain_isOpen` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.exteriorPartialChart` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.exteriorSmoothChart` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.manifold` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.exteriorSpatialPoint` | `Gravitation/SchwarzschildManifold.lean` | propext, Classical.choice, Quot.sound | proved |
