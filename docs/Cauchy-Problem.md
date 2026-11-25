@@ -122,7 +122,7 @@ Cauchy theorem needs.
 
 ## 3. Formalised geodesic Cauchy problem
 
-The module `Gravitation.Relativity.General.Geodesics` treats the second-order
+The module `Gravitation.Relativity.General.GeodesicSystem` treats the second-order
 geodesic equation as a first-order autonomous ODE on `E × E`:
 
 ```lean
@@ -522,7 +522,7 @@ The twenty-two formal modules named here can be read directly:
 - `gravitation/Gravitation/MaximalDevelopment.lean`
 - `gravitation/Gravitation/ExplicitDevelopments.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/InitialData.lean`
-- `gravitation/vendor/Gravitation/Relativity/General/Geodesics.lean`
+- `gravitation/vendor/Gravitation/Relativity/General/GeodesicSystem.lean`
 
 ## 10. What is not claimed
 
