@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1196 declarations, 743 of them theorem-like. The table below is the
+1215 declarations, 755 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -218,6 +218,25 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.minkowskiManifoldInitialData_isCompatible` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.kretschmann_scalar_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.kretschmann_sds_total` | `Gravitation/KretschmannTotal.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.kruskalF` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.kruskalRadius` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.kruskalRadius_pos` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.kruskalRadius_zero` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.metric` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.metricInv` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.metric_symm` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.metric_mul_inv` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.metricInv_mul` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.metricTensor` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonPoint` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonPoint_sq_diff` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonTensor` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonConformalFactor` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonTensor_g_00` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonTensor_g_11` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonTensor_ginv_00` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonTensor_ginv_11` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.horizonTensor_regular` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Linearized.WaveGaugePerturbation` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Linearized.ttWave_contDiffAt` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Linearized.ttWave_waveGauge` | `Gravitation/LinearizedWaveGauge.lean` | propext, Classical.choice, Quot.sound | proved |
