@@ -330,43 +330,13 @@ distance to it is visible.
 
 ## 6. What is missing
 
-The distance is not a single lemma. Five layers separate the present pointwise
-development from the theorem above.
+Five layers separate the present pointwise development from the theorem above.
 
-1. **Manifold and Lorentzian geometry.** The current `Metric` and
-   `MetricTensor` are matrices with a proved two-sided inverse at a point.
-   A Cauchy development needs a smooth 3-manifold `Σ`, a Lorentzian 4-manifold
-   `M`, an embedding `Σ → M`, an induced metric, an extrinsic curvature, and
-   isometries between developments. Mathlib has smooth manifolds, but the
-   repository has no pseudo-Riemannian manifold layer, no Levi-Civita connection
-   on a manifold, and no causality theory (Cauchy surfaces, global
-   hyperbolicity).
-2. **Curvature and derivative data from geometry.** In `InitialData`, `R3` and
-   `dK` are supplied. A Cauchy theorem must obtain them from `h` and `K` via the
-   connection and the embedding. The coordinate pipeline of Paper I computes
-   curvature from a metric *field in a chart*; lifting it to a manifold is part
-   of this layer.
-3. **Sobolev spaces and the constraint problem.** The theorem is usually stated
-   for Sobolev data `H^s` with `s` sufficiently large (or smooth data). Mathlib's
-   `Analysis/Distribution/Sobolev.lean` module works on `ℝⁿ`, not on manifolds, and the
-   repository contains no elliptic theory for solving the constraints. The
-   present module checks the constraints; it does not solve them.
-4. **Quasilinear hyperbolic existence.** After harmonic/wave gauge, the vacuum
-   Einstein equations become a quasilinear symmetric hyperbolic system. Proving
-   local existence for that system is the analytic core of [4]. Mathlib has no
-   such theorem, and no PDE library currently in the dependency graph supplies
-   one; the Lean PDE projects surveyed for this paper are elliptic or
-   Navier–Stokes formalisations, not quasilinear hyperbolic systems. The
-   one-dimensional linear wave theorem of §4 is a model, not this layer: it has
-   constant coefficients, no quasilinearity and no gauge.
-5. **Gauge and constraint propagation, then maximality.** One must show that a
-   solution of the reduced system satisfies the gauge condition and the full
-   Einstein equations, that the constraints propagate, and that developments can
-   be patched to a maximal one. Constraint propagation uses the contracted
-   Bianchi identity, which `Gravitation.Bianchi` now proves in general
-   coordinates and arbitrary dimension (`second_bianchi`, `contracted_bianchi`,
-   `covDiv_einstein_eq_zero`). Maximality then needs the Zorn argument of [1]
-   or the construction of [2], together with an isometry/embedding API.
+1. **Manifold and Lorentzian geometry.** The current `Metric` and `MetricTensor` are matrices with a proved two-sided inverse at a point. A Cauchy development needs a smooth 3-manifold `Σ`, a Lorentzian 4-manifold `M`, an embedding, an induced metric, an extrinsic curvature and isometries. Mathlib has smooth manifolds, but this repository has no pseudo-Riemannian layer, manifold Levi-Civita connection or causality theory.
+2. **Curvature and derivative data from geometry.** `InitialData` supplies `R3` and `dK`; a Cauchy theorem must derive them from `h` and `K`. Paper I computes curvature from a metric field in a chart, and lifting that pipeline to a manifold belongs to this layer.
+3. **Sobolev spaces and the constraint problem.** The theorem is usually stated for Sobolev data `H^s` with `s` large, or for smooth data. Mathlib's Sobolev module works on `ℝⁿ`, not on manifolds, and the repository has no elliptic theory for solving the constraints. The present module checks the constraints; it does not solve them.
+4. **Quasilinear hyperbolic existence.** In harmonic/wave gauge the vacuum Einstein equations become a quasilinear symmetric hyperbolic system; local existence for that system is the analytic core of [4]. No Mathlib or dependency PDE theorem supplies it, and the surveyed Lean PDE projects are elliptic or Navier–Stokes formalisations. The linear wave theorem of §4 is a constant-coefficient model, not this layer.
+5. **Gauge and constraint propagation, then maximality.** One must show that a reduced solution satisfies the gauge condition and the full Einstein equations, that the constraints propagate, and that developments patch to a maximal one. Propagation uses the contracted Bianchi identity, proved in `Gravitation.Bianchi` (`second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero`). Maximality needs the Zorn argument of [1] or the construction of [2], together with an isometry/embedding API.
 
 ## 7. A formalisation roadmap
 
