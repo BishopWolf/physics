@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1108 declarations, 687 of them theorem-like. The table below is the
+1109 declarations, 687 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -142,6 +142,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.minkowskiChart_spatialMetric` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.ofDerivedData` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ChartInitialData.ofFields` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.Regular` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.ham_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartInitialData.mom_zero` | `Gravitation/InitialDataInterface.lean` | propext, Classical.choice, Quot.sound | proved |

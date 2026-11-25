@@ -113,7 +113,7 @@ general relativity.
   the ADM Hamiltonian and momentum constraints.
 - `GeneralRelativity.spatialRiemannTensorOf`,
   `spatialRiemannTensorOfConstMetric`, `extrinsicDerivativeOf`,
-  `minkowskiChartInitialDataDerived` :
+  `ChartInitialData.ofFields`, `minkowskiChartInitialDataDerived` :
   the 3D Riemann tensor and momentum-constraint derivative derived from the
   spatial metric and extrinsic-curvature fields, exercised on Minkowski.
 - `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` :

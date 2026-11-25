@@ -30,6 +30,8 @@ constraint solving remain outside this interface.
   derived from an extrinsic-curvature field.
 - `ChartInitialData`, `ChartInitialData.ofDerivedData` : bundled chart initial
   data and the constructor taking the derived curvature and derivative data.
+- `ChartInitialData.ofFields` : field-level constructor computing `R3` and `dK`
+  from metric and extrinsic-curvature fields.
 - `minkowskiChartInitialDataDerived` : the Minkowski chart data reconstructed
   through the derived curvature and momentum constructors.
 - `ChartInitialData.constraintResidual_eq_zero` : bundled vacuum data have zero
@@ -297,6 +299,29 @@ noncomputable def ChartInitialData.ofDerivedData
   dK := dK
   vacuum := vacuum
 
+/-- Chart initial data whose `R3` and `dK` are computed from metric and
+extrinsic-curvature fields.  The vacuum proof remains an explicit input: this
+constructor packages the geometric data, it does not solve the constraints. -/
+noncomputable def ChartInitialData.ofFields
+    (X : ChartSpacetime) (M : MetricTensor 3)
+    (h hinv : (Fin 3 → ℝ) → Tensor2 3) (K : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ)
+    (hgSymm : ∀ᶠ y in 𝓝 x, ∀ i j, h y i j = h y j i)
+    (hInv : ∀ᶠ y in 𝓝 x, ∀ m j,
+      ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
+    (hΓD : ∀ k i j,
+      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j,
+      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i)
+    (Ksymm : IsSymm (K x))
+    (vacuum : (InitialData.mk M
+      (spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ)
+      (K x) Ksymm).IsVacuumData (extrinsicDerivativeOf K x)) :
+    ChartInitialData X :=
+  ChartInitialData.ofDerivedData X M (K x) Ksymm
+    (spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ)
+    (extrinsicDerivativeOf K x) vacuum
+
 /-- Chart-level regularity of initial data: smooth metric components and smooth
 momentum-constraint derivatives.  The ADM tensors themselves are pointwise
 matrices, so their regularity is carried by these two fields. -/
@@ -398,16 +423,42 @@ lemma minkowskiChartInitialData_constraintResidual_eq_zero :
 momentum constructors: the constant Euclidean metric gives `R3 = flat 3`, and
 zero extrinsic curvature gives `dK = 0`. -/
 noncomputable def minkowskiChartInitialDataDerived : ChartInitialData minkowskiChart := by
-  let K : Tensor2 3 := 0
-  let R3 := spatialRiemannTensorOfConstMetric euclid3 0
-  have hR3 : R3 = RiemannTensor.flat 3 :=
-    spatialRiemannTensorOfConstMetric_eq_flat euclid3 0
-  let dK := extrinsicDerivativeOf (fun _ : Fin 3 → ℝ => K) 0
-  have hdK : dK = fun _ => 0 := by
+  let h : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.g
+  let hinv : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.ginv
+  let K : (Fin 3 → ℝ) → Tensor2 3 := fun _ => 0
+  let hgSymm : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ i j, h y i j = h y j i := by
+    filter_upwards with y i j
+    simp [h, euclid3, Matrix.one_apply, eq_comm]
+  let hInv : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ m j,
+      ∑ a, hinv y a m * h y a j = if m = j then 1 else 0 := by
+    filter_upwards with y m j
+    simp [h, hinv, euclid3, Matrix.one_apply, eq_comm]
+  let hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) 0 := by
+    intro i j
+    exact contDiffAt_const
+  let hΓD : ∀ k i j,
+      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) 0 := by
+    intro k i j
+    have hc : (fun y : Fin 3 → ℝ => Pipeline.christoffel h hinv y k i j) = fun _ => 0 := by
+      funext y
+      exact Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j
+    rw [hc]
+    exact differentiableAt_const 0
+  let hΓ : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ k i j,
+      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i := by
+    filter_upwards with y k i j
+    rw [Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j,
+      Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k j i]
+  have hR3 : spatialRiemannTensorOf h hinv 0 hgSymm hInv hgC2 hΓD hΓ =
+      RiemannTensor.flat 3 :=
+    spatialRiemannTensorOf_const euclid3.g h hinv 0 (fun _ => rfl) hgSymm hInv hgC2 hΓD hΓ
+  have hdK : extrinsicDerivativeOf K 0 = fun _ => 0 := by
+    change extrinsicDerivativeOf (fun _ : Fin 3 → ℝ => (0 : Tensor2 3)) 0 = fun _ => 0
     funext μ
-    exact extrinsicDerivativeOf_const K 0 μ
-  refine ChartInitialData.ofDerivedData minkowskiChart euclid3 K Matrix.isSymm_zero R3 dK ?_
+    exact extrinsicDerivativeOf_const 0 0 μ
+  refine ChartInitialData.ofFields minkowskiChart euclid3 h hinv K 0 hgSymm hInv hgC2 hΓD hΓ
+    Matrix.isSymm_zero ?_
   rw [hR3, hdK]
-  simpa [flatData] using flatData_isVacuum
+  simpa [h, K, flatData] using flatData_isVacuum
 
 end GeneralRelativity
