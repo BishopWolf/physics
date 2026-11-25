@@ -113,8 +113,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1109
-declarations, 687 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1114
+declarations, 691 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -214,6 +214,7 @@ Weyl tensor removes.
 | `GeneralRelativity.spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `ChartInitialData.ofDerivedData`, `minkowskiChartInitialDataDerived` | derived 3D Riemann tensor and momentum derivative, with flat/constant and Minkowski checks |
 | `GeneralRelativity.spatialRiemannTensorOfConstMetric`, `spatialRiemannTensorOfConstMetric_eq_flat` | constant bundled metric derives flat `R3` without hand inverse hypotheses |
 | `GeneralRelativity.ChartInitialData.ofFields` | field-level chart data with `R3` and `dK` computed from metric/inverse and `K` |
+| `GeneralRelativity.ChartInitialData.ofChartData`, `differentiableAt_christoffel_of_contDiffAt_two` | arbitrary metric-field chart data with inverse relation and Christoffel symmetry derived |
 | `GeneralRelativity.SmoothChartSpacetime`, `GeneralRelativity.SmoothChartSpacetime.chartedSpace`, `GeneralRelativity.minkowskiSmoothChart` | Mathlib `ChartedSpace` bridge on chart homeomorphisms |
 | `GeneralRelativity.ChartSpacetime.IsCauchySurface`, `GeneralRelativity.ChartSpacetime.IsGloballyHyperbolic`, `GeneralRelativity.minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface and Minkowski global hyperbolicity |
 | `GeneralRelativity.Bianchi.second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero` | general second and contracted Bianchi identities, `∇·G = 0` |
@@ -356,7 +357,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1109 at this revision, 687 theorem-like) and rejects any axiom outside
+declaration (1114 at this revision, 691 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

@@ -32,6 +32,9 @@ constraint solving remain outside this interface.
   data and the constructor taking the derived curvature and derivative data.
 - `ChartInitialData.ofFields` : field-level constructor computing `R3` and `dK`
   from metric and extrinsic-curvature fields.
+- `ChartInitialData.ofChartData` : field-of-bundled-metrics constructor
+  deriving the inverse relation and Christoffel symmetry from the
+  `MetricTensor` fields and `Bianchi.christoffel_symm`.
 - `minkowskiChartInitialDataDerived` : the Minkowski chart data reconstructed
   through the derived curvature and momentum constructors.
 - `ChartInitialData.constraintResidual_eq_zero` : bundled vacuum data have zero
@@ -321,6 +324,80 @@ noncomputable def ChartInitialData.ofFields
   ChartInitialData.ofDerivedData X M (K x) Ksymm
     (spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ)
     (extrinsicDerivativeOf K x) vacuum
+
+/-- A field of bundled metrics is symmetric near every point. -/
+lemma metricField_symm (M : (Fin 3 → ℝ) → MetricTensor 3) (x : Fin 3 → ℝ) :
+    ∀ᶠ y in 𝓝 x, ∀ i j, (M y).g i j = (M y).g j i := by
+  filter_upwards with y i j
+  exact ((M y).symm.apply i j).symm
+
+/-- A field of bundled metrics satisfies the component inverse relation. -/
+lemma metricField_inv (M : (Fin 3 → ℝ) → MetricTensor 3) (x : Fin 3 → ℝ) :
+    ∀ᶠ y in 𝓝 x, ∀ m j,
+      ∑ a, (M y).ginv a m * (M y).g a j = if m = j then 1 else 0 := by
+  filter_upwards with y m j
+  calc
+    (∑ a, (M y).ginv a m * (M y).g a j)
+        = ∑ a, (M y).ginv m a * (M y).g a j := by
+          apply Finset.sum_congr rfl
+          intro a _
+          rw [(M y).ginv_symm.apply m a]
+    _ = if m = j then 1 else 0 := (M y).sum_ginv_mul_g_left m j
+
+/-- The Christoffel symbols of a field of bundled metrics are symmetric. -/
+lemma metricField_christoffel_symm (M : (Fin 3 → ℝ) → MetricTensor 3)
+    (x : Fin 3 → ℝ) :
+    ∀ᶠ y in 𝓝 x, ∀ k i j,
+      Pipeline.christoffel (fun z => (M z).g) (fun z => (M z).ginv) y k i j =
+        Pipeline.christoffel (fun z => (M z).g) (fun z => (M z).ginv) y k j i := by
+  filter_upwards with y k i j
+  exact Bianchi.christoffel_symm (fun z => (M z).g) (fun z => (M z).ginv)
+    (x := y) (by
+      filter_upwards with z i j
+      exact ((M z).symm.apply i j).symm) k i j
+
+/-- Differentiability of the coordinate Christoffel symbols from `C²` metric
+components and differentiable inverse components. -/
+lemma differentiableAt_christoffel_of_contDiffAt_two {n : ℕ}
+    {g ginv : (Fin n → ℝ) → Tensor2 n} {x : Fin n → ℝ}
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => g y i j) x)
+    (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
+    (k i j : Fin n) :
+    DifferentiableAt ℝ (fun y => Pipeline.christoffel g ginv y k i j) x := by
+  have hpdD : ∀ (μ a b : Fin n),
+      DifferentiableAt ℝ (fun y => Pipeline.coordDeriv μ (fun z => g z a b) y) x :=
+    fun μ a b => Pipeline.coordDeriv_differentiableAt μ (hgC2 a b)
+  have hterm : ∀ l : Fin n,
+      DifferentiableAt ℝ (fun y => ginv y k l *
+        (Pipeline.coordDeriv i (fun z => g z j l) y
+          + Pipeline.coordDeriv j (fun z => g z i l) y
+          - Pipeline.coordDeriv l (fun z => g z i j) y)) x := by
+    intro l
+    exact (hginvD k l).mul (((hpdD i j l).add (hpdD j i l)).sub (hpdD l i j))
+  unfold Pipeline.christoffel
+  exact DifferentiableAt.const_mul (DifferentiableAt.fun_sum fun l _ => hterm l) _
+
+/-- Chart initial data from an arbitrary field of bundled 3-metrics.  The
+inverse relation and Christoffel symmetry are derived from `MetricTensor` and
+`Bianchi.christoffel_symm`; metric and inverse-metric regularity and the vacuum
+proof remain explicit. -/
+noncomputable def ChartInitialData.ofChartData
+    (X : ChartSpacetime) (M : (Fin 3 → ℝ) → MetricTensor 3)
+    (K : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ)
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => (M y).g i j) x)
+    (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => (M y).ginv i j) x)
+    (Ksymm : IsSymm (K x))
+    (vacuum : (InitialData.mk (M x)
+      (spatialRiemannTensorOf (fun y => (M y).g) (fun y => (M y).ginv) x
+        (metricField_symm M x) (metricField_inv M x) hgC2
+        (fun k i j => differentiableAt_christoffel_of_contDiffAt_two hgC2 hginvD k i j)
+        (metricField_christoffel_symm M x))
+      (K x) Ksymm).IsVacuumData (extrinsicDerivativeOf K x)) :
+    ChartInitialData X :=
+  ChartInitialData.ofFields X (M x) (fun y => (M y).g) (fun y => (M y).ginv) K x
+    (metricField_symm M x) (metricField_inv M x) hgC2
+    (fun k i j => differentiableAt_christoffel_of_contDiffAt_two hgC2 hginvD k i j)
+    (metricField_christoffel_symm M x) Ksymm vacuum
 
 /-- Chart-level regularity of initial data: smooth metric components and smooth
 momentum-constraint derivatives.  The ADM tensors themselves are pointwise
