@@ -137,9 +137,12 @@ Two restrictions matter for what follows. First, `R3` remains a field of
 `InitialData`: the vendored module checks the constraint equation. The local
 chart layer now derives a spatial Riemann tensor from a metric field
 (`spatialRiemannTensorOf`) and packages it with `ChartInitialData.ofDerivedData`;
-the manifold-level identification of that tensor with the curvature of `h`
-remains outside. Second, `h` and `R3` are matrices and tensors at a point in a
-chart, not objects on a manifold. The module therefore formalises the *algebra*
+an intrinsic, arbitrary-multi-chart identification of that tensor with the
+curvature of `h` remains outside. Second, `h` and `R3` are matrices and tensors at a point in a
+chart, not intrinsic objects on a manifold. `ManifoldSpacetime`
+and `ManifoldInitialData` wrap the chart data at global-chart level, but they do
+not construct arbitrary multi-chart geometric tensors. The module therefore
+formalises the *algebra*
 of the constraints, which is exactly what a pointwise development can do, and
 stops short of the geometric data a Cauchy theorem needs.
 
