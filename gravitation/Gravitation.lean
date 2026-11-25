@@ -111,6 +111,9 @@ general relativity.
   symmetry of the lowered Riemann tensor.
 - `GeneralRelativity.InitialData.hamiltonianConstraint`, `momentumConstraint` :
   the ADM Hamiltonian and momentum constraints.
+- `GeneralRelativity.spatialRiemannTensorOf`, `extrinsicDerivativeOf` :
+  the 3D Riemann tensor and momentum-constraint derivative derived from the
+  spatial metric and extrinsic-curvature fields.
 - `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` :
   chart-level isometry and embedding API, with identity, inverse and composition.
 - `GeneralRelativity.Geodesics.geodesic_ivp_exists` : local existence for the

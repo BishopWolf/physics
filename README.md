@@ -113,8 +113,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1099
-declarations, 683 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1105
+declarations, 686 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -211,6 +211,7 @@ Weyl tensor removes.
 | `GeneralRelativity.ChartInitialData.Regular` | chart-level regularity package for initial data |
 | `GeneralRelativity.ConstraintResidual` | packaged Hamiltonian and momentum residuals |
 | `GeneralRelativity.ChartInitialData.constraintResidual_eq_zero` | chart vacuum data have zero constraint residual |
+| `GeneralRelativity.spatialRiemannTensorOf`, `extrinsicDerivativeOf`, `ChartInitialData.ofDerivedData` | derived 3D Riemann tensor and momentum derivative, with constant-metric checks |
 | `GeneralRelativity.SmoothChartSpacetime`, `GeneralRelativity.SmoothChartSpacetime.chartedSpace`, `GeneralRelativity.minkowskiSmoothChart` | Mathlib `ChartedSpace` bridge on chart homeomorphisms |
 | `GeneralRelativity.ChartSpacetime.IsCauchySurface`, `GeneralRelativity.ChartSpacetime.IsGloballyHyperbolic`, `GeneralRelativity.minkowskiChart_globallyHyperbolic` | chart-level Cauchy surface and Minkowski global hyperbolicity |
 | `GeneralRelativity.Bianchi.second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero` | general second and contracted Bianchi identities, `∇·G = 0` |
@@ -353,7 +354,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1099 at this revision, 683 theorem-like) and rejects any axiom outside
+declaration (1105 at this revision, 686 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

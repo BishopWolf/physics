@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Chart-level initial data
 
+## i. Overview
+
 This file provides the chart-level M2 layer by connecting a chart spacetime to
 the existing ADM `InitialData` structure.  The induced spatial metric is read
 from the `t = 0` slice of the chart metric.  The file packages smooth chart
@@ -13,10 +15,38 @@ constraint residual of bundled initial data.
 The regularity here is smooth (`ContDiff`) component regularity on a chart, not
 manifold Sobolev `H^s` theory: Sobolev spaces, trace/embedding estimates and
 constraint solving remain outside this interface.
+
+## ii. Key results
+
+- `ChartSpacetime.spatialMetric`, `ChartSpacetime.spatialMetricField` : the
+  spatial metric induced on the `t = 0` chart slice.
+- `spatialRiemannTensorOf` : the 3D Riemann tensor derived from a metric field
+  and packaged as a `RiemannTensor 3` using the coordinate skew, pair-symmetry
+  and Bianchi theorems.
+- `extrinsicDerivativeOf` : the momentum-constraint table `dK_μij = ∂_μ K_ij`
+  derived from an extrinsic-curvature field.
+- `ChartInitialData`, `ChartInitialData.ofDerivedData` : bundled chart initial
+  data and the constructor taking the derived curvature and derivative data.
+- `ChartInitialData.constraintResidual_eq_zero` : bundled vacuum data have zero
+  constraint residual.
+
+## iii. Table of contents
+
+- A. The chart slice and its induced metric
+- B. Derived curvature and extrinsic-curvature data
+- C. Bundled chart initial data and constraints
+
+## iv. References
+
+* S. M. Carroll, *Lecture Notes on General Relativity*, arXiv:gr-qc/9712019,
+  Ch. 4, p. 104. [ref: Carroll1997, p. 104]
+* R. Arnowitt, S. Deser, and C. W. Misner, *The Dynamics of General
+  Relativity*, arXiv:gr-qc/0405109, p. 1. [ref: ADM1962, p. 1]
 -/
 
 module
 
+public import Gravitation.Bianchi
 public import Gravitation.ManifoldInterface
 public import Gravitation.Relativity.General.InitialData
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
@@ -25,6 +55,7 @@ public import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 namespace GeneralRelativity
 
+open Filter Topology
 open scoped ContDiff
 
 /-- The `t = 0` coordinate slice of a four-dimensional chart. -/
@@ -83,6 +114,84 @@ lemma ChartSpacetime.spatialMetricField_contDiff (X : ChartSpacetime)
       spacetimeSlice)
   exact (hX (Fin.succ i) (Fin.succ j)).comp contDiff_spacetimeSlice
 
+/-- Extensionality for covariant Riemann tensors: equality of all components
+implies equality of the bundled tensor. -/
+lemma riemannTensor_ext {n : ℕ} {R S : RiemannTensor n}
+    (h : ∀ i j k l, R.comp i j k l = S.comp i j k l) : R = S := by
+  cases R with
+  | mk comp skew pair bianchi =>
+    cases S with
+    | mk comp' skew' pair' bianchi' =>
+      have hcomp : comp = comp' := by
+        funext i j k l
+        exact h i j k l
+      subst hcomp
+      simp
+
+/-- The `R3` tensor derived from a 3-metric field: lower the mixed coordinate
+Riemann tensor with the metric and use the coordinate skew, pair-symmetry and
+Bianchi theorems to fill the `RiemannTensor` fields.
+See arXiv:gr-qc/9712019, pp. 72–73. [ref: Carroll1997, pp. 72–73] -/
+noncomputable def spatialRiemannTensorOf
+    (h hinv : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ)
+    (hgSymm : ∀ᶠ y in 𝓝 x, ∀ i j, h y i j = h y j i)
+    (hInv : ∀ᶠ y in 𝓝 x, ∀ m j, ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
+    (hΓD : ∀ k i j,
+      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, Pipeline.christoffel h hinv y k i j =
+      Pipeline.christoffel h hinv y k j i) : RiemannTensor 3 where
+  comp := fun a b c d => ∑ e, h x a e * Pipeline.riemann h hinv x e b c d
+  skew_last := by
+    intro a b c d
+    calc
+      (∑ e, h x a e * Pipeline.riemann h hinv x e b c d)
+          = ∑ e, h x a e * (-Pipeline.riemann h hinv x e b d c) := by
+            apply Finset.sum_congr rfl
+            intro e _
+            rw [Bianchi.riemann_skew_last]
+      _ = -∑ e, h x a e * Pipeline.riemann h hinv x e b d c := by
+            simp_rw [mul_neg, Finset.sum_neg_distrib]
+  pair_symm := by
+    intro a b c d
+    exact Bianchi.riemann_lower_pair_symm h hinv hgSymm hInv hgC2 hΓD hΓ a b c d
+  bianchi := by
+    intro a b c d
+    exact Bianchi.riemann_lower_bianchi h hinv x hΓ a b c d
+
+/-- The derived `R3` of a constant metric is the flat Riemann tensor. -/
+theorem spatialRiemannTensorOf_const
+    (G : Tensor2 3) (h hinv : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ)
+    (hG : ∀ y, h y = G)
+    (hgSymm : ∀ᶠ y in 𝓝 x, ∀ i j, h y i j = h y j i)
+    (hInv : ∀ᶠ y in 𝓝 x, ∀ m j, ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
+    (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
+    (hΓD : ∀ k i j,
+      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, Pipeline.christoffel h hinv y k i j =
+      Pipeline.christoffel h hinv y k j i) :
+    spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ =
+      RiemannTensor.flat 3 := by
+  apply riemannTensor_ext
+  intro a b c d
+  change (∑ e, h x a e * Pipeline.riemann h hinv x e b c d) = 0
+  apply Finset.sum_eq_zero
+  intro e _
+  rw [Pipeline.riemann_const h hinv G hG x e b c d]
+  ring
+
+/-- The momentum-constraint derivative table `dK_μij = ∂_μ K_ij` derived from
+the extrinsic-curvature field. -/
+noncomputable def extrinsicDerivativeOf
+    (K : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ) : Fin 3 → Tensor2 3 :=
+  fun μ i j => Pipeline.coordDeriv μ (fun y => K y i j) x
+
+/-- A constant extrinsic curvature has vanishing derived derivative table. -/
+lemma extrinsicDerivativeOf_const (K : Tensor2 3) (x : Fin 3 → ℝ) (μ : Fin 3) :
+    extrinsicDerivativeOf (fun _ => K) x μ = 0 := by
+  ext i j
+  simp [extrinsicDerivativeOf, Pipeline.coordDeriv_const]
+
 /-- The Minkowski chart induces the Euclidean spatial metric components on the
 `t = 0` slice. -/
 lemma minkowskiChart_spatialMetric :
@@ -101,6 +210,18 @@ structure ChartInitialData (X : ChartSpacetime) where
   dK : Fin 3 → Tensor2 3
   /-- The vacuum constraint equations. -/
   vacuum : data.IsVacuumData dK
+
+/-- Chart initial data whose curvature and momentum derivative are supplied by
+the derived constructors `spatialRiemannTensorOf` and `extrinsicDerivativeOf`.
+The vacuum proof is still an input: no constraint-solving theorem is claimed. -/
+noncomputable def ChartInitialData.ofDerivedData
+    (X : ChartSpacetime) (h : MetricTensor 3) (K : Tensor2 3)
+    (Ksymm : IsSymm K) (R3 : RiemannTensor 3) (dK : Fin 3 → Tensor2 3)
+    (vacuum : (InitialData.mk h R3 K Ksymm).IsVacuumData dK) :
+    ChartInitialData X where
+  data := InitialData.mk h R3 K Ksymm
+  dK := dK
+  vacuum := vacuum
 
 /-- Chart-level regularity of initial data: smooth metric components and smooth
 momentum-constraint derivatives.  The ADM tensors themselves are pointwise
