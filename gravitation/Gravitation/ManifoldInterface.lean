@@ -477,4 +477,132 @@ theorem minkowskiChart_globallyHyperbolic :
     minkowskiChart.IsGloballyHyperbolic :=
   ⟨{x : SpacetimeChart | x 0 = 0}, minkowskiChart_t0_cauchySurface⟩
 
+/-! ## Chart-level isometries and embeddings
+
+These structures supply the isometry/embedding API needed by the maximal-
+development layer at chart scope.  They preserve the chart coordinate and the
+metric and inverse-metric components; they do not assert that a chart embeds
+into a geometric 4D Lorentzian manifold.
+-/
+
+/-- A chart-level isometry between two chart spacetimes: an equivalence of
+carriers that commutes with the charts and pulls back both metric components
+and their inverse components. -/
+structure ChartSpacetime.Isometry (X Y : ChartSpacetime) where
+  /-- The underlying equivalence of carriers. -/
+  toEquiv : X.carrier ≃ Y.carrier
+  /-- The equivalence is compatible with the chosen charts. -/
+  chart_comm : ∀ p : X.carrier, Y.chart (toEquiv p) = X.chart p
+  /-- The covariant metric components are preserved. -/
+  metric_pullback : ∀ p : X.carrier,
+    (Y.metric (toEquiv p)).g = (X.metric p).g
+  /-- The inverse metric components are preserved. -/
+  inverse_pullback : ∀ p : X.carrier,
+    (Y.metric (toEquiv p)).ginv = (X.metric p).ginv
+
+namespace ChartSpacetime.Isometry
+
+/-- The identity chart isometry. -/
+def refl (X : ChartSpacetime) : ChartSpacetime.Isometry X X where
+  toEquiv := Equiv.refl X.carrier
+  chart_comm := fun _ => rfl
+  metric_pullback := fun _ => rfl
+  inverse_pullback := fun _ => rfl
+
+/-- The inverse of a chart isometry. -/
+def symm {X Y : ChartSpacetime} (e : ChartSpacetime.Isometry X Y) :
+    ChartSpacetime.Isometry Y X where
+  toEquiv := e.toEquiv.symm
+  chart_comm := by
+    intro p
+    have h := e.chart_comm (e.toEquiv.symm p)
+    simpa using h.symm
+  metric_pullback := by
+    intro p
+    have h := e.metric_pullback (e.toEquiv.symm p)
+    simpa using h.symm
+  inverse_pullback := by
+    intro p
+    have h := e.inverse_pullback (e.toEquiv.symm p)
+    simpa using h.symm
+
+/-- Composition of chart isometries. -/
+def trans {X Y Z : ChartSpacetime} (e : ChartSpacetime.Isometry X Y)
+    (f : ChartSpacetime.Isometry Y Z) : ChartSpacetime.Isometry X Z where
+  toEquiv := e.toEquiv.trans f.toEquiv
+  chart_comm := by
+    intro p
+    simp [Equiv.trans_apply, f.chart_comm, e.chart_comm]
+  metric_pullback := by
+    intro p
+    simp [Equiv.trans_apply, f.metric_pullback, e.metric_pullback]
+  inverse_pullback := by
+    intro p
+    simp [Equiv.trans_apply, f.inverse_pullback, e.inverse_pullback]
+
+end ChartSpacetime.Isometry
+
+/-- Existence of a chart isometry. -/
+def ChartSpacetime.IsIsometric (X Y : ChartSpacetime) : Prop :=
+  Nonempty (ChartSpacetime.Isometry X Y)
+
+/-- Chart isometry is reflexive. -/
+theorem ChartSpacetime.isometric_refl (X : ChartSpacetime) :
+    ChartSpacetime.IsIsometric X X :=
+  ⟨ChartSpacetime.Isometry.refl X⟩
+
+/-- Chart isometry is symmetric. -/
+theorem ChartSpacetime.isometric_symm {X Y : ChartSpacetime}
+    (h : ChartSpacetime.IsIsometric X Y) : ChartSpacetime.IsIsometric Y X :=
+  h.elim fun e => ⟨e.symm⟩
+
+/-- Chart isometry is transitive. -/
+theorem ChartSpacetime.isometric_trans {X Y Z : ChartSpacetime}
+    (hXY : ChartSpacetime.IsIsometric X Y) (hYZ : ChartSpacetime.IsIsometric Y Z) :
+    ChartSpacetime.IsIsometric X Z :=
+  hXY.elim fun e => hYZ.elim fun f => ⟨e.trans f⟩
+
+/-- A chart-level embedding: an injective map that commutes with the charts
+and preserves metric and inverse-metric components. -/
+structure ChartSpacetime.Embedding (X Y : ChartSpacetime) where
+  /-- The underlying map of carriers. -/
+  toFun : X.carrier → Y.carrier
+  /-- The map is injective. -/
+  injective : Function.Injective toFun
+  /-- The embedding is compatible with the chosen charts. -/
+  chart_comm : ∀ p : X.carrier, Y.chart (toFun p) = X.chart p
+  /-- The covariant metric components are preserved. -/
+  metric_pullback : ∀ p : X.carrier,
+    (Y.metric (toFun p)).g = (X.metric p).g
+  /-- The inverse metric components are preserved. -/
+  inverse_pullback : ∀ p : X.carrier,
+    (Y.metric (toFun p)).ginv = (X.metric p).ginv
+
+namespace ChartSpacetime.Embedding
+
+/-- The identity embedding. -/
+def refl (X : ChartSpacetime) : ChartSpacetime.Embedding X X where
+  toFun := id
+  injective := Function.injective_id
+  chart_comm := fun _ => rfl
+  metric_pullback := fun _ => rfl
+  inverse_pullback := fun _ => rfl
+
+/-- Composition of chart embeddings. -/
+def trans {X Y Z : ChartSpacetime} (e : ChartSpacetime.Embedding X Y)
+    (f : ChartSpacetime.Embedding Y Z) : ChartSpacetime.Embedding X Z where
+  toFun := f.toFun ∘ e.toFun
+  injective := f.injective.comp e.injective
+  chart_comm := by
+    intro p
+    simp [Function.comp_apply, f.chart_comm, e.chart_comm]
+  metric_pullback := by
+    intro p
+    simp [Function.comp_apply, f.metric_pullback, e.metric_pullback]
+  inverse_pullback := by
+    intro p
+    simp [Function.comp_apply, f.inverse_pullback, e.inverse_pullback]
+
+end ChartSpacetime.Embedding
+
 end GeneralRelativity

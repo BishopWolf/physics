@@ -108,6 +108,8 @@ general relativity.
   the algebraic symmetries of curvature and `G = 0 ↔ Ric = 0` in four dimensions.
 - `GeneralRelativity.InitialData.hamiltonianConstraint`, `momentumConstraint` :
   the ADM Hamiltonian and momentum constraints.
+- `GeneralRelativity.ChartSpacetime.Isometry`, `ChartSpacetime.Embedding` :
+  chart-level isometry and embedding API, with identity, inverse and composition.
 - `GeneralRelativity.Geodesics.geodesic_ivp_exists` : local existence for the
   geodesic equation from position and velocity.
 - `GeneralRelativity.Schwarzschild.ricciTensorOf_schwarzschild`,

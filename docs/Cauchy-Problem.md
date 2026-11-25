@@ -40,7 +40,7 @@ solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy, uniqueness, chart-manifold, general Bianchi, Sobolev/initial-data,
 reduced Cauchy, gauge-recovery, maximal-development, and explicit-development
-modules, together with the 3D divergence foundation, contribute 289 of the 1081
+modules, together with the 3D divergence foundation, contribute 300 of the 1092
 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
@@ -336,7 +336,7 @@ Five layers separate the present pointwise development from the theorem above.
 2. **Curvature and derivative data from geometry.** `InitialData` supplies `R3` and `dK`; a Cauchy theorem must derive them from `h` and `K`. Paper I computes curvature from a metric field in a chart, and lifting that pipeline to a manifold belongs to this layer.
 3. **Sobolev spaces and the constraint problem.** The theorem is usually stated for Sobolev data `H^s` with `s` large, or for smooth data. Mathlib's Sobolev module works on `ℝⁿ`, not on manifolds, and the repository has no elliptic theory for solving the constraints. The present module checks the constraints; it does not solve them.
 4. **Quasilinear hyperbolic existence.** In harmonic/wave gauge the vacuum Einstein equations become a quasilinear symmetric hyperbolic system; local existence for that system is the analytic core of [4]. No Mathlib or dependency PDE theorem supplies it, and the surveyed Lean PDE projects are elliptic or Navier–Stokes formalisations. The linear wave theorem of §4 is a constant-coefficient model, not this layer.
-5. **Gauge and constraint propagation, then maximality.** One must show that a reduced solution satisfies the gauge condition and the full Einstein equations, that the constraints propagate, and that developments patch to a maximal one. Propagation uses the contracted Bianchi identity, proved in `Gravitation.Bianchi` (`second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero`). Maximality needs the Zorn argument of [1] or the construction of [2], together with an isometry/embedding API.
+5. **Gauge and constraint propagation, then maximality.** One must show that a reduced solution satisfies the gauge condition and the full Einstein equations, that the constraints propagate, and that developments patch to a maximal one. Propagation uses the contracted Bianchi identity, proved in `Gravitation.Bianchi` (`second_bianchi`, `contracted_bianchi`, `covDiv_einstein_eq_zero`). Maximality needs the Zorn argument of [1] or the construction of [2]. The chart-level isometry/embedding API is now present (`ChartSpacetime.Isometry`, `ChartSpacetime.Embedding`, with identity, inverse and composition lemmas); geometric 4D Lorentzian patching and isometric amalgamation remain open.
 
 ## 7. A formalisation roadmap
 
@@ -418,7 +418,7 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 1081 declarations. It contains the
+The development audited in Paper I now has 1092 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
@@ -428,7 +428,7 @@ curved initial-data module, the M3 reduced Cauchy module, the M4
 gauge-recovery module, the M5 maximal-development module, and the M6
 explicit-developments module discussed above, together with the
 solution theory, the alternative theories, the axiom audit and the numerical
-pass. This paper's Lean contribution is 289 declarations across twenty
+pass. This paper's Lean contribution is 300 declarations across twenty
 modules: `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
 `Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
 `Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation`,
@@ -462,8 +462,8 @@ This paper adds prose and twenty Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.CauchyInterfaces`,
 `Gravitation.ReducedWave3D`, `Gravitation.ReducedCauchy`,
 `Gravitation.GaugeRecovery`, `Gravitation.MaximalDevelopment` and
-`Gravitation.ExplicitDevelopments` (289 declarations). The audited development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1081 declarations with axioms inside
+`Gravitation.ExplicitDevelopments` (300 declarations). The audited development is the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1092 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
