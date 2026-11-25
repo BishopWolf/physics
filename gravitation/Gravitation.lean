@@ -117,6 +117,9 @@ general relativity.
   `minkowskiChartInitialDataDerived` :
   the 3D Riemann tensor and momentum-constraint derivative derived from the
   spatial metric and extrinsic-curvature fields, exercised on Minkowski.
+- `GeneralRelativity.warpedSpatialMetric`, `warpedSpatialRiemann`,
+  `spatialRiemannTensorOf_warped_nonconstant` :
+  a nonconstant warped metric whose derived `R_{0101}` is `-1`.
 - `GeneralRelativity.ManifoldSpacetime`, `ManifoldInitialData`,
   `minkowskiManifoldInitialData` :
   global-chart manifold packaging of the derived chart curvature and momentum

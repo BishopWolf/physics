@@ -312,8 +312,8 @@ in the proofs are the `GeneralRelativity` ones either way.
 | Module | Declarations |
 | --- | --- |
 | `Gravitation.ManifoldInterface` | 63 |
+| `Gravitation.InitialDataInterface` | 57 |
 | `PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere` | 53 |
-| `Gravitation.InitialDataInterface` | 49 |
 | `Gravitation.Relativity.General.Schwarzschild.Basic` | 42 |
 | `Gravitation.Relativity.Metrics.CoordinateMetric` | 39 |
 | `Gravitation.SobolevInitialData` | 39 |
