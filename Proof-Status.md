@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `b81c896a`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1240 declarations, 760 of them theorem-like. The table below is the
+1248 declarations, 768 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -234,6 +234,11 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.KruskalSzekeres.kruskalRadius` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.kruskalRadius_pos` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.kruskalRadius_zero` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.contDiff_kruskalF` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.deriv_kruskalF` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.kruskalF_exists_pos` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.contDiffAt_kruskalRadius` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.contDiffOn_kruskalRadius` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.metric` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.metricInv` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.metric_symm` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -245,6 +250,9 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.KruskalSzekeres.partialChart` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.partialChartSpacetime` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.restrictedChart` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.contDiffOn_radius_comp` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.contDiffOn_ks_metric_component` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.KruskalSzekeres.partialChart_isSmooth` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonPoint` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonPoint_sq_diff` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.KruskalSzekeres.horizonPoint_mem_partialChartDomain` | `Gravitation/KruskalSzekeres.lean` | propext, Classical.choice, Quot.sound | proved |
