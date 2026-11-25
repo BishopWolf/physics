@@ -165,6 +165,14 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.hasDerivAt_coord_zero_pos` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_t0_cauchySurface` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.minkowskiChart_globallyHyperbolic` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.OrderedDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
+| `GeneralRelativity.OrderedDevelopmentSystem.IsMaximal` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
+| `GeneralRelativity.OrderedDevelopmentSystem.toDevelopmentInterface` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
+| `GeneralRelativity.OrderedDevelopmentSystem.exists_maximal` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.OrderedDevelopmentSystem.unique_up_to_isometry` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
+| `GeneralRelativity.OrderedDevelopmentSystem.maximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.intervalDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.intervalMaximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

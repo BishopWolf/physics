@@ -31,6 +31,7 @@ public import Gravitation.CauchyInterfaces
 public import Gravitation.ReducedWave3D
 public import Gravitation.ReducedCauchy
 public import Gravitation.GaugeRecovery
+public import Gravitation.MaximalDevelopment
 public import Gravitation.Relativity.General.Kerr.Basic
 public import Gravitation.Relativity.General.Kerr.Christoffel
 public import Gravitation.Relativity.General.Kerr.Vacuum
