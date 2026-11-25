@@ -6,7 +6,8 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-public import Gravitation.Relativity.General.Einstein
+public import Gravitation.Relativity.Tensors.EinsteinTensor
+public import Gravitation.Relativity.Metrics.Basic
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Ring
@@ -29,7 +30,8 @@ reduction to Schwarzschild at `a = 0`.
 
 ## ii. Key results
 
-- `sigma`, `delta`, `bigB` : Boyer–Lindquist auxiliary functions `Σ`, `Δ`, and `B`.
+- `KerrSpacetime`, `sigma`, `delta`, `kerrAxialFactor` : Kerr spacetime structure and
+  Boyer–Lindquist auxiliary functions `Σ`, `Δ`, and `kerrAxialFactor`.
 - `kerrMetric`, `kerrMetricInv`, `kerrMetricTensor` : Kerr metric and inverse `MetricTensor 4`.
 - `horizonPlus`, `horizonMinus`, `delta_horizonPlus`, `kerr_extremal` : event horizons `r±`.
 - `ergosphereRadius`, `kerrMetric_00_ergosphere` : stationary-limit surface `g₀₀ = 0`.
@@ -44,8 +46,12 @@ reduction to Schwarzschild at `a = 0`.
 
 ## iv. References
 
-* None.
-
+* R. M. Wald, *General Relativity* (1984), Ch. 12 (Sec. 12.3). [ref: wald_1984_general_relativity]
+* C. W. Misner, K. S. Thorne, and J. A. Wheeler, *Gravitation* (1973), Ch. 33.
+  [ref: mtw_1973_gravitation]
+* S. M. Carroll, *Lecture Notes on General Relativity* (1997), Ch. 7
+  (https://arxiv.org/pdf/gr-qc/9712019#page=187). [ref: Carroll1997]
+* S. Chandrasekhar, *The Mathematical Theory of Black Holes* (1983), Ch. 6. [ref: Chandrasekhar1983]
 -/
 
 @[expose] public section
@@ -60,29 +66,40 @@ namespace Kerr
 
 -/
 
+/-- Rotating Boyer–Lindquist Kerr black hole spacetime parameterized by mass `M` and spin `a`. -/
+structure KerrSpacetime where
+  /-- Geometric mass parameter `M` (`G = c = 1`). -/
+  M : ℝ
+  /-- Spin parameter `a = J / M`. -/
+  a : ℝ
+
 /-- Boyer–Lindquist radial-polar function `Σ = r² + a² cos² θ`. -/
 noncomputable def sigma (a r θ : ℝ) : ℝ := r ^ 2 + a ^ 2 * Real.cos θ ^ 2
 
 /-- Boyer–Lindquist horizon function `Δ = r² - 2 M r + a²`. -/
 noncomputable def delta (M a r : ℝ) : ℝ := r ^ 2 - 2 * M * r + a ^ 2
 
-/-- Boyer–Lindquist auxiliary function `B = (r² + a²)² - a² Δ sin² θ`. -/
-noncomputable def bigB (M a r θ : ℝ) : ℝ :=
+/-- Boyer–Lindquist axial metric factor `(r² + a²)² - a² Δ sin² θ` (often denoted `A` in
+Misner–Thorne–Wheeler and Chandrasekhar), factored out because it governs both `g_{φφ}` and
+`g^{tt}` and appears directly in the `(t, φ)` block determinant identity. -/
+noncomputable def kerrAxialFactor (M a r θ : ℝ) : ℝ :=
   (r ^ 2 + a ^ 2) ^ 2 - a ^ 2 * delta M a r * Real.sin θ ^ 2
 
-/-- Alternative expansion of `B`: `B = Σ (r² + a²) + 2 M a² r sin² θ`. -/
-lemma bigB_eq_sigma (M a r θ : ℝ) :
-    bigB M a r θ = sigma a r θ * (r ^ 2 + a ^ 2) + 2 * M * a ^ 2 * r * Real.sin θ ^ 2 := by
-  simp only [bigB, sigma, delta]
+/-- Alternative expansion of the Boyer–Lindquist axial metric factor:
+`kerrAxialFactor = Σ (r² + a²) + 2 M a² r sin² θ`. -/
+lemma kerrAxialFactor_eq_sigma (M a r θ : ℝ) :
+    kerrAxialFactor M a r θ
+      = sigma a r θ * (r ^ 2 + a ^ 2) + 2 * M * a ^ 2 * r * Real.sin θ ^ 2 := by
+  simp only [kerrAxialFactor, sigma, delta]
   rw [Real.sin_sq θ]
   ring
 
 /-- Algebraic identity governing the determinant of the `(t, φ)` metric block:
-`(Σ - 2 M r) B + 4 M² a² r² sin² θ = Σ² Δ`. -/
+`(Σ - 2 M r) kerrAxialFactor + 4 M² a² r² sin² θ = Σ² Δ`. -/
 lemma kerr_tphi_det_id (M a r θ : ℝ) :
-    (sigma a r θ - 2 * M * r) * bigB M a r θ + 4 * M ^ 2 * a ^ 2 * r ^ 2 * Real.sin θ ^ 2
+    (sigma a r θ - 2 * M * r) * kerrAxialFactor M a r θ + 4 * M ^ 2 * a ^ 2 * r ^ 2 * Real.sin θ ^ 2
       = sigma a r θ ^ 2 * delta M a r := by
-  simp only [sigma, delta, bigB]
+  simp only [sigma, delta, kerrAxialFactor]
   rw [Real.sin_sq θ]
   ring
 
@@ -91,7 +108,7 @@ lemma kerr_tphi_det_id (M a r θ : ℝ) :
 noncomputable def kerrMetric (M a : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
   let sig := sigma a (x 1) (x 2)
   let del := delta M a (x 1)
-  let bval := bigB M a (x 1) (x 2)
+  let bval := kerrAxialFactor M a (x 1) (x 2)
   let s2 := Real.sin (x 2) ^ 2
   fun i j =>
     if i = 0 ∧ j = 0 then -(1 - 2 * M * x 1 / sig)
@@ -105,7 +122,7 @@ noncomputable def kerrMetric (M a : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
 noncomputable def kerrMetricInv (M a : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
   let sig := sigma a (x 1) (x 2)
   let del := delta M a (x 1)
-  let bval := bigB M a (x 1) (x 2)
+  let bval := kerrAxialFactor M a (x 1) (x 2)
   let s2 := Real.sin (x 2) ^ 2
   fun i j =>
     if i = 0 ∧ j = 0 then -(bval / (sig * del))
@@ -115,10 +132,18 @@ noncomputable def kerrMetricInv (M a : ℝ) (x : Fin 4 → ℝ) : Tensor2 4 :=
     else if i = 3 ∧ j = 3 then (sig - 2 * M * x 1) / (sig * del * s2)
     else 0
 
-/-- Symmetry of `kerrMetric M a x`. -/
-lemma kerrMetric_symm (M a : ℝ) (x : Fin 4 → ℝ) : IsSymm (kerrMetric M a x) := by
-  intro i j
-  fin_cases i <;> fin_cases j <;> simp [kerrMetric]
+/-- The Boyer–Lindquist metric of a Kerr spacetime. -/
+noncomputable def KerrSpacetime.metric (K : KerrSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 :=
+  kerrMetric K.M K.a x
+
+/-- The inverse Boyer–Lindquist metric of a Kerr spacetime. -/
+noncomputable def KerrSpacetime.metricInv (K : KerrSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 :=
+  kerrMetricInv K.M K.a x
+
+/-- Symmetry of the Boyer–Lindquist Kerr metric `kerrMetric`. -/
+lemma kerrMetric_symm (M a : ℝ) (x : Fin 4 → ℝ) : IsSymm (kerrMetric M a x) :=
+  Matrix.IsSymm.ext fun i j => by
+    fin_cases i <;> fin_cases j <;> simp [kerrMetric]
 
 /-- Left-inverse verification `g⁻¹ * g = 1` for the Boyer–Lindquist Kerr metric. -/
 lemma kerrMetricInv_mul_kerrMetric (M a : ℝ) (x : Fin 4 → ℝ)
@@ -223,12 +248,12 @@ lemma kerrMetric_00_ergosphere {M a : ℝ} (x : Fin 4 → ℝ)
 
 /-- Zero-angular-momentum observer (ZAMO) frame-dragging angular velocity
 `ω = -g_{tφ} / g_{φφ} = 2 M a r / B`. -/
-noncomputable def frameDraggingOmega (M a r θ : ℝ) : ℝ := 2 * M * a * r / bigB M a r θ
+noncomputable def frameDraggingOmega (M a r θ : ℝ) : ℝ := 2 * M * a * r / kerrAxialFactor M a r θ
 
 /-- Agreement of `-g_{tφ} / g_{φφ}` with `frameDraggingOmega M a r θ`. -/
 lemma kerr_zamo_omega_eq (M a : ℝ) (x : Fin 4 → ℝ)
     (hsig : sigma a (x 1) (x 2) ≠ 0) (hs : Real.sin (x 2) ≠ 0)
-    (hB : bigB M a (x 1) (x 2) ≠ 0) :
+    (hB : kerrAxialFactor M a (x 1) (x 2) ≠ 0) :
     -(kerrMetric M a x 0 3 / kerrMetric M a x 3 3)
       = frameDraggingOmega M a (x 1) (x 2) := by
   simp only [kerrMetric, frameDraggingOmega, Fin.isValue, Fin.reduceEq, and_false, and_true,
@@ -241,7 +266,7 @@ lemma frameDraggingOmega_horizonPlus {M a : ℝ} (ha : a ^ 2 ≤ M ^ 2) (θ : �
     frameDraggingOmega M a (horizonPlus M a) θ
       = 2 * M * a * horizonPlus M a / (horizonPlus M a ^ 2 + a ^ 2) ^ 2 := by
   have hdel : delta M a (horizonPlus M a) = 0 := delta_horizonPlus ha
-  simp [frameDraggingOmega, bigB, hdel]
+  simp [frameDraggingOmega, kerrAxialFactor, hdel]
 
 /-!
 
@@ -270,7 +295,7 @@ lemma kerrMetric_zero_spin (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
       and_self, or_self]
     field_simp [hr2]
   · simp [kerrMetric, hs0]
-  · simp only [kerrMetric, hs0, bigB, Fin.isValue]
+  · simp only [kerrMetric, hs0, kerrAxialFactor, Fin.isValue]
     norm_num
     field_simp [hr2]
 

@@ -11,14 +11,15 @@ name = "Gravitation"
 globs = ["Gravitation"]
 
 # Temporary home of the unmerged `gravity` branch.  The vendored modules use
-# the `Gravitation.Relativity.General.*` module path so they cannot collide with
-# the dependency's `PhyslibAlpha.*` library globs; their namespace is still
-# `GeneralRelativity` and the proofs are unchanged.  To migrate: delete
-# `vendor/` and switch the umbrella imports back to `PhyslibAlpha.Relativity.General.*`.
+# the `Gravitation.Relativity.*` and `Gravitation.Cosmology.*` module paths so
+# they cannot collide with the dependency's `PhyslibAlpha.*` library globs; their
+# namespace is still `GeneralRelativity` and the proofs are unchanged.  To
+# migrate: delete `vendor/` and switch the umbrella imports back to the
+# corresponding `PhyslibAlpha.*` paths.
 [[lean_lib]]
 name = "GravitationVendor"
 srcDir = "vendor"
-globs = ["Gravitation.Relativity.+"]
+globs = ["Gravitation.Relativity.+", "Gravitation.Cosmology.+"]
 
 # Physlib provides the base library (units, cosmology) and the already-merged
 # `Schwarzschild.IncompressibleSphere` theorem.  The rest of the general-
@@ -28,4 +29,4 @@ globs = ["Gravitation.Relativity.+"]
 [[require]]
 name = "physlib"
 git = "https://github.com/leanprover-community/physlib.git"
-rev = "cbd02238fd1414edd9fa34871acc2a0fcdc20c21"
+rev = "7910f51f9129ee4c5829216251c25a3a82042f1e"

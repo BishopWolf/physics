@@ -7,9 +7,10 @@
 # and Quot.sound (Lean/Mathlib; Physlib adds none).
 #
 # The development audited here is the repository's own module (the umbrella
-# `Gravitation` root) together with `PhyslibAlpha/Relativity/General/` from the
-# pinned Physlib revision: the theorems this repository reports on are the
-# Physlib ones, so the audit has to cover them, not just the local imports.
+# `Gravitation` root) together with the full vendored `gravity` tree and the
+# `PhyslibAlpha/Relativity/General/` modules left in the pinned Physlib revision
+# (`Schwarzschild/IncompressibleSphere`): the theorems this repository reports on
+# are the Physlib ones, so the audit has to cover them, not just the local imports.
 #
 # The script
 #   1. rejects any axiom/constant/opaque/unsafe/sorry/admit/native_decide,
@@ -29,7 +30,7 @@ PROJ="$ROOT/gravitation"
 SRC="$PROJ/Gravitation"
 PKG="$PROJ/.lake/packages/physlib"
 DEP="$PKG/PhyslibAlpha/Relativity/General"
-VENDOR="$PROJ/vendor/Gravitation/Relativity/General"
+VENDOR="$PROJ/vendor/Gravitation"
 GEN="$PROJ/.lake/audit_names.lean"
 OUT="$PROJ/.lake/audit_axioms.txt"
 

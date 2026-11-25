@@ -28,7 +28,9 @@ public import Gravitation.InitialDataInterface
 public import Gravitation.ReducedWave3D
 public import Gravitation.WaveEnergy
 public import Gravitation.WaveEnergy3D
-public import Gravitation.Relativity.General.SchwarzschildDeSitter.Pipeline
+public import Gravitation.Relativity.General.Schwarzschild.Basic
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
+public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
@@ -267,12 +269,12 @@ noncomputable def spatialRiemannOf (h hinv : Space3 → Tensor2 3)
 /-- Spatial Ricci tensor `³Ric_{ab}` computed from a 3-metric field. -/
 noncomputable def spatialRicciOf (h hinv : Space3 → Tensor2 3)
     (x : Space3) (a b : Fin 3) : ℝ :=
-  Pipeline.ricciOf h hinv x a b
+  Pipeline.ricciTensorOf h hinv x a b
 
 /-- Spatial scalar curvature `³R` computed from a 3-metric field. -/
 noncomputable def spatialScalarCurvOf (h hinv : Space3 → Tensor2 3)
     (x : Space3) : ℝ :=
-  Pipeline.scalarOf h hinv x
+  Pipeline.ricciScalarOf h hinv x
 
 /-- ADM Hamiltonian constraint functional
 `H(h, K) = ³R(h) + (tr K)² - K_{ij} K^{ij}`, with `³R(h)` derived from the
@@ -290,8 +292,8 @@ directly from the fields `hinv` and `K`. -/
 noncomputable def momentumConstraintOf (hinv K : Space3 → Tensor2 3)
     (x : Space3) (i : Fin 3) : ℝ :=
   (∑ j : Fin 3, ∑ k : Fin 3,
-      Pipeline.pd j (fun y => hinv y j k * K y i k) x)
-    - Pipeline.pd i (fun y => ∑ j : Fin 3, ∑ k : Fin 3, hinv y j k * K y j k) x
+      Pipeline.coordDeriv j (fun y => hinv y j k * K y i k) x)
+    - Pipeline.coordDeriv i (fun y => ∑ j : Fin 3, ∑ k : Fin 3, hinv y j k * K y j k) x
 
 /-- Flat Minkowski slice data with zero extrinsic curvature satisfy both
 derived ADM constraints identically. -/
@@ -306,14 +308,14 @@ theorem minkowskiChart_spatial_constraints_zero (x : Space3) :
       ext a b
       fin_cases a <;> fin_cases b <;>
         simp [ChartSpacetime.spatialMetricField, ChartSpacetime.coordinateMetric,
-          minkowskiChart, minkowski, euclid3, eta4]
+          minkowskiChart, minkowski, euclid3, minkowskiMetric4_apply]
     have hS : spatialScalarCurvOf minkowskiChart.spatialMetricField
         (fun _ => euclid3.ginv) x = 0 :=
-      Pipeline.scalarOf_const minkowskiChart.spatialMetricField
+      Pipeline.ricciScalarOf_const minkowskiChart.spatialMetricField
         (fun _ => euclid3.ginv) euclid3.g hconst x
     simp [hamiltonianConstraintOf, hS]
   · intro i
-    simp [momentumConstraintOf, Pipeline.pd_const]
+    simp [momentumConstraintOf, Pipeline.coordDeriv_const]
 
 /-! ## D. Solving the nonlinear constraints -/
 
@@ -455,7 +457,7 @@ in coordinates `(r, θ, φ)` (`x 0 = r`, `x 1 = θ`, `x 2 = φ`). -/
 noncomputable def sdsSpatialMetric (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
   fun i j =>
     if i = j then
-      if i = 0 then (SchwarzschildDeSitter.sdsF M Λ (x 0))⁻¹
+      if i = 0 then (SchwarzschildDeSitter.sdsLapse M Λ (x 0))⁻¹
       else if i = 1 then (x 0) ^ 2
       else (x 0) ^ 2 * Real.sin (x 1) ^ 2
     else 0
@@ -464,7 +466,7 @@ noncomputable def sdsSpatialMetric (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
 noncomputable def sdsSpatialMetricInv (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
   fun i j =>
     if i = j then
-      if i = 0 then SchwarzschildDeSitter.sdsF M Λ (x 0)
+      if i = 0 then SchwarzschildDeSitter.sdsLapse M Λ (x 0)
       else if i = 1 then ((x 0) ^ 2)⁻¹
       else ((x 0) ^ 2 * Real.sin (x 1) ^ 2)⁻¹
     else 0
@@ -473,9 +475,9 @@ noncomputable def sdsSpatialMetricInv (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
 noncomputable def sdsSpatialG (M Λ : ℝ) (x : Space3) (k i j : Fin 3) : ℝ :=
   if k = 0 then
     if i = 0 ∧ j = 0 then
-      -(SchwarzschildDeSitter.sdsHalf M Λ (x 0) / SchwarzschildDeSitter.sdsF M Λ (x 0))
-    else if i = 1 ∧ j = 1 then -(x 0 * SchwarzschildDeSitter.sdsF M Λ (x 0))
-    else if i = 2 ∧ j = 2 then -(x 0 * Real.sin (x 1) ^ 2 * SchwarzschildDeSitter.sdsF M Λ (x 0))
+      -(SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) / SchwarzschildDeSitter.sdsLapse M Λ (x 0))
+    else if i = 1 ∧ j = 1 then -(x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))
+    else if i = 2 ∧ j = 2 then -(x 0 * Real.sin (x 1) ^ 2 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))
     else 0
   else if k = 1 then
     if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then 1 / x 0
@@ -487,75 +489,75 @@ noncomputable def sdsSpatialG (M Λ : ℝ) (x : Space3) (k i j : Fin 3) : ℝ :=
     else 0
 
 lemma pd_sdsSpatial_00 (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsF M Λ (x 0) ≠ 0) :
-    Pipeline.pd 0 (fun y => (SchwarzschildDeSitter.sdsF M Λ (y 0))⁻¹) x =
-      -(2 * SchwarzschildDeSitter.sdsHalf M Λ (x 0)) /
-        SchwarzschildDeSitter.sdsF M Λ (x 0) ^ 2 := by
-  have hd := (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 0) hr).fun_inv hf
-  have hfun : (fun s : ℝ => (SchwarzschildDeSitter.sdsF M Λ (Function.update x 0 s 0))⁻¹) =
-      fun s : ℝ => (SchwarzschildDeSitter.sdsF M Λ s)⁻¹ := by
+    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) :
+    Pipeline.coordDeriv 0 (fun y => (SchwarzschildDeSitter.sdsLapse M Λ (y 0))⁻¹) x =
+      -(2 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0)) /
+        SchwarzschildDeSitter.sdsLapse M Λ (x 0) ^ 2 := by
+  have hd := (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr).fun_inv hf
+  have hfun : (fun s : ℝ => (SchwarzschildDeSitter.sdsLapse M Λ (Function.update x 0 s 0))⁻¹) =
+      fun s : ℝ => (SchwarzschildDeSitter.sdsLapse M Λ s)⁻¹ := by
     funext s; simp
-  unfold Pipeline.pd
+  unfold Pipeline.coordDeriv
   rw [hfun, hd.deriv]
 
 lemma christoffel_eq_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsF M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (k i j : Fin 3) :
     Pipeline.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
       sdsSpatialG M Λ x k i j := by
   have h0_00 := pd_sdsSpatial_00 M Λ x hr hf
-  have h0_11 : Pipeline.pd 0 (fun y : Space3 => y 0 ^ 2) x = 2 * x 0 := by
+  have h0_11 : Pipeline.coordDeriv 0 (fun y : Space3 => y 0 ^ 2) x = 2 * x 0 := by
     have hfun : (fun s : ℝ => Function.update x 0 s 0 ^ 2) = fun s => s ^ 2 := by
       funext s; simp
-    unfold Pipeline.pd; rw [hfun]
+    unfold Pipeline.coordDeriv; rw [hfun]
     have hd := hasDerivAt_pow 2 (x 0)
     convert hd.deriv using 1
     ring
-  have h0_22 : Pipeline.pd 0 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
+  have h0_22 : Pipeline.coordDeriv 0 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
       2 * x 0 * Real.sin (x 1) ^ 2 := by
     have hfun : (fun s : ℝ => Function.update x 0 s 0 ^ 2 *
         Real.sin (Function.update x 0 s 1) ^ 2) = fun s => s ^ 2 * Real.sin (x 1) ^ 2 := by
       funext s; simp
-    unfold Pipeline.pd; rw [hfun]
+    unfold Pipeline.coordDeriv; rw [hfun]
     have hd := (hasDerivAt_pow 2 (x 0)).mul_const (Real.sin (x 1) ^ 2)
     convert hd.deriv using 1
     ring
-  have h1_22 : Pipeline.pd 1 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
+  have h1_22 : Pipeline.coordDeriv 1 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
       2 * x 0 ^ 2 * Real.sin (x 1) * Real.cos (x 1) := by
     have hfun : (fun s : ℝ => Function.update x 1 s 0 ^ 2 *
         Real.sin (Function.update x 1 s 1) ^ 2) = fun s => x 0 ^ 2 * Real.sin s ^ 2 := by
       funext s; simp
-    unfold Pipeline.pd; rw [hfun]
-    have hd := (Schwarzschild.hasDerivAt_sinSq (x 1)).const_mul (x 0 ^ 2)
+    unfold Pipeline.coordDeriv; rw [hfun]
+    have hd := (Pipeline.hasDerivAt_sin_sq (x 1)).const_mul (x 0 ^ 2)
     convert hd.deriv using 1
     ring
-  have h2_22 : Pipeline.pd 2 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x = 0 := by
+  have h2_22 : Pipeline.coordDeriv 2 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x = 0 := by
     have hfun : (fun s : ℝ => Function.update x 2 s 0 ^ 2 *
         Real.sin (Function.update x 2 s 1) ^ 2) = fun _ => x 0 ^ 2 * Real.sin (x 1) ^ 2 := by
       funext s; simp
-    unfold Pipeline.pd; rw [hfun, deriv_const']
+    unfold Pipeline.coordDeriv; rw [hfun, deriv_const']
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
     simp [Pipeline.christoffel, sdsSpatialMetric, sdsSpatialMetricInv,
       sdsSpatialG, h0_00, h0_11, h0_22, h1_22, h2_22] <;>
-    (try simp [Pipeline.pd]) <;>
+    (try simp [Pipeline.coordDeriv]) <;>
     field_simp [hr, hf, hsin]
 
 lemma pd_christoffel_eq_pd_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsF M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (μ k i j : Fin 3) :
-    Pipeline.pd μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
+    Pipeline.coordDeriv μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
         (sdsSpatialMetricInv M Λ) y k i j) x =
-      Pipeline.pd μ (fun y => sdsSpatialG M Λ y k i j) x := by
-  have hev_r : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 ∧ SchwarzschildDeSitter.sdsF M Λ r ≠ 0 := by
+      Pipeline.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x := by
+  have hev_r : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 ∧ SchwarzschildDeSitter.sdsLapse M Λ r ≠ 0 := by
     have h1 : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 := continuousAt_id.eventually_ne hr
-    have h2 : ∀ᶠ r in 𝓝 (x 0), SchwarzschildDeSitter.sdsF M Λ r ≠ 0 :=
-      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 0) hr).continuousAt.eventually_ne hf
+    have h2 : ∀ᶠ r in 𝓝 (x 0), SchwarzschildDeSitter.sdsLapse M Λ r ≠ 0 :=
+      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr).continuousAt.eventually_ne hf
     exact h1.and h2
   have hev_th : ∀ᶠ th in 𝓝 (x 1), Real.sin th ≠ 0 :=
     Real.continuous_sin.continuousAt.eventually_ne hsin
   have hcont : ∀ p : Fin 3, ContinuousAt (fun y : Space3 => y p) x := fun p => continuousAt_apply p x
   have hev_y : ∀ᶠ y in 𝓝 x,
-      y 0 ≠ 0 ∧ SchwarzschildDeSitter.sdsF M Λ (y 0) ≠ 0 ∧ Real.sin (y 1) ≠ 0 := by
+      y 0 ≠ 0 ∧ SchwarzschildDeSitter.sdsLapse M Λ (y 0) ≠ 0 ∧ Real.sin (y 1) ≠ 0 := by
     have hr' := (hcont 0).eventually hev_r
     have hth' := (hcont 1).eventually hev_th
     filter_upwards [hr', hth'] with y hy1 hy2
@@ -570,15 +572,15 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
   if μ = 0 then
     if k = 0 then
       if i = 0 ∧ j = 0 then
-        -(((-2 * M / (x 0) ^ 3 - Λ / 3) * SchwarzschildDeSitter.sdsF M Λ (x 0) -
-            2 * SchwarzschildDeSitter.sdsHalf M Λ (x 0) ^ 2) /
-          SchwarzschildDeSitter.sdsF M Λ (x 0) ^ 2)
+        -(((-2 * M / (x 0) ^ 3 - Λ / 3) * SchwarzschildDeSitter.sdsLapse M Λ (x 0) -
+            2 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) ^ 2) /
+          SchwarzschildDeSitter.sdsLapse M Λ (x 0) ^ 2)
       else if i = 1 ∧ j = 1 then
-        -(SchwarzschildDeSitter.sdsF M Λ (x 0) +
-          2 * x 0 * SchwarzschildDeSitter.sdsHalf M Λ (x 0))
+        -(SchwarzschildDeSitter.sdsLapse M Λ (x 0) +
+          2 * x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0))
       else if i = 2 ∧ j = 2 then
-        -(Real.sin (x 1) ^ 2 * (SchwarzschildDeSitter.sdsF M Λ (x 0) +
-          2 * x 0 * SchwarzschildDeSitter.sdsHalf M Λ (x 0)))
+        -(Real.sin (x 1) ^ 2 * (SchwarzschildDeSitter.sdsLapse M Λ (x 0) +
+          2 * x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0)))
       else 0
     else if k = 1 then
       if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then -(1 / x 0 ^ 2) else 0
@@ -588,7 +590,7 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
     if k = 0 then
       if i = 2 ∧ j = 2 then
         -(2 * x 0 * Real.sin (x 1) * Real.cos (x 1) *
-          SchwarzschildDeSitter.sdsF M Λ (x 0))
+          SchwarzschildDeSitter.sdsLapse M Λ (x 0))
       else 0
     else if k = 1 then
       if i = 2 ∧ j = 2 then -(Real.cos (x 1) ^ 2 - Real.sin (x 1) ^ 2) else 0
@@ -597,85 +599,85 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
   else 0
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_0 (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsF M Λ (x 0) ≠ 0) (k i j : Fin 3) :
-    Pipeline.pd 0 (fun y => sdsSpatialG M Λ y k i j) x =
+    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (k i j : Fin 3) :
+    Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 0 x k i j := by
-  have h000 : Pipeline.pd 0 (fun y => sdsSpatialG M Λ y 0 0 0) x =
+  have h000 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 0 0) x =
       sdsSpatialDG M Λ 0 x 0 0 0 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 0 0) =
-        fun s : ℝ => -(SchwarzschildDeSitter.sdsHalf M Λ s /
-          SchwarzschildDeSitter.sdsF M Λ s) := by
+        fun s : ℝ => -(SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ s /
+          SchwarzschildDeSitter.sdsLapse M Λ s) := by
       funext s; simp [sdsSpatialG]
-    unfold Pipeline.pd; rw [hfun]
-    have hd := ((SchwarzschildDeSitter.hasDerivAt_sdsHalf M Λ (x 0) hr).fun_div
-      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 0) hr) hf).fun_neg
+    unfold Pipeline.coordDeriv; rw [hfun]
+    have hd := ((SchwarzschildDeSitter.hasDerivAt_sdsLapseHalfDeriv M Λ (x 0) hr).fun_div
+      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr) hf).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
-  have h011 : Pipeline.pd 0 (fun y => sdsSpatialG M Λ y 0 1 1) x =
+  have h011 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 1 1) x =
       sdsSpatialDG M Λ 0 x 0 1 1 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 1 1) =
-        fun s : ℝ => -(s * SchwarzschildDeSitter.sdsF M Λ s) := by
+        fun s : ℝ => -(s * SchwarzschildDeSitter.sdsLapse M Λ s) := by
       funext s; simp [sdsSpatialG]
-    unfold Pipeline.pd; rw [hfun]
+    unfold Pipeline.coordDeriv; rw [hfun]
     have hd := ((hasDerivAt_id' (x 0)).fun_mul
-      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 0) hr)).fun_neg
+      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr)).fun_neg
     rw [hd.deriv]
     dsimp [sdsSpatialDG]
     ring
-  have h022 : Pipeline.pd 0 (fun y => sdsSpatialG M Λ y 0 2 2) x =
+  have h022 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 2 2) x =
       sdsSpatialDG M Λ 0 x 0 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 2 2) =
-        fun s : ℝ => -(Real.sin (x 1) ^ 2 * (s * SchwarzschildDeSitter.sdsF M Λ s)) := by
+        fun s : ℝ => -(Real.sin (x 1) ^ 2 * (s * SchwarzschildDeSitter.sdsLapse M Λ s)) := by
       funext s; simp [sdsSpatialG]; ring
-    unfold Pipeline.pd; rw [hfun]
+    unfold Pipeline.coordDeriv; rw [hfun]
     have hd := (((hasDerivAt_id' (x 0)).fun_mul
-      (SchwarzschildDeSitter.hasDerivAt_sdsF M Λ (x 0) hr)).const_mul
+      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr)).const_mul
         (Real.sin (x 1) ^ 2)).fun_neg
     rw [hd.deriv]
     dsimp [sdsSpatialDG]
     ring
-  have h101 : Pipeline.pd 0 (fun y => sdsSpatialG M Λ y 1 0 1) x =
+  have h101 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 1 0 1) x =
       sdsSpatialDG M Λ 0 x 1 0 1 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 1 0 1) =
         fun s : ℝ => s⁻¹ := by funext s; simp [sdsSpatialG]
-    unfold Pipeline.pd; rw [hfun, (hasDerivAt_inv hr).deriv]
+    unfold Pipeline.coordDeriv; rw [hfun, (hasDerivAt_inv hr).deriv]
     simp [sdsSpatialDG, one_div]
   fin_cases k <;> fin_cases i <;> fin_cases j
   all_goals first
     | exact h000 | exact h011 | exact h022
     | exact h101
-    | simp [Pipeline.pd, sdsSpatialG, sdsSpatialDG]
+    | simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_1 (M Λ : ℝ) (x : Space3)
     (hsin : Real.sin (x 1) ≠ 0) (k i j : Fin 3) :
-    Pipeline.pd 1 (fun y => sdsSpatialG M Λ y k i j) x =
+    Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 1 x k i j := by
-  have h022 : Pipeline.pd 1 (fun y => sdsSpatialG M Λ y 0 2 2) x =
+  have h022 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 0 2 2) x =
       sdsSpatialDG M Λ 1 x 0 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 0 2 2) =
-        fun s : ℝ => -(x 0 * SchwarzschildDeSitter.sdsF M Λ (x 0) * Real.sin s ^ 2) := by
+        fun s : ℝ => -(x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0) * Real.sin s ^ 2) := by
       funext s; simp [sdsSpatialG]; ring
-    unfold Pipeline.pd; rw [hfun]
-    have hd := ((Schwarzschild.hasDerivAt_sinSq (x 1)).const_mul
-      (x 0 * SchwarzschildDeSitter.sdsF M Λ (x 0))).fun_neg
+    unfold Pipeline.coordDeriv; rw [hfun]
+    have hd := ((Pipeline.hasDerivAt_sin_sq (x 1)).const_mul
+      (x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
-  have h122 : Pipeline.pd 1 (fun y => sdsSpatialG M Λ y 1 2 2) x =
+  have h122 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 1 2 2) x =
       sdsSpatialDG M Λ 1 x 1 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 1 2 2) =
         fun s : ℝ => -(Real.sin s * Real.cos s) := by funext s; simp [sdsSpatialG]
-    unfold Pipeline.pd; rw [hfun]
+    unfold Pipeline.coordDeriv; rw [hfun]
     have hd := ((Real.hasDerivAt_sin (x 1)).fun_mul (Real.hasDerivAt_cos (x 1))).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
-  have h212 : Pipeline.pd 1 (fun y => sdsSpatialG M Λ y 2 1 2) x =
+  have h212 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 2 1 2) x =
       sdsSpatialDG M Λ 1 x 2 1 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 2 1 2) =
         fun s : ℝ => Real.cos s / Real.sin s := by funext s; simp [sdsSpatialG]
-    unfold Pipeline.pd; rw [hfun]
+    unfold Pipeline.coordDeriv; rw [hfun]
     have hd := (Real.hasDerivAt_cos (x 1)).fun_div (Real.hasDerivAt_sin (x 1)) hsin
     have hcos_sin : -Real.sin (x 1) * Real.sin (x 1) - Real.cos (x 1) * Real.cos (x 1) =
         -(Real.sin (x 1) ^ 2 + Real.cos (x 1) ^ 2) := by ring
@@ -685,18 +687,18 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG_1 (M Λ : ℝ) (x : Space3)
   fin_cases k <;> fin_cases i <;> fin_cases j
   all_goals first
     | exact h022 | exact h122 | exact h212
-    | simp [Pipeline.pd, sdsSpatialG, sdsSpatialDG]
+    | simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_2 (M Λ : ℝ) (x : Space3) (k i j : Fin 3) :
-    Pipeline.pd 2 (fun y => sdsSpatialG M Λ y k i j) x =
+    Pipeline.coordDeriv 2 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 2 x k i j := by
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
-    simp [Pipeline.pd, sdsSpatialG, sdsSpatialDG]
+    simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsF M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (μ k i j : Fin 3) :
-    Pipeline.pd μ (fun y => sdsSpatialG M Λ y k i j) x =
+    Pipeline.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ μ x k i j := by
   fin_cases μ
   · exact pd_sdsSpatialG_eq_sdsSpatialDG_0 M Λ x hr hf k i j
@@ -708,14 +710,14 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
 nontrivial curved 3D vacuum initial data (`³R = 0` while `³Ric_{00} ≠ 0` for
 `M ≠ 0`). -/
 theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsF M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
+    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
     spatialScalarCurvOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x = 2 * Λ := by
   have hG : ∀ k i j,
       Pipeline.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
         sdsSpatialG M Λ x k i j :=
     christoffel_eq_sdsSpatialG M Λ x hr hf hsin
   have hpd : ∀ μ k i j,
-      Pipeline.pd μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
+      Pipeline.coordDeriv μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
           (sdsSpatialMetricInv M Λ) y k i j) x =
         sdsSpatialDG M Λ μ x k i j := by
     intro μ k i j
@@ -723,64 +725,64 @@ theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0
       pd_sdsSpatialG_eq_sdsSpatialDG M Λ x hr hf hsin μ k i j]
   have hcos_sq : Real.cos (x 1) ^ 2 = 1 - Real.sin (x 1) ^ 2 := by
     linear_combination Real.sin_sq_add_cos_sq (x 1)
-  have hric00 : Pipeline.ricciOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 0 0 =
-      -(2 * SchwarzschildDeSitter.sdsHalf M Λ (x 0) /
-        (x 0 * SchwarzschildDeSitter.sdsF M Λ (x 0))) := by
-    simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+  have hric00 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 0 0 =
+      -(2 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) /
+        (x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))) := by
+    simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hf]
     ring
-  have hric11 : Pipeline.ricciOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 1 1 =
-      1 - SchwarzschildDeSitter.sdsF M Λ (x 0) -
-        x 0 * SchwarzschildDeSitter.sdsHalf M Λ (x 0) := by
-    simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+  have hric11 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 1 1 =
+      1 - SchwarzschildDeSitter.sdsLapse M Λ (x 0) -
+        x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) := by
+    simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hsin]
     rw [hcos_sq]
     ring
-  have hric22 : Pipeline.ricciOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 2 2 =
-      Real.sin (x 1) ^ 2 * (1 - SchwarzschildDeSitter.sdsF M Λ (x 0) -
-        x 0 * SchwarzschildDeSitter.sdsHalf M Λ (x 0)) := by
-    simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+  have hric22 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 2 2 =
+      Real.sin (x 1) ^ 2 * (1 - SchwarzschildDeSitter.sdsLapse M Λ (x 0) -
+        x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0)) := by
+    simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hsin]
     rw [hcos_sq]
     ring
   have hoff : ∀ σ ν : Fin 3, σ ≠ ν →
-      Pipeline.ricciOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x σ ν = 0 := by
+      Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x σ ν = 0 := by
     intro σ ν hne
     fin_cases σ <;> fin_cases ν
     · exact absurd rfl hne
-    · simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
       ring
     · exact absurd rfl hne
-    · simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
     · exact absurd rfl hne
-  simp [spatialScalarCurvOf, Pipeline.scalarOf, Fin.sum_univ_three, sdsSpatialMetricInv,
+  simp [spatialScalarCurvOf, Pipeline.ricciScalarOf, Fin.sum_univ_three, sdsSpatialMetricInv,
     hric00, hric11, hric22]
   field_simp [hr, hf, hsin]
-  simp only [SchwarzschildDeSitter.sdsF, SchwarzschildDeSitter.sdsHalf]
+  simp only [SchwarzschildDeSitter.sdsLapse, SchwarzschildDeSitter.sdsLapseHalfDeriv]
   field_simp [hr]
   ring
 
 /-- Time-symmetric curved Schwarzschild spatial slice (`K = 0`, `Λ = 0`) solves
 the derived nonlinear Hamiltonian constraint identically. -/
 theorem schwarzschild_spatial_hamiltonian_zero (M : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : Schwarzschild.schwarzschildF M (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
+    (hf : Schwarzschild.schwarzschildLapse M (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
     hamiltonianConstraintOf (sdsSpatialMetric M 0) (sdsSpatialMetricInv M 0)
       (fun _ => 0) x = 0 := by
-  have hf0 : SchwarzschildDeSitter.sdsF M 0 (x 0) ≠ 0 := by
-    rwa [SchwarzschildDeSitter.sdsF_zero_lambda]
+  have hf0 : SchwarzschildDeSitter.sdsLapse M 0 (x 0) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.sdsLapse_zero_lambda]
   have hS := spatialScalarCurvOf_sdsSpatial M 0 x hr hf0 hsin
   simp [hamiltonianConstraintOf, hS]
 
@@ -795,12 +797,12 @@ theorem flrw_initial_constraints (a₀ H : ℝ) (ha : a₀ ≠ 0) (x : Space3) :
         (fun _ => (H * a₀ ^ 2) • (1 : Tensor2 3)) x i = 0 := by
   have hS : spatialScalarCurvOf (fun _ => a₀ ^ 2 • (1 : Tensor2 3))
       (fun _ => (a₀ ^ 2)⁻¹ • (1 : Tensor2 3)) x = 0 :=
-    Pipeline.scalarOf_const _ _ (a₀ ^ 2 • (1 : Tensor2 3)) (fun _ => rfl) x
+    Pipeline.ricciScalarOf_const _ _ (a₀ ^ 2 • (1 : Tensor2 3)) (fun _ => rfl) x
   constructor
   · simp [hamiltonianConstraintOf, hS, Fin.sum_univ_three]
     field_simp [ha]
     ring
   · intro i
-    simp [momentumConstraintOf, Pipeline.pd_const]
+    simp [momentumConstraintOf, Pipeline.coordDeriv_const]
 
 end GeneralRelativity

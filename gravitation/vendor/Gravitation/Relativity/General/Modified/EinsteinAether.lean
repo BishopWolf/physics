@@ -5,7 +5,7 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.General.Einstein
+public import Gravitation.Relativity.Metrics.Minkowski
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.FinCases
 import Mathlib.Tactic.Linarith
@@ -31,7 +31,11 @@ general quadratic derivative action is parameterized by four dimensionless coupl
 Linearizing around flat Minkowski spacetime with rest-frame aether `u = (1, 0, 0, 0)` yields three
 propagating radiative modes (spin-2 tensor, spin-1 vector, and spin-0 scalar) with distinct
 squared propagation speeds `s₂², s₁², s₀²`, together with a renormalized effective Newtonian
-constant `G_N = G_bare / (1 - c₁₄ / 2)`.
+constant `G_N = G_bare / (1 - c₁₄ / 2)`. Multi-messenger observation of the binary neutron-star
+merger gravitational wave `GW170817` and its electromagnetic counterpart `GRB 170817A` constrained
+the tensor propagation speed to `|s₂ - 1| ≲ 10⁻¹⁵`, requiring `c₁ + c₃ ≈ 0`. Focusing on this
+algebraic dispersion-relation layer keeps the theory's observational parameter bounds independent of
+a full coordinate-chart Euler–Lagrange solver.
 
 ## ii. Key results
 
@@ -57,8 +61,15 @@ constant `G_N = G_bare / (1 - c₁₄ / 2)`.
 
 ## iv. References
 
-* None.
-
+* Ted Jacobson and David Mattingly, *Gravity with a Dynamical Preferred Frame*, *Physical Review D*
+  (2001), Sec. II (https://arxiv.org/pdf/gr-qc/0007031#page=2). [ref: JacobsonMattingly2001]
+* Ted Jacobson and David Mattingly, *Einstein-Aether Waves*, *Physical Review D* (2004), Sec. II-III
+  (https://arxiv.org/pdf/gr-qc/0402005#page=2). [ref: JacobsonMattingly2004]
+* Christopher Eling, Ted Jacobson, and David Mattingly, *Einstein-Aether Theory*, (2004), Sec. 2
+  (https://arxiv.org/pdf/gr-qc/0410001#page=3). [ref: ElingJacobsonMattingly2004]
+* Jacob Oost, Shinji Mukohyama, and Anzhong Wang, *Constraints on Einstein-aether Theory after
+  GW170817*, *Physical Review D* 97, 124023 (2018), Sec. II-IV
+  (https://arxiv.org/pdf/1802.04303#page=1). [ref: OostMukohyamaWang2018]
 -/
 
 @[expose] public section
@@ -106,21 +117,21 @@ def IsUnitTimelike {n : ℕ} (g : Tensor2 n) (u : Fin n → ℝ) : Prop :=
 /-- Canonical Minkowski rest-frame aether four-vector `u^a = (1, 0, 0, 0)`. -/
 def minkowskiRestAether : Fin 4 → ℝ := ![1, 0, 0, 0]
 
-/-- The Minkowski rest-frame aether `u = (1, 0, 0, 0)` is unit-timelike with respect to `eta4`. -/
-lemma minkowskiRestAether_unitTimelike : IsUnitTimelike eta4 minkowskiRestAether := by
-  unfold IsUnitTimelike minkowskiRestAether
-  simp [Fin.sum_univ_four, eta4]
+/-- The Minkowski rest-frame aether `u = (1, 0, 0, 0)` is unit-timelike with respect to
+`minkowskiMetric4`. -/
+lemma minkowskiRestAether_unitTimelike : IsUnitTimelike minkowskiMetric4 minkowskiRestAether := by
+  simp [IsUnitTimelike, minkowskiRestAether, Fin.sum_univ_four]
 
 /-- First-order variation of the unit-timelike constraint `g_{ab} u^a u^b = -1` around flat
-Minkowski spacetime (`g = eta4 + h`, `u = minkowskiRestAether + δu`):
+Minkowski spacetime (`g = minkowskiMetric4 + h`, `u = minkowskiRestAether + δu`):
 `h_{00} - 2 δu^0 = 0`, so in a gauge with `h_{00} = 0` the time perturbation vanishes
 (`δu^0 = 0`). -/
 lemma linUnitTimelike_time_zero (h : Tensor2 4) (δu : Fin 4 → ℝ)
     (hlin : (∑ a : Fin 4, ∑ b : Fin 4,
       (h a b * minkowskiRestAether a * minkowskiRestAether b
-        + 2 * eta4 a b * minkowskiRestAether a * δu b)) = 0)
+        + 2 * minkowskiMetric4 a b * minkowskiRestAether a * δu b)) = 0)
     (hh00 : h 0 0 = 0) : δu 0 = 0 := by
-  simp only [minkowskiRestAether, Fin.sum_univ_four, eta4, Matrix.cons_val_zero,
+  simp only [minkowskiRestAether, Fin.sum_univ_four, minkowskiMetric4_apply, Matrix.cons_val_zero,
     Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three, hh00] at hlin
   norm_num at hlin
   linarith
@@ -159,7 +170,7 @@ def aetherLagrangian {n : ℕ} (C : AetherCouplings) (M : MetricTensor n) (R : �
 lemma aetherLagrangian_on_shell {n : ℕ} (C : AetherCouplings) (M : MetricTensor n) (R : ℝ)
     (u : Fin n → ℝ) (du : Tensor2 n) (lam : ℝ) (hu : IsUnitTimelike M.g u) :
     aetherLagrangian C M R u du lam = R - aetherKineticInvariant C M u du := by
-  unfold aetherLagrangian
+  simp only [aetherLagrangian]
   rw [hu]
   ring
 
@@ -188,8 +199,7 @@ noncomputable def spin0SpeedSq (C : AetherCouplings) : ℝ :=
 (`s₂² = 1`) if and only if `c₁₃ = c₁ + c₃ = 0`. -/
 lemma spin2SpeedSq_eq_one_iff (C : AetherCouplings) (h : 1 - C.c13 ≠ 0) :
     spin2SpeedSq C = 1 ↔ C.c13 = 0 := by
-  unfold spin2SpeedSq
-  rw [div_eq_iff h]
+  simp only [spin2SpeedSq, div_eq_iff h]
   constructor <;> intro h1 <;> linarith
 
 /-- When tensor gravitons are luminal (`c₁₃ = c₁ + c₃ = 0`), the spin-1 vector mode squared speed
@@ -197,10 +207,9 @@ simplifies to `s₁² = c₁ / c₁₄`. -/
 lemma spin1SpeedSq_luminal_graviton (C : AetherCouplings) (hc13 : C.c13 = 0)
     (hc14 : C.c14 ≠ 0) : spin1SpeedSq C = C.c1 / C.c14 := by
   have hc3 : C.c3 = -C.c1 := by
-    unfold AetherCouplings.c13 at hc13
+    simp only [AetherCouplings.c13] at hc13
     linarith
-  unfold spin1SpeedSq
-  rw [hc13, hc3]
+  simp only [spin1SpeedSq, hc13, hc3]
   field_simp [hc14]
   ring
 
@@ -209,10 +218,9 @@ to `s₀² = c₂ (2 - c₁₄) / (c₁₄ (2 + 3 c₂))`. -/
 lemma spin0SpeedSq_luminal_graviton (C : AetherCouplings) (hc13 : C.c13 = 0) :
     spin0SpeedSq C = C.c2 * (2 - C.c14) / (C.c14 * (2 + 3 * C.c2)) := by
   have hc123 : C.c123 = C.c2 := by
-    unfold AetherCouplings.c123 AetherCouplings.c13 at *
+    simp only [AetherCouplings.c123, AetherCouplings.c13] at *
     linarith
-  unfold spin0SpeedSq
-  rw [hc13, hc123]
+  simp only [spin0SpeedSq, hc13, hc123]
   ring
 
 /-- Renormalized Newtonian gravitational constant measured in weak-field static gravity:
@@ -225,8 +233,7 @@ if and only if `c₁₄ = c₁ + c₄ = 0`. -/
 lemma effectiveNewtonG_eq_bare_iff (Gbare : ℝ) (C : AetherCouplings) (hG : Gbare ≠ 0)
     (hd : 1 - C.c14 / 2 ≠ 0) :
     effectiveNewtonG Gbare C = Gbare ↔ C.c14 = 0 := by
-  unfold effectiveNewtonG
-  rw [div_eq_iff hd]
+  simp only [effectiveNewtonG, div_eq_iff hd]
   constructor
   · intro h
     have h1 : Gbare * (1 - C.c14 / 2) = Gbare * 1 := by linarith

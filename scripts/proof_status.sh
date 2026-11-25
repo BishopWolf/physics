@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Maintains the proof-status table in Proof-Status.md.
 #
-# Every declaration of the repository's own module and of the Physlib
-# `PhyslibAlpha/Relativity/General/` subtree is listed with the axioms its proof
+# Every declaration of the repository's own module, the vendored `gravity`
+# tree, and the remaining `PhyslibAlpha/Relativity/General/` dependency module
+# is listed with the axioms its proof
 # depends on, as reported by the audit.  A declaration is "proved" when the
 # audit has a `#print axioms` report for it and that report stays inside the base
 # axiom set; the audit itself fails first if any declaration uses `sorry` or
@@ -22,7 +23,7 @@ export LC_ALL=C
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJ="$ROOT/gravitation"
 DEP="$PROJ/.lake/packages/physlib/PhyslibAlpha/Relativity/General"
-VENDOR="$PROJ/vendor/Gravitation/Relativity/General"
+VENDOR="$PROJ/vendor/Gravitation"
 DECLS="$PROJ/.lake/decls.tsv"
 AXIOMS="$PROJ/.lake/axioms.tsv"
 ROWS="$PROJ/.lake/proof_rows.tsv"

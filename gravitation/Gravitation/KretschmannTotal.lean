@@ -5,8 +5,8 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.General.Schwarzschild.Frame
-public import Gravitation.Relativity.General.SchwarzschildDeSitter.Frame
+public import Gravitation.Relativity.General.Schwarzschild.ElectricWeyl
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
 
 /-!
 

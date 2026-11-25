@@ -5,7 +5,7 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.General.Basic
+public import Gravitation.Relativity.Tensors.Tensor2
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.NormNum
@@ -33,10 +33,12 @@ contrasting it with a standard positive-definite quadratic kinetic term.
 
 ## ii. Key results
 
+- `HigherDerivModel` : benchmark higher-derivative harmonic oscillator model with mass `m`.
 - `kineticMatrix`, `kineticMatrix_degenerate` : singular Hessian `diag(0, 1)` in `(q̇, q̈)`.
-- `hamiltonian`, `hamiltonian_add`, `unbounded_below` : linearity in `p₁` and unboundedness
+- `hamiltonian`, `hamiltonian_add`, `ostrogradsky_unbounded_below` : linearity in `p₁` and
+  unboundedness
   below whenever `v ≠ 0`.
-- `kinetic_bounded`, `kinetic_zero_iff` : positivity and non-degeneracy of a standard first-order
+- `kinetic_nonneg`, `kinetic_zero_iff` : positivity and non-degeneracy of a standard first-order
   quadratic kinetic term.
 
 ## iii. Table of contents
@@ -46,13 +48,24 @@ contrasting it with a standard positive-definite quadratic kinetic term.
 
 ## iv. References
 
-* None.
-
+* Mikhail Ostrogradsky, *Mémoires sur les équations différentielles, relatives au problème des
+  isopérimètres*, *Mémoires de l'Académie Impériale des Sciences de Saint-Pétersbourg* 6, pp.
+  385-517 (1850). [ref: Ostrogradsky1850]
+* Richard P. Woodard, *The Theorem of Ostrogradsky*, *Scholarpedia* (2015), Sec. 2
+  (https://arxiv.org/pdf/1506.02210#page=3). [ref: Woodard2015]
+* Alexander Ganz and Karim Noui, *Reconsidering the Ostrogradsky Theorem: Higher-Derivatives
+  Lagrangians, Ghosts and Degeneracy*, *Classical and Quantum Gravity* 38, 075005 (2021), Sec. 2-3
+  (https://arxiv.org/pdf/2007.01063#page=1). [ref: GanzNoui2021]
+* David Langlois and Karim Noui, *Degenerate Higher Derivative Theories beyond Horndeski: Evading
+  the Ostrogradsky Instability*, *Journal of Cosmology and Astroparticle Physics* (2016), Sec. 2-3
+  (https://arxiv.org/pdf/1510.06930#page=1). [ref: LangloisNoui2016]
 -/
 
 @[expose] public section
 
 namespace GeneralRelativity
+
+namespace Modified
 
 namespace Ostrogradsky
 
@@ -61,6 +74,11 @@ namespace Ostrogradsky
 ## A. Degenerate kinetic matrix and Ostrogradsky ghost
 
 -/
+
+/-- Higher-derivative benchmark model `L = (1/2) q̈² - (1/2) m² q²` parameterized by mass `m`. -/
+structure HigherDerivModel where
+  /-- Oscillator mass parameter `m`. -/
+  m : ℝ
 
 /-- The kinetic Hessian matrix `diag(0, 1)` of `L = (1/2) q̈² + V(q)` in `(q̇, q̈)`. -/
 def kineticMatrix : Tensor2 2 :=
@@ -71,10 +89,14 @@ lemma kineticMatrix_degenerate :
     kineticMatrix 0 0 * kineticMatrix 1 1 - kineticMatrix 0 1 * kineticMatrix 1 0 = 0 := by
   simp [kineticMatrix]
 
-/-- The Ostrogradsky Hamiltonian for `L = (1/2) q̈² - (1/2) m² q²`, with `p₁` conjugate to `q̇`
-and `p₂ = q̈`. -/
+/-- Canonical Ostrogradsky Hamiltonian for the higher-derivative toy model
+`L = (1/2) q̈² - (1/2) m² q²`, with `p₁` conjugate to `q̇` and `p₂ = q̈`. -/
 noncomputable def hamiltonian (v a p₁ p₂ q m : ℝ) : ℝ :=
   p₁ * v + p₂ * a - a ^ 2 / 2 + m ^ 2 * q ^ 2 / 2
+
+/-- Canonical Ostrogradsky Hamiltonian evaluated for a `HigherDerivModel`. -/
+noncomputable def HigherDerivModel.hamiltonian (H : HigherDerivModel) (v a p₁ p₂ q : ℝ) : ℝ :=
+  Ostrogradsky.hamiltonian v a p₁ p₂ q H.m
 
 /-- Shifting `p₁` by `t` translates the Ostrogradsky Hamiltonian linearly by `t * v`. -/
 lemma hamiltonian_add (v a p₁ p₂ q m t : ℝ) :
@@ -84,7 +106,7 @@ lemma hamiltonian_add (v a p₁ p₂ q m t : ℝ) :
 
 /-- The Ostrogradsky ghost: for any non-zero velocity `v ≠ 0`, the Hamiltonian is unbounded
 below as a function of `p₁`. -/
-lemma unbounded_below (v a p₂ q m : ℝ) (hv : v ≠ 0) :
+lemma ostrogradsky_unbounded_below (v a p₂ q m : ℝ) (hv : v ≠ 0) :
     ∀ B : ℝ, ∃ p₁ : ℝ, hamiltonian v a p₁ p₂ q m < B := by
   intro B
   have h : (B - 1 - (p₂ * a - a ^ 2 / 2 + m ^ 2 * q ^ 2 / 2)) / v * v
@@ -101,7 +123,7 @@ lemma unbounded_below (v a p₂ q m : ℝ) (hv : v ≠ 0) :
 -/
 
 /-- A standard first-order quadratic kinetic term `(1/2) m x²` is non-negative for `m > 0`. -/
-lemma kinetic_bounded (m x : ℝ) (hm : 0 < m) : 0 ≤ m * x ^ 2 / 2 := by
+lemma kinetic_nonneg (m x : ℝ) (hm : 0 < m) : 0 ≤ m * x ^ 2 / 2 := by
   positivity
 
 /-- A standard quadratic kinetic term vanishes if and only if the velocity is zero. -/
@@ -116,5 +138,7 @@ lemma kinetic_zero_iff (m x : ℝ) (hm : 0 < m) : m * x ^ 2 / 2 = 0 ↔ x = 0 :=
     ring
 
 end Ostrogradsky
+
+end Modified
 
 end GeneralRelativity

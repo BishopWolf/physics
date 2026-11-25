@@ -33,6 +33,7 @@ This module formalises the one-dimensional core of those two mechanisms:
 
 ## ii. Key results
 
+- `CubicGalileon`, `cubicGalileonDensity` : cubic Galileon model and 1D density `(φ')² φ''`.
 - `cubic_total_derivative` : `(v t)² a t = d/dt (v³ / 3)` whenever `v' = a`.
 - `shift_total_derivative` : shifting velocity by `c` preserves total-derivative structure.
 - `shift_forbids_potential` : shift-symmetric potentials are constant.
@@ -43,13 +44,25 @@ This module formalises the one-dimensional core of those two mechanisms:
 
 ## iv. References
 
-* None.
-
+* Alberto Nicolis, Riccardo Rattazzi, and Enrico Trincherini, *The Galileon as a Local Modification
+  of Gravity*, *Physical Review D* (2009), Sec. II-III (https://arxiv.org/pdf/0811.2197#page=2).
+  [ref: NicolisRattazziTrincherini2009]
+* Gregory Walter Horndeski, *Second-Order Scalar-Tensor Field Equations in a Four-Dimensional
+  Space*, *International Journal of Theoretical Physics* 10, pp. 363-384 (1974), Sec. 2-4.
+  [ref: Horndeski1974]
+* Cédric Deffayet, Stanley Deser, and Gilles Esposito-Farèse, *Generalized Galileons: All Scalar
+  Models Whose Curved Background Extensions Maintain Second-Order Field Equations and
+  Stress-Tensors*, *Physical Review D* (2009), Sec. II (https://arxiv.org/pdf/0906.1967#page=2).
+  [ref: DeffayetDeserEspositoFarese2009]
+* Cédric Deffayet et al., *From k-essence to Generalised Galileons*, *Physical Review D* (2011),
+  Sec. II-III (https://arxiv.org/pdf/1103.3260#page=2). [ref: DeffayetGaoSteerZahariade2011]
 -/
 
 @[expose] public section
 
 namespace GeneralRelativity
+
+namespace Modified
 
 namespace Galileon
 
@@ -58,6 +71,19 @@ namespace Galileon
 ## A. Cubic Galileon total derivative and shift symmetry
 
 -/
+
+/-- Cubic Galileon scalar–tensor theory parameterized by its cubic interaction coupling `c₃`. -/
+structure CubicGalileon where
+  /-- Dimensionless cubic Galileon self-interaction coupling `c₃`. -/
+  c3 : ℝ
+
+/-- One-dimensional cubic Galileon density `(φ')² φ''` for velocity `v = φ'` and
+acceleration `a = φ''`. -/
+def cubicGalileonDensity (v a : ℝ → ℝ) (t : ℝ) : ℝ := v t ^ 2 * a t
+
+/-- Scaled 1D cubic Galileon density `c₃ (φ')² φ''` for a `CubicGalileon` model. -/
+def CubicGalileon.density (C : CubicGalileon) (v a : ℝ → ℝ) (t : ℝ) : ℝ :=
+  C.c3 * cubicGalileonDensity v a t
 
 /-- In one dimension, the cubic Galileon density `(φ')² φ''` is the total derivative
 `d/dt ((φ')³ / 3)`. -/
@@ -83,5 +109,7 @@ lemma shift_forbids_potential (V : ℝ → ℝ) (h : ∀ φ c, V (φ + c) = V φ
   exact h'.symm
 
 end Galileon
+
+end Modified
 
 end GeneralRelativity

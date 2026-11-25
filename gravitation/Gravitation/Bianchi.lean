@@ -38,6 +38,18 @@ import Mathlib.Tactic.Ring
 
 namespace GeneralRelativity
 
+/-! Compatibility names for the refactored core pipeline.  The local Bianchi
+calculus below was written against the former `pd`, `ricciOf`, `scalarOf`, and
+`einsteinOf` names; the upstream core now calls the same operations
+`coordDeriv`, `ricciTensorOf`, `ricciScalarOf`, and `einsteinTensorOf`. -/
+lemma pd_const {n : ℕ} (μ : Fin n) (c : ℝ) (x : Fin n → ℝ) :
+    Pipeline.coordDeriv μ (fun _ => c) x = 0 :=
+  Pipeline.coordDeriv_const μ c x
+
+lemma pd_congr {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} (x : Fin n → ℝ)
+    (h : ∀ y, f y = g y) : Pipeline.coordDeriv μ f x = Pipeline.coordDeriv μ g x :=
+  Pipeline.coordDeriv_congr μ x h
+
 namespace Bianchi
 
 open Pipeline Topology Filter
@@ -63,9 +75,9 @@ lemma hasDerivAt_update {n : ℕ} (x : Fin n → ℝ) (μ : Fin n) :
     rw [hfun, Pi.single_eq_of_ne h]
     exact hasDerivAt_const (x μ) (x i)
 
-/-- `pd` depends only on the germ of the field in a neighborhood of `x`. -/
+/-- `Pipeline.coordDeriv` depends only on the germ of the field in a neighborhood of `x`. -/
 lemma pd_congr_nhds {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
-    (h : f =ᶠ[𝓝 x] g) : pd μ f x = pd μ g x := by
+    (h : f =ᶠ[𝓝 x] g) : Pipeline.coordDeriv μ f x = Pipeline.coordDeriv μ g x := by
   have hcont : ContinuousAt (fun s : ℝ => Function.update x μ s) (x μ) :=
     (hasDerivAt_update x μ).continuousAt
   have heq : (fun s : ℝ => f (Function.update x μ s)) =ᶠ[𝓝 (x μ)]
@@ -75,11 +87,11 @@ lemma pd_congr_nhds {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} {x : 
     exact h1.eventually h
   exact heq.deriv_eq
 
-/-- For a Fréchet-differentiable field, `pd μ f x` equals the directional
+/-- For a Fréchet-differentiable field, `Pipeline.coordDeriv μ f x` equals the directional
 Fréchet derivative `fderiv ℝ f x (Pi.single μ 1)`. -/
 lemma pd_eq_fderiv_single {n : ℕ} {f : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : DifferentiableAt ℝ f x) (μ : Fin n) :
-    pd μ f x = fderiv ℝ f x (Pi.single μ 1) := by
+    Pipeline.coordDeriv μ f x = fderiv ℝ f x (Pi.single μ 1) := by
   have hu := hasDerivAt_update x μ
   have hfx : HasFDerivAt f (fderiv ℝ f x) (Function.update x μ (x μ)) := by
     simpa [Function.update_eq_self] using hf.hasFDerivAt
@@ -97,38 +109,38 @@ lemma differentiableAt_line {n : ℕ} {f : (Fin n → ℝ) → ℝ} {x : Fin n �
 
 lemma pd_add {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : DifferentiableAt ℝ f x) (hg : DifferentiableAt ℝ g x) :
-    pd μ (fun y => f y + g y) x = pd μ f x + pd μ g x :=
+    Pipeline.coordDeriv μ (fun y => f y + g y) x = Pipeline.coordDeriv μ f x + Pipeline.coordDeriv μ g x :=
   deriv_add (differentiableAt_line hf μ) (differentiableAt_line hg μ)
 
 lemma pd_sub {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : DifferentiableAt ℝ f x) (hg : DifferentiableAt ℝ g x) :
-    pd μ (fun y => f y - g y) x = pd μ f x - pd μ g x :=
+    Pipeline.coordDeriv μ (fun y => f y - g y) x = Pipeline.coordDeriv μ f x - Pipeline.coordDeriv μ g x :=
   deriv_sub (differentiableAt_line hf μ) (differentiableAt_line hg μ)
 
 lemma pd_neg {n : ℕ} (μ : Fin n) (f : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) :
-    pd μ (fun y => -f y) x = -pd μ f x := by
-  simp [pd]
+    Pipeline.coordDeriv μ (fun y => -f y) x = -Pipeline.coordDeriv μ f x := by
+  simp [Pipeline.coordDeriv]
 
 lemma pd_const_mul {n : ℕ} (μ : Fin n) (c : ℝ) {f : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : DifferentiableAt ℝ f x) :
-    pd μ (fun y => c * f y) x = c * pd μ f x :=
+    Pipeline.coordDeriv μ (fun y => c * f y) x = c * Pipeline.coordDeriv μ f x :=
   deriv_const_mul c (differentiableAt_line hf μ)
 
 lemma pd_mul {n : ℕ} (μ : Fin n) {f g : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : DifferentiableAt ℝ f x) (hg : DifferentiableAt ℝ g x) :
-    pd μ (fun y => f y * g y) x = pd μ f x * g x + f x * pd μ g x := by
+    Pipeline.coordDeriv μ (fun y => f y * g y) x = Pipeline.coordDeriv μ f x * g x + f x * Pipeline.coordDeriv μ g x := by
   have hm := (differentiableAt_line hf μ).hasDerivAt.fun_mul
     (differentiableAt_line hg μ).hasDerivAt
-  simpa [pd, Function.update_eq_self] using hm.deriv
+  simpa [Pipeline.coordDeriv, Function.update_eq_self] using hm.deriv
 
 lemma pd_sum {n : ℕ} {ι : Type*} (μ : Fin n) (s : Finset ι)
     (f : ι → (Fin n → ℝ) → ℝ) {x : Fin n → ℝ}
     (hf : ∀ i ∈ s, DifferentiableAt ℝ (f i) x) :
-    pd μ (fun y => ∑ i ∈ s, f i y) x = ∑ i ∈ s, pd μ (f i) x := by
+    Pipeline.coordDeriv μ (fun y => ∑ i ∈ s, f i y) x = ∑ i ∈ s, Pipeline.coordDeriv μ (f i) x := by
   have h := deriv_fun_sum (u := s)
     (A := fun i s' => f i (Function.update x μ s')) (x := x μ)
     (fun i hi => differentiableAt_line (hf i hi) μ)
-  simpa [pd] using h
+  simpa [Pipeline.coordDeriv] using h
 
 /-- A `C²` field is differentiable on a neighborhood of `x`. -/
 lemma eventually_differentiableAt_of_contDiffAt_two {n : ℕ}
@@ -142,26 +154,26 @@ lemma eventually_differentiableAt_of_contDiffAt_two {n : ℕ}
 /-- The coordinate partial derivative of a `C²` field is `C¹` at `x`. -/
 lemma contDiffAt_one_pd {n : ℕ} {f : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : ContDiffAt ℝ 2 f x) (ν : Fin n) :
-    ContDiffAt ℝ 1 (pd ν f) x := by
+    ContDiffAt ℝ 1 (Pipeline.coordDeriv ν f) x := by
   have hfd : ContDiffAt ℝ 1 (fderiv ℝ f) x :=
     hf.fderiv_right (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
   have hclm : ContDiffAt ℝ 1 (fun y => fderiv ℝ f y (Pi.single ν 1)) x :=
     hfd.clm_apply contDiffAt_const
-  have heq : pd ν f =ᶠ[𝓝 x] fun y => fderiv ℝ f y (Pi.single ν 1) := by
+  have heq : Pipeline.coordDeriv ν f =ᶠ[𝓝 x] fun y => fderiv ℝ f y (Pi.single ν 1) := by
     filter_upwards [eventually_differentiableAt_of_contDiffAt_two hf] with y hy
     exact pd_eq_fderiv_single hy ν
   exact hclm.congr_of_eventuallyEq heq
 
-/-- **Schwarz's theorem for `pd`**: mixed second coordinate partial derivatives
+/-- **Schwarz's theorem for `Pipeline.coordDeriv`**: mixed second coordinate partial derivatives
 of any `C²` field commute. -/
 theorem pd_comm_of_contDiffAt {n : ℕ} {f : (Fin n → ℝ) → ℝ} {x : Fin n → ℝ}
     (hf : ContDiffAt ℝ 2 f x) (μ ν : Fin n) :
-    pd μ (pd ν f) x = pd ν (pd μ f) x := by
+    Pipeline.coordDeriv μ (Pipeline.coordDeriv ν f) x = Pipeline.coordDeriv ν (Pipeline.coordDeriv μ f) x := by
   have eval_eq : ∀ a b : Fin n,
-      pd a (pd b f) x = fderiv ℝ (fderiv ℝ f) x (Pi.single a 1) (Pi.single b 1) := by
+      Pipeline.coordDeriv a (Pipeline.coordDeriv b f) x = fderiv ℝ (fderiv ℝ f) x (Pi.single a 1) (Pi.single b 1) := by
     intro a b
     let vb : Fin n → ℝ := Pi.single b (1 : ℝ)
-    have heq : pd b f =ᶠ[𝓝 x] fun y => fderiv ℝ f y vb := by
+    have heq : Pipeline.coordDeriv b f =ᶠ[𝓝 x] fun y => fderiv ℝ f y vb := by
       filter_upwards [eventually_differentiableAt_of_contDiffAt_two hf] with y hy
       exact pd_eq_fderiv_single hy b
     rw [pd_congr_nhds a heq]
@@ -181,7 +193,7 @@ theorem pd_comm_of_contDiffAt {n : ℕ} {f : (Fin n → ℝ) → ℝ} {x : Fin n
 `∇_l T_{ij} = ∂_l T_{ij} - Γ^a_{li} T_{aj} - Γ^a_{lj} T_{ia}`. -/
 noncomputable def covDeriv2 {n : ℕ} (g ginv T : (Fin n → ℝ) → Tensor2 n)
     (x : Fin n → ℝ) (l i j : Fin n) : ℝ :=
-  pd l (fun y => T y i j) x
+  Pipeline.coordDeriv l (fun y => T y i j) x
     - ∑ a, christoffel g ginv x a l i * T x a j
     - ∑ a, christoffel g ginv x a l j * T x i a
 
@@ -189,7 +201,7 @@ noncomputable def covDeriv2 {n : ℕ} (g ginv T : (Fin n → ℝ) → Tensor2 n)
 `∇_l T^{ij} = ∂_l T^{ij} + Γ^i_{la} T^{aj} + Γ^j_{la} T^{ia}`. -/
 noncomputable def covDeriv2Up {n : ℕ} (g ginv T : (Fin n → ℝ) → Tensor2 n)
     (x : Fin n → ℝ) (l i j : Fin n) : ℝ :=
-  pd l (fun y => T y i j) x
+  Pipeline.coordDeriv l (fun y => T y i j) x
     + ∑ a, christoffel g ginv x i l a * T x a j
     + ∑ a, christoffel g ginv x j l a * T x i a
 
@@ -198,7 +210,7 @@ noncomputable def covDeriv2Up {n : ℕ} (g ginv T : (Fin n → ℝ) → Tensor2 
   - Γ^a_{lμ} R^ρ_{σaν} - Γ^a_{lν} R^ρ_{σμa}`. -/
 noncomputable def covDerivRiemann {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n)
     (x : Fin n → ℝ) (l ρ σ μ ν : Fin n) : ℝ :=
-  pd l (fun y => riemann g ginv y ρ σ μ ν) x
+  Pipeline.coordDeriv l (fun y => riemann g ginv y ρ σ μ ν) x
     + ∑ a, christoffel g ginv x ρ l a * riemann g ginv x a σ μ ν
     - ∑ a, christoffel g ginv x a l σ * riemann g ginv x ρ a μ ν
     - ∑ a, christoffel g ginv x a l μ * riemann g ginv x ρ σ a ν
@@ -221,7 +233,7 @@ lemma christoffel_symm {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : F
   congr 1
   apply Finset.sum_congr rfl
   intro l _
-  have hsym : pd l (fun y => g y i j) x = pd l (fun y => g y j i) x :=
+  have hsym : Pipeline.coordDeriv l (fun y => g y i j) x = Pipeline.coordDeriv l (fun y => g y j i) x :=
     pd_congr_nhds l (hgSymm.mono fun y hy => hy i j)
   rw [hsym]
   ring
@@ -235,35 +247,35 @@ theorem metric_compat {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : Fi
     covDeriv2 g ginv g x l i j = 0 := by
   have hsum : ∀ p q : Fin n,
       (∑ a, christoffel g ginv x a l p * g x a q) =
-        (1 / 2) * (pd l (fun y => g y p q) x + pd p (fun y => g y l q) x
-          - pd q (fun y => g y l p) x) := by
+        (1 / 2) * (Pipeline.coordDeriv l (fun y => g y p q) x + Pipeline.coordDeriv p (fun y => g y l q) x
+          - Pipeline.coordDeriv q (fun y => g y l p) x) := by
     intro p q
     simp only [christoffel, Finset.mul_sum, Finset.sum_mul]
     rw [Finset.sum_comm]
     calc
       ∑ m, ∑ a, (1 / 2) * (ginv x a m *
-          (pd l (fun y => g y p m) x + pd p (fun y => g y l m) x
-            - pd m (fun y => g y l p) x)) * g x a q
-          = ∑ m, (1 / 2) * (pd l (fun y => g y p m) x + pd p (fun y => g y l m) x
-              - pd m (fun y => g y l p) x) * (∑ a, ginv x a m * g x a q) := by
+          (Pipeline.coordDeriv l (fun y => g y p m) x + Pipeline.coordDeriv p (fun y => g y l m) x
+            - Pipeline.coordDeriv m (fun y => g y l p) x)) * g x a q
+          = ∑ m, (1 / 2) * (Pipeline.coordDeriv l (fun y => g y p m) x + Pipeline.coordDeriv p (fun y => g y l m) x
+              - Pipeline.coordDeriv m (fun y => g y l p) x) * (∑ a, ginv x a m * g x a q) := by
             apply Finset.sum_congr rfl
             intro m _
             rw [Finset.mul_sum]
             apply Finset.sum_congr rfl
             intro a _
             ring
-      _ = ∑ m, (1 / 2) * (pd l (fun y => g y p m) x + pd p (fun y => g y l m) x
-            - pd m (fun y => g y l p) x) * (if m = q then 1 else 0) := by
+      _ = ∑ m, (1 / 2) * (Pipeline.coordDeriv l (fun y => g y p m) x + Pipeline.coordDeriv p (fun y => g y l m) x
+            - Pipeline.coordDeriv m (fun y => g y l p) x) * (if m = q then 1 else 0) := by
             apply Finset.sum_congr rfl
             intro m _
             rw [hInv m q]
-      _ = (1 / 2) * (pd l (fun y => g y p q) x + pd p (fun y => g y l q) x
-            - pd q (fun y => g y l p) x) := by
+      _ = (1 / 2) * (Pipeline.coordDeriv l (fun y => g y p q) x + Pipeline.coordDeriv p (fun y => g y l q) x
+            - Pipeline.coordDeriv q (fun y => g y l p) x) := by
             simp
   have h1 := hsum i j
   have h2 : (∑ a, christoffel g ginv x a l j * g x i a) =
-      (1 / 2) * (pd l (fun y => g y j i) x + pd j (fun y => g y l i) x
-        - pd i (fun y => g y l j) x) := by
+      (1 / 2) * (Pipeline.coordDeriv l (fun y => g y j i) x + Pipeline.coordDeriv j (fun y => g y l i) x
+        - Pipeline.coordDeriv i (fun y => g y l j) x) := by
     have hg0 : ∀ a b, g x a b = g x b a := hgSymm.self_of_nhds
     have hrewrite : (∑ a, christoffel g ginv x a l j * g x i a) =
         ∑ a, christoffel g ginv x a l j * g x a i := by
@@ -271,7 +283,7 @@ theorem metric_compat {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : Fi
       intro a _
       rw [hg0 i a]
     rw [hrewrite, hsum j i]
-  have hpd_sym : pd l (fun y => g y j i) x = pd l (fun y => g y i j) x :=
+  have hpd_sym : Pipeline.coordDeriv l (fun y => g y j i) x = Pipeline.coordDeriv l (fun y => g y i j) x :=
     pd_congr_nhds l (hgSymm.mono fun y hy => hy j i)
   unfold covDeriv2
   rw [h1, h2, hpd_sym]
@@ -291,10 +303,10 @@ theorem inv_metric_compat {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x 
     intro m j
     have h0 := hInvL.self_of_nhds m j
     simpa [hginvSymm] using h0
-  have hdiff : ∀ j, ∑ k, (pd l (fun y => ginv y i k) x * g x k j
-      + ginv x i k * pd l (fun y => g y k j) x) = 0 := by
+  have hdiff : ∀ j, ∑ k, (Pipeline.coordDeriv l (fun y => ginv y i k) x * g x k j
+      + ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x) = 0 := by
     intro j
-    have hconst : pd l (fun y => ∑ k, ginv y i k * g y k j) x = 0 := by
+    have hconst : Pipeline.coordDeriv l (fun y => ∑ k, ginv y i k * g y k j) x = 0 := by
       rw [pd_congr_nhds l (hInvL.mono fun y hy => hy i j)]
       exact pd_const l _ x
     rw [pd_sum l Finset.univ (fun k y => ginv y i k * g y k j)
@@ -303,32 +315,32 @@ theorem inv_metric_compat {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x 
     apply Finset.sum_congr rfl
     intro k _
     exact (pd_mul l (hginvD i k) (hgD k j)).symm
-  have hpd_ginv : pd l (fun y => ginv y i b) x =
-      -∑ j, ∑ k, ginv x i k * pd l (fun y => g y k j) x * ginv x j b := by
-    have h1 : pd l (fun y => ginv y i b) x =
-        ∑ k, pd l (fun y => ginv y i k) x * (∑ j, g x k j * ginv x j b) := by
+  have hpd_ginv : Pipeline.coordDeriv l (fun y => ginv y i b) x =
+      -∑ j, ∑ k, ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x * ginv x j b := by
+    have h1 : Pipeline.coordDeriv l (fun y => ginv y i b) x =
+        ∑ k, Pipeline.coordDeriv l (fun y => ginv y i k) x * (∑ j, g x k j * ginv x j b) := by
       simp [hInvR]
     rw [h1]
     simp_rw [Finset.mul_sum]
     rw [Finset.sum_comm]
-    have hstep : ∀ j, (∑ k, pd l (fun y => ginv y i k) x * (g x k j * ginv x j b)) =
-        -(∑ k, ginv x i k * pd l (fun y => g y k j) x * ginv x j b) := by
+    have hstep : ∀ j, (∑ k, Pipeline.coordDeriv l (fun y => ginv y i k) x * (g x k j * ginv x j b)) =
+        -(∑ k, ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x * ginv x j b) := by
       intro j
       have hd := hdiff j
-      have hmul : (∑ k, (pd l (fun y => ginv y i k) x * g x k j
-          + ginv x i k * pd l (fun y => g y k j) x) * ginv x j b) = 0 := by
+      have hmul : (∑ k, (Pipeline.coordDeriv l (fun y => ginv y i k) x * g x k j
+          + ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x) * ginv x j b) = 0 := by
         rw [← Finset.sum_mul, hd, zero_mul]
-      have hsplit : (∑ k, (pd l (fun y => ginv y i k) x * g x k j
-          + ginv x i k * pd l (fun y => g y k j) x) * ginv x j b) =
-          (∑ k, pd l (fun y => ginv y i k) x * (g x k j * ginv x j b))
-            + ∑ k, ginv x i k * pd l (fun y => g y k j) x * ginv x j b := by
+      have hsplit : (∑ k, (Pipeline.coordDeriv l (fun y => ginv y i k) x * g x k j
+          + ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x) * ginv x j b) =
+          (∑ k, Pipeline.coordDeriv l (fun y => ginv y i k) x * (g x k j * ginv x j b))
+            + ∑ k, ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x * ginv x j b := by
         rw [← Finset.sum_add_distrib]
         apply Finset.sum_congr rfl
         intro k _
         ring
       linarith
     simp_rw [hstep, Finset.sum_neg_distrib]
-  have hmc : ∀ k j, pd l (fun y => g y k j) x =
+  have hmc : ∀ k j, Pipeline.coordDeriv l (fun y => g y k j) x =
       (∑ a, christoffel g ginv x a l k * g x a j)
         + ∑ a, christoffel g ginv x a l j * g x k a := by
     intro k j
@@ -378,7 +390,7 @@ theorem inv_metric_compat {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x 
             simp
   unfold covDeriv2Up
   rw [hpd_ginv]
-  have hsplit : (∑ j, ∑ k, ginv x i k * pd l (fun y => g y k j) x * ginv x j b) =
+  have hsplit : (∑ j, ∑ k, ginv x i k * Pipeline.coordDeriv l (fun y => g y k j) x * ginv x j b) =
       (∑ j, ∑ k, ginv x i k * (∑ a, christoffel g ginv x a l k * g x a j) * ginv x j b)
         + ∑ j, ∑ k, ginv x i k * (∑ a, christoffel g ginv x a l j * g x k a) * ginv x j b := by
     rw [← Finset.sum_add_distrib]
@@ -423,7 +435,7 @@ theorem riemann_lower_skew_first {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2
   have hgD : ∀ i j, DifferentiableAt ℝ (fun y => g y i j) x :=
     fun i j => (hgC2 i j).differentiableAt two_ne_zero
   have hmc_nhds : ∀ a b c : Fin n,
-      (fun y => pd c (fun z => g z a b) y) =ᶠ[𝓝 x]
+      (fun y => Pipeline.coordDeriv c (fun z => g z a b) y) =ᶠ[𝓝 x]
         fun y => (∑ β, christoffel g ginv y β c a * g y β b)
           + ∑ β, christoffel g ginv y β c b * g y a β := by
     intro a b c
@@ -434,9 +446,9 @@ theorem riemann_lower_skew_first {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2
     unfold covDeriv2 at h
     linarith
   have h2pd : ∀ p q : Fin n,
-      pd p (pd q (fun z => g z α σ)) x =
-        (∑ β, pd p (fun y => christoffel g ginv y β q α) x * g x β σ)
-        + (∑ β, pd p (fun y => christoffel g ginv y β q σ) x * g x α β)
+      Pipeline.coordDeriv p (Pipeline.coordDeriv q (fun z => g z α σ)) x =
+        (∑ β, Pipeline.coordDeriv p (fun y => christoffel g ginv y β q α) x * g x β σ)
+        + (∑ β, Pipeline.coordDeriv p (fun y => christoffel g ginv y β q σ) x * g x α β)
         + (∑ β, ∑ γ, christoffel g ginv x β q α * christoffel g ginv x γ p β * g x γ σ)
         + (∑ β, ∑ γ, christoffel g ginv x β q α * christoffel g ginv x γ p σ * g x β γ)
         + (∑ β, ∑ γ, christoffel g ginv x β q σ * christoffel g ginv x γ p α * g x γ β)
@@ -452,30 +464,30 @@ theorem riemann_lower_skew_first {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2
         (fun β _ => (hΓD β q α).fun_mul (hgD β σ)),
       pd_sum p Finset.univ (fun β y => christoffel g ginv y β q σ * g y α β)
         (fun β _ => (hΓD β q σ).fun_mul (hgD α β))]
-    have hm1 : ∀ β, pd p (fun y => christoffel g ginv y β q α * g y β σ) x =
-        pd p (fun y => christoffel g ginv y β q α) x * g x β σ +
+    have hm1 : ∀ β, Pipeline.coordDeriv p (fun y => christoffel g ginv y β q α * g y β σ) x =
+        Pipeline.coordDeriv p (fun y => christoffel g ginv y β q α) x * g x β σ +
           christoffel g ginv x β q α *
             ((∑ γ, christoffel g ginv x γ p β * g x γ σ) +
               ∑ γ, christoffel g ginv x γ p σ * g x β γ) := by
       intro β
-      have hβ : pd p (fun y => g y β σ) x =
+      have hβ : Pipeline.coordDeriv p (fun y => g y β σ) x =
           (∑ γ, christoffel g ginv x γ p β * g x γ σ) +
             ∑ γ, christoffel g ginv x γ p σ * g x β γ := (hmc_nhds β σ p).self_of_nhds
       rw [pd_mul p (hΓD β q α) (hgD β σ), hβ]
-    have hm2 : ∀ β, pd p (fun y => christoffel g ginv y β q σ * g y α β) x =
-        pd p (fun y => christoffel g ginv y β q σ) x * g x α β +
+    have hm2 : ∀ β, Pipeline.coordDeriv p (fun y => christoffel g ginv y β q σ * g y α β) x =
+        Pipeline.coordDeriv p (fun y => christoffel g ginv y β q σ) x * g x α β +
           christoffel g ginv x β q σ *
             ((∑ γ, christoffel g ginv x γ p α * g x γ β) +
               ∑ γ, christoffel g ginv x γ p β * g x α γ) := by
       intro β
-      have hβ : pd p (fun y => g y α β) x =
+      have hβ : Pipeline.coordDeriv p (fun y => g y α β) x =
           (∑ γ, christoffel g ginv x γ p α * g x γ β) +
             ∑ γ, christoffel g ginv x γ p β * g x α γ := (hmc_nhds α β p).self_of_nhds
       rw [pd_mul p (hΓD β q σ) (hgD α β), hβ]
     simp_rw [hm1, hm2, mul_add, Finset.mul_sum, Finset.sum_add_distrib]
     simp_rw [mul_assoc]
     ring
-  have hcomm : pd μ (pd ν (fun z => g z α σ)) x - pd ν (pd μ (fun z => g z α σ)) x = 0 := by
+  have hcomm : Pipeline.coordDeriv μ (Pipeline.coordDeriv ν (fun z => g z α σ)) x - Pipeline.coordDeriv ν (Pipeline.coordDeriv μ (fun z => g z α σ)) x = 0 := by
     rw [pd_comm_of_contDiffAt (hgC2 α σ) μ ν]
     ring
   have hg0 : ∀ a b, g x a b = g x b a := hgSymm.self_of_nhds
@@ -544,12 +556,12 @@ theorem riemann_lower_skew_first {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2
   have htarget :
       (∑ β, g x α β * riemann g ginv x β σ μ ν) +
         (∑ β, g x σ β * riemann g ginv x β α μ ν) =
-      (∑ β, pd μ (fun y => christoffel g ginv y β ν α) x * g x β σ)
-        + (∑ β, pd μ (fun y => christoffel g ginv y β ν σ) x * g x α β)
+      (∑ β, Pipeline.coordDeriv μ (fun y => christoffel g ginv y β ν α) x * g x β σ)
+        + (∑ β, Pipeline.coordDeriv μ (fun y => christoffel g ginv y β ν σ) x * g x α β)
         + (∑ β, g x σ β * ∑ γ, christoffel g ginv x β μ γ * christoffel g ginv x γ ν α)
         + (∑ β, g x α β * ∑ γ, christoffel g ginv x β μ γ * christoffel g ginv x γ ν σ)
-        - (∑ β, pd ν (fun y => christoffel g ginv y β μ α) x * g x β σ)
-        - (∑ β, pd ν (fun y => christoffel g ginv y β μ σ) x * g x α β)
+        - (∑ β, Pipeline.coordDeriv ν (fun y => christoffel g ginv y β μ α) x * g x β σ)
+        - (∑ β, Pipeline.coordDeriv ν (fun y => christoffel g ginv y β μ σ) x * g x α β)
         - (∑ β, g x σ β * ∑ γ, christoffel g ginv x β ν γ * christoffel g ginv x γ μ α)
         - (∑ β, g x α β * ∑ γ, christoffel g ginv x β ν γ * christoffel g ginv x γ μ σ) := by
     simp only [riemann, mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib,
@@ -682,21 +694,21 @@ theorem second_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : F
   have hΓD : ∀ k i j, DifferentiableAt ℝ (fun y => christoffel g ginv y k i j) x :=
     fun k i j => (hΓC2 k i j).differentiableAt two_ne_zero
   have hdΓD : ∀ a k i j,
-      DifferentiableAt ℝ (fun y => pd a (fun z => christoffel g ginv z k i j) y) x :=
+      DifferentiableAt ℝ (fun y => Pipeline.coordDeriv a (fun z => christoffel g ginv z k i j) y) x :=
     fun a k i j => (contDiffAt_one_pd (hΓC2 k i j) a).differentiableAt one_ne_zero
   have hpdR : ∀ a r s m p : Fin n,
-      pd a (fun y => riemann g ginv y r s m p) x =
-        pd a (fun y => pd m (fun z => christoffel g ginv z r p s) y) x
-        - pd a (fun y => pd p (fun z => christoffel g ginv z r m s) y) x
-        + ∑ c, (pd a (fun y => christoffel g ginv y r m c) x * christoffel g ginv x c p s
-              + christoffel g ginv x r m c * pd a (fun y => christoffel g ginv y c p s) x
-              - pd a (fun y => christoffel g ginv y r p c) x * christoffel g ginv x c m s
-              - christoffel g ginv x r p c * pd a (fun y => christoffel g ginv y c m s) x) := by
+      Pipeline.coordDeriv a (fun y => riemann g ginv y r s m p) x =
+        Pipeline.coordDeriv a (fun y => Pipeline.coordDeriv m (fun z => christoffel g ginv z r p s) y) x
+        - Pipeline.coordDeriv a (fun y => Pipeline.coordDeriv p (fun z => christoffel g ginv z r m s) y) x
+        + ∑ c, (Pipeline.coordDeriv a (fun y => christoffel g ginv y r m c) x * christoffel g ginv x c p s
+              + christoffel g ginv x r m c * Pipeline.coordDeriv a (fun y => christoffel g ginv y c p s) x
+              - Pipeline.coordDeriv a (fun y => christoffel g ginv y r p c) x * christoffel g ginv x c m s
+              - christoffel g ginv x r p c * Pipeline.coordDeriv a (fun y => christoffel g ginv y c m s) x) := by
     intro a r s m p
     unfold riemann
     have hsub : DifferentiableAt ℝ (fun y =>
-        pd m (fun z => christoffel g ginv z r p s) y
-          - pd p (fun z => christoffel g ginv z r m s) y) x :=
+        Pipeline.coordDeriv m (fun z => christoffel g ginv z r p s) y
+          - Pipeline.coordDeriv p (fun z => christoffel g ginv z r m s) y) x :=
       (hdΓD m r p s).sub (hdΓD p r m s)
     have hsum : DifferentiableAt ℝ (fun y =>
         ∑ c, (christoffel g ginv y r m c * christoffel g ginv y c p s
@@ -718,8 +730,8 @@ theorem second_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : F
     ring
   have halg := second_bianchi_of
     (fun k i j => christoffel g ginv x k i j)
-    (fun a k i j => pd a (fun y => christoffel g ginv y k i j) x)
-    (fun a b k i j => pd a (fun y => pd b (fun z => christoffel g ginv z k i j) y) x)
+    (fun a k i j => Pipeline.coordDeriv a (fun y => christoffel g ginv y k i j) x)
+    (fun a b k i j => Pipeline.coordDeriv a (fun y => Pipeline.coordDeriv b (fun z => christoffel g ginv z k i j) y) x)
     (fun k i j => christoffel_symm g ginv hgSymm k i j)
     (fun a b k i j => pd_comm_of_contDiffAt (hΓC2 k i j) a b)
     l ρ σ μ ν
@@ -737,39 +749,41 @@ lemma differentiableAt_riemann {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n
   have hΓD : ∀ k i j, DifferentiableAt ℝ (fun y => christoffel g ginv y k i j) x :=
     fun k i j => (hΓC2 k i j).differentiableAt two_ne_zero
   have hdΓD : ∀ a k i j,
-      DifferentiableAt ℝ (fun y => pd a (fun z => christoffel g ginv z k i j) y) x :=
+      DifferentiableAt ℝ (fun y => Pipeline.coordDeriv a (fun z => christoffel g ginv z k i j) y) x :=
     fun a k i j => (contDiffAt_one_pd (hΓC2 k i j) a).differentiableAt one_ne_zero
   unfold riemann
   exact ((hdΓD μ ρ ν σ).sub (hdΓD ν ρ μ σ)).add
     (DifferentiableAt.fun_sum fun l _ =>
       ((hΓD ρ μ l).mul (hΓD l ν σ)).sub ((hΓD ρ ν l).mul (hΓD l μ σ)))
 
-/-- Differentiability of `ricciOf` from `C²` Christoffel symbols. -/
+/-- Differentiability of `Pipeline.ricciTensorOf` from `C²` Christoffel symbols. -/
 lemma differentiableAt_ricciOf {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : Fin n → ℝ}
     (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => christoffel g ginv y k i j) x)
     (σ ν : Fin n) :
-    DifferentiableAt ℝ (fun y => ricciOf g ginv y σ ν) x :=
-  DifferentiableAt.fun_sum fun ρ _ => differentiableAt_riemann g ginv hΓC2 ρ σ ρ ν
+    DifferentiableAt ℝ (fun y => Pipeline.ricciTensorOf g ginv y σ ν) x := by
+  unfold Pipeline.ricciTensorOf
+  exact DifferentiableAt.fun_sum fun ρ _ => differentiableAt_riemann g ginv hΓC2 ρ σ ρ ν
 
-/-- Differentiability of `scalarOf` from `C²` Christoffel symbols and
+/-- Differentiability of `Pipeline.ricciScalarOf` from `C²` Christoffel symbols and
 differentiable `ginv`. -/
 lemma differentiableAt_scalarOf {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : Fin n → ℝ}
     (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
     (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => christoffel g ginv y k i j) x) :
-    DifferentiableAt ℝ (scalarOf g ginv) x :=
-  DifferentiableAt.fun_sum fun σ _ =>
+    DifferentiableAt ℝ (Pipeline.ricciScalarOf g ginv) x := by
+  unfold Pipeline.ricciScalarOf
+  exact DifferentiableAt.fun_sum fun σ _ =>
     DifferentiableAt.fun_sum fun ν _ =>
       (hginvD σ ν).mul (differentiableAt_ricciOf g ginv hΓC2 σ ν)
 
-/-- Contracting `ρ = μ` in `covDerivRiemann` yields `covDeriv2 (ricciOf)`. -/
+/-- Contracting `ρ = μ` in `covDerivRiemann` yields `covDeriv2 (Pipeline.ricciTensorOf)`. -/
 lemma sum_covDerivRiemann_ricci {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x : Fin n → ℝ}
     (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => christoffel g ginv y k i j) x)
     (m σ l : Fin n) :
     (∑ r, covDerivRiemann g ginv x m r σ r l) =
-      covDeriv2 g ginv (ricciOf g ginv) x m σ l := by
+      covDeriv2 g ginv (Pipeline.ricciTensorOf g ginv) x m σ l := by
   simp only [covDerivRiemann, Finset.sum_add_distrib, Finset.sum_sub_distrib]
-  have hpd : (∑ r, pd m (fun y => riemann g ginv y r σ r l) x) =
-      pd m (fun y => ricciOf g ginv y σ l) x :=
+  have hpd : (∑ r, Pipeline.coordDeriv m (fun y => riemann g ginv y r σ r l) x) =
+      Pipeline.coordDeriv m (fun y => Pipeline.ricciTensorOf g ginv y σ l) x :=
     (pd_sum m Finset.univ (fun r y => riemann g ginv y r σ r l)
       (fun r _ => differentiableAt_riemann g ginv hΓC2 r σ r l)).symm
   have hcancel :
@@ -778,7 +792,7 @@ lemma sum_covDerivRiemann_ricci {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 
     rw [Finset.sum_comm]
   have hsig :
       (∑ r, ∑ a, christoffel g ginv x a m σ * riemann g ginv x r a r l) =
-      (∑ a, christoffel g ginv x a m σ * ricciOf g ginv x a l) := by
+      (∑ a, christoffel g ginv x a m σ * Pipeline.ricciTensorOf g ginv x a l) := by
     rw [Finset.sum_comm]
     apply Finset.sum_congr rfl
     intro a _
@@ -786,7 +800,7 @@ lemma sum_covDerivRiemann_ricci {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 
     rfl
   have hl :
       (∑ r, ∑ a, christoffel g ginv x a m l * riemann g ginv x r σ r a) =
-      (∑ a, christoffel g ginv x a m l * ricciOf g ginv x σ a) := by
+      (∑ a, christoffel g ginv x a m l * Pipeline.ricciTensorOf g ginv x σ a) := by
     rw [Finset.sum_comm]
     apply Finset.sum_congr rfl
     intro a _
@@ -807,14 +821,14 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
     (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
     (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => christoffel g ginv y k i j) x)
     (l : Fin n) :
-    covDiv2 g ginv (ricciOf g ginv) x l = (1 / 2) * pd l (scalarOf g ginv) x := by
+    covDiv2 g ginv (Pipeline.ricciTensorOf g ginv) x l = (1 / 2) * Pipeline.coordDeriv l (Pipeline.ricciScalarOf g ginv) x := by
   have hgD : ∀ i j, DifferentiableAt ℝ (fun y => g y i j) x :=
     fun i j => (hgC2 i j).differentiableAt two_ne_zero
   have hRD : ∀ ρ σ μ ν, DifferentiableAt ℝ (fun y => riemann g ginv y ρ σ μ ν) x :=
     fun ρ σ μ ν => differentiableAt_riemann g ginv hΓC2 ρ σ μ ν
-  have hRicD : ∀ σ ν, DifferentiableAt ℝ (fun y => ricciOf g ginv y σ ν) x :=
+  have hRicD : ∀ σ ν, DifferentiableAt ℝ (fun y => Pipeline.ricciTensorOf g ginv y σ ν) x :=
     fun σ ν => differentiableAt_ricciOf g ginv hΓC2 σ ν
-  have hInvUp : ∀ a i j, pd a (fun y => ginv y i j) x =
+  have hInvUp : ∀ a i j, Pipeline.coordDeriv a (fun y => ginv y i j) x =
       -(∑ c, christoffel g ginv x i a c * ginv x c j)
         - ∑ c, christoffel g ginv x j a c * ginv x i c := by
     intro a i j
@@ -848,7 +862,7 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
             rw [Finset.sum_eq_zero (fun r _ => hpt m σ r), mul_zero]
   have hT1 :
       (∑ m, ∑ σ, ginv x m σ * ∑ r, covDerivRiemann g ginv x m r σ r l) =
-        covDiv2 g ginv (ricciOf g ginv) x l := by
+        covDiv2 g ginv (Pipeline.ricciTensorOf g ginv) x l := by
     unfold covDiv2
     apply Finset.sum_congr rfl
     intro m _
@@ -857,29 +871,29 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
     rw [sum_covDerivRiemann_ricci g ginv hΓC2 m σ l]
   have hT3 :
       (∑ m, ∑ σ, ginv x m σ * ∑ r, covDerivRiemann g ginv x l r σ m r) =
-        -pd l (scalarOf g ginv) x := by
-    have hpdS : pd l (scalarOf g ginv) x =
-        ∑ m, ∑ σ, (pd l (fun y => ginv y m σ) x * ricciOf g ginv x m σ
-          + ginv x m σ * pd l (fun y => ricciOf g ginv y m σ) x) := by
-      unfold scalarOf
-      rw [pd_sum l Finset.univ (fun m y => ∑ σ, ginv y m σ * ricciOf g ginv y m σ)
+        -Pipeline.coordDeriv l (Pipeline.ricciScalarOf g ginv) x := by
+    have hpdS : Pipeline.coordDeriv l (Pipeline.ricciScalarOf g ginv) x =
+        ∑ m, ∑ σ, (Pipeline.coordDeriv l (fun y => ginv y m σ) x * Pipeline.ricciTensorOf g ginv x m σ
+          + ginv x m σ * Pipeline.coordDeriv l (fun y => Pipeline.ricciTensorOf g ginv y m σ) x) := by
+      unfold Pipeline.ricciScalarOf
+      rw [pd_sum l Finset.univ (fun m y => ∑ σ, ginv y m σ * Pipeline.ricciTensorOf g ginv y m σ)
         (fun m _ => DifferentiableAt.fun_sum fun σ _ => (hginvD m σ).fun_mul (hRicD m σ))]
       apply Finset.sum_congr rfl
       intro m _
-      rw [pd_sum l Finset.univ (fun σ y => ginv y m σ * ricciOf g ginv y m σ)
+      rw [pd_sum l Finset.univ (fun σ y => ginv y m σ * Pipeline.ricciTensorOf g ginv y m σ)
         (fun σ _ => (hginvD m σ).fun_mul (hRicD m σ))]
       apply Finset.sum_congr rfl
       intro σ _
       exact pd_mul l (hginvD m σ) (hRicD m σ)
     have hric_neg : ∀ m σ,
         (∑ r, covDerivRiemann g ginv x l r σ m r) =
-          -covDeriv2 g ginv (ricciOf g ginv) x l σ m := by
+          -covDeriv2 g ginv (Pipeline.ricciTensorOf g ginv) x l σ m := by
       intro m σ
       have hskew_cov : ∀ r, covDerivRiemann g ginv x l r σ m r =
           -covDerivRiemann g ginv x l r σ r m := by
         intro r
-        have hpd_skew : pd l (fun y => riemann g ginv y r σ m r) x =
-            -pd l (fun y => riemann g ginv y r σ r m) x := by
+        have hpd_skew : Pipeline.coordDeriv l (fun y => riemann g ginv y r σ m r) x =
+            -Pipeline.coordDeriv l (fun y => riemann g ginv y r σ r m) x := by
           rw [pd_congr l x (fun y => riemann_skew_last g ginv y r σ m r), pd_neg]
         unfold covDerivRiemann
         rw [hpd_skew]
@@ -899,13 +913,13 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
     congr 1
     have hginv0 : ∀ a b, ginv x a b = ginv x b a := hginvSymm.self_of_nhds
     have hmain :
-        (∑ m, ∑ σ, ginv x m σ * covDeriv2 g ginv (ricciOf g ginv) x l σ m) =
-        (∑ m, ∑ σ, (pd l (fun y => ginv y m σ) x * ricciOf g ginv x σ m
-          + ginv x m σ * pd l (fun y => ricciOf g ginv y σ m) x)) := by
+        (∑ m, ∑ σ, ginv x m σ * covDeriv2 g ginv (Pipeline.ricciTensorOf g ginv) x l σ m) =
+        (∑ m, ∑ σ, (Pipeline.coordDeriv l (fun y => ginv y m σ) x * Pipeline.ricciTensorOf g ginv x σ m
+          + ginv x m σ * Pipeline.coordDeriv l (fun y => Pipeline.ricciTensorOf g ginv y σ m) x)) := by
       simp only [covDeriv2, mul_sub, Finset.sum_sub_distrib, hInvUp]
       have hA :
-          (∑ m, ∑ σ, ginv x m σ * ∑ a, christoffel g ginv x a l σ * ricciOf g ginv x a m) =
-          (∑ m, ∑ σ, (∑ c, christoffel g ginv x σ l c * ginv x m c) * ricciOf g ginv x σ m) := by
+          (∑ m, ∑ σ, ginv x m σ * ∑ a, christoffel g ginv x a l σ * Pipeline.ricciTensorOf g ginv x a m) =
+          (∑ m, ∑ σ, (∑ c, christoffel g ginv x σ l c * ginv x m c) * Pipeline.ricciTensorOf g ginv x σ m) := by
         apply Finset.sum_congr rfl
         intro m _
         simp_rw [Finset.mul_sum, Finset.sum_mul]
@@ -916,8 +930,8 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         intro c _
         ring
       have hB :
-          (∑ m, ∑ σ, ginv x m σ * ∑ a, christoffel g ginv x a l m * ricciOf g ginv x σ a) =
-          (∑ m, ∑ σ, (∑ c, christoffel g ginv x m l c * ginv x c σ) * ricciOf g ginv x σ m) := by
+          (∑ m, ∑ σ, ginv x m σ * ∑ a, christoffel g ginv x a l m * Pipeline.ricciTensorOf g ginv x σ a) =
+          (∑ m, ∑ σ, (∑ c, christoffel g ginv x m l c * ginv x c σ) * Pipeline.ricciTensorOf g ginv x σ m) := by
         rw [Finset.sum_comm]
         conv_rhs => rw [Finset.sum_comm]
         apply Finset.sum_congr rfl
@@ -932,11 +946,11 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         ring
       have hsplit :
           (∑ m, ∑ σ, ((-(∑ c, christoffel g ginv x m l c * ginv x c σ)
-            - ∑ c, christoffel g ginv x σ l c * ginv x m c) * ricciOf g ginv x σ m
-            + ginv x m σ * pd l (fun y => ricciOf g ginv y σ m) x)) =
-          (∑ m, ∑ σ, ginv x m σ * pd l (fun y => ricciOf g ginv y σ m) x)
-            - (∑ m, ∑ σ, (∑ c, christoffel g ginv x σ l c * ginv x m c) * ricciOf g ginv x σ m)
-            - (∑ m, ∑ σ, (∑ c, christoffel g ginv x m l c * ginv x c σ) * ricciOf g ginv x σ m) := by
+            - ∑ c, christoffel g ginv x σ l c * ginv x m c) * Pipeline.ricciTensorOf g ginv x σ m
+            + ginv x m σ * Pipeline.coordDeriv l (fun y => Pipeline.ricciTensorOf g ginv y σ m) x)) =
+          (∑ m, ∑ σ, ginv x m σ * Pipeline.coordDeriv l (fun y => Pipeline.ricciTensorOf g ginv y σ m) x)
+            - (∑ m, ∑ σ, (∑ c, christoffel g ginv x σ l c * ginv x m c) * Pipeline.ricciTensorOf g ginv x σ m)
+            - (∑ m, ∑ σ, (∑ c, christoffel g ginv x m l c * ginv x c σ) * Pipeline.ricciTensorOf g ginv x σ m) := by
         simp_rw [← Finset.sum_sub_distrib]
         apply Finset.sum_congr rfl
         intro m _
@@ -950,12 +964,12 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
     intro m _
     apply Finset.sum_congr rfl
     intro σ _
-    have hpd_g_sym : pd l (fun y => ginv y σ m) x = pd l (fun y => ginv y m σ) x :=
+    have hpd_g_sym : Pipeline.coordDeriv l (fun y => ginv y σ m) x = Pipeline.coordDeriv l (fun y => ginv y m σ) x :=
       pd_congr_nhds l (hginvSymm.mono fun y hy => hy σ m)
     rw [hpd_g_sym, hginv0 σ m]
   have hRcontract_nhds : ∀ r a : Fin n,
       (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ a m) =ᶠ[𝓝 x]
-        fun y => ∑ m, ginv y r m * ricciOf g ginv y m a := by
+        fun y => ∑ m, ginv y r m * Pipeline.ricciTensorOf g ginv y m a := by
     intro r a
     have hS : ∀ᶠ y in 𝓝 x, ∀ᶠ z in 𝓝 y, ∀ i j, g z i j = g z j i :=
       eventually_eventually_nhds.mpr hgSymm
@@ -1060,31 +1074,31 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
             intro m _
             simp_rw [hyL m]
             simp
-      _ = ∑ m, ginv y r m * ricciOf g ginv y m a := by
+      _ = ∑ m, ginv y r m * Pipeline.ricciTensorOf g ginv y m a := by
             apply Finset.sum_congr rfl
             intro α _
             congr 1
-            unfold ricciOf
+            unfold Pipeline.ricciTensorOf
             apply Finset.sum_congr rfl
             intro m _
             rw [riemann_skew_last g ginv y m α a m]
             ring
   have hT2 :
       (∑ m, ∑ σ, ginv x m σ * ∑ r, covDerivRiemann g ginv x r r σ l m) =
-        covDiv2 g ginv (ricciOf g ginv) x l := by
+        covDiv2 g ginv (Pipeline.ricciTensorOf g ginv) x l := by
     have hginv0 : ∀ a b, ginv x a b = ginv x b a := hginvSymm.self_of_nhds
     have hstep : ∀ r,
         (∑ m, ∑ σ, ginv x m σ * covDerivRiemann g ginv x r r σ l m) =
-          pd r (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ l m) x
+          Pipeline.coordDeriv r (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ l m) x
           + ∑ a, christoffel g ginv x r r a *
               (∑ m, ∑ σ, ginv x m σ * riemann g ginv x a σ l m)
           - ∑ a, christoffel g ginv x a r l *
               (∑ m, ∑ σ, ginv x m σ * riemann g ginv x r σ a m) := by
       intro r
       have hpd_lhs :
-          pd r (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ l m) x =
-            ∑ m, ∑ σ, (pd r (fun y => ginv y m σ) x * riemann g ginv x r σ l m
-              + ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x) := by
+          Pipeline.coordDeriv r (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ l m) x =
+            ∑ m, ∑ σ, (Pipeline.coordDeriv r (fun y => ginv y m σ) x * riemann g ginv x r σ l m
+              + ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x) := by
         rw [pd_sum r Finset.univ
           (fun m y => ∑ σ, ginv y m σ * riemann g ginv y r σ l m)
           (fun m _ => DifferentiableAt.fun_sum fun σ _ => (hginvD m σ).fun_mul (hRD r σ l m))]
@@ -1097,9 +1111,9 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         intro σ _
         exact pd_mul r (hginvD m σ) (hRD r σ l m)
       have hsplit :
-          (∑ m, ∑ σ, ((pd r (fun y => ginv y m σ) x) * riemann g ginv x r σ l m
-            + ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x)) =
-          (∑ m, ∑ σ, ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x)
+          (∑ m, ∑ σ, ((Pipeline.coordDeriv r (fun y => ginv y m σ) x) * riemann g ginv x r σ l m
+            + ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x)) =
+          (∑ m, ∑ σ, ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x)
             - (∑ m, ∑ σ, (∑ c, christoffel g ginv x σ r c * ginv x m c) *
                 riemann g ginv x r σ l m)
             - (∑ m, ∑ σ, (∑ c, christoffel g ginv x m r c * ginv x c σ) *
@@ -1108,8 +1122,8 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         have heach : ∀ m σ,
             (-(∑ c, christoffel g ginv x m r c * ginv x c σ)
               - ∑ c, christoffel g ginv x σ r c * ginv x m c) * riemann g ginv x r σ l m
-              + ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x =
-            ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x
+              + ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x =
+            ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x
               - (∑ c, christoffel g ginv x σ r c * ginv x m c) * riemann g ginv x r σ l m
               - (∑ c, christoffel g ginv x m r c * ginv x c σ) * riemann g ginv x r σ l m := by
           intro m σ; ring
@@ -1117,9 +1131,9 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
             (∑ m, ∑ σ,
               ((-(∑ c, christoffel g ginv x m r c * ginv x c σ)
                 - ∑ c, christoffel g ginv x σ r c * ginv x m c) * riemann g ginv x r σ l m
-                + ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x)) =
+                + ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x)) =
             ∑ m, ∑ σ,
-              (ginv x m σ * pd r (fun y => riemann g ginv y r σ l m) x
+              (ginv x m σ * Pipeline.coordDeriv r (fun y => riemann g ginv y r σ l m) x
                 - (∑ c, christoffel g ginv x σ r c * ginv x m c) * riemann g ginv x r σ l m
                 - (∑ c, christoffel g ginv x m r c * ginv x c σ) * riemann g ginv x r σ l m) := by
           apply Finset.sum_congr rfl
@@ -1206,26 +1220,26 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
     rw [hreord]
     simp_rw [hstep]
     have hstep2 : ∀ r,
-        pd r (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ l m) x
+        Pipeline.coordDeriv r (fun y => ∑ m, ∑ σ, ginv y m σ * riemann g ginv y r σ l m) x
           + (∑ a, christoffel g ginv x r r a *
               ∑ m, ∑ σ, ginv x m σ * riemann g ginv x a σ l m)
           - (∑ a, christoffel g ginv x a r l *
               ∑ m, ∑ σ, ginv x m σ * riemann g ginv x r σ a m) =
-        ∑ m, ginv x r m * covDeriv2 g ginv (ricciOf g ginv) x r m l := by
+        ∑ m, ginv x r m * covDeriv2 g ginv (Pipeline.ricciTensorOf g ginv) x r m l := by
       intro r
       rw [pd_congr_nhds r (hRcontract_nhds r l)]
       simp_rw [(hRcontract_nhds _ l).self_of_nhds, (hRcontract_nhds r _).self_of_nhds]
-      rw [pd_sum r Finset.univ (fun m y => ginv y r m * ricciOf g ginv y m l)
+      rw [pd_sum r Finset.univ (fun m y => ginv y r m * Pipeline.ricciTensorOf g ginv y m l)
         (fun m _ => (hginvD r m).fun_mul (hRicD m l))]
-      have hpm : ∀ m, pd r (fun y => ginv y r m * ricciOf g ginv y m l) x =
-          pd r (fun y => ginv y r m) x * ricciOf g ginv x m l
-            + ginv x r m * pd r (fun y => ricciOf g ginv y m l) x :=
+      have hpm : ∀ m, Pipeline.coordDeriv r (fun y => ginv y r m * Pipeline.ricciTensorOf g ginv y m l) x =
+          Pipeline.coordDeriv r (fun y => ginv y r m) x * Pipeline.ricciTensorOf g ginv x m l
+            + ginv x r m * Pipeline.coordDeriv r (fun y => Pipeline.ricciTensorOf g ginv y m l) x :=
         fun m => pd_mul r (hginvD r m) (hRicD m l)
       simp_rw [hpm, hInvUp]
       simp only [covDeriv2, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib]
       have hX :
-          (∑ a, christoffel g ginv x r r a * ∑ m, ginv x a m * ricciOf g ginv x m l) =
-          (∑ m, (∑ c, christoffel g ginv x r r c * ginv x c m) * ricciOf g ginv x m l) := by
+          (∑ a, christoffel g ginv x r r a * ∑ m, ginv x a m * Pipeline.ricciTensorOf g ginv x m l) =
+          (∑ m, (∑ c, christoffel g ginv x r r c * ginv x c m) * Pipeline.ricciTensorOf g ginv x m l) := by
         simp_rw [Finset.mul_sum]
         rw [Finset.sum_comm]
         apply Finset.sum_congr rfl
@@ -1235,8 +1249,8 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         intro c _
         ring
       have hY :
-          (∑ m, ginv x r m * ∑ a, christoffel g ginv x a r m * ricciOf g ginv x a l) =
-          (∑ m, (∑ c, christoffel g ginv x m r c * ginv x r c) * ricciOf g ginv x m l) := by
+          (∑ m, ginv x r m * ∑ a, christoffel g ginv x a r m * Pipeline.ricciTensorOf g ginv x a l) =
+          (∑ m, (∑ c, christoffel g ginv x m r c * ginv x r c) * Pipeline.ricciTensorOf g ginv x m l) := by
         simp_rw [Finset.mul_sum, Finset.sum_mul]
         rw [Finset.sum_comm]
         apply Finset.sum_congr rfl
@@ -1245,8 +1259,8 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         intro c _
         ring
       have hZ :
-          (∑ a, christoffel g ginv x a r l * ∑ m, ginv x r m * ricciOf g ginv x m a) =
-          (∑ m, ginv x r m * ∑ a, christoffel g ginv x a r l * ricciOf g ginv x m a) := by
+          (∑ a, christoffel g ginv x a r l * ∑ m, ginv x r m * Pipeline.ricciTensorOf g ginv x m a) =
+          (∑ m, ginv x r m * ∑ a, christoffel g ginv x a r l * Pipeline.ricciTensorOf g ginv x m a) := by
         simp_rw [Finset.mul_sum]
         rw [Finset.sum_comm]
         apply Finset.sum_congr rfl
@@ -1256,14 +1270,14 @@ theorem contracted_bianchi {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) {x
         ring
       have hsplit :
           (∑ m, (-(∑ c, christoffel g ginv x r r c * ginv x c m)
-            - ∑ c, christoffel g ginv x m r c * ginv x r c) * ricciOf g ginv x m l) =
-          -(∑ m, (∑ c, christoffel g ginv x r r c * ginv x c m) * ricciOf g ginv x m l)
-            - (∑ m, (∑ c, christoffel g ginv x m r c * ginv x r c) * ricciOf g ginv x m l) := by
+            - ∑ c, christoffel g ginv x m r c * ginv x r c) * Pipeline.ricciTensorOf g ginv x m l) =
+          -(∑ m, (∑ c, christoffel g ginv x r r c * ginv x c m) * Pipeline.ricciTensorOf g ginv x m l)
+            - (∑ m, (∑ c, christoffel g ginv x m r c * ginv x r c) * Pipeline.ricciTensorOf g ginv x m l) := by
         have hm : ∀ m,
             (-(∑ c, christoffel g ginv x r r c * ginv x c m)
-              - ∑ c, christoffel g ginv x m r c * ginv x r c) * ricciOf g ginv x m l =
-            -((∑ c, christoffel g ginv x r r c * ginv x c m) * ricciOf g ginv x m l)
-              - (∑ c, christoffel g ginv x m r c * ginv x r c) * ricciOf g ginv x m l := by
+              - ∑ c, christoffel g ginv x m r c * ginv x r c) * Pipeline.ricciTensorOf g ginv x m l =
+            -((∑ c, christoffel g ginv x r r c * ginv x c m) * Pipeline.ricciTensorOf g ginv x m l)
+              - (∑ c, christoffel g ginv x m r c * ginv x r c) * Pipeline.ricciTensorOf g ginv x m l := by
           intro m; ring
         simp_rw [hm, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
       rw [hsplit, hX, hY, hZ]
@@ -1285,22 +1299,22 @@ theorem covDiv_einstein_eq_zero {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 
     (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
     (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => christoffel g ginv y k i j) x)
     (l : Fin n) :
-    covDiv2 g ginv (einsteinOf g ginv) x l = 0 := by
+    covDiv2 g ginv (Pipeline.einsteinTensorOf g ginv) x l = 0 := by
   have hgD : ∀ i j, DifferentiableAt ℝ (fun y => g y i j) x :=
     fun i j => (hgC2 i j).differentiableAt two_ne_zero
-  have hRicD : ∀ σ ν, DifferentiableAt ℝ (fun y => ricciOf g ginv y σ ν) x :=
+  have hRicD : ∀ σ ν, DifferentiableAt ℝ (fun y => Pipeline.ricciTensorOf g ginv y σ ν) x :=
     fun σ ν => differentiableAt_ricciOf g ginv hΓC2 σ ν
-  have hSD : DifferentiableAt ℝ (scalarOf g ginv) x :=
+  have hSD : DifferentiableAt ℝ (Pipeline.ricciScalarOf g ginv) x :=
     differentiableAt_scalarOf g ginv hginvD hΓC2
   have hInvAt : ∀ m j, ∑ a, ginv x a m * g x a j = if m = j then 1 else 0 := by
     intro m j
     simpa [hginvSymm.self_of_nhds] using hInvL.self_of_nhds m j
   have hcd : ∀ μ ν,
-      covDeriv2 g ginv (einsteinOf g ginv) x μ ν l =
-        covDeriv2 g ginv (ricciOf g ginv) x μ ν l
-          - (1 / 2) * pd μ (scalarOf g ginv) x * g x ν l := by
+      covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x μ ν l =
+        covDeriv2 g ginv (Pipeline.ricciTensorOf g ginv) x μ ν l
+          - (1 / 2) * Pipeline.coordDeriv μ (Pipeline.ricciScalarOf g ginv) x * g x ν l := by
     intro μ ν
-    unfold covDeriv2 einsteinOf
+    unfold covDeriv2 Pipeline.einsteinTensorOf
     have hsub := pd_sub μ (hRicD ν l) ((hSD.const_mul (1 / 2 : ℝ)).fun_mul (hgD ν l))
     have hmul := pd_mul μ (hSD.const_mul (1 / 2 : ℝ)) (hgD ν l)
     have hcmul := pd_const_mul μ (1 / 2 : ℝ) hSD
@@ -1309,38 +1323,38 @@ theorem covDiv_einstein_eq_zero {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 
     rw [hsub, hmul, hcmul]
     simp_rw [mul_sub, Finset.sum_sub_distrib]
     have h1 :
-        (∑ a, christoffel g ginv x a μ ν * ((1 / 2) * scalarOf g ginv x * g x a l)) =
-        (1 / 2) * scalarOf g ginv x * ∑ a, christoffel g ginv x a μ ν * g x a l := by
+        (∑ a, christoffel g ginv x a μ ν * ((1 / 2) * Pipeline.ricciScalarOf g ginv x * g x a l)) =
+        (1 / 2) * Pipeline.ricciScalarOf g ginv x * ∑ a, christoffel g ginv x a μ ν * g x a l := by
       rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro a _
       ring
     have h2 :
-        (∑ a, christoffel g ginv x a μ l * ((1 / 2) * scalarOf g ginv x * g x ν a)) =
-        (1 / 2) * scalarOf g ginv x * ∑ a, christoffel g ginv x a μ l * g x ν a := by
+        (∑ a, christoffel g ginv x a μ l * ((1 / 2) * Pipeline.ricciScalarOf g ginv x * g x ν a)) =
+        (1 / 2) * Pipeline.ricciScalarOf g ginv x * ∑ a, christoffel g ginv x a μ l * g x ν a := by
       rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro a _
       ring
     rw [h1, h2]
-    linear_combination -((1 / 2) * scalarOf g ginv x) * hmc
+    linear_combination -((1 / 2) * Pipeline.ricciScalarOf g ginv x) * hmc
   have hdiv :
-      covDiv2 g ginv (einsteinOf g ginv) x l =
-        covDiv2 g ginv (ricciOf g ginv) x l
-          - (1 / 2) * pd l (scalarOf g ginv) x := by
+      covDiv2 g ginv (Pipeline.einsteinTensorOf g ginv) x l =
+        covDiv2 g ginv (Pipeline.ricciTensorOf g ginv) x l
+          - (1 / 2) * Pipeline.coordDeriv l (Pipeline.ricciScalarOf g ginv) x := by
     unfold covDiv2
     simp_rw [hcd, mul_sub, Finset.sum_sub_distrib]
     congr 1
     calc
-      ∑ μ, ∑ ν, ginv x μ ν * ((1 / 2) * pd μ (scalarOf g ginv) x * g x ν l)
-          = ∑ μ, (1 / 2) * pd μ (scalarOf g ginv) x * (∑ ν, ginv x μ ν * g x ν l) := by
+      ∑ μ, ∑ ν, ginv x μ ν * ((1 / 2) * Pipeline.coordDeriv μ (Pipeline.ricciScalarOf g ginv) x * g x ν l)
+          = ∑ μ, (1 / 2) * Pipeline.coordDeriv μ (Pipeline.ricciScalarOf g ginv) x * (∑ ν, ginv x μ ν * g x ν l) := by
             apply Finset.sum_congr rfl
             intro μ _
             rw [Finset.mul_sum]
             apply Finset.sum_congr rfl
             intro ν _
             ring
-      _ = (1 / 2) * pd l (scalarOf g ginv) x := by
+      _ = (1 / 2) * Pipeline.coordDeriv l (Pipeline.ricciScalarOf g ginv) x := by
             simp_rw [hInvL.self_of_nhds]
             simp
   rw [hdiv, contracted_bianchi g ginv hgSymm hginvSymm hInvL hInvR hgC2 hginvD hΓC2 l]
@@ -1357,7 +1371,7 @@ theorem chartSpacetime_second_bianchi (X : ChartSpacetime) {x : SpacetimeChart}
       + covDerivRiemann X.coordinateMetric X.coordinateInverseMetric x μ ρ σ ν l
       + covDerivRiemann X.coordinateMetric X.coordinateInverseMetric x ν ρ σ l μ = 0 :=
   second_bianchi X.coordinateMetric X.coordinateInverseMetric
-    (Filter.Eventually.of_forall fun y i j => (X.metric (X.chart.symm y)).symm i j)
+    (Filter.Eventually.of_forall fun y i j => (X.metric (X.chart.symm y)).symm.apply j i)
     hΓC2 l ρ σ μ ν
 
 /-- Any `ChartSpacetime` with `C²` metric, differentiable inverse metric, and
@@ -1384,8 +1398,8 @@ theorem chartSpacetime_covDiv_einstein_eq_zero (X : ChartSpacetime) {x : Spaceti
     simpa [ChartSpacetime.coordinateMetric, ChartSpacetime.coordinateInverseMetric,
       Matrix.mul_apply, Matrix.one_apply] using h
   exact covDiv_einstein_eq_zero X.coordinateMetric X.coordinateInverseMetric
-    (Filter.Eventually.of_forall fun y i j => (X.metric (X.chart.symm y)).symm i j)
-    (Filter.Eventually.of_forall fun y i j => (X.metric (X.chart.symm y)).ginv_symm i j)
+    (Filter.Eventually.of_forall fun y i j => (X.metric (X.chart.symm y)).symm.apply j i)
+    (Filter.Eventually.of_forall fun y i j => (X.metric (X.chart.symm y)).ginv_symm.apply j i)
     (Filter.Eventually.of_forall hInvL)
     (Filter.Eventually.of_forall hInvR)
     hgC2 hginvD hΓC2 l

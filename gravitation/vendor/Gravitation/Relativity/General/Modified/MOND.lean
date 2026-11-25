@@ -8,6 +8,8 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Order.Filter.AtTopBot.Defs
 public import Mathlib.Topology.MetricSpace.Pseudo.Defs
+public import PhyslibAlpha.ClassicalMechanics.OrbitalMechanics.NewtonianGravity
+public import Gravitation.Relativity.General.GravitationalConstant
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Topology.Algebra.Order.Field
 import Mathlib.Tactic.FieldSimp
@@ -34,6 +36,7 @@ simple (`x / (1 + x)`) and standard (`x / √(1 + x²)`) interpolating functions
 
 ## ii. Key results
 
+- `MONDTheory` : MOND theory parameterized by its acceleration scale `a₀`.
 - `newtonAccel`, `deepAccel`, `Relation` : Newtonian point-mass acceleration, deep-MOND
   acceleration, and the MOND interpolating relation.
 - `newtonian_limit` : where `μ(a / a₀) = 1`, `a = g_N`.
@@ -50,13 +53,26 @@ simple (`x / (1 + x)`) and standard (`x / √(1 + x²)`) interpolating functions
 
 ## iv. References
 
-* None.
-
+* Mordehai Milgrom, *A Modification of the Newtonian Dynamics as a Possible Alternative to the
+  Hidden Mass Hypothesis*, *The Astrophysical Journal* 270, pp. 365-370 (1983), Sec. II.
+  [ref: Milgrom1983a]
+* Mordehai Milgrom, *A Modification of the Newtonian Dynamics: Implications for Galaxies*, *The
+  Astrophysical Journal* 270, pp. 371-383 (1983), Sec. II. [ref: Milgrom1983b]
+* Mordehai Milgrom, *A Modification of the Newtonian Dynamics: Implications for Galaxy Systems*,
+  *The Astrophysical Journal* 270, pp. 384-389 (1983). [ref: Milgrom1983c]
+* Jacob Bekenstein and Mordehai Milgrom, *Does the Missing Mass Problem Signal the Breakdown of
+  Newtonian Gravity?*, *The Astrophysical Journal* 286, pp. 7-14 (1984), Sec. II.
+  [ref: BekensteinMilgrom1984]
+* Benoit Famaey and Stacy S. McGaugh, *Modified Newtonian Dynamics (MOND): Observational
+  Phenomenology and Relativistic Extensions*, *Living Reviews in Relativity* (2012), Sec. 5-6
+  (https://arxiv.org/pdf/1112.3960#page=25). [ref: FamaeyMcGaugh2012]
 -/
 
 @[expose] public section
 
 namespace GeneralRelativity
+
+namespace Modified
 
 namespace MOND
 
@@ -66,6 +82,12 @@ namespace MOND
 
 -/
 
+/-- Milgrom's Modified Newtonian Dynamics (MOND) theory parameterized by the universal
+acceleration scale `a₀`. -/
+structure MONDTheory where
+  /-- Critical transition acceleration scale `a₀`. -/
+  a0 : ℝ
+
 /-- Newtonian gravitational acceleration `G M / r²` of a point mass `M`. -/
 noncomputable def newtonAccel (G M r : ℝ) : ℝ := G * M / r ^ 2
 
@@ -74,6 +96,12 @@ noncomputable def deepAccel (a₀ gN : ℝ) : ℝ := Real.sqrt (a₀ * gN)
 
 /-- The MOND interpolating relation `μ(a / a₀) * a = g_N`. -/
 def Relation (μ : ℝ → ℝ) (a₀ a gN : ℝ) : Prop := μ (a / a₀) * a = gN
+
+/-- Deep-MOND acceleration `√(a₀ g_N)` for a `MONDTheory`. -/
+noncomputable def MONDTheory.deepAccel (T : MONDTheory) (gN : ℝ) : ℝ := MOND.deepAccel T.a0 gN
+
+/-- The MOND interpolating relation `μ(a / a₀) * a = g_N` for a `MONDTheory`. -/
+def MONDTheory.Relation (T : MONDTheory) (μ : ℝ → ℝ) (a gN : ℝ) : Prop := MOND.Relation μ T.a0 a gN
 
 /-- Newtonian limit: where the interpolating function saturates at `1`, MOND reproduces
 Newtonian acceleration `a = g_N`. -/
@@ -149,6 +177,34 @@ lemma simpleMu_tendsto_atTop :
   field_simp
   ring
 
+/-- Newtonian point-mass acceleration `newtonAccel` taking a `GravitationalConstant`. -/
+noncomputable def newtonAccel_G (G : GravitationalConstant) (M r : ℝ) : ℝ :=
+  newtonAccel G.val M r
+
+open scoped Classical in
+/-- In Physlib's classical reference frame, the norm of `pairGravityAcceleration` between
+non-coincident particles equals `newtonAccel`. -/
+lemma norm_pairGravityAcceleration_eq_newtonAccel {d : ℕ}
+    {frame : ClassicalMechanics.ReferenceFrame d}
+    (G : GravitationalConstant) (particles : Multiset frame.Particle)
+    (source target : particles.ToType) (t : ℝ)
+    (hne : source.1.pos t ≠ target.1.pos t) :
+    ‖ClassicalMechanics.ReferenceFrame.pairGravityAcceleration G.val particles source target t‖ =
+      newtonAccel G.val source.1.mass.val ‖source.1.pos t - target.1.pos t‖ := by
+  simp only [ClassicalMechanics.ReferenceFrame.pairGravityAcceleration, newtonAccel,
+    norm_smul, Real.norm_eq_abs]
+  have hG : 0 < G.val := G.pos
+  have hr : 0 < ‖source.1.pos t - target.1.pos t‖ :=
+    norm_pos_iff.mpr (sub_ne_zero.mpr hne)
+  have hm : 0 ≤ source.1.mass.val := le_of_lt source.1.mass.property
+  have hnum : 0 ≤ G.val * source.1.mass.val / ‖source.1.pos t - target.1.pos t‖ ^ 3 := by
+    positivity
+  rw [abs_of_nonneg hnum]
+  have hne0 : ‖source.1.pos t - target.1.pos t‖ ≠ 0 := hr.ne'
+  field_simp [hne0]
+
 end MOND
+
+end Modified
 
 end GeneralRelativity

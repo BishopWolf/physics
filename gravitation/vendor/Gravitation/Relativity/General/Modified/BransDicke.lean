@@ -21,29 +21,32 @@ import Mathlib.Topology.Order.Basic
 
 # Brans–Dicke scalar–tensor theory
 
-PPN parameter `γ`, effective gravitational coupling, bounds, and the general-relativity limit
-`ω → ∞`.
+Parameterized post-Newtonian (PPN) parameter `γ`, effective gravitational coupling, solar-system
+Shapiro delay bounds, and the general-relativity limit `ω → ∞`.
 
 ## i. Overview
 
 In Brans–Dicke gravity, a massless scalar field `φ` couples non-minimally to the Ricci scalar
-with dimensionless parameter `ω`. In the weak-field post-Newtonian expansion, light deflection and
-Shapiro time delay are governed by `γ(ω) = (1 + ω) / (2 + ω)`, while the effective Newton
-constant scales as `coupling(ω) = (4 + 2ω) / (3 + 2ω)`.
+with dimensionless Dicke parameter `ω`. In the weak-field parameterized post-Newtonian (PPN)
+expansion, space curvature produced by unit rest mass scales with `γ(ω) = (1 + ω) / (2 + ω)`,
+while the effective gravitational constant scales as `coupling(ω) = (4 + 2ω) / (3 + 2ω)`. Precision
+Doppler tracking of the Cassini spacecraft near solar conjunction measured the Shapiro gravitational
+time delay to constrain `|γ - 1| ≲ 2.3 × 10⁻⁵`, forcing `ω > 40000` in Solar-System tests.
 
 This module formalises `gamma` and `coupling`, proves `1/2 < γ < 1` for `ω > 0`, establishes the
-Cassini solar-system bound `ω > 40000 ⇒ 1 - γ < 1/40000`, proves the `ω → ∞` limit `γ → 1`,
+Cassini Shapiro time-delay bound `ω > 40000 ⇒ 1 - γ < 1/40000`, proves the `ω → ∞` limit `γ → 1`,
 exhibits `ω = 0` (`γ = 1/2`) as the metric `f(R)` value, proves `1 ≤ coupling ω ≤ 4/3` for
 `ω ≥ 0`, and records the ghost pole at `ω = -3/2`.
 
 ## ii. Key results
 
+- `BransDickeTheory` : Brans–Dicke scalar–tensor theory parameterized by `ω`.
 - `gamma` : Brans–Dicke PPN parameter `(1 + ω) / (2 + ω)`.
 - `gamma_bounds`, `cassini_deviation`, `gamma_tendsto_atTop` : bounds, Cassini constraint, and
   GR limit as `ω → ∞`.
 - `fR_gamma` : `γ(0) = 1/2`, matching unscreened metric `f(R)` gravity.
-- `coupling`, `coupling_bounds`, `coupling_pole` : effective coupling `1 + 1/(3 + 2ω)` and its
-  kinetic degeneracy pole at `ω = -3/2`.
+- `coupling`, `coupling_eq_one_add`, `coupling_bounds` : effective coupling
+  `1 + 1/(3 + 2ω)` and its weak-field bounds.
 
 ## iii. Table of contents
 
@@ -52,13 +55,20 @@ exhibits `ω = 0` (`γ = 1/2`) as the metric `f(R)` value, proves `1 ≤ couplin
 
 ## iv. References
 
-* None.
-
+* Carl Brans and Robert H. Dicke, *Mach's Principle and a Relativistic Theory of Gravitation*,
+  *Physical Review* 124, pp. 925-935 (1961), Sec. II-III. [ref: BransDicke1961]
+* Bruno Bertotti, Luciano Iess, and Paolo Tortora, *A Test of General Relativity Using Radio Links
+  with the Cassini Spacecraft*, *Nature* 425, pp. 374-376 (2003). [ref: BertottiIessTortora2003]
+* Clifford M. Will, *The Confrontation between General Relativity and Experiment*, *Living Reviews
+  in Relativity* 17, 4 (2014), Sec. 3.3 & Sec. 5.1 (https://arxiv.org/pdf/1403.7377#page=37).
+  [ref: Will2014]
 -/
 
 @[expose] public section
 
 namespace GeneralRelativity
+
+namespace Modified
 
 namespace BransDicke
 
@@ -68,8 +78,16 @@ namespace BransDicke
 
 -/
 
+/-- Brans–Dicke scalar–tensor gravity parameterized by its dimensionless Dicke coupling `ω`. -/
+structure BransDickeTheory where
+  /-- Dimensionless Brans–Dicke scalar coupling parameter `ω`. -/
+  ω : ℝ
+
 /-- The Brans–Dicke PPN parameter `γ = (1 + ω) / (2 + ω)`. -/
 noncomputable def gamma (ω : ℝ) : ℝ := (1 + ω) / (2 + ω)
+
+/-- The Brans–Dicke PPN parameter `γ` of a `BransDickeTheory`. -/
+noncomputable def BransDickeTheory.gamma (T : BransDickeTheory) : ℝ := BransDicke.gamma T.ω
 
 /-- `γ = 1 - 1 / (2 + ω)`: the deviation from general relativity is reciprocal in `2 + ω`. -/
 lemma gamma_eq_one_sub (ω : ℝ) (h : 2 + ω ≠ 0) : gamma ω = 1 - 1 / (2 + ω) := by
@@ -136,9 +154,11 @@ lemma coupling_bounds (ω : ℝ) (hω : 0 ≤ ω) : 1 ≤ coupling ω ∧ coupli
   rw [coupling_eq_one_add ω (by linarith)]
   constructor <;> linarith
 
-/-- `ω = -3/2` is the pole of the effective coupling where the scalar kinetic term vanishes. -/
-lemma coupling_pole : 3 + 2 * (-(3 / 2) : ℝ) = 0 := by norm_num
+/-- The effective gravitational coupling ratio of a `BransDickeTheory`. -/
+noncomputable def BransDickeTheory.coupling (T : BransDickeTheory) : ℝ := BransDicke.coupling T.ω
 
 end BransDicke
+
+end Modified
 
 end GeneralRelativity

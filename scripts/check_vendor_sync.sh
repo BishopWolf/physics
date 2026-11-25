@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 # Fail if the vendored copy of the Physlib `gravity` branch has drifted.
 #
-# `gravitation/vendor/` is a temporary, byte-for-byte copy of
-# `PhyslibAlpha/Relativity/General/` at the commit recorded in
-# `gravitation/vendor/REVISION`, except that import lines are rewritten from
-# `PhyslibAlpha.Relativity.General.` to `Gravitation.Relativity.General.` so
-# the modules do not collide with the dependency's own library globs.  This
-# script fetches the branch and checks both that it still points at the
-# recorded commit and that every vendored Lean file equals the branch file
-# after applying the same rewrite.
+# `gravitation/vendor/` is a temporary, byte-for-byte copy of four subtrees at
+# the commit recorded in `gravitation/vendor/REVISION`:
+#
+#   PhyslibAlpha/Relativity/General/   -> Gravitation/Relativity/General/
+#   PhyslibAlpha/Relativity/Metrics/   -> Gravitation/Relativity/Metrics/
+#   PhyslibAlpha/Relativity/Tensors/   -> Gravitation/Relativity/Tensors/
+#   PhyslibAlpha/Cosmology/            -> Gravitation/Cosmology/
+#
+# Import lines are rewritten from `PhyslibAlpha.*` to `Gravitation.*` so the
+# modules do not collide with the dependency's own library globs.  The one
+# compatibility patch is in `Modified/MOND.lean`: `[Fact frame.IsMetricConserved]`
+# is removed because the pinned Physlib revision no longer has that class.  This
+# script fetches the branch and checks both that it still points at the recorded
+# commit and that every vendored Lean file equals the branch file after applying
+# the same rewrites and patch.
 #
 # Requires network access and git; it runs in CI before the build.
 set -euo pipefail
@@ -54,45 +61,72 @@ if [ "$TIP" != "$REV" ]; then
   exit 1
 fi
 
+declare -A EXPECTED
 mismatch=0
 
-# Every module on the branch (except the already-merged IncompressibleSphere)
-# must be present in the vendored tree, identical up to the import rewrite.
-while IFS= read -r path; do
-  rel="${path#"$PREFIX"/}"
-  [ "$rel" = "Schwarzschild/IncompressibleSphere.lean" ] && continue
-  expected="$TMP/expected/$rel"
-  mkdir -p "$(dirname "$expected")"
-  git -C "$TMP/repo" show "FETCH_HEAD:$path" \
-    | sed 's/PhyslibAlpha\.Relativity\.General\./Gravitation.Relativity.General./g' \
-    > "$expected"
-  actual="$VENDOR/Gravitation/Relativity/General/$rel"
-  if [ ! -f "$actual" ]; then
-    echo "missing from vendor: $rel"
-    mismatch=1
-    continue
-  fi
-  if ! diff -q "$expected" "$actual" >/dev/null; then
-    echo "drifted from $BRANCH: $rel"
-    diff -u "$expected" "$actual" | head -20 || true
-    mismatch=1
-  fi
-done < <(git -C "$TMP/repo" ls-tree -r --name-only FETCH_HEAD "$PREFIX" \
-         | grep '\.lean$' || true)
+rewrite() {
+  sed \
+    -e 's/PhyslibAlpha\.Relativity\.General\./Gravitation.Relativity.General./g' \
+    -e 's/PhyslibAlpha\.Relativity\.Metrics\./Gravitation.Relativity.Metrics./g' \
+    -e 's/PhyslibAlpha\.Relativity\.Tensors\./Gravitation.Relativity.Tensors./g' \
+    -e 's/PhyslibAlpha\.Cosmology\./Gravitation.Cosmology./g' \
+    -e 's/Gravitation\.Relativity\.General\.Schwarzschild\.IncompressibleSphere/PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere/g' \
+    -e 's/ \[Fact frame\.IsMetricConserved\]//g'
+}
 
-# No extra vendored Lean files.
-while IFS= read -r actual; do
-  rel="${actual#"$VENDOR/Gravitation/Relativity/General/"}"
-  if ! git -C "$TMP/repo" cat-file -e "FETCH_HEAD:$PREFIX/$rel" 2>/dev/null; then
-    echo "not on $BRANCH: $rel"
-    mismatch=1
+check_subtree() {
+  local src="$1" dest="$2" mode="$3" list="$4"
+  local rel expected actual
+  local -a rels=()
+
+  if [ "$mode" = all ]; then
+    mapfile -t rels < <(git -C "$TMP/repo" ls-tree -r --name-only FETCH_HEAD "$src" \
+      | sed "s#^$src/##" | grep '\.lean$' | sort)
+  else
+    mapfile -t rels < <(printf '%s\n' "$list" | tr ',' '\n' | sed '/^$/d')
   fi
-done < <(find "$VENDOR/Gravitation/Relativity/General" -name '*.lean')
+
+  for rel in "${rels[@]}"; do
+    if [ "$src" = "PhyslibAlpha/Relativity/General" ] && \
+       [ "$rel" = "Schwarzschild/IncompressibleSphere.lean" ]; then
+      continue
+    fi
+    EXPECTED["$dest/$rel"]=1
+    expected="$TMP/expected/$dest/$rel"
+    mkdir -p "$(dirname "$expected")"
+    git -C "$TMP/repo" show "FETCH_HEAD:$src/$rel" | rewrite > "$expected"
+    actual="$VENDOR/$dest/$rel"
+    if [ ! -f "$actual" ]; then
+      echo "missing from vendor: $dest/$rel"
+      mismatch=1
+      continue
+    fi
+    if ! diff -q "$expected" "$actual" >/dev/null; then
+      echo "drifted from $BRANCH: $dest/$rel"
+      diff -u "$expected" "$actual" | head -20 || true
+      mismatch=1
+    fi
+  done
+
+  while IFS= read -r actual; do
+    rel="${actual#"$VENDOR/$dest/"}"
+    if [ -z "${EXPECTED["$dest/$rel"]+x}" ]; then
+      echo "not on $BRANCH: $dest/$rel"
+      mismatch=1
+    fi
+  done < <(find "$VENDOR/$dest" -name '*.lean' 2>/dev/null || true)
+}
+
+check_subtree "PhyslibAlpha/Relativity/General" "Gravitation/Relativity/General" all ""
+check_subtree "PhyslibAlpha/Relativity/Metrics" "Gravitation/Relativity/Metrics" all ""
+check_subtree "PhyslibAlpha/Relativity/Tensors" "Gravitation/Relativity/Tensors" allow \
+  "Tensor2.lean,RiemannTensor.lean,RicciTensor.lean,EinsteinTensor.lean,MaxwellStressEnergy.lean"
+check_subtree "PhyslibAlpha/Cosmology" "Gravitation/Cosmology" all ""
 
 if [ "$mismatch" -ne 0 ]; then
   echo "FAIL: the vendored copy differs from $URL $BRANCH @ $REV"
-  echo "      re-copy PhyslibAlpha/Relativity/General, rewrite the imports and"
-  echo "      update gravitation/vendor/REVISION (see gravitation/vendor/README.md)"
+  echo "      re-copy the four subtrees, rewrite the imports, re-apply the MOND"
+  echo "      patch and update gravitation/vendor/REVISION (see vendor/README.md)"
   exit 1
 fi
 

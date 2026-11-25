@@ -37,7 +37,8 @@ module
 public import Gravitation.ReducedWave3D
 public import Gravitation.LinearizedWaveGauge
 public import Gravitation.CauchyInterfaces
-public import Gravitation.Relativity.General.FLRW.Pipeline
+public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.ODE.ExistUnique
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Tactic.FieldSimp
@@ -240,7 +241,7 @@ theorem minkowski_harmonicGauge (x : Fin 4 → ℝ) (μ : Fin 4) :
   have hG : ∀ α β, Pipeline.christoffel (fun _ => minkowski.g) (fun _ => minkowski.ginv)
       x μ α β = 0 := by
     intro α β
-    simp [Pipeline.christoffel, Pipeline.pd_const]
+    simp [Pipeline.christoffel, Pipeline.coordDeriv_const]
   simp [hG]
 
 /-! ## C. Linearized 3D wave-gauge reduced Cauchy problem on a box -/

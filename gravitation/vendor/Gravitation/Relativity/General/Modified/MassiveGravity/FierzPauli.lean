@@ -1,0 +1,155 @@
+/-
+Copyright (c) 2026 Alex Vergara Gil. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Alex Vergara Gil
+-/
+module
+
+public import Mathlib.Algebra.BigOperators.Fin
+public import Gravitation.Relativity.Metrics.MetricTrace
+public import Gravitation.Relativity.Metrics.Minkowski
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
+
+/-!
+
+# Fierz–Pauli massive gravity and ghost freedom
+
+Fierz–Pauli Lorentz-invariant quadratic mass term, Boulware–Deser ghost-free tuning `α = -1`,
+and on-shell tracelessness of massive spin-2 perturbations.
+
+## i. Overview
+
+Giving a spin-2 graviton a non-zero mass `m > 0` on a Minkowski reference background `η` requires
+adding a Lorentz-invariant quadratic mass term built from `h_{ab} h^{ab}` and `h² = (η^{ab}
+h_{ab})²`. For a generic mixing coefficient `α ≠ -1`, the longitudinal Stueckelberg mode
+`h_{00} = ϕ''` retains a non-zero `-(m²/4)(1 + α) (ϕ'')²` mass-induced fourth-order time
+derivative—the linearized precursor of the pathological sixth Boulware–Deser ghost degree of
+freedom. Only the Fierz–Pauli tuning `α = -1` cancels this longitudinal ghost contribution and
+forces the five healthy massive polarizations via the on-shell tracelessness constraint `h = 0` for
+`m ≠ 0`.
+
+## ii. Key results
+
+- `FierzPauliTheory` : massive spin-2 theory parameterized by mass `m` and tuning `α`.
+- `hContractionSq`, `fierzPauliLagrangian`, `fpMassTensor` : mass invariants and variation tensor
+  contracted against `metricTrace minkowski`.
+- `fpMassTensor_trace`, `fpMassTensor_trace_tuned`, `longitudinal_time_ghost_free_iff`,
+  `fp_traceless_of_zero_trace_source` : ghost-free tuning `α = -1` and tracelessness.
+
+## iii. Table of contents
+
+- A. Fierz–Pauli mass term and ghost-free trace constraint
+
+## iv. References
+
+* Markus Fierz and Wolfgang Pauli, *On Relativistic Wave Equations for Particles of Arbitrary Spin
+  in an Electromagnetic Field*, *Proceedings of the Royal Society of London. Series A* 173, pp.
+  211-232 (1939), Sec. 2-3. [ref: FierzPauli1939]
+* D. G. Boulware and S. Deser, *Can Gravitation Have a Finite Range?*, *Physical Review D* 6, pp.
+  3368-3382 (1972), Sec. II. [ref: BoulwareDeser1972]
+* Kurt Hinterbichler, *Theoretical Aspects of Massive Gravity*, *Reviews of Modern Physics* 84, pp.
+  671-710 (2012), Sec. II-III (https://arxiv.org/pdf/1105.3735#page=4). [ref: Hinterbichler2012]
+-/
+
+@[expose] public section
+
+namespace GeneralRelativity
+
+namespace Modified
+
+namespace MassiveGravity
+
+/-!
+
+## A. Fierz–Pauli mass term and ghost-free trace constraint
+
+-/
+
+/-- Fierz–Pauli linearized massive gravity parameterized by graviton mass `m` and mass-term
+mixing parameter `α` (ghost-free at `α = -1`). -/
+structure FierzPauliTheory where
+  /-- Graviton mass parameter `m`. -/
+  m : ℝ
+  /-- Relative coefficient `α` of `(η^{ab} h_{ab})²`. -/
+  α : ℝ
+
+/-- Full Minkowski quadratic contraction `h_{ab} h^{ab} = ∑_{a,b} η^{aa} η^{bb} (h_{ab})²`. -/
+def hContractionSq (h : Tensor2 4) : ℝ :=
+  ∑ a : Fin 4, ∑ b : Fin 4, minkowskiMetric4 a a * minkowskiMetric4 b b * h a b * h a b
+
+/-- General Lorentz-invariant quadratic graviton mass Lagrangian density
+`ℒ_mass(α) = -(m² / 4) (h_{ab} h^{ab} + α h²)`. The Fierz–Pauli tuning is `α = -1`. -/
+noncomputable def fierzPauliLagrangian (m α : ℝ) (h : Tensor2 4) : ℝ :=
+  -(m ^ 2 / 4) * (hContractionSq h + α * metricTrace minkowski h ^ 2)
+
+/-- Mass-term contribution to the linearized field equations:
+`M_{ij}(α) = (m² / 2) (h_{ij} + α η_{ij} h)`. -/
+noncomputable def fpMassTensor (m α : ℝ) (h : Tensor2 4) : Tensor2 4 :=
+  fun i j => (m ^ 2 / 2) * (h i j + α * minkowskiMetric4 i j * metricTrace minkowski h)
+
+/-- Fierz–Pauli quadratic graviton mass Lagrangian evaluated for a `FierzPauliTheory`. -/
+noncomputable def FierzPauliTheory.lagrangian (T : FierzPauliTheory) (h : Tensor2 4) : ℝ :=
+  fierzPauliLagrangian T.m T.α h
+
+/-- Fierz–Pauli mass-term variation tensor evaluated for a `FierzPauliTheory`. -/
+noncomputable def FierzPauliTheory.massTensor (T : FierzPauliTheory) (h : Tensor2 4) : Tensor2 4 :=
+  fpMassTensor T.m T.α h
+
+/-- Minkowski trace of the general mass tensor:
+`η^{ij} M_{ij}(α) = (m² / 2) (1 + 4 α) h`. -/
+lemma fpMassTensor_trace (m α : ℝ) (h : Tensor2 4) :
+    (∑ i : Fin 4, minkowskiMetric4 i i * fpMassTensor m α h i i) =
+      (m ^ 2 / 2) * (1 + 4 * α) * metricTrace minkowski h := by
+  simp only [fpMassTensor, metricTrace_minkowski, Fin.sum_univ_four, minkowskiMetric4_apply]
+  norm_num
+  ring
+
+/-- At the Fierz–Pauli ghost-free point `α = -1`, the trace of the mass tensor is
+`-(3 / 2) m² h`. -/
+lemma fpMassTensor_trace_tuned (m : ℝ) (h : Tensor2 4) :
+    (∑ i : Fin 4, minkowskiMetric4 i i * fpMassTensor m (-1) h i i)
+      = -(3 / 2) * m ^ 2 * metricTrace minkowski h := by
+  rw [fpMassTensor_trace]
+  ring
+
+/-- Ghost cancellation on a longitudinal plane wave: for a 1D mode `h_{00} = ϕ''` with all other
+components zero, the quadratic mass combination `h_{ab} h^{ab} + α h²` vanishes (eliminating the
+sixth scalar ghost degree of freedom) if and only if `α = -1`. -/
+lemma longitudinal_time_ghost_free_iff (α ϕdd : ℝ) (hϕ : ϕdd ≠ 0) :
+    hContractionSq (fun i j => if i = 0 ∧ j = 0 then ϕdd else 0)
+      + α * metricTrace minkowski (fun i j => if i = 0 ∧ j = 0 then ϕdd else 0) ^ 2 = 0
+        ↔ α = -1 := by
+  have ht : metricTrace minkowski (fun i j => if i = 0 ∧ j = 0 then ϕdd else 0) = -ϕdd := by
+    simp [metricTrace, minkowski, Fin.sum_univ_four]
+  simp only [hContractionSq, ht, Fin.sum_univ_four, minkowskiMetric4_apply]
+  norm_num
+  constructor
+  · intro h
+    have h2 : ϕdd ^ 2 ≠ 0 := pow_ne_zero 2 hϕ
+    have hfac : (1 + α) * ϕdd ^ 2 = 0 := by linarith
+    rcases mul_eq_zero.mp hfac with h1 | h2'
+    · linarith
+    · exact False.elim (h2 h2')
+  · intro h
+    subst h
+    ring
+
+/-- On shell in vacuum (where the divergence constraint forces the trace of the mass tensor to
+vanish), any non-zero Fierz–Pauli mass `m ≠ 0` at `α = -1` forces the metric perturbation to be
+traceless (`h = 0`). -/
+lemma fp_traceless_of_zero_trace_source (m : ℝ) (hm : m ≠ 0) (h : Tensor2 4)
+    (htr : (∑ i : Fin 4, minkowskiMetric4 i i * fpMassTensor m (-1) h i i) = 0) :
+    metricTrace minkowski h = 0 := by
+  rw [fpMassTensor_trace_tuned] at htr
+  have hm2 : m ^ 2 ≠ 0 := pow_ne_zero 2 hm
+  have hfac : (-(3 / 2 : ℝ) * m ^ 2) * metricTrace minkowski h = 0 := by linarith
+  rcases mul_eq_zero.mp hfac with h1 | h2
+  · exfalso; apply hm2; linarith
+  · exact h2
+
+end MassiveGravity
+
+end Modified
+
+end GeneralRelativity

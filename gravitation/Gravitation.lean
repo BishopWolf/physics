@@ -5,14 +5,9 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.General.Basic
-public import Gravitation.Relativity.General.Conservation
-public import Gravitation.Relativity.General.Curvature
-public import Gravitation.Relativity.General.Einstein
-public import Gravitation.Relativity.General.FLRW.Pipeline
-public import Gravitation.Relativity.General.Geodesics
+public import Gravitation.Relativity.General.GeodesicSystem
 public import Gravitation.Relativity.General.GravitationalConstant
-public import Gravitation.Relativity.General.InitialValue
+public import Gravitation.Relativity.General.InitialData
 public import Gravitation.KretschmannTotal
 public import Gravitation.WaveCauchy
 public import Gravitation.WaveEnergy
@@ -35,34 +30,45 @@ public import Gravitation.MaximalDevelopment
 public import Gravitation.ExplicitDevelopments
 public import Gravitation.Relativity.General.Kerr.Basic
 public import Gravitation.Relativity.General.Kerr.Christoffel
-public import Gravitation.Relativity.General.Kerr.Vacuum
-public import Gravitation.Relativity.General.Linearized
-public import Gravitation.Relativity.General.Minkowski
+public import Gravitation.Relativity.General.Kerr.RicciCurvature
+public import Gravitation.Relativity.General.Linearized.LinearizedCurvature
+public import Gravitation.Relativity.General.Linearized.LorenzGauge
+public import Gravitation.Relativity.General.Linearized.NewtonianPerturb
+public import Gravitation.Relativity.General.Linearized.TTWave
+public import Gravitation.Relativity.General.Linearized.TraceReversed
+public import Gravitation.Relativity.General.MinkowskiVacuum
 public import Gravitation.Relativity.General.Modified.BransDicke
 public import Gravitation.Relativity.General.Modified.ChameleonScreening
 public import Gravitation.Relativity.General.Modified.EinsteinAether
 public import Gravitation.Relativity.General.Modified.EinsteinCartan
 public import Gravitation.Relativity.General.Modified.FRGravity
 public import Gravitation.Relativity.General.Modified.Galileon
-public import Gravitation.Relativity.General.Modified.KaluzaKlein
-public import Gravitation.Relativity.General.Modified.Lovelock
+public import Gravitation.Relativity.General.Modified.KaluzaKlein.Basic
+public import Gravitation.Relativity.General.Modified.KaluzaKlein.GaugeTransform
+public import Gravitation.Relativity.General.Modified.KaluzaKlein.KaluzaMiracle
+public import Gravitation.Relativity.General.Modified.KaluzaKlein.TriangularFactorization
+public import Gravitation.Relativity.General.Modified.Lovelock.Basic
+public import Gravitation.Relativity.General.Modified.Lovelock.GeneralizedKronecker
 public import Gravitation.Relativity.General.Modified.MOG
 public import Gravitation.Relativity.General.Modified.MOND
-public import Gravitation.Relativity.General.Modified.MassiveGravity
+public import Gravitation.Relativity.General.Modified.MassiveGravity.DRGT
+public import Gravitation.Relativity.General.Modified.MassiveGravity.FierzPauli
+public import Gravitation.Relativity.General.Modified.MassiveGravity.VDVZ
 public import Gravitation.Relativity.General.Modified.Nordstrom
 public import Gravitation.Relativity.General.Modified.Ostrogradsky
-public import Gravitation.Relativity.General.Modified.PPN
+public import Gravitation.Relativity.General.Modified.PPNParameters
 public import Gravitation.Relativity.General.Modified.TeVeS
-public import Gravitation.Relativity.General.Modified.Teleparallel
-public import Gravitation.Relativity.General.Pipeline
+public import Gravitation.Relativity.General.Modified.Teleparallel.Basic
+public import Gravitation.Relativity.General.Modified.Teleparallel.FLRWTorsion
+public import Gravitation.Relativity.General.Modified.Teleparallel.FTGravity
 public import Gravitation.Relativity.General.ReissnerNordstrom.Basic
-public import Gravitation.Relativity.General.Schwarzschild.Frame
+public import Gravitation.Relativity.General.Schwarzschild.Basic
+public import Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature
+public import Gravitation.Relativity.General.Schwarzschild.ElectricWeyl
 public import PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere
-public import Gravitation.Relativity.General.Schwarzschild.Metric
-public import Gravitation.Relativity.General.SchwarzschildDeSitter.Frame
-public import Gravitation.Relativity.General.SchwarzschildDeSitter.Metric
-public import Gravitation.Relativity.General.SchwarzschildDeSitter.Pipeline
-public import Gravitation.Relativity.General.StaticSpherical
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.CoordinateCurvature
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
 
 /-!
 
@@ -70,8 +76,9 @@ public import Gravitation.Relativity.General.StaticSpherical
 
 Umbrella module for the general-relativity development maintained in Physlib
 (`PhyslibAlpha/Relativity/General`, branch `gravity`).  Until that branch is
-merged, its modules are vendored under `vendor/Gravitation/Relativity/General/`
-at commit `41abde06` as `Gravitation.Relativity.General.*`; the namespace is
+merged, its modules are vendored under `vendor/Gravitation/Relativity/{General,Metrics,
+Tensors}/` and `vendor/Gravitation/Cosmology/FLRW/Metric.lean` at commit
+`b81c896a` as `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`; the namespace is
 still `GeneralRelativity` and the proofs are unchanged, so migrating consists of
 switching these imports back to `PhyslibAlpha.Relativity.General.*`.  The
 repository adds the numerical verification and the written account.
@@ -94,22 +101,23 @@ general relativity.
 
 ## ii. Key results
 
-- `GeneralRelativity.Pipeline.christoffel`, `riemann`, `ricciOf`, `scalarOf`,
-  `einsteinOf` : the coordinate chain `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G`.
+- `GeneralRelativity.Pipeline.coordDeriv`, `christoffel`, `riemann`,
+  `ricciTensorOf`, `ricciScalarOf`, `einsteinTensorOf` : the coordinate chain
+  `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G`.
 - `GeneralRelativity.Riemann.skew_first`, `ricci_symm`, `vacuum_iff_ricci_flat` :
   the algebraic symmetries of curvature and `G = 0 ↔ Ric = 0` in four dimensions.
-- `GeneralRelativity.InitialValue.ham`, `momConstraint` : the ADM Hamiltonian and
-  momentum constraints.
+- `GeneralRelativity.InitialData.hamiltonianConstraint`, `momentumConstraint` :
+  the ADM Hamiltonian and momentum constraints.
 - `GeneralRelativity.Geodesics.geodesic_ivp_exists` : local existence for the
   geodesic equation from position and velocity.
-- `GeneralRelativity.Pipeline.ricciOf_schwarzschild`,
-  `SchwarzschildDeSitter.Pipeline.ricciOf_sds` : Schwarzschild's vacuum and
+- `GeneralRelativity.Schwarzschild.ricciTensorOf_schwarzschild`,
+  `SchwarzschildDeSitter.ricciTensorOf_sds` : Schwarzschild's vacuum and
   Schwarzschild–de Sitter's `Ric = Λ g`, proved from the metric.
-- `GeneralRelativity.Kerr.Vacuum.ricciOf_kerr_eq_zero` : the rotating Kerr metric
+- `GeneralRelativity.Kerr.ricciTensorOf_kerr_eq_zero` : the rotating Kerr metric
   is Ricci flat.
-- `GeneralRelativity.ReissnerNordstrom.einsteinOf_rn_eq_maxwell` : the charged
+- `GeneralRelativity.ReissnerNordstrom.einsteinTensorOf_rn_eq_maxwell` : the charged
   Reissner–Nordström metric solves the Einstein–Maxwell equations.
-- `GeneralRelativity.FLRW.Pipeline.einsteinOf_flrw_iff_friedmann` : the FLRW
+- `GeneralRelativity.FLRW.einsteinTensorOf_flrw_iff_friedmann` : the FLRW
   metric satisfies the Einstein equations exactly when the Friedmann equations
   hold.
 - `GeneralRelativity.Linearized.linEinstein_lorenz_gauge` : in Lorenz gauge the
@@ -119,11 +127,11 @@ general relativity.
 
 - `Basic`, `Curvature`, `Einstein`, `Conservation` : tensors, curvature,
   field equations, and the conservation of `G`.
-- `Pipeline`, `StaticSpherical`, `Minkowski` : the metric-to-curvature pipeline
-  and the flat reference spacetime.
+- `Metrics/CoordinateMetric`, `Metrics/StaticSphericalMetric`, `Metrics/Minkowski` :
+  the metric-to-curvature pipeline and the flat reference spacetime.
 - `Schwarzschild/*`, `SchwarzschildDeSitter/*`, `ReissnerNordstrom/Basic`,
-  `Kerr/*`, `FLRW/Pipeline` : the exact solutions.
-- `InitialValue`, `Geodesics`, `Linearized`, `GravitationalConstant` : the
+  `Kerr/*`, `Cosmology/FLRW/Metric` : the exact solutions.
+- `InitialData`, `GeodesicSystem`, `Linearized`, `GravitationalConstant` : the
   Cauchy problem, linearized gravity, and Newton's constant.
 - `Modified/*` : Brans–Dicke, `f(R)`, chameleon screening, Galileons,
   Ostrogradsky, MOND, MOG, TeVeS, Nordström, Einstein–Aether, Einstein–Cartan,

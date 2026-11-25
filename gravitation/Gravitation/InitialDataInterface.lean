@@ -18,7 +18,7 @@ constraint solving remain outside this interface.
 module
 
 public import Gravitation.ManifoldInterface
-public import Gravitation.Relativity.General.InitialValue
+public import Gravitation.Relativity.General.InitialData
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 @[expose] public section
@@ -90,7 +90,7 @@ lemma minkowskiChart_spatialMetric :
   ext i j
   fin_cases i <;> fin_cases j <;>
     simp [ChartSpacetime.spatialMetric, ChartSpacetime.coordinateMetric,
-      minkowskiChart, minkowski, euclid3, eta4]
+      minkowskiChart, minkowski, euclid3, minkowskiMetric4_apply]
 
 /-- ADM data on a chart slice, together with the momentum-constraint derivative
 and a proof that the vacuum constraints hold. -/
@@ -112,12 +112,13 @@ structure ChartInitialData.Regular {X : ChartSpacetime} (D : ChartInitialData X)
   dK_smooth : ∀ (i j k : Fin 3), ContDiff ℝ ∞ fun _ : Fin 3 → ℝ => D.dK i j k
 
 /-- Every bundled chart initial data set satisfies the Hamiltonian constraint. -/
-lemma ChartInitialData.ham_zero (D : ChartInitialData X) : D.data.ham = 0 :=
+lemma ChartInitialData.ham_zero (D : ChartInitialData X) :
+    D.data.hamiltonianConstraint = 0 :=
   D.vacuum.1
 
 /-- Every bundled chart initial data set satisfies the momentum constraint. -/
 lemma ChartInitialData.mom_zero (D : ChartInitialData X) (i : Fin 3) :
-    momConstraint D.dK i = 0 :=
+    D.data.momentumConstraint D.dK i = 0 :=
   D.vacuum.2 i
 
 /-- The bundled vacuum predicate is exactly `InitialData.IsVacuumData`. -/
@@ -135,18 +136,18 @@ structure ConstraintResidual where
 /-- The constraint residual packaged from chart initial data. -/
 noncomputable def ChartInitialData.constraintResidual
     (D : ChartInitialData X) : ConstraintResidual where
-  ham := D.data.ham
-  mom := fun i => momConstraint D.dK i
+  ham := D.data.hamiltonianConstraint
+  mom := fun i => D.data.momentumConstraint D.dK i
 
 /-- The packaged Hamiltonian residual vanishes. -/
 lemma ChartInitialData.constraintResidual_ham (D : ChartInitialData X) :
-    D.constraintResidual.ham = 0 :=
-  D.vacuum.1
+    D.constraintResidual.ham = 0 := by
+  simpa [ChartInitialData.constraintResidual] using D.vacuum.1
 
 /-- Every packaged momentum residual vanishes. -/
 lemma ChartInitialData.constraintResidual_mom (D : ChartInitialData X) (i : Fin 3) :
-    D.constraintResidual.mom i = 0 :=
-  D.vacuum.2 i
+    D.constraintResidual.mom i = 0 := by
+  simpa [ChartInitialData.constraintResidual] using D.vacuum.2 i
 
 /-- The whole constraint residual vanishes. -/
 lemma ChartInitialData.constraintResidual_eq_zero (D : ChartInitialData X) :
@@ -163,7 +164,7 @@ lemma ChartInitialData.regular (D : ChartInitialData X) (hX : X.IsSmooth) :
 lemma minkowskiChart_isSmooth : minkowskiChart.IsSmooth := by
   intro i j
   have h : (fun x : SpacetimeChart => minkowskiChart.coordinateMetric x i j) =
-      fun _ => eta4 i j := by
+      fun _ => minkowskiMetric4 i j := by
     funext x
     simp [ChartSpacetime.coordinateMetric, minkowskiChart, minkowski]
   rw [h]
@@ -184,7 +185,7 @@ lemma minkowskiChartInitialData_metric :
 
 /-- The flat instance has vanishing Hamiltonian constraint. -/
 lemma minkowskiChartInitialData_ham_zero :
-    minkowskiChartInitialData.data.ham = 0 :=
+    minkowskiChartInitialData.data.hamiltonianConstraint = 0 :=
   flatData_ham_zero
 
 /-- The Minkowski chart initial data are regular. -/

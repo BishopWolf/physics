@@ -18,8 +18,8 @@ with Minkowski spacetime as its first instance.
 
 module
 
-public import Gravitation.Relativity.General.Minkowski
-public import Gravitation.Relativity.General.Pipeline
+public import Gravitation.Relativity.Metrics.CoordinateMetric
+public import Gravitation.Relativity.Metrics.Minkowski
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Geometry.Manifold.ChartedSpace
@@ -86,50 +86,50 @@ noncomputable def ChartSpacetime.riemann (X : ChartSpacetime)
 /-- Chart Ricci tensor computed from the coordinate metric. -/
 noncomputable def ChartSpacetime.ricci (X : ChartSpacetime)
     (x : SpacetimeChart) (σ ν : Fin 4) : ℝ :=
-  Pipeline.ricciOf X.coordinateMetric X.coordinateInverseMetric x σ ν
+  Pipeline.ricciTensorOf X.coordinateMetric X.coordinateInverseMetric x σ ν
 
 /-- Chart scalar curvature computed from the coordinate metric. -/
 noncomputable def ChartSpacetime.scalarCurvature (X : ChartSpacetime)
     (x : SpacetimeChart) : ℝ :=
-  Pipeline.scalarOf X.coordinateMetric X.coordinateInverseMetric x
+  Pipeline.ricciScalarOf X.coordinateMetric X.coordinateInverseMetric x
 
 /-- Chart Einstein tensor computed from the coordinate metric. -/
 noncomputable def ChartSpacetime.einstein (X : ChartSpacetime)
     (x : SpacetimeChart) (i j : Fin 4) : ℝ :=
-  Pipeline.einsteinOf X.coordinateMetric X.coordinateInverseMetric x i j
+  Pipeline.einsteinTensorOf X.coordinateMetric X.coordinateInverseMetric x i j
 
 lemma minkowskiChart_christoffel_zero (x : SpacetimeChart) (k i j : Fin 4) :
     minkowskiChart.christoffel x k i j = 0 := by
   simpa [ChartSpacetime.christoffel] using
     Pipeline.christoffel_const minkowskiChart.coordinateMetric
-      minkowskiChart.coordinateInverseMetric eta4 (fun _ => rfl) x k i j
+      minkowskiChart.coordinateInverseMetric minkowskiMetric4 (fun _ => rfl) x k i j
 
 lemma minkowskiChart_riemann_zero (x : SpacetimeChart)
     (ρ σ μ ν : Fin 4) :
     minkowskiChart.riemann x ρ σ μ ν = 0 := by
   simpa [ChartSpacetime.riemann] using
     Pipeline.riemann_const minkowskiChart.coordinateMetric
-      minkowskiChart.coordinateInverseMetric eta4 (fun _ => rfl) x ρ σ μ ν
+      minkowskiChart.coordinateInverseMetric minkowskiMetric4 (fun _ => rfl) x ρ σ μ ν
 
 lemma minkowskiChart_ricci_zero (x : SpacetimeChart) (σ ν : Fin 4) :
     minkowskiChart.ricci x σ ν = 0 := by
   simpa [ChartSpacetime.ricci, ChartSpacetime.coordinateMetric,
     ChartSpacetime.coordinateInverseMetric, minkowskiChart, minkowski] using
-    Pipeline.ricciOf_const minkowskiChart.coordinateMetric
-      minkowskiChart.coordinateInverseMetric eta4 (fun _ => rfl) x σ ν
+    Pipeline.ricciTensorOf_const minkowskiChart.coordinateMetric
+      minkowskiChart.coordinateInverseMetric minkowskiMetric4 (fun _ => rfl) x σ ν
 
 lemma minkowskiChart_scalar_zero (x : SpacetimeChart) :
     minkowskiChart.scalarCurvature x = 0 := by
   simpa [ChartSpacetime.scalarCurvature, ChartSpacetime.coordinateMetric,
     ChartSpacetime.coordinateInverseMetric, minkowskiChart, minkowski] using
-    Pipeline.scalarOf_const minkowskiChart.coordinateMetric
-      minkowskiChart.coordinateInverseMetric eta4 (fun _ => rfl) x
+    Pipeline.ricciScalarOf_const minkowskiChart.coordinateMetric
+      minkowskiChart.coordinateInverseMetric minkowskiMetric4 (fun _ => rfl) x
 
 lemma minkowskiChart_einstein_zero (x : SpacetimeChart) (i j : Fin 4) :
     minkowskiChart.einstein x i j = 0 := by
   simpa [ChartSpacetime.einstein] using
-    Pipeline.einsteinOf_const minkowskiChart.coordinateMetric
-      minkowskiChart.coordinateInverseMetric eta4 (fun _ => rfl) x i j
+    Pipeline.einsteinTensorOf_const minkowskiChart.coordinateMetric
+      minkowskiChart.coordinateInverseMetric minkowskiMetric4 (fun _ => rfl) x i j
 
 /-- The squared Lorentzian norm of a chart tangent vector. -/
 noncomputable def ChartSpacetime.normSq (X : ChartSpacetime)
@@ -155,7 +155,7 @@ lemma minkowskiChart_normSq (x : SpacetimeChart) (v : Fin 4 → ℝ) :
     minkowskiChart.normSq x v =
       -(v 0) ^ 2 + (v 1) ^ 2 + (v 2) ^ 2 + (v 3) ^ 2 := by
   simp [ChartSpacetime.normSq, ChartSpacetime.coordinateMetric,
-    minkowskiChart, minkowski, eta4, Fin.sum_univ_four]
+    minkowskiChart, minkowski, minkowskiMetric4_apply, Fin.sum_univ_four]
   ring
 
 /-- The time basis vector is timelike in the Minkowski chart. -/
@@ -251,11 +251,11 @@ lemma ChartSpacetime.christoffel_symm (X : ChartSpacetime)
   congr 1
   apply Finset.sum_congr rfl
   intro l _
-  have hsymm : Pipeline.pd l (fun y => X.coordinateMetric y i j) x =
-      Pipeline.pd l (fun y => X.coordinateMetric y j i) x := by
-    apply Pipeline.pd_congr
+  have hsymm : Pipeline.coordDeriv l (fun y => X.coordinateMetric y i j) x =
+      Pipeline.coordDeriv l (fun y => X.coordinateMetric y j i) x := by
+    apply Pipeline.coordDeriv_congr
     intro y
-    exact (X.metric (X.chart.symm y)).symm i j
+    exact (X.metric (X.chart.symm y)).symm.apply j i
   rw [hsymm]
   ring
 
@@ -263,7 +263,7 @@ lemma ChartSpacetime.christoffel_symm (X : ChartSpacetime)
 `∇_i g_{jk} = ∂_i g_{jk} - Γ^l_{ij} g_{lk} - Γ^l_{ik} g_{jl}`. -/
 noncomputable def ChartSpacetime.metricCovariantDeriv
     (X : ChartSpacetime) (x : SpacetimeChart) (i j k : Fin 4) : ℝ :=
-  Pipeline.pd i (fun y => X.coordinateMetric y j k) x
+  Pipeline.coordDeriv i (fun y => X.coordinateMetric y j k) x
     - ∑ l : Fin 4, X.christoffel x l i j * X.coordinateMetric x l k
     - ∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x j l
 
@@ -273,12 +273,12 @@ lemma minkowskiChart_metricCovariantDeriv_zero
     (x : SpacetimeChart) (i j k : Fin 4) :
     minkowskiChart.metricCovariantDeriv x i j k = 0 := by
   rw [ChartSpacetime.metricCovariantDeriv]
-  have hpd : Pipeline.pd i (fun y => minkowskiChart.coordinateMetric y j k) x = 0 := by
-    have hconst : ∀ y, minkowskiChart.coordinateMetric y j k = eta4 j k := by
+  have hpd : Pipeline.coordDeriv i (fun y => minkowskiChart.coordinateMetric y j k) x = 0 := by
+    have hconst : ∀ y, minkowskiChart.coordinateMetric y j k = minkowskiMetric4 j k := by
       intro y
       simp [ChartSpacetime.coordinateMetric, minkowskiChart, minkowski]
-    rw [Pipeline.pd_congr i x hconst]
-    exact Pipeline.pd_const i (eta4 j k) x
+    rw [Pipeline.coordDeriv_congr i x hconst]
+    exact Pipeline.coordDeriv_const i (minkowskiMetric4 j k) x
   have h1 :
       (∑ l : Fin 4,
         minkowskiChart.christoffel x l i j * minkowskiChart.coordinateMetric x l k) = 0 := by
@@ -307,7 +307,7 @@ lemma ChartSpacetime.metricCovariantDeriv_eq_zero (X : ChartSpacetime)
     intro m q
     have hinvR := congrFun (congrFun (X.metric (X.chart.symm x)).inv_right m) q
     have hgsym : ∀ a b, X.coordinateInverseMetric x a b = X.coordinateInverseMetric x b a :=
-      (X.metric (X.chart.symm x)).ginv_symm
+      fun a b => (X.metric (X.chart.symm x)).ginv_symm.apply b a
     calc
       ∑ l : Fin 4, X.coordinateInverseMetric x l m * X.coordinateMetric x l q
           = ∑ l : Fin 4, X.coordinateInverseMetric x m l * X.coordinateMetric x l q := by
@@ -319,22 +319,22 @@ lemma ChartSpacetime.metricCovariantDeriv_eq_zero (X : ChartSpacetime)
               Matrix.mul_apply, Matrix.one_apply] using hinvR
   have hsum : ∀ p q : Fin 4,
       (∑ l : Fin 4, X.christoffel x l i p * X.coordinateMetric x l q) =
-        (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y p q) x
-          + Pipeline.pd p (fun y => X.coordinateMetric y i q) x
-          - Pipeline.pd q (fun y => X.coordinateMetric y i p) x) := by
+        (1 / 2) * (Pipeline.coordDeriv i (fun y => X.coordinateMetric y p q) x
+          + Pipeline.coordDeriv p (fun y => X.coordinateMetric y i q) x
+          - Pipeline.coordDeriv q (fun y => X.coordinateMetric y i p) x) := by
     intro p q
     simp only [ChartSpacetime.christoffel, Pipeline.christoffel,
       Finset.mul_sum, Finset.sum_mul]
     rw [Finset.sum_comm]
     calc
       ∑ m : Fin 4, ∑ l : Fin 4, (1 / 2) * (X.coordinateInverseMetric x l m *
-          (Pipeline.pd i (fun y => X.coordinateMetric y p m) x
-            + Pipeline.pd p (fun y => X.coordinateMetric y i m) x
-            - Pipeline.pd m (fun y => X.coordinateMetric y i p) x)) *
+          (Pipeline.coordDeriv i (fun y => X.coordinateMetric y p m) x
+            + Pipeline.coordDeriv p (fun y => X.coordinateMetric y i m) x
+            - Pipeline.coordDeriv m (fun y => X.coordinateMetric y i p) x)) *
           X.coordinateMetric x l q
-          = ∑ m : Fin 4, (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y p m) x
-              + Pipeline.pd p (fun y => X.coordinateMetric y i m) x
-              - Pipeline.pd m (fun y => X.coordinateMetric y i p) x) *
+          = ∑ m : Fin 4, (1 / 2) * (Pipeline.coordDeriv i (fun y => X.coordinateMetric y p m) x
+              + Pipeline.coordDeriv p (fun y => X.coordinateMetric y i m) x
+              - Pipeline.coordDeriv m (fun y => X.coordinateMetric y i p) x) *
               (∑ l : Fin 4, X.coordinateInverseMetric x l m * X.coordinateMetric x l q) := by
             apply Finset.sum_congr rfl
             intro m _
@@ -342,26 +342,26 @@ lemma ChartSpacetime.metricCovariantDeriv_eq_zero (X : ChartSpacetime)
             apply Finset.sum_congr rfl
             intro l _
             ring
-      _ = (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y p q) x
-            + Pipeline.pd p (fun y => X.coordinateMetric y i q) x
-            - Pipeline.pd q (fun y => X.coordinateMetric y i p) x) := by
+      _ = (1 / 2) * (Pipeline.coordDeriv i (fun y => X.coordinateMetric y p q) x
+            + Pipeline.coordDeriv p (fun y => X.coordinateMetric y i q) x
+            - Pipeline.coordDeriv q (fun y => X.coordinateMetric y i p) x) := by
             simp_rw [hInv]
             simp
   have hg2 : (∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x j l) =
-      (1 / 2) * (Pipeline.pd i (fun y => X.coordinateMetric y k j) x
-        + Pipeline.pd k (fun y => X.coordinateMetric y i j) x
-        - Pipeline.pd j (fun y => X.coordinateMetric y i k) x) := by
+      (1 / 2) * (Pipeline.coordDeriv i (fun y => X.coordinateMetric y k j) x
+        + Pipeline.coordDeriv k (fun y => X.coordinateMetric y i j) x
+        - Pipeline.coordDeriv j (fun y => X.coordinateMetric y i k) x) := by
     have hrewrite : (∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x j l) =
         ∑ l : Fin 4, X.christoffel x l i k * X.coordinateMetric x l j := by
       apply Finset.sum_congr rfl
       intro l _
       have hsym : X.coordinateMetric x j l = X.coordinateMetric x l j :=
-        (X.metric (X.chart.symm x)).symm j l
+        (X.metric (X.chart.symm x)).symm.apply l j
       rw [hsym]
     rw [hrewrite, hsum k j]
-  have hpd_sym : Pipeline.pd i (fun y => X.coordinateMetric y k j) x =
-      Pipeline.pd i (fun y => X.coordinateMetric y j k) x :=
-    Pipeline.pd_congr i x fun y => (X.metric (X.chart.symm y)).symm k j
+  have hpd_sym : Pipeline.coordDeriv i (fun y => X.coordinateMetric y k j) x =
+      Pipeline.coordDeriv i (fun y => X.coordinateMetric y j k) x :=
+    Pipeline.coordDeriv_congr i x fun y => (X.metric (X.chart.symm y)).symm.apply j k
   rw [ChartSpacetime.metricCovariantDeriv, hsum j k, hg2, hpd_sym]
   ring
 

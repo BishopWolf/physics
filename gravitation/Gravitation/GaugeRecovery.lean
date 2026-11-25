@@ -27,7 +27,7 @@ conservation identity:
    `2 a a'' + (a')² = Λ a²` on `Ioo (-δ) δ` and satisfies the initial Hamiltonian
    constraint `3 (a'(0))² = Λ a(0)²`, then `d/dt [a (3 (a')² - Λ a²)] = 0`
    propagates `3 (a')² = Λ a²` everywhere on `Ioo (-δ) δ`, and
-   `FLRW.einsteinOf_flrw_iff_friedmann` recovers the full 4D Einstein equations
+   `FLRW.einsteinTensorOf_flrw_iff_friedmann` recovers the full 4D Einstein equations
    `G_{ij} + Λ g_{ij} = 0` at every regular chart point.
 -/
 
@@ -35,6 +35,8 @@ module
 
 public import Gravitation.Bianchi
 public import Gravitation.ReducedCauchy
+public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
@@ -66,29 +68,29 @@ theorem bianchi_constraint_propagation_split
     (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
     (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => Pipeline.christoffel g ginv y k i j) x)
     (l : Fin 4) :
-    ginv x 0 0 * Pipeline.pd 0 (fun y => Pipeline.einsteinOf g ginv y 0 l) x =
+    ginv x 0 0 * Pipeline.coordDeriv 0 (fun y => Pipeline.einsteinTensorOf g ginv y 0 l) x =
       -(ginv x 0 0 *
           (-(∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 0 *
-              Pipeline.einsteinOf g ginv x a l)
+              Pipeline.einsteinTensorOf g ginv x a l)
             - ∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 l *
-              Pipeline.einsteinOf g ginv x 0 a)
+              Pipeline.einsteinTensorOf g ginv x 0 a)
         + ∑ ν : Fin 3, ginv x 0 ν.succ *
-            Bianchi.covDeriv2 g ginv (Pipeline.einsteinOf g ginv) x 0 ν.succ l
+            Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x 0 ν.succ l
         + ∑ μ : Fin 3, ∑ ν : Fin 4, ginv x μ.succ ν *
-            Bianchi.covDeriv2 g ginv (Pipeline.einsteinOf g ginv) x μ.succ ν l) := by
+            Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x μ.succ ν l) := by
   have hdiv := Bianchi.covDiv_einstein_eq_zero g ginv
     hgSymm hginvSymm hInvL hInvR hgC2 hginvD hΓC2 l
   unfold Bianchi.covDiv2 at hdiv
   have hsum4 : ∀ f : Fin 4 → ℝ, (∑ μ : Fin 4, f μ) = f 0 + ∑ μ : Fin 3, f μ.succ :=
     Fin.sum_univ_succ
   rw [hsum4] at hdiv
-  rw [hsum4 (fun ν => ginv x 0 ν * Bianchi.covDeriv2 g ginv (Pipeline.einsteinOf g ginv) x 0 ν l)] at hdiv
-  have h00 : Bianchi.covDeriv2 g ginv (Pipeline.einsteinOf g ginv) x 0 0 l =
-      Pipeline.pd 0 (fun y => Pipeline.einsteinOf g ginv y 0 l) x
+  rw [hsum4 (fun ν => ginv x 0 ν * Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x 0 ν l)] at hdiv
+  have h00 : Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x 0 0 l =
+      Pipeline.coordDeriv 0 (fun y => Pipeline.einsteinTensorOf g ginv y 0 l) x
         - ∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 0 *
-            Pipeline.einsteinOf g ginv x a l
+            Pipeline.einsteinTensorOf g ginv x a l
         - ∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 l *
-            Pipeline.einsteinOf g ginv x 0 a := rfl
+            Pipeline.einsteinTensorOf g ginv x 0 a := rfl
   rw [h00] at hdiv
   linarith
 
@@ -289,7 +291,7 @@ theorem flrw_full_einstein_of_reduced
     (hham0 : 3 * a' 0 ^ 2 = Λ * a 0 ^ 2)
     {x : Fin 4 → ℝ} (hx0 : x 0 ∈ Ioo (-δ) δ)
     (hr : x 1 ≠ 0) (hsin : Real.sin (x 2) ≠ 0) (i j : Fin 4) :
-    Pipeline.einsteinOf (FLRW.flrwMetric a 0) (FLRW.flrwMetricInv a 0) x i j +
+    Pipeline.einsteinTensorOf (FLRW.flrwMetric a 0) (FLRW.flrwMetricInv a 0) x i j +
       Λ * FLRW.flrwMetric a 0 x i j = 0 := by
   have hham := flrw_constraint_propagates a a' a'' Λ δ hδ ha_ne ha1 ha2 hevol hham0
   have ha_x0 : a (x 0) ≠ 0 := ha_ne (x 0) hx0
@@ -318,7 +320,7 @@ theorem flrw_full_einstein_of_reduced
     simp only [mul_zero, zero_div, zero_add, neg_zero]
     field_simp [ha_x0]
     linarith
-  have hiff := (FLRW.einsteinOf_flrw_iff_friedmann a 0 Λ 0 0 0 x
+  have hiff := (FLRW.einsteinTensorOf_flrw_iff_friedmann a 0 Λ 0 0 0 x
     ha_x0 hr (by norm_num) hsin hdiff_nhds hd2.differentiableAt).mpr ⟨hf1, hf2⟩ i j
   simpa [FLRW.perfectFluidT] using hiff
 
@@ -344,7 +346,7 @@ noncomputable def flrwGaugeRecoveryProblem (Λ δ : ℝ) (hδ : 0 < δ) :
   IsFullEinsteinSolution := fun a =>
     ∀ x : Fin 4 → ℝ, x 0 ∈ Ioo (-δ) δ → x 1 ≠ 0 → Real.sin (x 2) ≠ 0 →
       ∀ i j : Fin 4,
-        Pipeline.einsteinOf (FLRW.flrwMetric a 0) (FLRW.flrwMetricInv a 0) x i j +
+        Pipeline.einsteinTensorOf (FLRW.flrwMetric a 0) (FLRW.flrwMetricInv a 0) x i j +
           Λ * FLRW.flrwMetric a 0 x i j = 0
   ConstraintsPreserved := fun a =>
     ∀ t ∈ Ioo (-δ) δ, ∃ a', HasDerivAt a a' t ∧ 3 * a' ^ 2 = Λ * a t ^ 2

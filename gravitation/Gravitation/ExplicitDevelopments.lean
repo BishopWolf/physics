@@ -30,9 +30,12 @@ module
 
 public import Gravitation.CauchyInterfaces
 public import Gravitation.SobolevInitialData
-public import Gravitation.Relativity.General.SchwarzschildDeSitter.Pipeline
-public import Gravitation.Relativity.General.Kerr.Vacuum
-public import Gravitation.Relativity.General.FLRW.Pipeline
+public import Gravitation.Relativity.Metrics.CoordinateMetric
+public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
+public import Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.CoordinateCurvature
+public import Gravitation.Relativity.General.Kerr.RicciCurvature
 
 @[expose] public section
 
@@ -44,24 +47,24 @@ Schwarzschild, Schwarzschild–de Sitter, Kerr, and FLRW. -/
 def explicitSolutionObligations : ExplicitDevelopmentObligations where
   schwarzschild :=
     ∀ (M : ℝ),
-      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → Schwarzschild.schwarzschildF M (x 1) ≠ 0 →
+      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → Schwarzschild.schwarzschildLapse M (x 1) ≠ 0 →
         Real.sin (x 2) ≠ 0 → ∀ i j : Fin 4,
-          Pipeline.einsteinOf (SchwarzschildDeSitter.schwarzschildG M)
-            (SchwarzschildDeSitter.schwarzschildGinv M) x i j = 0) ∧
-      (∀ (r θ φ : ℝ), r ≠ 0 → Schwarzschild.schwarzschildF M r ≠ 0 → Real.sin θ ≠ 0 →
+          Pipeline.einsteinTensorOf (Schwarzschild.schwarzschildMetricField M)
+            (Schwarzschild.schwarzschildMetricInv M) x i j = 0) ∧
+      (∀ (r θ φ : ℝ), r ≠ 0 → Schwarzschild.schwarzschildLapse M r ≠ 0 → Real.sin θ ≠ 0 →
         (∀ i j : Fin 3,
-          SchwarzschildDeSitter.schwarzschildG M ![0, r, θ, φ] i.succ j.succ =
+          Schwarzschild.schwarzschildMetricField M ![0, r, θ, φ] i.succ j.succ =
             sdsSpatialMetric M 0 ![r, θ, φ] i j) ∧
         hamiltonianConstraintOf (sdsSpatialMetric M 0) (sdsSpatialMetricInv M 0)
           (fun _ => 0) ![r, θ, φ] = 0)
   deSitter :=
     ∀ (M Λ : ℝ),
-      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → SchwarzschildDeSitter.sdsF M Λ (x 1) ≠ 0 →
+      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → SchwarzschildDeSitter.sdsLapse M Λ (x 1) ≠ 0 →
         Real.sin (x 2) ≠ 0 → ∀ i j : Fin 4,
-          Pipeline.einsteinOf (SchwarzschildDeSitter.sdsMetric M Λ)
+          Pipeline.einsteinTensorOf (SchwarzschildDeSitter.sdsMetric M Λ)
             (SchwarzschildDeSitter.sdsMetricInv M Λ) x i j +
             Λ * SchwarzschildDeSitter.sdsMetric M Λ x i j = 0) ∧
-      (∀ (r θ φ : ℝ), r ≠ 0 → SchwarzschildDeSitter.sdsF M Λ r ≠ 0 → Real.sin θ ≠ 0 →
+      (∀ (r θ φ : ℝ), r ≠ 0 → SchwarzschildDeSitter.sdsLapse M Λ r ≠ 0 → Real.sin θ ≠ 0 →
         (∀ i j : Fin 3,
           SchwarzschildDeSitter.sdsMetric M Λ ![0, r, θ, φ] i.succ j.succ =
             sdsSpatialMetric M Λ ![r, θ, φ] i j) ∧
@@ -71,7 +74,7 @@ def explicitSolutionObligations : ExplicitDevelopmentObligations where
     ∀ (M a : ℝ),
       (∀ (x : Fin 4 → ℝ), Kerr.sigma a (x 1) (x 2) ≠ 0 →
         Kerr.delta M a (x 1) ≠ 0 → Real.sin (x 2) ≠ 0 → ∀ i j : Fin 4,
-          Pipeline.einsteinOf (Kerr.kerrMetric M a) (Kerr.kerrMetricInv M a) x i j = 0) ∧
+          Pipeline.einsteinTensorOf (Kerr.kerrMetric M a) (Kerr.kerrMetricInv M a) x i j = 0) ∧
       (∀ (x : Fin 4 → ℝ) (i j : Fin 4),
         Kerr.kerrMetric M a x i j = Kerr.kerrMetric M a x j i) ∧
       (∀ (r θ φ : ℝ),
@@ -85,7 +88,7 @@ def explicitSolutionObligations : ExplicitDevelopmentObligations where
       ((deriv a (x 0) / a (x 0)) ^ 2 = (8 * Real.pi * G / 3) * ρ - k / a (x 0) ^ 2 + Λ / 3 ∧
         deriv (deriv a) (x 0) / a (x 0) = -(4 * Real.pi * G / 3) * (ρ + 3 * p) + Λ / 3) →
       (∀ i j : Fin 4,
-        Pipeline.einsteinOf (FLRW.flrwMetric a k) (FLRW.flrwMetricInv a k) x i j +
+        Pipeline.einsteinTensorOf (FLRW.flrwMetric a k) (FLRW.flrwMetricInv a k) x i j +
           Λ * FLRW.flrwMetric a k x i j =
           8 * Real.pi * G * FLRW.perfectFluidT ρ p (FLRW.flrwMetric a k x) i j) ∧
       (∀ (r θ φ : ℝ),
@@ -98,11 +101,12 @@ def explicitSolutionObligations : ExplicitDevelopmentObligations where
 theorem schwarzschild_explicit_development : explicitSolutionObligations.schwarzschild := by
   intro M
   refine ⟨fun x hr hf hsin i j =>
-      SchwarzschildDeSitter.einsteinOf_schwarzschild M x hr hf hsin i j,
+      Schwarzschild.einsteinTensorOf_schwarzschild M x hr hf hsin i j,
     fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
   · fin_cases i <;> fin_cases j <;>
-      simp [SchwarzschildDeSitter.schwarzschildG, Schwarzschild.schwarzschildMetric,
-        sdsSpatialMetric, SchwarzschildDeSitter.sdsF]
+      simp [Schwarzschild.schwarzschildMetricField, Schwarzschild.schwarzschildMetric,
+        StaticSpherical.staticSphericalMetric, sdsSpatialMetric,
+        Schwarzschild.schwarzschildLapse, SchwarzschildDeSitter.sdsLapse]
   · exact schwarzschild_spatial_hamiltonian_zero M ![r, θ, φ]
       (by simpa using hr) (by simpa using hf) (by simpa using hsin)
 
@@ -112,10 +116,12 @@ spatial scalar curvature `³R = 2 Λ`. -/
 theorem sds_explicit_development : explicitSolutionObligations.deSitter := by
   intro M Λ
   refine ⟨fun x hr hf hsin i j => ?_, fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
-  · have h := SchwarzschildDeSitter.einsteinOf_sds M Λ x hr hf hsin i j
-    linarith
+  · have h := SchwarzschildDeSitter.einsteinTensorOf_sds M Λ x hr hf hsin i j
+    rw [h]
+    ring
   · fin_cases i <;> fin_cases j <;>
-      simp [SchwarzschildDeSitter.sdsMetric, sdsSpatialMetric]
+      simp [SchwarzschildDeSitter.sdsMetric, StaticSpherical.staticSphericalMetric,
+        sdsSpatialMetric, SchwarzschildDeSitter.sdsLapse]
   · exact spatialScalarCurvOf_sdsSpatial M Λ ![r, θ, φ]
       (by simpa using hr) (by simpa using hf) (by simpa using hsin)
 
@@ -123,8 +129,8 @@ theorem sds_explicit_development : explicitSolutionObligations.deSitter := by
 equation `G = 0`, metric symmetry, and `t = 0` Boyer–Lindquist shift block. -/
 theorem kerr_explicit_development : explicitSolutionObligations.kerr := by
   intro M a
-  refine ⟨fun x hsig hdel hs i j => Kerr.einsteinOf_kerr_eq_zero M a x hsig hdel hs i j,
-    fun x i j => Kerr.kerrMetric_symm M a x i j,
+  refine ⟨fun x hsig hdel hs i j => Kerr.einsteinTensorOf_kerr_eq_zero M a x hsig hdel hs i j,
+    fun x i j => (Kerr.kerrMetric_symm M a x).apply j i,
     fun r θ φ => ?_⟩
   simp [Kerr.kerrMetric]
 
@@ -132,7 +138,7 @@ theorem kerr_explicit_development : explicitSolutionObligations.kerr := by
 `G + Λ g = 8πG T` and `t = 0` flat (`k = 0`) spatial scale-factor metric components. -/
 theorem flrw_explicit_development : explicitSolutionObligations.flrw := by
   intro a k Λ G ρ p x ha hr hkr hsin ha_diff ha2 hfried
-  refine ⟨(FLRW.einsteinOf_flrw_iff_friedmann a k Λ G ρ p x
+  refine ⟨(FLRW.einsteinTensorOf_flrw_iff_friedmann a k Λ G ρ p x
       ha hr hkr hsin ha_diff ha2).mpr hfried,
     fun r θ φ => ?_⟩
   simp [FLRW.flrwMetric]

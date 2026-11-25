@@ -16,7 +16,9 @@ it is not a manifold-level derivation of the linearized equations.
 
 module
 
-public import Gravitation.Relativity.General.Linearized
+public import Gravitation.Relativity.General.Linearized.LinearizedCurvature
+public import Gravitation.Relativity.General.Linearized.LorenzGauge
+public import Gravitation.Relativity.General.Linearized.TTWave
 public import Gravitation.WaveUniqueness3D
 
 @[expose] public section
@@ -66,7 +68,7 @@ theorem ttWave_waveGauge
     (hPlus hCross : ℝ) (f : ℝ → ℝ) (hf : ContDiff ℝ 2 f) (x : Fin 4 → ℝ) :
     WaveGaugePerturbation (ttWave hPlus hCross f) x := by
   refine {
-    symm := ttWave_symm hPlus hCross f
+    symm := fun y i j => (ttWave_symm hPlus hCross f y).apply j i
     smooth := ttWave_contDiffAt hPlus hCross f hf x
     gauge := Filter.Eventually.of_forall fun y k =>
       ttWave_lorenz_gauge hPlus hCross f y k
@@ -74,7 +76,7 @@ theorem ttWave_waveGauge
   intro i j
   have hsym : ∀ z a b,
       ttWave hPlus hCross f z a b = ttWave hPlus hCross f z b a :=
-    ttWave_symm hPlus hCross f
+    fun z a b => (ttWave_symm hPlus hCross f z).apply b a
   have hc : ∀ a b, ContDiffAt ℝ 2
       (fun z => ttWave hPlus hCross f z a b) x :=
     ttWave_contDiffAt hPlus hCross f hf x
