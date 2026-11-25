@@ -78,19 +78,21 @@ listed at the end of this document.
 ## What this repository adds
 
 The general-relativity development lives in Physlib on the `gravity` branch
-(`PhyslibAlpha/Relativity/General`, 38 Lean modules, namespace
-`GeneralRelativity`), which is not yet merged upstream. Since 24 November 2026
-the 37 unmerged modules are **vendored** here under
-`gravitation/vendor/Gravitation/Relativity/General/` (module path
-`Gravitation.Relativity.General.*`, namespace `GeneralRelativity` unchanged) at
-branch commit `41abde06`, while the `physlib` requirement points at merged master `cbd02238`
+(`PhyslibAlpha/Relativity/General` plus the branch-only `Metrics`, `Tensors` and
+`Cosmology` trees, 67 Lean modules on the branch, namespace `GeneralRelativity`),
+which is not yet merged upstream. Since 25 November 2026 the 57 vendored modules
+are **vendored** here under `gravitation/vendor/Gravitation/Relativity/{General,
+Metrics,Tensors}/` and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lean`
+(module paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, namespace
+`GeneralRelativity` unchanged) at branch commit `b81c896a`, while the `physlib`
+requirement points at merged master `7910f51f`
 — the merge base the branch was written against, which also supplies the
-already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 989 audited declarations are those sources plus the local
+already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1081 audited declarations are those sources plus the local
 `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
 `Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge`,
-`Gravitation.ManifoldInterface`, `Gravitation.Bianchi`,
+`Gravitation.ManifoldInterface`, `Gravitation.Bianchi`, `Gravitation.KretschmannTotal`,
 `Gravitation.InitialDataInterface`, `Gravitation.SobolevInitialData`,
 `Gravitation.CauchyInterfaces`, `Gravitation.ReducedWave3D`,
 `Gravitation.ReducedCauchy`, `Gravitation.GaugeRecovery`,
@@ -127,7 +129,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 989 declarations (655 theorem-like) and rejects anything outside
+  all 1081 declarations (675 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`

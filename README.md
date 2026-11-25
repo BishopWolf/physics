@@ -7,12 +7,14 @@ numerically.
 
 The development itself lives in Physlib on its `gravity` branch, which is not
 yet merged upstream. Until it is, the branch's unmerged modules are **vendored**
-here (`gravitation/vendor/Gravitation/Relativity/General/`, from commit
-`41abde06`, as the module path `Gravitation.Relativity.General.*`) and the base
+here (`gravitation/vendor/Gravitation/Relativity/{General,Metrics,Tensors}/`
+and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lean`, from commit
+`b81c896a`, as the module paths `Gravitation.Relativity.*` and
+`Gravitation.Cosmology.*`) and the base
 library is a pinned Physlib **master**. The namespace is still
 `GeneralRelativity` and the proofs are unchanged, so removing the vendored copy
-and switching the imports back to `PhyslibAlpha.Relativity.General.*` is the
-whole migration. The repository adds what Physlib does not carry: the numerical
+and switching the imports back to the corresponding `PhyslibAlpha.*` paths is
+the whole migration. The repository adds what Physlib does not carry: the numerical
 cross-check, the axiom/proof-status tooling, and the written account.
 
 Curvature *definitions* exist in several projects; this development adds
@@ -48,7 +50,10 @@ gravitation/
 ├── Gravitation/MaximalDevelopment.lean  M5 Zorn and open-domain maximal development
 ├── Gravitation/ExplicitDevelopments.lean M6 explicit-solution certificates
 ├── vendor/                              temporary copy of the unmerged branch
-│   └── Gravitation/Relativity/General/ 37 modules, commit 41abde06
+│   ├── Gravitation/Relativity/General/  43 modules
+│   ├── Gravitation/Relativity/Metrics/   8 modules
+│   ├── Gravitation/Relativity/Tensors/   5 selected modules
+│   └── Gravitation/Cosmology/FLRW/Metric.lean  1 module, commit b81c896a
 └── vulkan/
     ├── shaders/tensor.comp              GLSL compute: Γ, Ric, R, G, K on a lattice
     ├── src/gr_vulkan.c                  host: five metrics, tolerance checks
@@ -67,27 +72,29 @@ scripts/
 
 ## The Physlib dependency and the vendored branch
 
-The general-relativity development (`PhyslibAlpha/Relativity/General/`, 38 Lean
-modules, namespace `GeneralRelativity`) is on Physlib's `gravity` branch, which
-is not yet merged upstream. The build therefore has two parts:
+The general-relativity development (`PhyslibAlpha/Relativity/General/` plus the
+branch-only `Metrics/`, `Tensors/` and `Cosmology/` trees, 67 Lean modules on the
+branch, namespace `GeneralRelativity`) is on Physlib's `gravity` branch, which is
+not yet merged upstream. This repository vendors 57 of those modules. The build
+therefore has two parts:
 
 | Source | What | Revision |
 | --- | --- | --- |
-| `physlib` git requirement | base library: units, cosmology, Mathlib | upstream master `cbd02238` |
-| `gravitation/vendor/` | the 37 unmerged GR modules, proofs unchanged | branch `gravity` `41abde06` |
+| `physlib` git requirement | base library: units, cosmology, Mathlib | upstream master `7910f51f` |
+| `gravitation/vendor/` | the 57 unmerged GR modules, proofs unchanged | branch `gravity` `b81c896a` |
 
 `Schwarzschild/IncompressibleSphere.lean` is already on master, so it is not
-vendored and comes from the dependency. The vendored files keep their proofs and
-their `GeneralRelativity` namespace but take the `Gravitation.Relativity.General.*`
-module path, so they cannot collide with Physlib's own `PhyslibAlpha.*` library
-globs. The `physlib` requirement is a merged upstream commit — the merge base the
+vendored and comes from the dependency. The vendored files keep their proofs and their `GeneralRelativity` namespace
+but take `Gravitation.Relativity.*` or `Gravitation.Cosmology.*` module paths,
+so they cannot collide with Physlib's own `PhyslibAlpha.*` library globs. The `physlib` requirement is a merged upstream commit — the merge base the
 branch was written against — so nothing in the build depends on a personal fork
 or a moving branch.
 
 **Removal once the branch is merged:** delete `gravitation/vendor/`, remove the
 `GravitationVendor` library from `gravitation/lakefile.toml`, switch the
-umbrella imports from `Gravitation.Relativity.General.*` back to
-`PhyslibAlpha.Relativity.General.*`, point `physlib` at the merged revision, then
+umbrella imports from `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`
+back to the corresponding `PhyslibAlpha.*` paths, point `physlib` at the merged
+revision, then
 run `lake update physlib`, `lake build`, `scripts/audit_axioms.sh` and
 `scripts/proof_status.sh`. `gravitation/vendor/README.md` records the
 provenance and the exact steps.
@@ -106,14 +113,14 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 989
-declarations, 655 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1081
+declarations, 675 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
 | Result | Statement |
 | --- | --- |
-| `GeneralRelativity.eta4_mul_self` | `η * η = 1`, i.e. `η` is its own inverse |
+| `GeneralRelativity.minkowskiMetric4_mul_self` | `η * η = 1`, i.e. `η` is its own inverse |
 | `GeneralRelativity.MetricTensor.ginv_symm` | the inverse of a symmetric metric is symmetric |
 | `GeneralRelativity.Riemann.skew_first` | `R_{ijkl} = −R_{jikl}`, derived from pair symmetry and antisymmetry in the last pair |
 | `GeneralRelativity.ricci_symm` | `Ric_{ij} = Ric_{ji}`, derived from pair symmetry |
@@ -123,7 +130,7 @@ declarations, 655 of them theorem-like.
 | `GeneralRelativity.vacuum_iff_ricci_flat` | in 4D, `G = 0 ↔ Ric = 0` |
 | `GeneralRelativity.SchwarzschildDeSitter.sds_frame_bianchi` | the contracted Bianchi identity is proved, not assumed, for the frame Einstein space (`Ric = Λη`, `S = 4Λ`), and `sds_frame_einstein_conserved` gives `∇·G = 0` |
 | `GeneralRelativity.Schwarzschild.kretschmann_scalar_total`, `GeneralRelativity.SchwarzschildDeSitter.kretschmann_sds_total` | the frame Kretschmann scalars with no hypotheses: the `r ≠ 0` of `kretschmann_scalar` / `kretschmann_sds` is removed |
-| `GeneralRelativity.Pipeline.christoffel`, `riemann`, `ricciOf`, `scalarOf`, `einsteinOf` | the chain `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G` from metric components |
+| `GeneralRelativity.Pipeline.christoffel`, `riemann`, `ricciTensorOf`, `ricciScalarOf`, `einsteinTensorOf` | the chain `g ↦ ∂g ↦ Γ ↦ ∂Γ ↦ R ↦ Ric ↦ S ↦ G` from metric components |
 
 The Riemann tensor carries antisymmetry in the last pair, pair symmetry
 `R_{ijkl} = R_{klij}`, and the first Bianchi identity; antisymmetry in the first
@@ -134,23 +141,21 @@ pair is *proved* from those (`skew_first`), not assumed.
 | Solution | Result |
 | --- | --- |
 | Minkowski | `Minkowski.minkowski_ricci_eq_zero`, `minkowski_einstein_eq_zero`: computed flatness and vacuum |
-| Schwarzschild | `Schwarzschild.ricci_eq_zero`; `Schwarzschild.kretschmann_scalar` (`48M²/r⁶`); `Schwarzschild.weyl_purely_electric`; metric-level `Pipeline.ricciOf_schwarzschild`, `scalarOf_schwarzschild`, `einsteinOf_schwarzschild` |
+| Schwarzschild | `Schwarzschild.ricci_eq_zero`; `Schwarzschild.kretschmann_scalar` (`48M²/r⁶`); `Schwarzschild.weyl_purely_electric`; metric-level `Schwarzschild.ricciTensorOf_schwarzschild`, `Schwarzschild.ricciScalarOf_schwarzschild`, `Schwarzschild.einsteinTensorOf_schwarzschild` |
 | Interior Schwarzschild | `Schwarzschild.IncompressibleSphere`: TOV pressure profile and the Buchdahl compactness bound |
-| Schwarzschild–de Sitter | `SchwarzschildDeSitter.kretschmann_sds` (`48M²/r⁶ + 8Λ²/3`); `sdsRic_eq` (`Ric = Λη`), `sdsScalar_eq` (`S = 4Λ`), `sdsEinstein_eq` (`G = −Λη`); metric-level `Pipeline.ricciOf_sds`, `scalarOf_sds`, `einsteinOf_sds` for general `Λ` |
-| Reissner–Nordström | `ReissnerNordstrom.einsteinOf_rn_eq_maxwell`: `G_{ij} = 8π T^{EM}_{ij}`; trace-free Maxwell stress-energy; Cauchy/event horizons and the extremal limit |
-| Kerr | `Kerr.ricciOf_kerr_eq_zero`, `Kerr.scalarOf_kerr_eq_zero`, `Kerr.einsteinOf_kerr_eq_zero`: the Boyer–Lindquist metric is vacuum, with horizons, ergosphere and frame dragging |
-| FLRW | `FLRW.ricciOf_flrw`, `scalarOf_flrw`, `einsteinOf_flrw`; `einsteinOf_flrw_iff_friedmann`: the Einstein equations hold exactly when the Friedmann equations do |
+| Schwarzschild–de Sitter | `SchwarzschildDeSitter.kretschmann_sds` (`48M²/r⁶ + 8Λ²/3`); `sdsRic_eq` (`Ric = Λη`), `sdsScalar_eq` (`S = 4Λ`), `sdsEinstein_eq` (`G = −Λη`); metric-level `SchwarzschildDeSitter.ricciTensorOf_sds`, `ricciScalarOf_sds`, `einsteinTensorOf_sds` for general `Λ` |
+| Reissner–Nordström | `ReissnerNordstrom.einsteinTensorOf_rn_eq_maxwell`: `G_{ij} = 8π T^{EM}_{ij}`; trace-free Maxwell stress-energy; Cauchy/event horizons and the extremal limit |
+| Kerr | `Kerr.ricciTensorOf_kerr_eq_zero`, `Kerr.ricciScalarOf_kerr_eq_zero`, `Kerr.einsteinTensorOf_kerr_eq_zero`: the Boyer–Lindquist metric is vacuum, with horizons, ergosphere and frame dragging |
+| FLRW | `FLRW.ricciTensorOf_flrw`, `ricciScalarOf_flrw`, `einsteinTensorOf_flrw`; `einsteinTensorOf_flrw_iff_friedmann`: the Einstein equations hold exactly when the Friedmann equations do |
 
 The static spherically symmetric family is also handled once, for an arbitrary
-lapse profile, in `StaticSpherical` (`ricciOf_staticSpherical`,
-`scalarOf_staticSpherical`, `einsteinOf_staticSpherical`), so Schwarzschild,
+lapse profile, in `StaticSpherical` (`ricciTensorOf_staticSpherical`,
+`ricciScalarOf_staticSpherical`, `einsteinTensorOf_staticSpherical`), so Schwarzschild,
 Schwarzschild–de Sitter and Reissner–Nordström share one derivation.
 
 For Schwarzschild–de Sitter the metric-level derivation is closed end to end:
-`christoffel_eq_sdsG` identifies the metric's Christoffel symbols with the
-closed form, `pd_christoffel_eq_pd_sdsG` pushes the equality through coordinate
-differentiation, `pd_sdsG_eq_sdsDGFull` evaluates all 256 derivative slots, and
-`riemann_sds_components` gives all six independent Riemann components. The frame
+the metric's Christoffel symbols, their coordinate derivatives, and
+`riemann_sds_components` give all six independent Riemann components. The frame
 Weyl electric part is proved to be `diag(0, −2M/r³, M/r³, M/r³)` for every `Λ`:
 the cosmological constant enters the Riemann tensor only through the trace the
 Weyl tensor removes.
@@ -159,7 +164,7 @@ Weyl tensor removes.
 
 | Result | Statement |
 | --- | --- |
-| `InitialValue` | ADM Hamiltonian and momentum constraints `H = ³R + (tr K)² − K_ij K^ij`, `M_i`; moment-of-time-symmetry and maximal-slicing reductions; a non-vacuum `K = diag(1,1,0)` example |
+| `InitialData` | ADM Hamiltonian and momentum constraints `H = ³R + (tr K)² − K_ij K^ij`, `M_i`; moment-of-time-symmetry and maximal-slicing reductions; a non-vacuum `K = diag(1,1,0)` example |
 | `Geodesics.geodesic_ivp_exists` | local existence for `γ'' = −Γ(γ)(γ', γ')` from `(x₀, v₀)`, via Picard–Lindelöf |
 | `Geodesics.geodesic_ivp_unique` | uniqueness under an explicit Lipschitz hypothesis |
 | `GeneralRelativity.dAlembert_wave_equation` | the d'Alembert formula solves `∂ₜ²u = ∂ₓ²u` with prescribed initial position and velocity |
@@ -236,7 +241,7 @@ existence theorem. The M3–M6 results are scoped: linearized-box and nonlinear
 flat-FLRW reduced existence/recovery, abstract Zorn/open-domain maximality, and
 explicit-solution/initial-slice checks. Development existence for arbitrary
 data under the full Choquet–Bruhat–Geroch theorem is neither claimed nor
-axiomatised; `InitialValue` is a predicate on a slice.
+axiomatised; `InitialData` is a predicate on a slice.
 
 ### Modified and alternative theories
 
@@ -338,14 +343,14 @@ Physlib subtree declares an `axiom`, `constant` or `opaque`, and there is no
 `sorry`, `admit`, `native_decide` or `Lean.trustCompiler`.
 
 The check is automated over both surfaces — the local `Gravitation` module and
-the vendored `PhyslibAlpha/Relativity/General/` tree:
+the vendored `gravity` tree:
 
 ```sh
 scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (989 at this revision, 655 theorem-like) and rejects any axiom outside
+declaration (1081 at this revision, 675 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

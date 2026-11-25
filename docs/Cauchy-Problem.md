@@ -40,7 +40,7 @@ solutions gives general-data uniqueness there, under explicit regularity and,
 respectively, homogeneous Dirichlet or matching boundary hypotheses. The wave,
 energy, uniqueness, chart-manifold, general Bianchi, Sobolev/initial-data,
 reduced Cauchy, gauge-recovery, maximal-development, and explicit-development
-modules, together with the 3D divergence foundation, contribute 285 of the 989
+modules, together with the 3D divergence foundation, contribute 289 of the 1081
 audited declarations in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints · Lean 4 ·
@@ -74,8 +74,8 @@ not present them as one.
 
 ## 2. Formalised initial data and constraints
 
-The module `Gravitation.Relativity.General.InitialValue` (vendored at
-`gravitation/vendor/Gravitation/Relativity/General/InitialValue.lean`) works in
+The module `Gravitation.Relativity.General.InitialData` (vendored at
+`gravitation/vendor/Gravitation/Relativity/General/InitialData.lean`) works in
 the ADM 3+1 decomposition. Initial data consist of a Riemannian 3-metric `h`,
 its 3-dimensional Riemann tensor `R3`, and a symmetric extrinsic curvature `K`:
 
@@ -93,7 +93,8 @@ $$H = {}^{3}R + (\operatorname{tr} K)^2 - K_{ij}K^{ij},
 \qquad
 M_i = \partial_j K^{i}{}_{j} - \partial_i \operatorname{tr} K,$$
 
-with `InitialData.ham` and `momConstraint` as their Lean definitions and
+with `InitialData.hamiltonianConstraint` and `InitialData.momentumConstraint`
+as their Lean definitions and
 `InitialData.IsVacuumData` as the conjunction `H = 0 ∧ M = 0`. The momentum
 constraint takes the derivative field `dK` as an argument; it does not derive
 `dK` from `K`.
@@ -102,9 +103,9 @@ The formalised reductions and examples are:
 
 | Lean declaration | Statement |
 | --- | --- |
-| `InitialData.ham_eq_scalarCurv_of_K_zero` | at a moment of time symmetry (`K = 0`), `H = ³R` |
+| `InitialData.hamiltonianConstraint_eq_ricciScalar_of_K_zero` | at a moment of time symmetry (`K = 0`), `H = ³R` |
 | `InitialData.ham_zero_iff_scalarCurv_zero_of_K_zero` | hence `H = 0 ↔ ³R = 0` when `K = 0` |
-| `InitialData.ham_eq_of_trace_zero` | under maximal slicing (`tr K = 0`), `H = ³R − K_{ij}K^{ij}` |
+| `InitialData.hamiltonianConstraint_eq_of_trace_zero` | under maximal slicing (`tr K = 0`), `H = ³R − K_{ij}K^{ij}` |
 | `trace_sq_eq_of_ham_zero` | on a scalar-flat slice, `H = 0` forces `(tr K)² = K_{ij}K^{ij}` |
 | `momConstraint_zero_of_dK_zero` | constant extrinsic curvature satisfies the momentum constraint |
 | `flatData_isVacuum` | flat `ℝ³` with `K = 0` satisfies both vacuum constraints |
@@ -378,7 +379,7 @@ The layers above suggest an order in which the work can be made checkable.
 | M1 | Smooth manifolds, Lorentzian metrics, Levi-Civita connection, curvature, causality, Bianchi | **Done at chart/global-chart scope**: `SmoothChartSpacetime` (`ChartedSpace`), general `ChartSpacetime.isLeviCivita` (`metricCovariantDeriv_eq_zero`), `IsCauchySurface`, `minkowskiChart_globallyHyperbolic`, and general `Bianchi.second_bianchi` / `contracted_bianchi` / `covDiv_einstein_eq_zero`; arbitrary multi-chart manifold gluing remains outside |
 | M2 | Manifold Sobolev spaces `H^s`, trace/embedding estimates, constraint data | **Done at 1D/3D-box Sobolev and curved-slice scope**: chart regularity (`ChartInitialData`), 1D `H¹` Sobolev embedding & trace estimate (`sobolev_embedding_1D`, `trace_estimate_1D`), 3D box `H¹` norm (`sobolevH1NormSq3D`), derived 3D spatial curvature & ADM constraints (`hamiltonianConstraintOf`, `momentumConstraintOf`), Brill–Lindquist harmonic conformal factor (`Δφ = 0`), curved Schwarzschild–de Sitter 3D slice (`³R = 2Λ`, `H = 0` for `Λ = 0`), and flat FLRW initial data (`flrw_initial_constraints`); general elliptic constraint solving on arbitrary 3-manifolds remains outside |
 | M3 | Harmonic/wave gauge and the reduced quasilinear hyperbolic system | **Done at linearized 3D box & nonlinear FLRW scope**: directional 3D plane waves (`directionalWave3D_wave_equation`), superposition (`spatialLaplacian3D_add`), nonlinear harmonic gauge (`harmonicGaugeCond`, `minkowski_harmonicGauge`), plus concrete `ReducedLocalExistenceCertificate` instances for the linearized 3D wave-gauge box problem (`linearizedBox_reducedLocalExistence`, `ttWave_reduced_solution`) and the nonlinear 4D flat FLRW reduced Einstein ODE via Picard–Lindelöf (`flrw_reducedLocalExistence`); full `H^s(ℝ³)` quasilinear symmetric hyperbolic existence without symmetry remains outside |
-| M4 | Gauge recovery and constraint propagation | **Done at linearized 3D box & nonlinear FLRW scope**: general nonlinear Bianchi split (`bianchi_constraint_propagation_split`), plus concrete `GaugeRecoveryCertificate` instances for the linearized 3D wave-gauge system via `wave_zero_of_zero_data3D` (`linearizedBox_gaugeRecovery`) and for nonlinear 4D flat FLRW via constraint propagation and `einsteinOf_flrw_iff_friedmann` (`flrw_gaugeRecovery`); non-symmetric nonlinear 4D `H^s` constraint propagation remains outside |
+| M4 | Gauge recovery and constraint propagation | **Done at linearized 3D box & nonlinear FLRW scope**: general nonlinear Bianchi split (`bianchi_constraint_propagation_split`), plus concrete `GaugeRecoveryCertificate` instances for the linearized 3D wave-gauge system via `wave_zero_of_zero_data3D` (`linearizedBox_gaugeRecovery`) and for nonlinear 4D flat FLRW via constraint propagation and `einsteinTensorOf_flrw_iff_friedmann` (`flrw_gaugeRecovery`); non-symmetric nonlinear 4D `H^s` constraint propagation remains outside |
 | M5 | Maximal development | **Done at abstract Zorn & 1D open-domain scope**: `OrderedDevelopmentSystem` proves Zorn maximal existence (`exists_maximal`), amalgamation uniqueness up to isometry (`unique_up_to_isometry`), and inhabits `MaximalDevelopmentCertificate`, instantiated without extra hypotheses by `intervalMaximalDevelopmentCertificate` on open sets containing `0`; geometric 4D Lorentzian patching/isometry axioms remain outside |
 | M6 | Cross-checks against explicit solutions | **Done at explicit coordinate/initial-slice scope**: `minkowskiChart_explicit_development` plus `explicitSolutions_certificate : ExplicitDevelopmentCertificate explicitSolutionObligations` proving 4D Einstein equations and `t = 0` spatial-slice / initial-data agreement for Schwarzschild, Schwarzschild–de Sitter, Kerr, and FLRW directly from the vendored metric pipeline and `SobolevInitialData` |
 
@@ -432,8 +433,8 @@ covers flat space and `Gravitation.ExplicitDevelopments` inhabits
 `ExplicitDevelopmentCertificate explicitSolutionObligations` via
 `explicitSolutions_certificate`, verifying the 4D Einstein equations and `t = 0`
 slice / initial-data agreements for Schwarzschild, Schwarzschild–de Sitter,
-Kerr, and FLRW directly from `SchwarzschildDeSitter.Pipeline`, `Kerr.Vacuum`,
-`FLRW.Pipeline`, and `SobolevInitialData`. Across M1–M6, all four certificate
+Kerr, and FLRW directly from `SchwarzschildDeSitter.CoordinateCurvature`,
+`Kerr.RicciCurvature`, `Cosmology.FLRW.Metric`, and `SobolevInitialData`. Across M1–M6, all four certificate
 structures in `CauchyInterfaces.lean` now have kernel-checked instances at
 their stated scopes, while the full 1952 Choquet–Bruhat–Geroch theorem —
 nonlinear `H^s(ℝ³)` quasilinear symmetric hyperbolic local existence on
@@ -447,7 +448,7 @@ the maximality API until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I now has 989 declarations. It contains the
+The development audited in Paper I now has 1081 declarations. It contains the
 constraint module, the geodesic module, the wave/energy/uniqueness modules, the
 3D divergence foundation, the 3D energy derivative, conditional 3D energy
 conservation, the wave-flux instantiation, the closed-box 3D zero-energy and
@@ -457,13 +458,13 @@ curved initial-data module, the M3 reduced Cauchy module, the M4
 gauge-recovery module, the M5 maximal-development module, and the M6
 explicit-developments module discussed above, together with the
 solution theory, the alternative theories, the axiom audit and the numerical
-pass. This paper's Lean contribution is 285 declarations across nineteen
+pass. This paper's Lean contribution is 289 declarations across twenty
 modules: `Gravitation.WaveCauchy`, `Gravitation.WaveEnergy`,
 `Gravitation.WaveUniqueness`, `Gravitation.Divergence3D`,
 `Gravitation.WaveEnergy3D`, `Gravitation.WaveEnergy3DConservation`,
 `Gravitation.WaveEnergy3DWave`, `Gravitation.WaveUniqueness3D`,
 `Gravitation.LinearizedWaveGauge`, `Gravitation.ManifoldInterface`,
-`Gravitation.Bianchi`, `Gravitation.InitialDataInterface`,
+`Gravitation.Bianchi`, `Gravitation.KretschmannTotal`, `Gravitation.InitialDataInterface`,
 `Gravitation.SobolevInitialData`, `Gravitation.CauchyInterfaces`,
 `Gravitation.ReducedWave3D`, `Gravitation.ReducedCauchy`,
 `Gravitation.GaugeRecovery`, `Gravitation.MaximalDevelopment` and
@@ -481,24 +482,24 @@ take for granted when they exhibit a solution.
 
 ## 9. Reproducibility and trust
 
-This paper adds prose and nineteen Lean modules, `Gravitation.WaveCauchy`,
+This paper adds prose and twenty Lean modules, `Gravitation.WaveCauchy`,
 `Gravitation.WaveEnergy`, `Gravitation.WaveUniqueness`,
 `Gravitation.Divergence3D`, `Gravitation.WaveEnergy3D`,
 `Gravitation.WaveEnergy3DConservation`, `Gravitation.WaveEnergy3DWave`,
 `Gravitation.WaveUniqueness3D`, `Gravitation.LinearizedWaveGauge`,
 `Gravitation.ManifoldInterface`, `Gravitation.Bianchi`,
-`Gravitation.InitialDataInterface`, `Gravitation.SobolevInitialData`,
+`Gravitation.KretschmannTotal`, `Gravitation.InitialDataInterface`, `Gravitation.SobolevInitialData`,
 `Gravitation.CauchyInterfaces`,
 `Gravitation.ReducedWave3D`, `Gravitation.ReducedCauchy`,
 `Gravitation.GaugeRecovery`, `Gravitation.MaximalDevelopment` and
-`Gravitation.ExplicitDevelopments` (285 declarations). The audited development is the one described in Paper I: `lake build` is silent,
-`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 989 declarations with axioms inside
+`Gravitation.ExplicitDevelopments` (289 declarations). The audited development is the one described in Paper I: `lake build` is silent,
+`scripts/check_messages.sh` passes, `scripts/audit_axioms.sh` reports 1081 declarations with axioms inside
 `{propext, Classical.choice, Quot.sound}`, and `scripts/proof_status.sh
 --check` passes against `Proof-Status.md`. The module paths cited here are the
 vendored `Gravitation.Relativity.General.*` paths; in Physlib they are
 `PhyslibAlpha.Relativity.General.*`, with the same namespace and proofs.
 
-The twenty-one formal modules named here can be read directly:
+The twenty-two formal modules named here can be read directly:
 
 - `gravitation/Gravitation/WaveCauchy.lean`
 - `gravitation/Gravitation/WaveEnergy.lean`
@@ -511,6 +512,7 @@ The twenty-one formal modules named here can be read directly:
 - `gravitation/Gravitation/LinearizedWaveGauge.lean`
 - `gravitation/Gravitation/ManifoldInterface.lean`
 - `gravitation/Gravitation/Bianchi.lean`
+- `gravitation/Gravitation/KretschmannTotal.lean`
 - `gravitation/Gravitation/InitialDataInterface.lean`
 - `gravitation/Gravitation/SobolevInitialData.lean`
 - `gravitation/Gravitation/CauchyInterfaces.lean`
@@ -519,7 +521,7 @@ The twenty-one formal modules named here can be read directly:
 - `gravitation/Gravitation/GaugeRecovery.lean`
 - `gravitation/Gravitation/MaximalDevelopment.lean`
 - `gravitation/Gravitation/ExplicitDevelopments.lean`
-- `gravitation/vendor/Gravitation/Relativity/General/InitialValue.lean`
+- `gravitation/vendor/Gravitation/Relativity/General/InitialData.lean`
 - `gravitation/vendor/Gravitation/Relativity/General/Geodesics.lean`
 
 ## 10. What is not claimed
