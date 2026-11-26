@@ -58,7 +58,7 @@ gravitation/
 │   └── Gravitation/Cosmology/FLRW/            4 modules, commit 626ada7
 └── vulkan/
     ├── shaders/tensor.comp              GLSL compute: Γ, Ric, R, G, K on a lattice
-    ├── src/gr_vulkan.c                  host: five metrics, tolerance checks
+    ├── src/gr_vulkan.c                  host: nine metric cases, tolerance checks
     └── Makefile
 docs/
 ├── references.bib                       bibliography, cited as [ref: key]
@@ -316,9 +316,13 @@ precision with `h = 1e-4`:
 | Schwarzschild–de Sitter `Λ = 0.1` | `max|Ric − Λg|` | `6.94e-7` |
 | Schwarzschild–de Sitter | `K` vs `48M²/r⁶ + 8Λ²/3` | `1.91e-7` relative |
 | Kerr `a = 0.5` | vacuum `max|Ric|`, `max|G|` | `2.10e-7`, `1.42e-7` |
-| Reissner–Nordström `Q = 0.5` | `max|G − 8πT|` | `1.09e-7` |
+| Kerr `a = 0.5` | Kretschmann vs the closed form | `1.71e-7` relative |
+| Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
+| Reissner–Nordström `Q = 0.5` | Kretschmann vs the closed form | `1.17e-7` relative |
 | FLRW `a = 1 + Ht + t²`, `k = 0.3` | `Ric`, `R`, `G` vs the closed forms | `1.27e-6` |
 | Interior Schwarzschild `Rc = 5`, `Ra = 4` | `G` vs `8π diag(ρ,p,p,p)` | `8.90e-8` |
+| Schwarzschild `M = 2`, `r ∈ [5, 5.75]` | `max|Ric|`, Kretschmann | `1.93e-7`, `1.05e-7` |
+| Schwarzschild–de Sitter `Λ = −0.05` | `max|Ric − Λg|`, Kretschmann | `1.83e-7`, `7.51e-8` |
 
 The Minkowski zeros are exact (a constant metric differentiates to zero). The
 Schwarzschild residual is central-difference noise, not curvature: `|Ric|` is
@@ -330,8 +334,9 @@ to the same noise level, so the vacuum test is not vacuous.
 The host also checks closed forms proved in Physlib: the Weyl electric part
 against `diag(0, −2k, k, k)` at `k = M/r³` (`2.6e-9`, and `1.4e-8` with the
 trace added back for `Λ = 0.1`), the four Schwarzschild–de Sitter Riemann
-components, the frame Ricci tensor against `Λη`, and the Kerr and
-Reissner–Nordström field equations. This is a numerical sanity check on the same
+components, the frame Ricci tensor against `Λη`, the Kerr and
+Reissner–Nordström field equations, and their Kretschmann scalars — the last
+contracts the full Riemann tensor instead of only its trace. This is a numerical sanity check on the same
 objects the Lean side defines; it is not a proof, and finite differences say
 nothing about the analytic solution.
 

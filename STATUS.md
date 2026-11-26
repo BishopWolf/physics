@@ -147,15 +147,19 @@ branch lands.
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`
   fails if one reappears.
-* Numerical check — the Vulkan tensor pass now covers seven metrics. Besides
-  Minkowski, Schwarzschild and Schwarzschild–de Sitter (Kretschmann, Weyl part
-  and four Riemann components), it verifies the Kerr vacuum (`2.10e-7` on
-  `|Ric|` and `1.42e-7` on `|G|` at `a = 0.5`), the Reissner–Nordström
-  Einstein–Maxwell equation (`1.085e-7` on `|G − 8πT|` at `Q = 0.5`), the FLRW
-  closed forms for `a = 1 + Ht + t²` (`1.27e-6` on `Ric`, `R` and `G`, so the
-  `a''` term is exercised), and the interior Schwarzschild constant-density
-  Einstein tensor (`8.90e-8` at `Rc = 5`, `Ra = 4`). CI runs it on the lavapipe
-  software driver.
+* Numerical check — the Vulkan tensor pass now covers nine metric cases.
+  Besides Minkowski, Schwarzschild and Schwarzschild–de Sitter (Kretschmann,
+  Weyl part and four Riemann components), it verifies the Kerr vacuum
+  (`2.10e-7` on `|Ric|`, `1.42e-7` on `|G|`) and the Kerr Kretschmann scalar
+  (`1.71e-7` relative, so the full Riemann tensor of a non-diagonal metric is
+  checked), the Reissner–Nordström Einstein–Maxwell equation (`1.085e-7` on
+  `|G − 8πT|`), its vanishing scalar curvature (`2.41e-8`) and Kretschmann
+  scalar (`1.17e-7` relative at `Q = 0.5`), the FLRW closed forms for
+  `a = 1 + Ht + t²` (`1.27e-6` on `Ric`, `R` and `G`, so the `a''` term is
+  exercised), and the interior Schwarzschild constant-density Einstein tensor
+  (`8.90e-8` at `Rc = 5`, `Ra = 4`). The vacuum and de Sitter checks are
+  repeated at a second mass (`M = 2`) and with negative `Λ = −0.05`. CI runs
+  it on the lavapipe software driver.
 * Vendor drift guard — `scripts/check_vendor_sync.sh` fetches the `gravity`
   branch, fails if its tip has moved from `vendor/REVISION`, and diffs every
   vendored module against the branch after the import rewrite. CI runs it

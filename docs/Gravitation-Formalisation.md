@@ -553,8 +553,13 @@ interior sphere):
 | Schwarzschild–de Sitter, $R^t{}_{rtr}$ | $5.923\times10^{-7}$ |
 | Schwarzschild–de Sitter, Weyl electric part | $1.394\times10^{-8}$ |
 | Kerr $a=0.5$, $\max|Ric|$ | $2.100\times10^{-7}$ |
+| Kerr $a=0.5$, Kretschmann vs the closed form (relative) | $1.707\times10^{-7}$ |
 | Kerr $a=0.5$, $\max|G|$ | $1.416\times10^{-7}$ |
 | Reissner–Nordström $Q=0.5$, $\max|G-8\pi T|$ | $1.085\times10^{-7}$ |
+| Reissner–Nordström $Q=0.5$, $\max|R|$ | $2.405\times10^{-8}$ |
+| Reissner–Nordström $Q=0.5$, Kretschmann vs the closed form (relative) | $1.173\times10^{-7}$ |
+| Schwarzschild $M=2$ ($r\in[5,5.75]$), $\max|Ric|$ | $1.932\times10^{-7}$ |
+| Schwarzschild–de Sitter $\Lambda=-0.05$, $\max|Ric-\Lambda g|$ | $1.833\times10^{-7}$ |
 | FLRW $a=1+Ht+t^2$, $k=0.3$, $\max$ deviation of $Ric$, $R$, $G$ from the closed forms | $1.273\times10^{-6}$ |
 | Interior Schwarzschild $Rc=5$, $Ra=4$, $\max|G-8\pi\,\mathrm{diag}(\rho,p,p,p)|$ | $8.895\times10^{-8}$ |
 
@@ -566,7 +571,10 @@ constant-density Einstein tensor. The host also forms the frame components
 $R_{ab}/\sqrt{|g_{aa}g_{bb}|}$ and checks them against
 $\Lambda\,\mathrm{diag}(-1,1,1,1)$, which lands at $2.0\times10^{-8}$ for
 both static cases. It confirms the lifted Kretschmann scalar of Figure 2 to
-$1.9\times10^{-7}$ relative.
+$1.9\times10^{-7}$ relative. The Kerr and Reissner–Nordström Kretschmann
+checks contract the full Riemann tensor rather than only its trace, and the
+static checks are repeated at $M=2$ and at negative $\Lambda$, so no
+tolerance is tuned to a single parameter set.
 
 This is a regression test for the implementation and for the closed forms, not
 evidence for the theorems. Finite differences say nothing about an analytic

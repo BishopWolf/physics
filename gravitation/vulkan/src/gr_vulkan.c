@@ -295,6 +295,10 @@ int main(int argc, char **argv)
          {0.0f, 0.5f, 0.5f, 0.3f}, {0.1f, 0.12f, 0.2f, 0.2f}},
         {6, "Interior Schwarzschild (Rc = 5, Ra = 4)", 5.0f, 4.0f, 1e-5,
          {0.0f, 1.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
+        {1, "Schwarzschild (M = 2, vacuum)", 2.0f, 0.0f, 1e-6,
+         {0.0f, 5.0f, 0.5f, 0.3f}, {0.1f, 0.25f, 0.2f, 0.2f}},
+        {2, "Schwarzschild-de Sitter (Lambda = -0.05)", 1.0f, -0.05f, 1e-6,
+         {0.0f, 3.0f, 0.5f, 0.3f}, {0.1f, 0.15f, 0.2f, 0.2f}},
     };
 
     int failures = 0;
@@ -356,6 +360,7 @@ int main(int argc, char **argv)
         double maxRtt = 0.0, maxRrr = 0.0, maxRtp = 0.0;
         double maxKsds = 0.0, maxRicFrame = 0.0, maxMaxwell = 0.0;
         double maxFlrw = 0.0, maxInterior = 0.0;
+        double maxKerrK = 0.0, maxRnK = 0.0;
         const double PI = 3.14159265358979323846;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
@@ -483,6 +488,49 @@ int main(int argc, char **argv)
                 }
             }
 
+            // Kerr Kretschmann scalar: for the Boyer-Lindquist metric
+            //   K = 48 M^2 (r^6 - 15 a^2 r^4 c^2 + 15 a^4 r^2 c^4 - a^6 c^6) / Sigma^6,
+            // with c = cos theta and Sigma = r^2 + a^2 c^2.  This exercises the
+            // full Riemann tensor of a non-diagonal metric, not just its trace.
+            if (cases[c].id == 3) {
+                int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                int    i2 = (int)((p / ((uint32_t)G[0] * (uint32_t)G[1]))
+                                  % (uint32_t)G[2]);
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double th = (double)P.lo[2] + (double)i2 * (double)P.stepv[2];
+                double M  = (double)cases[c].M;
+                double a  = (double)cases[c].Lambda;
+                double c2 = cos(th) * cos(th);
+                double r2 = rr * rr;
+                double a2 = a * a;
+                double sig = r2 + a2 * c2;
+                double sig6 = sig * sig * sig * sig * sig * sig;
+                double num = r2 * r2 * r2
+                           - 15.0 * a2 * r2 * r2 * c2
+                           + 15.0 * a2 * a2 * r2 * c2 * c2
+                           - a2 * a2 * a2 * c2 * c2 * c2;
+                double kexp = 48.0 * M * M * num / sig6;
+                double krel = fabs(o[49] - kexp) / fabs(kexp);
+                if (krel > maxKerrK) maxKerrK = krel;
+            }
+
+            // Reissner-Nordstrom Kretschmann scalar:
+            //   K = 48 M^2/r^6 - 96 M Q^2/r^7 + 56 Q^4/r^8.
+            // The metric is spherically symmetric, so this also checks the
+            // angular components of the Riemann tensor.
+            if (cases[c].id == 4) {
+                int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double M  = (double)cases[c].M;
+                double q  = (double)cases[c].Lambda;
+                double r2 = rr * rr;
+                double kexp = 48.0 * M * M / (r2 * r2 * r2)
+                            - 96.0 * M * q * q / (r2 * r2 * r2 * rr)
+                            + 56.0 * q * q * q * q / (r2 * r2 * r2 * r2);
+                double krel = fabs(o[49] - kexp) / fabs(kexp);
+                if (krel > maxRnK) maxRnK = krel;
+            }
+
             // FLRW: a(t) = 1 + H t + t^2 and spatial curvature k.  The closed
             // forms are ricciOf_flrw, scalarOf_flrw and einsteinOf_flrw; with
             // a'' = 2 the second-derivative term is exercised.
@@ -556,9 +604,13 @@ int main(int argc, char **argv)
         if (cases[c].id == 1 && maxKrel > kTol) bad = 1;
         if (cases[c].id == 2 && maxKsds > kTol) bad = 1;
         if (cases[c].id == 3 &&
-            (maxRic > cases[c].tol || maxG > cases[c].tol))
+            (maxRic > cases[c].tol || maxG > cases[c].tol ||
+             maxKerrK > cases[c].tol))
             bad = 1;
-        if (cases[c].id == 4 && maxMaxwell > cases[c].tol) bad = 1;
+        if (cases[c].id == 4 &&
+            (maxMaxwell > cases[c].tol || maxRnK > cases[c].tol ||
+             maxR > cases[c].tol))
+            bad = 1;
         if (cases[c].id == 5 && maxFlrw > cases[c].tol) bad = 1;
         if (cases[c].id == 6 && maxInterior > cases[c].tol) bad = 1;
         if (cases[c].id <= 2 && maxRicFrame > eTol) bad = 1;
@@ -606,6 +658,15 @@ int main(int argc, char **argv)
                    maxRrr, eTol, maxRrr <= eTol ? "ok" : "FAIL");
             printf("        R^theta_phitheta |R - (2M/r + L r^2/3) sin^2| = %.3e  (tol %.0e)  [%s]\n",
                    maxRtp, eTol, maxRtp <= eTol ? "ok" : "FAIL");
+        }
+        if (cases[c].id == 3)
+            printf("        Kretschmann |K - 48M^2(..)/Sigma^6| rel = %.3e  (tol %.0e)  [%s]\n",
+                   maxKerrK, cases[c].tol, maxKerrK <= cases[c].tol ? "ok" : "FAIL");
+        if (cases[c].id == 4) {
+            printf("        Kretschmann |K - 48M^2/r^6 + 96MQ^2/r^7 - 56Q^4/r^8| rel = %.3e  (tol %.0e)  [%s]\n",
+                   maxRnK, cases[c].tol, maxRnK <= cases[c].tol ? "ok" : "FAIL");
+            printf("        max|R| = %.3e  (traceless Maxwell source, tol %.0e)  [%s]\n",
+                   maxR, cases[c].tol, maxR <= cases[c].tol ? "ok" : "FAIL");
         }
         printf("\n");
     }

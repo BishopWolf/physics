@@ -41,7 +41,7 @@ The metric is selected by a push constant (`metricId`), with parameters `massM`,
 ## Host
 
 `src/gr_vulkan.c` creates a compute-only device (prefers a discrete GPU), a
-host-visible SSBO of 70 doubles per point, runs the seven cases, and checks the
+host-visible SSBO of 70 doubles per point, runs the nine cases, and checks the
 closed forms proved in Physlib, exiting nonzero on failure.
 
 For cases 0–2 it checks `max|Ric|` (cases 0, 1) or `max|Ric − Λg|` (case 2),
@@ -54,12 +54,19 @@ part against `diag(0, −2k, k, k)` with `k = M/r³` after adding back the trace
 `R^θ_φφ = (2M/r + Λr²/3) sin²θ`.
 
 Case 3 checks the Kerr vacuum: `Ric = 0` and `G = 0` from the Boyer–Lindquist
-metric, which is `ricciOf_kerr_eq_zero` and `einsteinOf_kerr_eq_zero`.
+metric, which is `ricciOf_kerr_eq_zero` and `einsteinOf_kerr_eq_zero`. It also
+checks the Kerr Kretschmann scalar
+`K = 48M²(r⁶ − 15a²r⁴cos²θ + 15a⁴r²cos⁴θ − a⁶cos⁶θ)/Σ⁶`, `Σ = r² + a²cos²θ`,
+which contracts the full Riemann tensor of a non-diagonal metric rather than
+its trace.
 
 Case 4 checks the Reissner–Nordström Einstein–Maxwell equations
 `G_ij = 8π T_ij` of `einsteinOf_rn_eq_maxwell`, with the Maxwell stress-energy
 of `F_01 = −Q/r²`. The expected right-hand side is
-`diag(Q²f/r⁴, −Q²/(f r⁴), Q²/r², Q²sin²θ/r²)`.
+`diag(Q²f/r⁴, −Q²/(f r⁴), Q²/r², Q²sin²θ/r²)`. Besides `G = 8πT` it checks
+the scalar curvature `R = 0` (the Maxwell stress-energy is traceless) and the
+Kretschmann scalar `K = 48M²/r⁶ − 96MQ²/r⁷ + 56Q⁴/r⁸`, which involves the
+angular components of the Riemann tensor.
 
 Case 5 checks the FLRW closed forms `ricciOf_flrw`, `scalarOf_flrw` and
 `einsteinOf_flrw` for `a(t) = 1 + Ht + t²` (so `a'' = 2` is exercised) and
@@ -70,6 +77,11 @@ Case 6 checks the interior Schwarzschild metric of the incompressible sphere:
 pressure `p = ρ(2cos χ_a/(3cos χ_a − cos χ) − 1)`. The Lean module proves the
 junction conditions and the Buchdahl bound, not the interior field equations;
 this case is the textbook solution, checked numerically.
+
+Cases 1 and 2 appear twice, at a second mass (`M = 2`, radial range starting at
+`r = 5`) and with negative cosmological constant (`Λ = −0.05`), so the
+closed-form checks are not tuned to one parameter set and cover both signs of
+the de Sitter term.
 
 Schwarzschild is the `Λ = 0` special case of the same expressions; `sin²θ` is
 taken from the emitted `g_φφ/g_θθ`, which is exact. No validation layers, no
@@ -91,9 +103,13 @@ Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 lattice points:
 | Schwarzschild–de Sitter | `max|Ric − Λg|` | `6.94e-7` |
 | Schwarzschild–de Sitter | `K` vs `48M²/r⁶ + 8Λ²/3` | `1.91e-7` relative |
 | Kerr `a = 0.5` | `max|Ric|`, `max|G|` | `2.10e-7`, `1.42e-7` |
-| Reissner–Nordström `Q = 0.5` | `max|G − 8πT|` | `1.09e-7` |
+| Kerr `a = 0.5` | `K` vs the closed form | `1.71e-7` relative |
+| Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
+| Reissner–Nordström `Q = 0.5` | `K` vs the closed form | `1.17e-7` relative |
 | FLRW `H = 1`, `k = 0.3` | `Ric`, `R`, `G` vs closed forms | `1.27e-6` |
 | Interior Schwarzschild `Rc = 5`, `Ra = 4` | `max|G − 8π diag(ρ,p,p,p)|` | `8.90e-8` |
+| Schwarzschild `M = 2`, `r ∈ [5, 5.75]` | `max|Ric|`, `K` | `1.93e-7`, `1.05e-7` relative |
+| Schwarzschild–de Sitter `Λ = −0.05` | `max|Ric − Λg|`, `K` | `1.83e-7`, `7.51e-8` relative |
 
 GLSL has no double-precision `sin`, so the metric's `sin²θ` is expanded in
 double around the float `sin`/`cos` of each lattice line's base angle.
