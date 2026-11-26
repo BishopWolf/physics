@@ -82,7 +82,8 @@ $\mu=1$.
 
 **Needs.** The interpolating function selected by the action's free function,
 lensing without dark matter, and a cosmological background; the one-dimensional
-variational theory on a compact interval is now closed.
+variational theory on a compact interval, including the nonlinear free function,
+is now closed under `C^1` regularity.
 
 **Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
 partial derivatives computed, and stationarity proved equivalent to the field
@@ -95,8 +96,13 @@ vanishes at both endpoints; in the Poisson limit the action is differentiable at
 zero with derivative the first-variation integral, and the fundamental lemma for
 continuous residuals is proved. The exact quadratic profile satisfies the
 discrete equation at every interior site of an arbitrary path and converges to
-the continuum Poisson solution under grid refinement. The best developed of the
-three.
+the continuum Poisson solution under grid refinement. The nonlinear density has
+the same chain rule for an arbitrary free function, and the nonlinear action is
+differentiable under the interval integral when its parametric integrand is
+`C^1`. The discrete residual of a sampled profile is the negative second
+difference over $4\pi G$ plus the source, and converges to minus the continuum
+residual whenever the symmetric second difference converges to the second
+derivative. The best developed of the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -359,9 +365,10 @@ they are why TeVeS is listed as partial rather than promoted.
 
 ## 4. The order of work
 
-1. Extend the AQUAL derivation from the compact interval to the whole line and
-   to the full nonlinear interpolating function, with compact support and
-   integration by parts.
+1. Remove the `C^1` and nonvanishing-derivative hypotheses from the nonlinear
+   AQUAL variation, and replace the sampled residual's second-difference
+   hypothesis by a proved Taylor limit for `C^2` profiles; then extend the
+   derivation from the compact interval to the whole line.
 2. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
 3. Compute V2 for every theory that passes V1, using the PPN dictionary.
@@ -385,9 +392,12 @@ they are why TeVeS is listed as partial rather than promoted.
   first-variation integral to the residual integral; in the Poisson limit the
   action is differentiated under the integral, the fundamental lemma for
   continuous residuals is proved, and the quadratic profile on a general path
-  converges to the continuum solution. The full nonlinear AQUAL action with a
-  general interpolating function is not treated, and the STVG and TeVeS
-  equations are stated, not derived from their actions.
+  converges to the continuum solution. The nonlinear variation still assumes
+  `C^1` regularity of the parametric density and a nonvanishing field derivative
+  for the free function's derivative data, and the sampled residual bridge takes
+  the second-difference limit as a hypothesis; the full action on the whole line
+  is not treated. The STVG and TeVeS equations are stated, not derived from their
+  actions.
 - The PPN values of §3.16 are collected from the literature. The
   degree-of-freedom counts of §3.17 are reproduced by the formalised Dirac
   formula for the stated field content; the Proca and unit-vector brackets are

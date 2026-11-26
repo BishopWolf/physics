@@ -48,6 +48,9 @@ jobs:
       - name: Axiom audit (proves every declaration stays inside the base axioms)
         run: bash scripts/audit_axioms.sh
 
+      - name: Declaration census matches the audit
+        run: bash scripts/check_census.sh
+
       - name: Proof-status table is current
         run: bash scripts/proof_status.sh --check
 

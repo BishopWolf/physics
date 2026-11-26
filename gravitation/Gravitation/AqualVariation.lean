@@ -12,6 +12,7 @@ public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Linarith
@@ -34,11 +35,13 @@ equivalence with `IsAqualSolution` are proved.  A finite-graph version of the
 variational derivation is also formalised: the action is a sum over links, its
 first variation is computed, summation by parts converts it to a site sum, and
 stationarity under all variations vanishing on the boundary is proved equivalent
-to the discrete Euler-Lagrange equation at every interior site.  The continuum
-step (compact-support variations on the line, integration by parts, and the
-fundamental lemma of the calculus of variations) is not formalised.  The free
-function carries its derivative data and the identification
-`F' = mu ∘ sqrt` as hypotheses.
+to the discrete Euler-Lagrange equation at every interior site.  On an interval,
+integration by parts and the fundamental lemma of the calculus of variations are
+proved.  The Poisson-limit action is differentiated under the integral, the
+nonlinear density has a pointwise chain rule for an arbitrary free function and
+an interval derivative under `C^1` regularity, and the discrete residual of a
+sampled profile is bridged to the continuum residual.  The free function carries
+its derivative data and the identification `F' = mu ∘ sqrt` as hypotheses.
 
 ## ii. Key results
 
@@ -65,6 +68,11 @@ function carries its derivative data and the identification
 - `quadraticProfileN_residual` : the general-path quadratic solution.
 - `hasDerivAt_aqualPoissonAction` : differentiation under the interval
   integral for the Poisson-limit action.
+- `aqualLagrangianDensity1D_hasDerivAt_variation`,
+  `hasDerivAt_aqualAction1D` : the pointwise and interval variations for an
+  arbitrary nonlinear free function.
+- `sampledPath_residual_eq`, `sampledPath_residual_tendsto` : the discrete
+  residual of a sampled profile and its continuum limit.
 
 ## iii. Table of contents
 
@@ -76,6 +84,8 @@ function carries its derivative data and the identification
 - F. The fundamental lemma of the calculus of variations
 - G. The general path
 - H. Differentiation under the interval integral
+- I. The full nonlinear free-function variation
+- J. From the discrete residual to the continuum residual
 
 ## iv. References
 
@@ -769,5 +779,234 @@ theorem hasDerivAt_aqualPoissonAction
         simp only [aqualPoissonAction, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
         exact intervalIntegral.integral_congr (fun x _ => by ring)]
   simpa [aqualPoissonActionVariation] using hquad
+
+/-! ## I. The full nonlinear free-function variation -/
+
+/-- The one-dimensional AQUAL action on an interval for an arbitrary free
+function, `∫ (-(a0^2/8 pi G) F(phi'^2/a0^2) - rho phi)`. -/
+noncomputable def aqualAction1D (a0 G : ℝ) (F ρ φ φ' : ℝ → ℝ) (a b : ℝ) : ℝ :=
+  ∫ x in a..b,
+    aqualLagrangianDensity1D a0 G F (ρ x) (φ x) (φ' x) ∂MeasureTheory.volume
+
+/-- The chain rule along a straight-line variation of the full nonlinear AQUAL
+density.  The derivative is the source term plus the AQUAL momentum contracted
+with the variation of the field derivative. -/
+lemma aqualLagrangianDensity1D_hasDerivAt_variation
+    (a0 G : ℝ) (F F' : ℝ → ℝ) (ρ φ φ' v v' : ℝ → ℝ) (x : ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : HasDerivAt F (F' (φ' x ^ 2 / a0 ^ 2)) (φ' x ^ 2 / a0 ^ 2)) :
+    HasDerivAt
+      (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ x) (φ x + ε * v x) (φ' x + ε * v' x))
+      (-ρ x * v x + aqualMomentumDensity a0 G F' φ' x * v' x) 0 := by
+  have harg : HasDerivAt (fun ε : ℝ => (φ' x + ε * v' x) ^ 2 / a0 ^ 2)
+      (2 * φ' x * v' x / a0 ^ 2) 0 := by
+    have h1 : HasDerivAt (fun ε : ℝ => φ' x + ε * v' x) (v' x) 0 := by
+      have h := (hasDerivAt_const (c := φ' x) (x := (0 : ℝ))).add
+        ((hasDerivAt_id (𝕜 := ℝ) 0).mul_const (v' x))
+      convert h using 1
+      · funext ε
+        simp
+      · ring
+    have h2 := (h1.pow 2).div_const (a0 ^ 2)
+    convert h2 using 1
+    ring
+  have hpoint : (φ' x + 0 * v' x) ^ 2 / a0 ^ 2 = (φ' x) ^ 2 / a0 ^ 2 := by ring
+  have hF0 := hF
+  rw [← hpoint] at hF0
+  have hFarg := hF0.comp 0 harg
+  have hphi : HasDerivAt (fun ε : ℝ => φ x + ε * v x) (v x) 0 := by
+    have h := (hasDerivAt_const (c := φ x) (x := (0 : ℝ))).add
+      ((hasDerivAt_id (𝕜 := ℝ) 0).mul_const (v x))
+    convert h using 1
+    · funext ε
+      simp
+    · ring
+  have hsource : HasDerivAt (fun ε : ℝ => ρ x * (φ x + ε * v x)) (ρ x * v x) 0 :=
+    hphi.const_mul (ρ x)
+  have hdensity : HasDerivAt
+      (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ x) (φ x + ε * v x) (φ' x + ε * v' x))
+      (-(a0 ^ 2 / (8 * Real.pi * G)) *
+          (F' (φ' x ^ 2 / a0 ^ 2) * (2 * φ' x * v' x / a0 ^ 2))
+        - ρ x * v x) 0 := by
+    have hconst := hFarg.const_mul (-(a0 ^ 2 / (8 * Real.pi * G)))
+    have hsub := hconst.sub hsource
+    convert hsub using 1
+    · funext ε
+      simp [aqualLagrangianDensity1D]
+    · ring
+  convert hdensity using 1
+  unfold aqualMomentumDensity
+  have hpi : Real.pi ≠ 0 := Real.pi_pos.ne'
+  field_simp [ha0, hG, hpi]
+  ring
+
+/-- Differentiation under the interval integral for the full nonlinear AQUAL
+action.  The hypotheses are the standard parametric-integral regularity: the
+uncurried density is `C^1` on a neighbourhood of the parameter times the
+interval, its parameter derivative is continuous, and the pointwise chain rule
+holds on the interval. -/
+theorem hasDerivAt_aqualAction1D
+    (a0 G : ℝ) (F F' ρ φ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hcont : ContDiffOn ℝ 1
+      (Function.uncurry (fun (ε : ℝ) (t : ℝ) =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)))
+      (Set.univ ×ˢ Set.uIcc a b))
+    (hcont' : ContinuousOn
+      (fun t : ℝ => fderiv ℝ (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)) 0) (Set.uIcc a b))
+    (hderiv : ∀ t ∈ Set.uIcc a b,
+      HasDerivAt (fun ε : ℝ => aqualLagrangianDensity1D a0 G F (ρ t)
+        (φ t + ε * v t) (φ' t + ε * deriv v t))
+        (-ρ t * v t + aqualMomentumDensity a0 G F' φ' t * deriv v t) 0) :
+    HasDerivAt
+      (fun ε : ℝ => aqualAction1D a0 G F ρ (φ + ε • v) (φ' + ε • deriv v) a b)
+      (aqualFirstVariationIntegral a0 G F' ρ φ' v a b) 0 := by
+  let f : ℝ → ℝ → ℝ := fun ε t =>
+    aqualLagrangianDensity1D a0 G F (ρ t) (φ t + ε * v t) (φ' t + ε * deriv v t)
+  have hmain := intervalIntegral.hasFDerivAt_integral_of_contDiffOn
+    (μ := MeasureTheory.volume) (f := f) (x₀ := (0 : ℝ)) (u := Set.univ)
+    (by simp) (a := a) (b := b) (by simpa [f] using hcont)
+  have hd := hmain.hasDerivAt
+  have hIntOn : MeasureTheory.IntegrableOn
+      (fun t : ℝ => fderiv ℝ (fun ε : ℝ => f ε t) 0)
+      (Set.uIcc a b) MeasureTheory.volume :=
+    hcont'.integrableOn_compact isCompact_uIcc
+  have hswap : (∫ t in a..b, fderiv ℝ (fun ε : ℝ => f ε t) 0) 1
+      = ∫ t in a..b, (fderiv ℝ (fun ε : ℝ => f ε t) 0) 1 :=
+    ContinuousLinearMap.intervalIntegral_apply (𝕜 := ℝ) hIntOn.intervalIntegrable 1
+  rw [hswap] at hd
+  simp_rw [fderiv_apply_one_eq_deriv] at hd
+  have hfun : (fun ε : ℝ => aqualAction1D a0 G F ρ (φ + ε • v) (φ' + ε • deriv v) a b)
+      = fun ε : ℝ => ∫ t in a..b, f ε t := rfl
+  rw [hfun, aqualFirstVariationIntegral]
+  convert hd using 1
+  apply intervalIntegral.integral_congr
+  intro t ht
+  exact (hderiv t ht).deriv.symm
+
+/-- The nonlinear interval variation with the free function's derivative data
+discharged, away from zeros of the field derivative. -/
+theorem hasDerivAt_aqualAction1D_freeFunction
+    (A : AqualFreeFunction) (a0 G : ℝ) (ρ φ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hne : ∀ t ∈ Set.uIcc a b, φ' t ≠ 0)
+    (hcont : ContDiffOn ℝ 1
+      (Function.uncurry (fun (ε : ℝ) (t : ℝ) =>
+        aqualLagrangianDensity1D a0 G A.F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)))
+      (Set.univ ×ˢ Set.uIcc a b))
+    (hcont' : ContinuousOn
+      (fun t : ℝ => fderiv ℝ (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G A.F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)) 0) (Set.uIcc a b)) :
+    HasDerivAt
+      (fun ε : ℝ => aqualAction1D a0 G A.F ρ (φ + ε • v) (φ' + ε • deriv v) a b)
+      (aqualFirstVariationIntegral a0 G A.F' ρ φ' v a b) 0 := by
+  refine hasDerivAt_aqualAction1D a0 G A.F A.F' ρ φ φ' v a b hcont hcont' ?_
+  intro t ht
+  have hy : 0 < φ' t ^ 2 / a0 ^ 2 := by
+    apply div_pos
+    · simpa [pow_two] using mul_self_pos.mpr (hne t ht)
+    · simpa [pow_two] using mul_self_pos.mpr ha0
+  exact aqualLagrangianDensity1D_hasDerivAt_variation a0 G A.F A.F' ρ φ φ' v
+    (deriv v) t hG ha0 (A.hasDeriv _ hy)
+
+/-! ## J. From the discrete residual to the continuum residual -/
+
+/-- A profile sampled at the sites of a path with spacing `h`. -/
+noncomputable def sampledPath (φ : ℝ → ℝ) (h : ℝ) (n : ℕ) : Fin (n + 1) → ℝ :=
+  fun i => φ ((i : ℝ) * h)
+
+/-- The symmetric second difference of a profile. -/
+noncomputable def secondDifference (φ : ℝ → ℝ) (x h : ℝ) : ℝ :=
+  (φ (x + h) - 2 * φ x + φ (x - h)) / h ^ 2
+
+/-- The discrete residual of a sampled profile is the negative second difference
+over `4 pi G`, plus the source term. -/
+lemma sampledPath_residual_eq (G h ρ : ℝ) (φ : ℝ → ℝ) {n : ℕ}
+    (i : Fin (n + 1)) (h0 : i ≠ 0) (hi : i.val < n)
+    (hh : h ≠ 0) (hG : G ≠ 0) :
+    discreteResidual (pathNA n) (pathNB n) G h (fun _ => ρ) (sampledPath φ h n) i
+      = -h * secondDifference φ ((i : ℝ) * h) h / (4 * Real.pi * G) + h * ρ := by
+  rw [discreteResidual, pathN_divergence
+    (d := discreteMomentum (pathNA n) (pathNB n) G h (sampledPath φ h n)) i h0 hi]
+  have hi0 : 0 < i.val := Nat.pos_of_ne_zero (fun hc => h0 (Fin.ext hc))
+  have hcast : ((i.val - 1 : ℕ) : ℝ) = (i.val : ℝ) - 1 := by
+    rw [Nat.cast_sub (Nat.succ_le_of_lt hi0)]
+    norm_num
+  simp only [discreteMomentum, sampledPath, secondDifference, pathNB, pathNA]
+  simp only [Fin.val_succ, Fin.val_pred, Fin.val_castSucc]
+  rw [hcast]
+  rw [show i.val - 1 + 1 = i.val from Nat.sub_add_cancel (Nat.succ_le_of_lt hi0)]
+  push_cast
+  have hsucc : ((i.val : ℝ) + 1) * h = (i.val : ℝ) * h + h := by ring
+  have hpred : ((i.val : ℝ) - 1) * h = (i.val : ℝ) * h - h := by ring
+  rw [hsucc, hpred]
+  have hpi : Real.pi ≠ 0 := Real.pi_pos.ne'
+  field_simp [hh, hG, hpi]
+  ring
+
+/-- Along a refinement with interior sites `i h -> x`, the normalized discrete
+residual of a sampled profile tends to the negative continuum Poisson residual,
+provided the symmetric second difference tends to the second derivative. -/
+theorem sampledPath_residual_tendsto
+    (G ρ x : ℝ) (φ : ℝ → ℝ) (hG : G ≠ 0)
+    {ι : Type*} {l : Filter ι} (h : ι → ℝ) (i : ι → ℕ)
+    (hpos : ∀ k, 0 < i k) (hh : ∀ k, h k ≠ 0)
+    (hsecond : Filter.Tendsto
+      (fun k => secondDifference φ ((i k : ℝ) * h k) (h k)) l
+      (nhds (deriv (deriv φ) x))) :
+    Filter.Tendsto
+      (fun k => discreteResidual (pathNA (i k + 1)) (pathNB (i k + 1)) G (h k)
+        (fun _ => ρ) (sampledPath φ (h k) (i k + 1))
+        ⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩ / h k)
+      l (nhds (ρ - deriv (deriv φ) x / (4 * Real.pi * G))) := by
+  have hform : ∀ k : ι,
+      discreteResidual (pathNA (i k + 1)) (pathNB (i k + 1)) G (h k)
+        (fun _ => ρ) (sampledPath φ (h k) (i k + 1))
+        ⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩ / h k
+      = ρ - secondDifference φ ((i k : ℝ) * h k) (h k) / (4 * Real.pi * G) := by
+    intro k
+    have hi0 : (⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩ : Fin (i k + 1 + 1)) ≠ 0 := by
+      intro hc
+      have hv : i k = 0 := by
+        simpa using congrArg Fin.val hc
+      exact (Nat.ne_of_gt (hpos k)) hv
+    rw [sampledPath_residual_eq (G := G) (h := h k) (ρ := ρ) (φ := φ)
+      (n := i k + 1) (i := ⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩) hi0
+      (Nat.lt_succ_self (i k)) (hh k) hG]
+    have hpi : Real.pi ≠ 0 := Real.pi_pos.ne'
+    field_simp [hh k, hG, hpi]
+    ring
+  simp_rw [hform]
+  have hdiv : Filter.Tendsto
+      (fun k => secondDifference φ ((i k : ℝ) * h k) (h k) / (4 * Real.pi * G))
+      l (nhds (deriv (deriv φ) x / (4 * Real.pi * G))) :=
+    hsecond.div_const _
+  simpa using (tendsto_const_nhds (x := ρ)).sub hdiv
+
+/-- The same convergence, expressed as minus the continuum AQUAL residual in the
+Poisson limit `F' = 1`, `F'' = 0`. -/
+theorem sampledPath_residual_tendsto_continuum
+    (a0 G ρ x : ℝ) (φ : ℝ → ℝ) (hG : G ≠ 0)
+    {ι : Type*} {l : Filter ι} (h : ι → ℝ) (i : ι → ℕ)
+    (hpos : ∀ k, 0 < i k) (hh : ∀ k, h k ≠ 0)
+    (hsecond : Filter.Tendsto
+      (fun k => secondDifference φ ((i k : ℝ) * h k) (h k)) l
+      (nhds (deriv (deriv φ) x))) :
+    Filter.Tendsto
+      (fun k => discreteResidual (pathNA (i k + 1)) (pathNB (i k + 1)) G (h k)
+        (fun _ => ρ) (sampledPath φ (h k) (i k + 1))
+        ⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩ / h k)
+      l (nhds (-(aqualEulerLagrangeResidual a0 G ρ
+        (deriv φ x) (deriv (deriv φ) x) (fun _ => 1) (fun _ => 0)))) := by
+  have h := sampledPath_residual_tendsto G ρ x φ hG h i hpos hh hsecond
+  convert h using 1
+  simp [aqualEulerLagrangeResidual, aqualDivergence1D]
+  ring
 
 end GeneralRelativity
