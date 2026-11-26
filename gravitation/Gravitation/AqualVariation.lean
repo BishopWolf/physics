@@ -26,11 +26,11 @@ the residual is `dL/dphi - d/dx (dL/dphi')`, with the conjugate momentum
 `-(1/4 pi G) mu (|phi'|/a0) phi'` and its derivative written through the free
 function's first two derivatives.
 
-The two partial derivatives of the density are computed, and the algebraic
-assembly and the equivalence with `IsAqualSolution` are proved.  The derivative
-of the conjugate momentum along the slice, and the functional-analytic step
+The two partial derivatives of the density and the derivative of the conjugate
+momentum along the slice are computed, and the algebraic assembly and the
+equivalence with `IsAqualSolution` are proved.  The functional-analytic step
 behind a full derivation (compact-support variations, integration by parts, and
-the fundamental lemma of the calculus of variations), are not formalised.  The
+the fundamental lemma of the calculus of variations) is not formalised.  The
 free function carries its derivative data and the identification
 `F' = mu ∘ sqrt` as hypotheses.
 
@@ -39,9 +39,10 @@ free function carries its derivative data and the identification
 - `AqualFreeFunction` : the free function with `F' = mu ∘ sqrt` and its two
   derivative facts.
 - `aqualLagrangianDensity1D` : the action density at a point.
-- `aqualLagrangianDensity1D_deriv_phi`, `..._deriv_grad` : the two partial
+- `aqualLagrangianDensity1D_deriv_phi`, `..._deriv_phi'` : the two partial
   derivatives, `-rho` and `-(a0^2/8 pi G) F' (2 phi' / a0^2)`.
-- `aqualMomentumDensity` : the conjugate momentum.
+- `aqualMomentumDensity`, `aqualMomentumDensity_deriv` : the conjugate momentum
+  and its derivative along the slice.
 - `aqualDivergence1D` : `d/dx (mu (|phi'|/a0) phi')` through `F'` and `F''`.
 - `aqualEulerLagrangeResidual_eq` : the residual is the AQUAL residual divided
   by `4 pi G`.
@@ -89,8 +90,8 @@ noncomputable def aqualLagrangianDensity1D (a0 G : ℝ) (F : ℝ → ℝ) (rho p
 
 /-- The conjugate momentum to the field in the one-dimensional model:
 `-(1 / (4 pi G)) F'(phi'^2 / a0^2) phi'`, which is `-(1 / (4 pi G)) mu (|phi'|/a0) phi'`. -/
-noncomputable def aqualMomentumDensity (a0 G : ℝ) (F' : ℝ → ℝ) (phi' : ℝ) : ℝ :=
-  -(1 / (4 * Real.pi * G)) * F' (phi' ^ 2 / a0 ^ 2) * phi'
+noncomputable def aqualMomentumDensity (a0 G : ℝ) (F' : ℝ → ℝ) (phi' : ℝ → ℝ) : ℝ → ℝ :=
+  fun x => -(1 / (4 * Real.pi * G)) * F' (phi' x ^ 2 / a0 ^ 2) * phi' x
 
 /-! ## B. The residual and stationarity -/
 
@@ -165,7 +166,7 @@ lemma aqualLagrangianDensity1D_deriv_phi (a0 G : ℝ) (F : ℝ → ℝ) (rho phi
 
 /-- The partial derivative of the density with respect to the field derivative is
 `-(a0^2 / (8 pi G)) F'(phi'^2/a0^2) (2 phi' / a0^2)`. -/
-lemma aqualLagrangianDensity1D_deriv_grad (a0 G : ℝ) (F F' : ℝ → ℝ) (rho phi phi' : ℝ)
+lemma aqualLagrangianDensity1D_deriv_phi' (a0 G : ℝ) (F F' : ℝ → ℝ) (rho phi phi' : ℝ)
     (hF : HasDerivAt F (F' (phi' ^ 2 / a0 ^ 2)) (phi' ^ 2 / a0 ^ 2)) :
     deriv (fun q : ℝ => aqualLagrangianDensity1D a0 G F rho phi q) phi' =
       -(a0 ^ 2 / (8 * Real.pi * G)) * F' (phi' ^ 2 / a0 ^ 2) * (2 * phi' / a0 ^ 2) := by
@@ -178,6 +179,39 @@ lemma aqualLagrangianDensity1D_deriv_grad (a0 G : ℝ) (F F' : ℝ → ℝ) (rho
     simpa [Function.comp_def] using deriv_comp phi' hF.differentiableAt hg
   have hdg : deriv (fun q : ℝ => q ^ 2 / a0 ^ 2) phi' = 2 * phi' / a0 ^ 2 := by simp
   rw [hd, hcomp, hF.deriv, hdg]
+  ring
+
+/-- The derivative along the slice of the conjugate momentum, in terms of `F'`
+and `F''`. -/
+lemma aqualMomentumDensity_deriv (a0 G : ℝ) (F' F'' : ℝ → ℝ) (φ ψ : ℝ → ℝ) (x : ℝ)
+    (hφ : HasDerivAt φ (ψ x) x)
+    (hF : HasDerivAt F' (F'' (φ x ^ 2 / a0 ^ 2)) (φ x ^ 2 / a0 ^ 2)) :
+    deriv (fun y => aqualMomentumDensity a0 G F' φ y) x =
+      -(1 / (4 * Real.pi * G)) *
+        (F'' (φ x ^ 2 / a0 ^ 2) * (2 * φ x * ψ x / a0 ^ 2) * φ x +
+          F' (φ x ^ 2 / a0 ^ 2) * ψ x) := by
+  have hφdiff : DifferentiableAt ℝ φ x := hφ.differentiableAt
+  have hgdiff : DifferentiableAt ℝ (fun y => φ y ^ 2 / a0 ^ 2) x := by
+    have h1 : DifferentiableAt ℝ (fun y => φ y ^ 2) x := hφdiff.pow 2
+    exact h1.div_const (a0 ^ 2)
+  have hcomp : deriv (fun y => F' (φ y ^ 2 / a0 ^ 2)) x
+      = F'' (φ x ^ 2 / a0 ^ 2) * deriv (fun y => φ y ^ 2 / a0 ^ 2) x := by
+    have h := deriv_comp x hF.differentiableAt hgdiff
+    simpa [Function.comp_def, hF.deriv] using h
+  have hdg : deriv (fun y => φ y ^ 2 / a0 ^ 2) x = 2 * φ x * ψ x / a0 ^ 2 := by
+    have h2 : deriv (fun y => φ y ^ 2) x = 2 * φ x * ψ x := by
+      have h := deriv_comp x (by fun_prop : DifferentiableAt ℝ (fun z : ℝ => z ^ 2) (φ x))
+        hφdiff
+      simpa [Function.comp_def, hφ.deriv] using h
+    have h := deriv_div_const (c := fun y => φ y ^ 2) (d := a0 ^ 2) (x := x)
+    rw [h, h2]
+  have hf : DifferentiableAt ℝ
+      (fun y => -(1 / (4 * Real.pi * G)) * F' (φ y ^ 2 / a0 ^ 2)) x := by
+    have h := hF.differentiableAt.comp x hgdiff
+    exact h.const_mul _
+  have hfun : (fun y => aqualMomentumDensity a0 G F' φ y)
+      = (fun y => -(1 / (4 * Real.pi * G)) * F' (φ y ^ 2 / a0 ^ 2)) * φ := rfl
+  rw [hfun, deriv_mul hf hφdiff, deriv_const_mul_field, hcomp, hdg, hφ.deriv]
   ring
 
 end GeneralRelativity

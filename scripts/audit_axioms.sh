@@ -15,6 +15,7 @@
 # The script
 #   1. rejects any axiom/constant/opaque/unsafe/sorry/admit/native_decide,
 #   2. collects every declaration (theorem, lemma, def, abbrev, structure,
+#      including primed identifiers,
 #      inductive, class, instance) with its namespace,
 #   3. prints #print axioms for each and checks the reported sets.
 set -euo pipefail
@@ -116,7 +117,7 @@ DECLS=$(awk -v proj="$PROJ/" -v pkg="$PKG/" '
       sub(/^[A-Za-z_]+[[:space:]]+/, "", rest)
       name = rest
       sub(/[[:space:]].*/, "", name)
-      if (name ~ /^[A-Za-z_][A-Za-z0-9_.]*$/) {
+      if (name ~ /^[A-Za-z_][A-Za-z0-9_.]*$/ || name ~ /^[A-Za-z_][A-Za-z0-9_.]*'"'"'[A-Za-z0-9_.]*$/) {
         full = ""
         for (i = 1; i <= depth; i++) full = full ns[i] "."
         fname = FILENAME

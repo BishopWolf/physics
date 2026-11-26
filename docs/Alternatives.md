@@ -28,8 +28,9 @@ limit, degrees of freedom and background cosmology are all machine-checked. It
 goes through the alternatives one by one against that standard, records what is
 already there and what each needs, and states the verdict criterion. MOND, MOG and TeVeS
 now carry stated actions and field equations; the AQUAL Euler-Lagrange residual
-is assembled and its two partial derivatives computed in a one-dimensional
-model, but no full derivation from an action is formalised. No alternative is claimed to be a full theory today.
+is assembled, with its two partial derivatives and the momentum derivative
+computed, in a one-dimensional model, but no full derivation from an action is
+formalised. No alternative is claimed to be a full theory today.
 
 **Keywords:** modified gravity · MOND · TeVeS · MOG · PPN · formal verification
 
@@ -79,15 +80,14 @@ $\nabla\cdot[\mu(|\nabla\phi|/a_0)\nabla\phi]=4\pi G\rho$ are stated, with the
 interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
 $\mu=1$.
 
-**Needs.** The derivative of the conjugate momentum along the slice and the
-functional-analytic minimisation behind the derivation, the interpolating
+**Needs.** The functional-analytic minimisation behind the derivation
+(compact-support variations, integration by parts), the interpolating
 function selected by the action's free function, lensing without dark matter,
 and a cosmological background.
 
 **Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
 partial derivatives computed, and stationarity proved equivalent to the field
-equation in a one-dimensional model; the momentum derivative and the
-functional-analytic step remain. The best developed of the three.
+equation in a one-dimensional model; the functional-analytic step remains. The best developed of the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -318,8 +318,11 @@ In this development the counting is formalised with Dirac's formula: the Proca
 vector has four components and two second-class constraints (three degrees of
 freedom), the unit vector four components and one first-class constraint
 (three), the scalar one and the metric two, giving six for STVG and six for
-TeVeS. The constraint classification is input data; the Poisson brackets that
-establish it are not computed.
+TeVeS. For the Proca pair the brackets are computed in a finite-dimensional model:
+with $\pi^0$ and $\sum_i\pi^i+m^2A_0$ the Dirac matrix is
+$\begin{pmatrix}0&-m^2\\ m^2&0\end{pmatrix}$, whose determinant $m^4$ is
+nonzero, so the two constraints are second-class. The field-theoretic brackets,
+with smeared constraints and spatial derivatives, are not formalised.
 
 For STVG, the vector is a Proca field: its kinetic term is the Maxwell term
 with a mass, which has no ghost at the quadratic level, and the scalar sector
@@ -357,9 +360,8 @@ they are why TeVeS is listed as partial rather than promoted.
 - No alternative is a full field theory in this development today.
 - The Euler-Lagrange residual of the AQUAL action is assembled, its two partial
   derivatives are computed, and stationarity is proved to be the MOND equation
-  in a one-dimensional model; the derivative of the conjugate momentum and the
-  functional-analytic step are not formalised, and the STVG and TeVeS equations
-  are stated, not derived from their actions.
+  in a one-dimensional model; the functional-analytic step is not formalised,
+  and the STVG and TeVeS equations are stated, not derived from their actions.
 - The PPN values and degree-of-freedom counts of §3.16–3.17 are collected from
   the literature. None is re-derived, and none is machine-checked; a
   preferred-frame or ghost computation in this development would be new work.

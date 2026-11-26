@@ -6,6 +6,11 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Data.Nat.Basic
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.LinearAlgebra.Matrix.Notation
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Tactic.Ring
 
 /-!
 # Dirac counting for the STVG and TeVeS field content
@@ -20,10 +25,12 @@ Proca vector (four components, two second-class constraints), a unit timelike
 vector (four components, one first-class constraint), a real scalar and the two
 metric modes.
 
-The constraint classification is input data, not derived here: the Poisson
-brackets that make the Proca constraints second-class, and those that make the
-unit-vector constraint first-class, are not computed.  What is formalised is
-the counting formula applied to that classification.
+The counting formula is applied to the constraint classification, and for the
+Proca vector the brackets of the two constraints are computed in a
+finite-dimensional model: with `pi^0` and `sum_i pi^i + m^2 A_0` the Dirac
+matrix is antisymmetric with determinant `m^4`, so the pair is second-class.
+The field-theoretic brackets (smeared constraints, spatial derivatives) and the
+unit-vector bracket are not formalised.
 
 ## ii. Key results
 
@@ -31,6 +38,8 @@ the counting formula applied to that classification.
 - `procaCount_dof`, `unitVectorCount_dof`, `realScalarCount_dof`,
   `gravitonCount_dof` : `3`, `3`, `1` and `2` degrees of freedom.
 - `stvgCount_dof`, `tevesCount_dof` : `6` for both, with the sums made explicit.
+- `procaDiracMatrix_det`, `proca_constraints_second_class` : the Proca Dirac
+  matrix has determinant `m^4`, nonzero for `m != 0`.
 
 ## iii. Table of contents
 
@@ -112,5 +121,61 @@ theorem tevesCount_dof : tevesCount.dof = 6 := by decide
 theorem tevesCount_dof_eq_sum :
     tevesCount.dof = gravitonCount.dof + unitVectorCount.dof + realScalarCount.dof := by
   decide
+
+/-! ## C. Dirac brackets for the Proca constraints -/
+
+/-- A linear observable on the four-component Proca phase space: coefficient
+vectors for the four coordinates and their four momenta. -/
+structure ProcaObservable where
+  /-- Coefficients of the coordinate components. -/
+  q : Fin 4 → ℝ
+  /-- Coefficients of the momentum components. -/
+  p : Fin 4 → ℝ
+
+/-- The Poisson bracket of two linear observables, from the canonical brackets
+`{q_i, p_j} = delta_ij`. -/
+def poissonBracket (a b : ProcaObservable) : ℝ :=
+  (∑ i : Fin 4, a.q i * b.p i) - ∑ i : Fin 4, a.p i * b.q i
+
+/-- The primary constraint `pi^0` of the Proca field. -/
+def procaPrimary : ProcaObservable where
+  q := fun _ => 0
+  p i := if i = 0 then 1 else 0
+
+/-- The secondary (Gauss) constraint `sum_i pi^i + m^2 A_0` in the discrete
+model, where the divergence is the sum over the three spatial momenta. -/
+def procaSecondary (m : ℝ) : ProcaObservable where
+  q i := if i = 0 then m ^ 2 else 0
+  p _ := 1
+
+lemma procaBracket_primary_self :
+    poissonBracket procaPrimary procaPrimary = 0 := by
+  simp [poissonBracket, procaPrimary]
+
+lemma procaBracket_secondary_self (m : ℝ) :
+    poissonBracket (procaSecondary m) (procaSecondary m) = 0 := by
+  simp [poissonBracket, procaSecondary]
+
+lemma procaBracket_primary_secondary (m : ℝ) :
+    poissonBracket procaPrimary (procaSecondary m) = -m ^ 2 := by
+  simp [poissonBracket, procaPrimary, procaSecondary]
+
+lemma procaBracket_secondary_primary (m : ℝ) :
+    poissonBracket (procaSecondary m) procaPrimary = m ^ 2 := by
+  simp [poissonBracket, procaPrimary, procaSecondary]
+
+/-- The Dirac matrix of the two Proca constraints. -/
+noncomputable def procaDiracMatrix (m : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
+  !![0, -m ^ 2; m ^ 2, 0]
+
+/-- The Dirac matrix has determinant `m^4`. -/
+lemma procaDiracMatrix_det (m : ℝ) : (procaDiracMatrix m).det = m ^ 4 := by
+  simp [procaDiracMatrix, Matrix.det_fin_two]; ring
+
+/-- For nonzero mass the two Proca constraints are second-class. -/
+theorem proca_constraints_second_class (m : ℝ) (hm : m ≠ 0) :
+    (procaDiracMatrix m).det ≠ 0 := by
+  rw [procaDiracMatrix_det]
+  exact pow_ne_zero 4 hm
 
 end GeneralRelativity
