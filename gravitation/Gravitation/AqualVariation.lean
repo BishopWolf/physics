@@ -39,7 +39,7 @@ free function carries its derivative data and the identification
 - `AqualFreeFunction` : the free function with `F' = mu ∘ sqrt` and its two
   derivative facts.
 - `aqualLagrangianDensity1D` : the action density at a point.
-- `aqualLagrangianDensity1D_deriv_phi`, `..._deriv_phi'` : the two partial
+- `aqualLagrangianDensity1D_deriv_phi`, `..._deriv_grad` : the two partial
   derivatives, `-rho` and `-(a0^2/8 pi G) F' (2 phi' / a0^2)`.
 - `aqualMomentumDensity` : the conjugate momentum.
 - `aqualDivergence1D` : `d/dx (mu (|phi'|/a0) phi')` through `F'` and `F''`.
@@ -165,7 +165,7 @@ lemma aqualLagrangianDensity1D_deriv_phi (a0 G : ℝ) (F : ℝ → ℝ) (rho phi
 
 /-- The partial derivative of the density with respect to the field derivative is
 `-(a0^2 / (8 pi G)) F'(phi'^2/a0^2) (2 phi' / a0^2)`. -/
-lemma aqualLagrangianDensity1D_deriv_phi' (a0 G : ℝ) (F F' : ℝ → ℝ) (rho phi phi' : ℝ)
+lemma aqualLagrangianDensity1D_deriv_grad (a0 G : ℝ) (F F' : ℝ → ℝ) (rho phi phi' : ℝ)
     (hF : HasDerivAt F (F' (phi' ^ 2 / a0 ^ 2)) (phi' ^ 2 / a0 ^ 2)) :
     deriv (fun q : ℝ => aqualLagrangianDensity1D a0 G F rho phi q) phi' =
       -(a0 ^ 2 / (8 * Real.pi * G)) * F' (phi' ^ 2 / a0 ^ 2) * (2 * phi' / a0 ^ 2) := by
