@@ -69,7 +69,9 @@ of `F_01 = −Q/r²`. The expected right-hand side is
 `diag(Q²f/r⁴, −Q²/(f r⁴), Q²/r², Q²sin²θ/r²)`. Besides `G = 8πT` it checks
 the scalar curvature `R = 0` (the Maxwell stress-energy is traceless) and the
 Kretschmann scalar `K = 48M²/r⁶ − 96MQ²/r⁷ + 56Q⁴/r⁸`, which involves the
-angular components of the Riemann tensor.
+angular components of the Riemann tensor. Since `G` is nonzero here, the
+contracted Bianchi identity `∇_a G^{ab} = 0` is a genuine conservation test:
+the lattice residual is `6.83e-5` against a curvature scale of `0.028`.
 
 Case 5 checks the FLRW closed forms `ricciOf_flrw`, `scalarOf_flrw` and
 `einsteinOf_flrw` for `a(t) = 1 + Ht + t²` (so `a'' = 2` is exercised) and
@@ -110,6 +112,7 @@ Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 lattice points:
 | Kerr `a = 0.5` | `max|∇_a G^{ab}|` (contracted Bianchi) | `5.04e-9` |
 | Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
 | Reissner–Nordström `Q = 0.5` | `K` vs the closed form | `1.17e-7` relative |
+| Reissner–Nordström `Q = 0.5` | `max|∇_a G^{ab}|` (`G ≠ 0`) | `6.83e-5` |
 | FLRW `H = 1`, `k = 0.3` | `Ric`, `R`, `G` vs closed forms | `1.27e-6` |
 | Interior Schwarzschild `Rc = 5`, `Ra = 4` | `max|G − 8π diag(ρ,p,p,p)|` | `8.90e-8` |
 | Schwarzschild `M = 2`, `r ∈ [5, 5.75]` | `max|Ric|`, `K` | `1.93e-7`, `1.05e-7` relative |

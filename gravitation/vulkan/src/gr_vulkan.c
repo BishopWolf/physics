@@ -441,6 +441,7 @@ int main(int argc, char **argv)
         const double kTol = 1e-6;
         const double eTol = 1e-6;
         const double divTol = 1e-6;
+        const double divRnTol = 5e-4;
         for (uint32_t p = 0; p < total; ++p) {
             const double *o   = d + (size_t)p * STRIDE;
             const double *g   = o;
@@ -590,6 +591,26 @@ int main(int argc, char **argv)
                 double krel = fabs(o[49] - kexp) / fabs(kexp);
                 if (krel > maxKerrK) maxKerrK = krel;
 
+            }
+
+            // Reissner-Nordstrom Kretschmann scalar:
+            //   K = 48 M^2/r^6 - 96 M Q^2/r^7 + 56 Q^4/r^8.
+            // The metric is spherically symmetric, so this also checks the
+            // angular components of the Riemann tensor.
+            if (cases[c].id == 4) {
+                int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
+                double M  = (double)cases[c].M;
+                double q  = (double)cases[c].Lambda;
+                double r2 = rr * rr;
+                double kexp = 48.0 * M * M / (r2 * r2 * r2)
+                            - 96.0 * M * q * q / (r2 * r2 * r2 * rr)
+                            + 56.0 * q * q * q * q / (r2 * r2 * r2 * r2);
+                double krel = fabs(o[49] - kexp) / fabs(kexp);
+                if (krel > maxRnK) maxRnK = krel;
+            }
+
+            if (cases[c].id == 3 || cases[c].id == 4) {
                 // Contracted Bianchi identity: div_a G^{ab} = 0, i.e.
                 //   div^b = g^{ma} g^{nb} (d_m G_{ab} - C^l_{ma} G_{lb}
                 //                            - C^l_{mb} G_{al}).
@@ -648,25 +669,7 @@ int main(int argc, char **argv)
                             if (fabs(dv) > maxDivG) maxDivG = fabs(dv);
                         }
                     }
-                }
-            }
-
-            // Reissner-Nordstrom Kretschmann scalar:
-            //   K = 48 M^2/r^6 - 96 M Q^2/r^7 + 56 Q^4/r^8.
-            // The metric is spherically symmetric, so this also checks the
-            // angular components of the Riemann tensor.
-            if (cases[c].id == 4) {
-                int    i1 = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
-                double rr = (double)P.lo[1] + (double)i1 * (double)P.stepv[1];
-                double M  = (double)cases[c].M;
-                double q  = (double)cases[c].Lambda;
-                double r2 = rr * rr;
-                double kexp = 48.0 * M * M / (r2 * r2 * r2)
-                            - 96.0 * M * q * q / (r2 * r2 * r2 * rr)
-                            + 56.0 * q * q * q * q / (r2 * r2 * r2 * r2);
-                double krel = fabs(o[49] - kexp) / fabs(kexp);
-                if (krel > maxRnK) maxRnK = krel;
-            }
+                }            }
 
             // FLRW: a(t) = 1 + H t + t^2 and spatial curvature k.  The closed
             // forms are ricciOf_flrw, scalarOf_flrw and einsteinOf_flrw; with
@@ -746,7 +749,7 @@ int main(int argc, char **argv)
             bad = 1;
         if (cases[c].id == 4 &&
             (maxMaxwell > cases[c].tol || maxRnK > cases[c].tol ||
-             maxR > cases[c].tol))
+             maxR > cases[c].tol || maxDivG > divRnTol))
             bad = 1;
         if (cases[c].id == 5 && maxFlrw > cases[c].tol) bad = 1;
         if (cases[c].id == 6 && maxInterior > cases[c].tol) bad = 1;
@@ -807,6 +810,8 @@ int main(int argc, char **argv)
                    maxRnK, cases[c].tol, maxRnK <= cases[c].tol ? "ok" : "FAIL");
             printf("        max|R| = %.3e  (traceless Maxwell source, tol %.0e)  [%s]\n",
                    maxR, cases[c].tol, maxR <= cases[c].tol ? "ok" : "FAIL");
+            printf("        contracted Bianchi |div_a G^{ab}| = %.3e  (tol %.0e)  [%s]\n",
+                   maxDivG, divRnTol, maxDivG <= divRnTol ? "ok" : "FAIL");
         }
         printf("\n");
     }

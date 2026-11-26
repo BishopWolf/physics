@@ -559,6 +559,7 @@ interior sphere):
 | Reissner–Nordström $Q=0.5$, $\max|G-8\pi T|$ | $1.085\times10^{-7}$ |
 | Reissner–Nordström $Q=0.5$, $\max|R|$ | $2.405\times10^{-8}$ |
 | Reissner–Nordström $Q=0.5$, Kretschmann vs the closed form (relative) | $1.173\times10^{-7}$ |
+| Reissner–Nordström $Q=0.5$, $\max|\nabla_a G^{ab}|$ with $G\neq0$ | $6.827\times10^{-5}$ |
 | Schwarzschild $M=2$ ($r\in[5,5.75]$), $\max|Ric|$ | $1.932\times10^{-7}$ |
 | Schwarzschild–de Sitter $\Lambda=-0.05$, $\max|Ric-\Lambda g|$ | $1.833\times10^{-7}$ |
 | Schwarzschild–de Sitter $\Lambda=-0.05$, Kretschmann vs the closed form (relative) | $7.513\times10^{-8}$ |

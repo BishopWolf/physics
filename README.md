@@ -320,6 +320,7 @@ precision with `h = 1e-4`:
 | Kerr `a = 0.5` | `max|∇_a G^{ab}|` (contracted Bianchi) | `5.04e-9` |
 | Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
 | Reissner–Nordström `Q = 0.5` | Kretschmann vs the closed form | `1.17e-7` relative |
+| Reissner–Nordström `Q = 0.5` | `max|∇_a G^{ab}|` (contracted Bianchi) | `6.83e-5` |
 | FLRW `a = 1 + Ht + t²`, `k = 0.3` | `Ric`, `R`, `G` vs the closed forms | `1.27e-6` |
 | Interior Schwarzschild `Rc = 5`, `Ra = 4` | `G` vs `8π diag(ρ,p,p,p)` | `8.90e-8` |
 | Schwarzschild `M = 2`, `r ∈ [5, 5.75]` | `max|Ric|`, Kretschmann | `1.93e-7`, `1.05e-7` |

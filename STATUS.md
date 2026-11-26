@@ -159,9 +159,10 @@ branch lands.
   exercised), and the interior Schwarzschild constant-density Einstein tensor
   (`8.90e-8` at `Rc = 5`, `Ra = 4`). The vacuum and de Sitter checks are
   repeated at a second mass (`M = 2`) and with negative `Λ = −0.05`. CI runs
-  it on the lavapipe software driver. The Kerr case also checks the contracted
-  Bianchi identity, `max|∇_a G^{ab}| = 5.04e-9`, from second-order lattice
-  differences of the emitted Einstein tensor.
+  it on the lavapipe software driver. The Kerr and Reissner–Nordström cases
+  also check the contracted Bianchi identity from second-order lattice
+  differences of the emitted Einstein tensor: `5.04e-9` where `G` is roundoff
+  small, and `6.83e-5` on the charged case where `G` is nonzero.
 * Vendor drift guard — `scripts/check_vendor_sync.sh` fetches the `gravity`
   branch, fails if its tip has moved from `vendor/REVISION`, and diffs every
   vendored module against the branch after the import rewrite. CI runs it
