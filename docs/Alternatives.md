@@ -80,10 +80,9 @@ $\nabla\cdot[\mu(|\nabla\phi|/a_0)\nabla\phi]=4\pi G\rho$ are stated, with the
 interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
 $\mu=1$.
 
-**Needs.** The continuum functional-analytic minimisation behind the derivation
-(compact-support variations on the line, differentiation under the integral, and
-the fundamental lemma), the interpolating function selected by the action's free
-function, lensing without dark matter, and a cosmological background.
+**Needs.** The interpolating function selected by the action's free function,
+lensing without dark matter, and a cosmological background; the one-dimensional
+variational theory on a compact interval is now closed.
 
 **Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
 partial derivatives computed, and stationarity proved equivalent to the field
@@ -92,8 +91,12 @@ variation, proves summation by parts, and derives the discrete Euler-Lagrange
 equation from stationarity, and the exact quadratic profile on a three-site path
 reproduces the Poisson solution. On an interval, integration by parts converts
 the first-variation integral into the residual integral when the test function
-vanishes at both endpoints; differentiation under the integral and the
-fundamental lemma remain. The best developed of the three.
+vanishes at both endpoints; in the Poisson limit the action is differentiable at
+zero with derivative the first-variation integral, and the fundamental lemma for
+continuous residuals is proved. The exact quadratic profile satisfies the
+discrete equation at every interior site of an arbitrary path and converges to
+the continuum Poisson solution under grid refinement. The best developed of the
+three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -356,8 +359,8 @@ they are why TeVeS is listed as partial rather than promoted.
 
 ## 4. The order of work
 
-1. Carry the AQUAL derivation from the finite-graph and one-dimensional models
-   to variations of the full action on the line, with compact support and
+1. Extend the AQUAL derivation from the compact interval to the whole line and
+   to the full nonlinear interpolating function, with compact support and
    integration by parts.
 2. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
@@ -379,9 +382,12 @@ they are why TeVeS is listed as partial rather than promoted.
   boundary-vanishing variations is the discrete Euler-Lagrange equation, and
   reproduces the Poisson solution with the exact quadratic profile on a
   three-site path. On an interval, integration by parts converts the
-  first-variation integral to the residual integral; differentiating the action
-  under the integral and the fundamental lemma are not formalised. The STVG and
-  TeVeS equations are stated, not derived from their actions.
+  first-variation integral to the residual integral; in the Poisson limit the
+  action is differentiated under the integral, the fundamental lemma for
+  continuous residuals is proved, and the quadratic profile on a general path
+  converges to the continuum solution. The full nonlinear AQUAL action with a
+  general interpolating function is not treated, and the STVG and TeVeS
+  equations are stated, not derived from their actions.
 - The PPN values of §3.16 are collected from the literature. The
   degree-of-freedom counts of §3.17 are reproduced by the formalised Dirac
   formula for the stated field content; the Proca and unit-vector brackets are

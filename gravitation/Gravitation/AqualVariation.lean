@@ -60,6 +60,11 @@ function carries its derivative data and the identification
   path.
 - `aqual_first_variation_eq_integral_residual` : the continuum
   integration-by-parts step for the first-variation integral.
+- `aqual_fundamental_lemma` : a continuous residual orthogonal to every
+  endpoint-vanishing test function vanishes in the interior.
+- `quadraticProfileN_residual` : the general-path quadratic solution.
+- `hasDerivAt_aqualPoissonAction` : differentiation under the interval
+  integral for the Poisson-limit action.
 
 ## iii. Table of contents
 
@@ -68,6 +73,9 @@ function carries its derivative data and the identification
 - C. A discrete variational derivation
 - D. A worked example on a three-site path
 - E. The continuum integration-by-parts step
+- F. The fundamental lemma of the calculus of variations
+- G. The general path
+- H. Differentiation under the interval integral
 
 ## iv. References
 
@@ -545,5 +553,221 @@ theorem aqual_first_variation_eq_integral_residual
     hiu.mul_continuousOn hv
   rw [← sub_eq_add_neg, ← intervalIntegral.integral_sub hρv hiu_v]
   exact intervalIntegral.integral_congr (fun x _ => by ring)
+
+/-! ## F. The fundamental lemma of the calculus of variations -/
+
+/-- The fundamental lemma for continuous residuals on an interval: a residual
+orthogonal to every continuous test function vanishing at the endpoints vanishes
+in the interior.  The test function used is `r * ((x - a) * (b - x))`, which
+vanishes at the endpoints and is positive inside, so no bump functions are
+needed. -/
+theorem aqual_fundamental_lemma {r : ℝ → ℝ} {a b : ℝ} (hab : a < b)
+    (hr : ContinuousOn r (Set.Icc a b))
+    (h : ∀ v : ℝ → ℝ, ContinuousOn v (Set.Icc a b) → v a = 0 → v b = 0 →
+      (∫ x in a..b, r x * v x ∂MeasureTheory.volume) = 0)
+    {x : ℝ} (hx : x ∈ Set.Ioo a b) : r x = 0 := by
+  by_contra hxr
+  let w : ℝ → ℝ := fun y => (y - a) * (b - y)
+  have hw : ContinuousOn w (Set.Icc a b) := by
+    unfold w
+    fun_prop
+  have hv : ContinuousOn (fun y => r y * w y) (Set.Icc a b) := hr.mul hw
+  have hva : (fun y => r y * w y) a = 0 := by simp [w]
+  have hvb : (fun y => r y * w y) b = 0 := by simp [w]
+  have hint := h (fun y => r y * w y) hv hva hvb
+  have hsq : (∫ y in a..b, r y ^ 2 * w y ∂MeasureTheory.volume) = 0 := by
+    rw [← hint]
+    exact intervalIntegral.integral_congr (fun y _ => by ring)
+  have hcont : ContinuousOn (fun y => r y ^ 2 * w y) (Set.Icc a b) :=
+    (hr.pow 2).mul hw
+  have hnonneg : ∀ y ∈ Set.Ioc a b, 0 ≤ r y ^ 2 * w y := by
+    intro y hy
+    exact mul_nonneg (sq_nonneg _)
+      (mul_nonneg (sub_nonneg.mpr hy.1.le) (sub_nonneg.mpr hy.2))
+  have hxpos : 0 < r x ^ 2 * w x := by
+    have hrx : 0 < r x ^ 2 := by
+      simpa [pow_two] using mul_self_pos.mpr hxr
+    have hwx : 0 < w x := by
+      unfold w
+      exact mul_pos (sub_pos.mpr hx.1) (sub_pos.mpr hx.2)
+    exact mul_pos hrx hwx
+  have hpos : 0 < ∫ y in a..b, r y ^ 2 * w y ∂MeasureTheory.volume :=
+    intervalIntegral.integral_pos hab hcont hnonneg
+      ⟨x, ⟨hx.1.le, hx.2.le⟩, hxpos⟩
+  rw [hsq] at hpos
+  exact lt_irrefl 0 hpos
+
+/-! ## G. The general path -/
+
+/-- The tail map of the path on `n + 1` sites. -/
+def pathNA (n : ℕ) : Fin n → Fin (n + 1) := fun e => e.castSucc
+
+/-- The head map of the path on `n + 1` sites. -/
+def pathNB (n : ℕ) : Fin n → Fin (n + 1) := fun e => e.succ
+
+/-- A quadratic field on `n + 1` sites. -/
+def quadraticProfileN (n : ℕ) (C : ℝ) : Fin (n + 1) → ℝ :=
+  fun i => C * ((i : ℕ) : ℝ) ^ 2
+
+/-- The divergence at an interior site of the path is the incoming momentum
+minus the outgoing one. -/
+lemma pathN_divergence {n : ℕ} (d : Fin n → ℝ) (i : Fin (n + 1))
+    (h0 : i ≠ 0) (hi : i.val < n) :
+    discreteDivergence (pathNA n) (pathNB n) d i
+      = d (Fin.pred i h0) - d (⟨i.val, hi⟩ : Fin n) := by
+  have hb : (∑ e : Fin n, if (pathNB n e : Fin (n + 1)) = i then d e else 0)
+      = d (Fin.pred i h0) := by
+    have hb' : (∑ e : Fin n, if (pathNB n e : Fin (n + 1)) = i then d e else 0)
+        = (if (pathNB n (Fin.pred i h0) : Fin (n + 1)) = i then
+            d (Fin.pred i h0) else 0) := by
+      refine Finset.sum_eq_single (s := Finset.univ)
+        (f := fun e : Fin n => if (pathNB n e : Fin (n + 1)) = i then d e else 0)
+        (Fin.pred i h0) ?_ ?_
+      · intro e _ he
+        have hne : (pathNB n e : Fin (n + 1)) ≠ i := by
+          intro hc
+          apply he
+          have h2 : e.succ = (Fin.pred i h0).succ := by
+            rw [Fin.succ_pred]
+            exact hc
+          exact Fin.succ_injective n h2
+        simp [hne]
+      · intro hmem
+        exact absurd (Finset.mem_univ _) hmem
+    rw [hb', show (pathNB n (Fin.pred i h0) : Fin (n + 1)) = i from Fin.succ_pred i h0]
+    simp
+  have ha : (∑ e : Fin n, if (pathNA n e : Fin (n + 1)) = i then d e else 0)
+      = d (⟨i.val, hi⟩ : Fin n) := by
+    have ha' : (∑ e : Fin n, if (pathNA n e : Fin (n + 1)) = i then d e else 0)
+        = (if (pathNA n (⟨i.val, hi⟩ : Fin n) : Fin (n + 1)) = i then
+            d (⟨i.val, hi⟩ : Fin n) else 0) := by
+      refine Finset.sum_eq_single (s := Finset.univ)
+        (f := fun e : Fin n => if (pathNA n e : Fin (n + 1)) = i then d e else 0)
+        (⟨i.val, hi⟩ : Fin n) ?_ ?_
+      · intro e _ he
+        have hne : (pathNA n e : Fin (n + 1)) ≠ i := by
+          intro hc
+          apply he
+          apply Fin.ext
+          have hval := congrArg Fin.val hc
+          simpa [pathNA] using hval
+        simp [hne]
+      · intro hmem
+        exact absurd (Finset.mem_univ _) hmem
+    rw [ha', show (pathNA n (⟨i.val, hi⟩ : Fin n) : Fin (n + 1)) = i from by
+      apply Fin.ext
+      rfl]
+    simp
+  unfold discreteDivergence
+  rw [hb, ha]
+
+/-- The link momentum of the quadratic profile on a general path. -/
+lemma pathN_momentum {n : ℕ} (G h C : ℝ) (e : Fin n) :
+    discreteMomentum (pathNA n) (pathNB n) G h (quadraticProfileN n C) e
+      = C * (2 * (e : ℕ) + 1) / (4 * Real.pi * G * h) := by
+  simp [discreteMomentum, pathNA, pathNB, quadraticProfileN]
+  ring
+
+/-- The quadratic profile with `C = 2 pi G h^2 rho` satisfies the discrete
+Euler-Lagrange equation at every interior site of the general path. -/
+theorem quadraticProfileN_residual {n : ℕ} (G h ρ : ℝ) (hG : G ≠ 0)
+    (i : Fin (n + 1)) (h0 : i ≠ 0) (hi : i.val < n) :
+    discreteResidual (pathNA n) (pathNB n) G h (fun _ => ρ)
+      (quadraticProfileN n (2 * Real.pi * G * h ^ 2 * ρ)) i = 0 := by
+  rw [discreteResidual, pathN_divergence (d := discreteMomentum (pathNA n) (pathNB n) G h
+    (quadraticProfileN n (2 * Real.pi * G * h ^ 2 * ρ))) i h0 hi]
+  simp [pathN_momentum]
+  have hi0 : 0 < i.val := Nat.pos_of_ne_zero (fun h => h0 (Fin.ext h))
+  have hcast : ((i.val - 1 : ℕ) : ℝ) = (i.val : ℝ) - 1 := by
+    rw [Nat.cast_sub (Nat.succ_le_of_lt hi0)]
+    norm_num
+  field_simp
+  rw [hcast]
+  ring
+
+/-- Along any grid refinement with `i h -> x`, the quadratic grid values tend to
+the continuum Poisson solution `2 pi G rho x^2`. -/
+theorem quadraticProfileN_tendsto (G ρ x : ℝ) {ι : Type*} {l : Filter ι}
+    (h : ι → ℝ) (i : ι → ℕ)
+    (hx : Filter.Tendsto (fun k => (i k : ℝ) * h k) l (nhds x)) :
+    Filter.Tendsto
+      (fun k => 2 * Real.pi * G * ρ * ((i k : ℝ) * h k) ^ 2)
+      l (nhds (2 * Real.pi * G * ρ * x ^ 2)) := by
+  simpa [mul_assoc] using (hx.pow 2).const_mul (2 * Real.pi * G * ρ)
+
+/-! ## H. Differentiation under the interval integral -/
+
+/-- Differentiation under an interval integral for a quadratic integrand. -/
+theorem hasDerivAt_integral_quadratic {f0 f1 f2 : ℝ → ℝ} {l u : ℝ}
+    (h0 : IntervalIntegrable f0 MeasureTheory.volume l u)
+    (h1 : IntervalIntegrable f1 MeasureTheory.volume l u)
+    (h2 : IntervalIntegrable f2 MeasureTheory.volume l u) :
+    HasDerivAt (fun ε : ℝ => ∫ x in l..u, f0 x + ε * f1 x + ε ^ 2 * f2 x)
+      (∫ x in l..u, f1 x ∂MeasureTheory.volume) 0 := by
+  have hexp : ∀ ε : ℝ, (∫ x in l..u, f0 x + ε * f1 x + ε ^ 2 * f2 x)
+      = (∫ x in l..u, f0 x) + ε * (∫ x in l..u, f1 x)
+        + ε ^ 2 * (∫ x in l..u, f2 x) := by
+    intro ε
+    calc ∫ x in l..u, f0 x + ε * f1 x + ε ^ 2 * f2 x
+        = ∫ x in l..u, (f0 x + ε * f1 x) + ε ^ 2 * f2 x := rfl
+      _ = (∫ x in l..u, f0 x + ε * f1 x) + ∫ x in l..u, ε ^ 2 * f2 x :=
+          intervalIntegral.integral_add (h0.add (h1.const_mul ε)) (h2.const_mul (ε ^ 2))
+      _ = ((∫ x in l..u, f0 x) + ∫ x in l..u, ε * f1 x) + ∫ x in l..u, ε ^ 2 * f2 x := by
+          rw [intervalIntegral.integral_add h0 (h1.const_mul ε)]
+      _ = ((∫ x in l..u, f0 x) + ε * ∫ x in l..u, f1 x)
+            + ε ^ 2 * ∫ x in l..u, f2 x := by
+          rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
+      _ = (∫ x in l..u, f0 x) + ε * (∫ x in l..u, f1 x)
+            + ε ^ 2 * (∫ x in l..u, f2 x) := by ring
+  have hpoly : HasDerivAt (fun ε : ℝ =>
+      (∫ x in l..u, f0 x) + ε * (∫ x in l..u, f1 x)
+        + ε ^ 2 * (∫ x in l..u, f2 x))
+      (∫ x in l..u, f1 x) 0 := by
+    have hlin : HasDerivAt (fun ε : ℝ => ε * (∫ x in l..u, f1 x))
+        (∫ x in l..u, f1 x) 0 := by
+      simpa using (hasDerivAt_id (𝕜 := ℝ) 0).mul_const (∫ x in l..u, f1 x)
+    have hquad : HasDerivAt (fun ε : ℝ => ε ^ 2 * (∫ x in l..u, f2 x)) 0 0 := by
+      simpa using ((hasDerivAt_id (𝕜 := ℝ) 0).pow 2).mul_const (∫ x in l..u, f2 x)
+    have h := ((hasDerivAt_const (c := ∫ x in l..u, f0 x) (x := (0 : ℝ))).add hlin).add hquad
+    convert h using 1
+    ring
+  rw [show (fun ε : ℝ => ∫ x in l..u, f0 x + ε * f1 x + ε ^ 2 * f2 x)
+      = fun ε : ℝ => (∫ x in l..u, f0 x) + ε * (∫ x in l..u, f1 x)
+        + ε ^ 2 * (∫ x in l..u, f2 x) from funext hexp]
+  exact hpoly
+
+/-- The Poisson-limit AQUAL action on an interval. -/
+noncomputable def aqualPoissonAction (G : ℝ) (ρ φ φ' : ℝ → ℝ) (a b : ℝ) : ℝ :=
+  ∫ x in a..b, -(φ' x) ^ 2 / (8 * Real.pi * G) - ρ x * φ x ∂MeasureTheory.volume
+
+/-- Its first variation at zero along `phi + epsilon v` and `phi' + epsilon v'`. -/
+noncomputable def aqualPoissonActionVariation (G : ℝ) (ρ _φ φ' v v' : ℝ → ℝ)
+    (a b : ℝ) : ℝ :=
+  ∫ x in a..b, -(φ' x * v' x) / (4 * Real.pi * G) - ρ x * v x ∂MeasureTheory.volume
+
+/-- Differentiation under the integral for the Poisson-limit AQUAL action. -/
+theorem hasDerivAt_aqualPoissonAction
+    (G : ℝ) (ρ φ φ' v v' : ℝ → ℝ) (a b : ℝ)
+    (h0 : IntervalIntegrable
+      (fun x => -(φ' x) ^ 2 / (8 * Real.pi * G) - ρ x * φ x) MeasureTheory.volume a b)
+    (h1 : IntervalIntegrable
+      (fun x => -(φ' x * v' x) / (4 * Real.pi * G) - ρ x * v x) MeasureTheory.volume a b)
+    (h2 : IntervalIntegrable
+      (fun x => -(v' x) ^ 2 / (8 * Real.pi * G)) MeasureTheory.volume a b) :
+    HasDerivAt (fun ε : ℝ => aqualPoissonAction G ρ (φ + ε • v) (φ' + ε • v') a b)
+      (aqualPoissonActionVariation G ρ φ φ' v v' a b) 0 := by
+  have hquad := hasDerivAt_integral_quadratic
+    (f0 := fun x => -(φ' x) ^ 2 / (8 * Real.pi * G) - ρ x * φ x)
+    (f1 := fun x => -(φ' x * v' x) / (4 * Real.pi * G) - ρ x * v x)
+    (f2 := fun x => -(v' x) ^ 2 / (8 * Real.pi * G)) h0 h1 h2
+  rw [show (fun ε : ℝ => aqualPoissonAction G ρ (φ + ε • v) (φ' + ε • v') a b)
+      = fun ε : ℝ => ∫ x in a..b,
+          (-(φ' x) ^ 2 / (8 * Real.pi * G) - ρ x * φ x)
+          + ε * (-(φ' x * v' x) / (4 * Real.pi * G) - ρ x * v x)
+          + ε ^ 2 * (-(v' x) ^ 2 / (8 * Real.pi * G)) from by
+        funext ε
+        simp only [aqualPoissonAction, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+        exact intervalIntegral.integral_congr (fun x _ => by ring)]
+  simpa [aqualPoissonActionVariation] using hquad
 
 end GeneralRelativity
