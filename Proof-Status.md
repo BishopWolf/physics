@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1286 declarations, 783 of them theorem-like. The table below is the
+1298 declarations, 787 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -375,6 +375,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ChartMaximalDevelopmentCertificate.unique_up_to_isometry` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.intervalDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.intervalMaximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.stvgActionDensity` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaResidual` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaResidual_mu_zero_eq_zero_iff` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.mogEinsteinResidual` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.mogEinsteinResidual_eq_zero_iff` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsMogSolution` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_zero` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_pos` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -1199,6 +1205,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.spatialScalarCurvOf_sdsSpatial` | `Gravitation/SobolevInitialData.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.schwarzschild_spatial_hamiltonian_zero` | `Gravitation/SobolevInitialData.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.flrw_initial_constraints` | `Gravitation/SobolevInitialData.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.tevesActionDensity` | `Gravitation/TeVeSFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.tevesScalarResidual` | `Gravitation/TeVeSFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.tevesScalarResidual_eq_zero_iff` | `Gravitation/TeVeSFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.tevesEinsteinResidual` | `Gravitation/TeVeSFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.tevesEinsteinResidual_eq_zero_iff` | `Gravitation/TeVeSFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsTeVeSSolution` | `Gravitation/TeVeSFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dAlembert` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_integral_shift_t` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_integral_shift_x` | `Gravitation/WaveCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

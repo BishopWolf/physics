@@ -26,10 +26,10 @@ depth is uneven. This paper sets a uniform standard: a theory counts as
 formalised when its action, field equations, parameterised post-Newtonian
 limit, degrees of freedom and background cosmology are all machine-checked. It
 goes through the alternatives one by one against that standard, records what is
-already there and what each needs, and states the verdict criterion. The first
-promotion is MOND, whose AQUAL action and field equation are now stated; the
-derivation of the equation from the action is not formalised. No alternative is
-claimed to be a full theory today.
+already there and what each needs, and states the verdict criterion. MOND, MOG and TeVeS
+now carry stated actions and field equations; no derivation of a field equation
+from its action is formalised. No alternative is claimed to be a full theory
+today.
 
 **Keywords:** modified gravity · MOND · TeVeS · MOG · PPN · formal verification
 
@@ -89,24 +89,29 @@ dark matter, and a cosmological background.
 
 **Now.** The Yukawa-like enhancement
 $\Phi=-(GM/r)[1+\alpha(1-e^{-\mu r})]$ and the bounded-enhancement statement.
+The gravitational sector of the STVG action — Einstein term, Proca mass term
+and scalar potential — and the Proca field equation are also stated.
 
 **Needs.** The massive-vector action, its field equations coupled to the
 metric, the PPN parameters, and stability of the vector sector.
 
-**Verdict.** Shadow: a potential, not a theory.
+**Verdict.** V1 stated (action and Proca equation); PPN, stability and
+cosmology absent, so partial.
 
 ### 3.3 TeVeS
 
 **Now.** The disformal physical metric with explicit inverse; the physical
 metric is shown to stay Lorentzian for every scalar, and its spatial part is a
-conformal rescaling.
+conformal rescaling. The action density with the aether-projected scalar
+kinetic term, and the scalar and Einstein field equations, are stated.
 
 **Needs.** The full TeVeS action (metric, scalar, unit vector), the scalar and
 vector field equations, the lensing prediction, and the cosmological
 perturbation spectrum. The known constraints (GW speed, cluster lensing, CMB)
 should then be checked rather than asserted.
 
-**Verdict.** Shadow, but the geometric core exists.
+**Verdict.** V1 stated: the geometric core and the action now exist; the
+derivation and the PPN limit do not.
 
 ### 3.4 Brans–Dicke
 
@@ -228,7 +233,8 @@ theory. Its role is to receive the parameters from the sections above.
 ## 4. The order of work
 
 1. Derive the AQUAL field equation from the action, closing MOND's V1.
-2. Complete V1 for MOG and TeVeS — the remaining shadows.
+2. Derive the STVG and TeVeS field equations from their actions, adding the
+   vector and scalar stress to the Einstein equation.
 3. Compute V2 for every theory that passes V1, using the PPN dictionary.
 4. Audit V3, starting with the theories whose actions carry higher derivatives
    or vector sectors.
@@ -239,7 +245,8 @@ theory. Its role is to receive the parameters from the sections above.
 ## 5. What is not claimed
 
 - No alternative is a full field theory in this development today.
-- The AQUAL field equation is stated, not derived from the action.
+- The AQUAL, STVG and TeVeS field equations are stated, not derived from their
+  actions.
 - No observational data analysis: PPN bounds and GW170817 are cited as filters,
   not re-derived.
 - No claim that a theory failing V1 is physically wrong; only that it is not

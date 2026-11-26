@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1286 declarations, 783 of them theorem-like. An independent Vulkan
+contains 1298 declarations, 787 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1286 declarations, 783 of them theorem-like; no declaration uses `sorry`,
+1298 declarations, 787 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -728,6 +728,8 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Modified.Galileon` | 6 |
 | `Gravitation.Relativity.Metrics.Basic` | 6 |
 | `Gravitation.Relativity.Tensors.EinsteinTensor` | 6 |
+| `Gravitation.MogFieldTheory` | 6 |
+| `Gravitation.TeVeSFieldTheory` | 6 |
 | `Gravitation.Relativity.General.Linearized.Basic` | 5 |
 | `Gravitation.Relativity.General.Linearized.LorenzGauge` | 5 |
 | `Gravitation.Relativity.General.Linearized.NewtonianPerturb` | 5 |
@@ -753,9 +755,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
 | `Gravitation.ManifoldSobolev` | 1 |
-| **Total** | **1286** |
+| **Total** | **1298** |
 
-All 1286 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1298 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References
