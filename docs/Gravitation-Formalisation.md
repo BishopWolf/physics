@@ -554,12 +554,14 @@ interior sphere):
 | Schwarzschild–de Sitter, Weyl electric part | $1.394\times10^{-8}$ |
 | Kerr $a=0.5$, $\max|Ric|$ | $2.100\times10^{-7}$ |
 | Kerr $a=0.5$, Kretschmann vs the closed form (relative) | $1.707\times10^{-7}$ |
+| Kerr $a=0.5$, $\max|\nabla_a G^{ab}|$ (contracted Bianchi) | $5.044\times10^{-9}$ |
 | Kerr $a=0.5$, $\max|G|$ | $1.416\times10^{-7}$ |
 | Reissner–Nordström $Q=0.5$, $\max|G-8\pi T|$ | $1.085\times10^{-7}$ |
 | Reissner–Nordström $Q=0.5$, $\max|R|$ | $2.405\times10^{-8}$ |
 | Reissner–Nordström $Q=0.5$, Kretschmann vs the closed form (relative) | $1.173\times10^{-7}$ |
 | Schwarzschild $M=2$ ($r\in[5,5.75]$), $\max|Ric|$ | $1.932\times10^{-7}$ |
 | Schwarzschild–de Sitter $\Lambda=-0.05$, $\max|Ric-\Lambda g|$ | $1.833\times10^{-7}$ |
+| Schwarzschild–de Sitter $\Lambda=-0.05$, Kretschmann vs the closed form (relative) | $7.513\times10^{-8}$ |
 | FLRW $a=1+Ht+t^2$, $k=0.3$, $\max$ deviation of $Ric$, $R$, $G$ from the closed forms | $1.273\times10^{-6}$ |
 | Interior Schwarzschild $Rc=5$, $Ra=4$, $\max|G-8\pi\,\mathrm{diag}(\rho,p,p,p)|$ | $8.895\times10^{-8}$ |
 

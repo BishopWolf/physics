@@ -158,6 +158,82 @@ typedef struct {
     float       stepv[4];
 } Case;
 
+// ---------------------------------------------------------------------------
+// Lattice helpers for the contracted Bianchi identity div_a G^{ab} = 0.
+// The emitted Einstein tensor is sampled on the lattice, so its divergence is
+// taken with second-order differences there and the connection is recovered
+// from differences of the emitted metric.  Since the residual |G| of a vacuum
+// solution is already roundoff small, the connection enters only at second
+// order in the lattice step and does not set the measured value.
+// ---------------------------------------------------------------------------
+static uint32_t flat_of(const int gr[4], const int ix[4])
+{
+    return (uint32_t)(ix[0] + gr[0] * (ix[1] + gr[1] * (ix[2] + gr[2] * ix[3])));
+}
+
+// d/dx^ax of component `off` at lattice node ix: central inside, one-sided
+// (second order) on the faces.  All lattice extents are at least three.
+static double field_deriv(const double *d, size_t stride, const int gr[4],
+                          const int ix[4], int ax, int off, double h)
+{
+    int    n = gr[ax];
+    int    i = ix[ax];
+    int    a[4];
+    for (int k = 0; k < 4; ++k) a[k] = ix[k];
+
+    double f0 = d[(size_t)flat_of(gr, a) * stride + off];
+    if (i > 0 && i + 1 < n) {
+        a[ax] = i - 1;
+        double fm = d[(size_t)flat_of(gr, a) * stride + off];
+        a[ax] = i + 1;
+        double fp = d[(size_t)flat_of(gr, a) * stride + off];
+        return (fp - fm) / (2.0 * h);
+    }
+    if (i == 0) {
+        a[ax] = 1;
+        double f1 = d[(size_t)flat_of(gr, a) * stride + off];
+        a[ax] = 2;
+        double f2 = d[(size_t)flat_of(gr, a) * stride + off];
+        return (-3.0 * f0 + 4.0 * f1 - f2) / (2.0 * h);
+    }
+    a[ax] = n - 2;
+    double f1 = d[(size_t)flat_of(gr, a) * stride + off];
+    a[ax] = n - 3;
+    double f2 = d[(size_t)flat_of(gr, a) * stride + off];
+    return (3.0 * f0 - 4.0 * f1 + f2) / (2.0 * h);
+}
+
+// Gauss-Jordan inverse of a row-major 4x4; returns 0 if it is singular.
+static int invert4(const double m[16], double inv[16])
+{
+    double a[4][8];
+    for (int r = 0; r < 4; ++r) {
+        for (int c = 0; c < 4; ++c) a[r][c] = m[4 * r + c];
+        for (int c = 0; c < 4; ++c) a[r][4 + c] = (r == c) ? 1.0 : 0.0;
+    }
+    for (int c = 0; c < 4; ++c) {
+        int piv = c;
+        for (int r = c + 1; r < 4; ++r)
+            if (fabs(a[r][c]) > fabs(a[piv][c])) piv = r;
+        if (a[piv][c] == 0.0) return 0;
+        if (piv != c)
+            for (int k = 0; k < 8; ++k) {
+                double t = a[c][k]; a[c][k] = a[piv][k]; a[piv][k] = t;
+            }
+        double pv = a[c][c];
+        for (int k = 0; k < 8; ++k) a[c][k] /= pv;
+        for (int r = 0; r < 4; ++r) {
+            if (r == c) continue;
+            double f = a[r][c];
+            if (f == 0.0) continue;
+            for (int k = 0; k < 8; ++k) a[r][k] -= f * a[c][k];
+        }
+    }
+    for (int r = 0; r < 4; ++r)
+        for (int c = 0; c < 4; ++c) inv[4 * r + c] = a[r][4 + c];
+    return 1;
+}
+
 int main(int argc, char **argv)
 {
     const char *spv = (argc > 1) ? argv[1] : "shaders/tensor.comp.spv";
@@ -360,10 +436,11 @@ int main(int argc, char **argv)
         double maxRtt = 0.0, maxRrr = 0.0, maxRtp = 0.0;
         double maxKsds = 0.0, maxRicFrame = 0.0, maxMaxwell = 0.0;
         double maxFlrw = 0.0, maxInterior = 0.0;
-        double maxKerrK = 0.0, maxRnK = 0.0;
+        double maxKerrK = 0.0, maxRnK = 0.0, maxDivG = 0.0;
         const double PI = 3.14159265358979323846;
         const double kTol = 1e-6;
         const double eTol = 1e-6;
+        const double divTol = 1e-6;
         for (uint32_t p = 0; p < total; ++p) {
             const double *o   = d + (size_t)p * STRIDE;
             const double *g   = o;
@@ -512,6 +589,66 @@ int main(int argc, char **argv)
                 double kexp = 48.0 * M * M * num / sig6;
                 double krel = fabs(o[49] - kexp) / fabs(kexp);
                 if (krel > maxKerrK) maxKerrK = krel;
+
+                // Contracted Bianchi identity: div_a G^{ab} = 0, i.e.
+                //   div^b = g^{ma} g^{nb} (d_m G_{ab} - C^l_{ma} G_{lb}
+                //                            - C^l_{mb} G_{al}).
+                // G is emitted as lower indices; the connection comes from
+                // differences of the emitted metric, and dG from differences of
+                // the emitted Einstein tensor.  For a vacuum metric G itself is
+                // roundoff small, so this is a consistency check on the emitted
+                // tensor field rather than on the analytic solution.
+                {
+                    int ix[4];
+                    ix[0] = (int)(p % (uint32_t)G[0]);
+                    ix[1] = (int)((p / (uint32_t)G[0]) % (uint32_t)G[1]);
+                    ix[2] = (int)((p / ((uint32_t)G[0] * (uint32_t)G[1]))
+                                  % (uint32_t)G[2]);
+                    ix[3] = (int)(p / ((uint32_t)G[0] * (uint32_t)G[1]
+                                       * (uint32_t)G[2]));
+                    double gi[16];
+                    if (invert4(g, gi)) {
+                        double dg[4][16], dGm[4][16];
+                        for (int mu = 0; mu < 4; ++mu)
+                            for (int k = 0; k < 16; ++k) {
+                                dg[mu][k]  = field_deriv(d, STRIDE, G, ix, mu,
+                                                         k, (double)P.stepv[mu]);
+                                dGm[mu][k] = field_deriv(d, STRIDE, G, ix, mu,
+                                                         33 + k,
+                                                         (double)P.stepv[mu]);
+                            }
+                        double Cr[4][16];
+                        for (int k = 0; k < 4; ++k)
+                        for (int i = 0; i < 4; ++i)
+                        for (int j = 0; j < 4; ++j) {
+                            double sum = 0.0;
+                            for (int l = 0; l < 4; ++l)
+                                sum += gi[4 * k + l]
+                                     * (dg[i][4 * j + l] + dg[j][4 * i + l]
+                                        - dg[l][4 * i + j]);
+                            Cr[k][4 * i + j] = 0.5 * sum;
+                        }
+                        for (int nu = 0; nu < 4; ++nu) {
+                            double dv = 0.0;
+                            for (int mu = 0; mu < 4; ++mu)
+                            for (int al = 0; al < 4; ++al) {
+                                double q = 0.0;
+                                for (int be = 0; be < 4; ++be) {
+                                    double in = dGm[mu][4 * al + be];
+                                    for (int l = 0; l < 4; ++l) {
+                                        in -= Cr[l][4 * mu + al]
+                                            * Gm[4 * l + be];
+                                        in -= Cr[l][4 * mu + be]
+                                            * Gm[4 * al + l];
+                                    }
+                                    q += gi[4 * nu + be] * in;
+                                }
+                                dv += gi[4 * mu + al] * q;
+                            }
+                            if (fabs(dv) > maxDivG) maxDivG = fabs(dv);
+                        }
+                    }
+                }
             }
 
             // Reissner-Nordstrom Kretschmann scalar:
@@ -605,7 +742,7 @@ int main(int argc, char **argv)
         if (cases[c].id == 2 && maxKsds > kTol) bad = 1;
         if (cases[c].id == 3 &&
             (maxRic > cases[c].tol || maxG > cases[c].tol ||
-             maxKerrK > cases[c].tol))
+             maxKerrK > cases[c].tol || maxDivG > divTol))
             bad = 1;
         if (cases[c].id == 4 &&
             (maxMaxwell > cases[c].tol || maxRnK > cases[c].tol ||
@@ -659,9 +796,12 @@ int main(int argc, char **argv)
             printf("        R^theta_phitheta |R - (2M/r + L r^2/3) sin^2| = %.3e  (tol %.0e)  [%s]\n",
                    maxRtp, eTol, maxRtp <= eTol ? "ok" : "FAIL");
         }
-        if (cases[c].id == 3)
+        if (cases[c].id == 3) {
             printf("        Kretschmann |K - 48M^2(..)/Sigma^6| rel = %.3e  (tol %.0e)  [%s]\n",
                    maxKerrK, cases[c].tol, maxKerrK <= cases[c].tol ? "ok" : "FAIL");
+            printf("        contracted Bianchi |div_a G^{ab}| = %.3e  (tol %.0e)  [%s]\n",
+                   maxDivG, divTol, maxDivG <= divTol ? "ok" : "FAIL");
+        }
         if (cases[c].id == 4) {
             printf("        Kretschmann |K - 48M^2/r^6 + 96MQ^2/r^7 - 56Q^4/r^8| rel = %.3e  (tol %.0e)  [%s]\n",
                    maxRnK, cases[c].tol, maxRnK <= cases[c].tol ? "ok" : "FAIL");

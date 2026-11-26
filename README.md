@@ -317,6 +317,7 @@ precision with `h = 1e-4`:
 | Schwarzschild–de Sitter | `K` vs `48M²/r⁶ + 8Λ²/3` | `1.91e-7` relative |
 | Kerr `a = 0.5` | vacuum `max|Ric|`, `max|G|` | `2.10e-7`, `1.42e-7` |
 | Kerr `a = 0.5` | Kretschmann vs the closed form | `1.71e-7` relative |
+| Kerr `a = 0.5` | `max|∇_a G^{ab}|` (contracted Bianchi) | `5.04e-9` |
 | Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
 | Reissner–Nordström `Q = 0.5` | Kretschmann vs the closed form | `1.17e-7` relative |
 | FLRW `a = 1 + Ht + t²`, `k = 0.3` | `Ric`, `R`, `G` vs the closed forms | `1.27e-6` |

@@ -58,7 +58,10 @@ metric, which is `ricciOf_kerr_eq_zero` and `einsteinOf_kerr_eq_zero`. It also
 checks the Kerr Kretschmann scalar
 `K = 48M²(r⁶ − 15a²r⁴cos²θ + 15a⁴r²cos⁴θ − a⁶cos⁶θ)/Σ⁶`, `Σ = r² + a²cos²θ`,
 which contracts the full Riemann tensor of a non-diagonal metric rather than
-its trace.
+its trace. It also checks the contracted Bianchi identity `∇_a G^{ab} = 0` by
+second-order lattice differences of the emitted `G`, with the connection
+recovered from differences of the emitted metric; for a vacuum metric the
+residual is a consistency check on the emitted tensor field.
 
 Case 4 checks the Reissner–Nordström Einstein–Maxwell equations
 `G_ij = 8π T_ij` of `einsteinOf_rn_eq_maxwell`, with the Maxwell stress-energy
@@ -104,6 +107,7 @@ Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 lattice points:
 | Schwarzschild–de Sitter | `K` vs `48M²/r⁶ + 8Λ²/3` | `1.91e-7` relative |
 | Kerr `a = 0.5` | `max|Ric|`, `max|G|` | `2.10e-7`, `1.42e-7` |
 | Kerr `a = 0.5` | `K` vs the closed form | `1.71e-7` relative |
+| Kerr `a = 0.5` | `max|∇_a G^{ab}|` (contracted Bianchi) | `5.04e-9` |
 | Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
 | Reissner–Nordström `Q = 0.5` | `K` vs the closed form | `1.17e-7` relative |
 | FLRW `H = 1`, `k = 0.3` | `Ric`, `R`, `G` vs closed forms | `1.27e-6` |
