@@ -291,6 +291,11 @@ Four layers separate the present pointwise development from the theorem above.
    exists, but geometric four-dimensional Lorentzian patching and isometric
    amalgamation remain open.
 
+Layers 1, 3 and 4 are this paper's goal: the full Choquet–Bruhat–Geroch
+theorem. Layer 2 is the subject of a separate paper on elliptic constraint
+solving on arbitrary 3-manifolds, which Paper II takes as an input rather than
+reproving.
+
 ## 7. A roadmap
 
 The layers above suggest an order in which the work can be made checkable.

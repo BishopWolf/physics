@@ -448,6 +448,11 @@ not formalised), and the Galileon result is one-dimensional. None of these is a
 full non-linear solution theory, and empirical strengths and weaknesses are
 recorded in prose, not as theorems.
 
+MOND, MOG and TeVeS are the subject of a fourth paper, which promotes them from
+these structural statements to full field theories — action, field equations,
+PPN limit, stability and cosmology — or records why a given alternative cannot
+be promoted.
+
 ### 4.7 Conservation
 
 The contracted Bianchi identity
