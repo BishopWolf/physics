@@ -257,8 +257,7 @@ resemble; it is not part of the promotion test.
 ## 7. Reproducibility and trust
 
 The development's build, axiom and proof-status checks apply unchanged. Any
-promoted statement is kernel-checked like the rest, with no axiom of its own
-and no `sorry` or `admit`.
+promoted statement is fully proved like the rest, with no axiom of its own.
 
 ## References
 

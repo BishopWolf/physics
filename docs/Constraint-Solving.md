@@ -154,10 +154,10 @@ existence and geometric maximality remain separate layers.
 
 ## 8. Reproducibility and trust
 
-The build is silent, no declaration uses `sorry`, `admit` or an axiom of its
-own, and every axiom report stays inside the three standard axioms of the base
-libraries. The repository's audit covers every declaration, and the generated
-proof-status table is checked against it in continuous integration.
+The build is silent, every statement in the development is fully proved, and no
+proof introduces an axiom beyond the three standard ones of the base libraries.
+The audit covers the whole development, and the generated proof-status table is
+checked against it in continuous integration.
 
 ## References
 

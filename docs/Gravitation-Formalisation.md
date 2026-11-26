@@ -682,6 +682,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Modified.MOND` | 17 |
 | `Gravitation.Relativity.Metrics.StaticSphericalMetric` | 17 |
 | `Gravitation.WaveEnergy` | 15 |
+| `Gravitation.ConformalDecomposition` | 15 |
 | `Gravitation.Relativity.General.GeodesicSystem` | 14 |
 | `Gravitation.Relativity.General.Modified.FRGravity` | 14 |
 | `Gravitation.ReducedWave3D` | 13 |
@@ -707,7 +708,6 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Modified.MassiveGravity.FierzPauli` | 9 |
 | `Gravitation.Relativity.General.Modified.Nordstrom` | 9 |
 | `Gravitation.Relativity.General.Modified.Ostrogradsky` | 9 |
-| `Gravitation.ConformalDecomposition` | 9 |
 | `Gravitation.Cosmology.FLRW.FriedmannBridge` | 8 |
 | `Gravitation.Relativity.General.Linearized.LinearizedCurvature` | 8 |
 | `Gravitation.Relativity.General.Modified.KaluzaKlein.KaluzaMiracle` | 8 |
@@ -723,6 +723,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Tensors.RiemannTensor` | 7 |
 | `Gravitation.WaveEnergy3D` | 7 |
 | `Gravitation.WaveEnergy3DWave` | 7 |
+| `Gravitation.MondFieldTheory` | 7 |
 | `Gravitation.Relativity.General.Linearized.GaugeTransform` | 6 |
 | `Gravitation.Relativity.General.Modified.Galileon` | 6 |
 | `Gravitation.Relativity.Metrics.Basic` | 6 |
@@ -751,6 +752,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Tensors.Tensor2` | 2 |
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
+| `Gravitation.ManifoldSobolev` | 1 |
 | **Total** | **1286** |
 
 All 1286 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
