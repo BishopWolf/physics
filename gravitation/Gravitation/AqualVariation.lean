@@ -6,6 +6,11 @@ Authors: Alex Vergara Gil
 module
 
 public import Gravitation.MondFieldTheory
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Linarith
 
@@ -21,18 +26,21 @@ the residual is `dL/dphi - d/dx (dL/dphi')`, with the conjugate momentum
 `-(1/4 pi G) mu (|phi'|/a0) phi'` and its derivative written through the free
 function's first two derivatives.
 
-What is proved is the algebraic assembly and the equivalence with
-`IsAqualSolution`.  The evaluation of the two partial derivatives by the chain
-rule, and the functional-analytic step behind a full derivation (compact-support
-variations, integration by parts, and the fundamental lemma of the calculus of
-variations), are not formalised.  The free function carries its derivative data
-and the identification `F' = mu ∘ sqrt` as hypotheses.
+The two partial derivatives of the density are computed, and the algebraic
+assembly and the equivalence with `IsAqualSolution` are proved.  The derivative
+of the conjugate momentum along the slice, and the functional-analytic step
+behind a full derivation (compact-support variations, integration by parts, and
+the fundamental lemma of the calculus of variations), are not formalised.  The
+free function carries its derivative data and the identification
+`F' = mu ∘ sqrt` as hypotheses.
 
 ## ii. Key results
 
 - `AqualFreeFunction` : the free function with `F' = mu ∘ sqrt` and its two
   derivative facts.
 - `aqualLagrangianDensity1D` : the action density at a point.
+- `aqualLagrangianDensity1D_deriv_phi`, `..._deriv_phi'` : the two partial
+  derivatives, `-rho` and `-(a0^2/8 pi G) F' (2 phi' / a0^2)`.
 - `aqualMomentumDensity` : the conjugate momentum.
 - `aqualDivergence1D` : `d/dx (mu (|phi'|/a0) phi')` through `F'` and `F''`.
 - `aqualEulerLagrangeResidual_eq` : the residual is the AQUAL residual divided
@@ -149,5 +157,27 @@ theorem aqualFreeFunction_stationary_iff (A : AqualFreeFunction) (a0 G rho phi' 
     aqualEulerLagrangeResidual a0 G rho phi' phi'' A.F' A.F'' = 0 ↔
       IsAqualSolution G rho (aqualDivergence1D a0 phi' phi'' A.F' A.F'') :=
   aqual_euler_lagrange_iff a0 G rho phi' phi'' A.F' A.F'' hG
+
+/-- The partial derivative of the density with respect to the field is `-rho`. -/
+lemma aqualLagrangianDensity1D_deriv_phi (a0 G : ℝ) (F : ℝ → ℝ) (rho phi phi' : ℝ) :
+    deriv (fun p : ℝ => aqualLagrangianDensity1D a0 G F rho p phi') phi = -rho := by
+  simp [aqualLagrangianDensity1D]
+
+/-- The partial derivative of the density with respect to the field derivative is
+`-(a0^2 / (8 pi G)) F'(phi'^2/a0^2) (2 phi' / a0^2)`. -/
+lemma aqualLagrangianDensity1D_deriv_phi' (a0 G : ℝ) (F F' : ℝ → ℝ) (rho phi phi' : ℝ)
+    (hF : HasDerivAt F (F' (phi' ^ 2 / a0 ^ 2)) (phi' ^ 2 / a0 ^ 2)) :
+    deriv (fun q : ℝ => aqualLagrangianDensity1D a0 G F rho phi q) phi' =
+      -(a0 ^ 2 / (8 * Real.pi * G)) * F' (phi' ^ 2 / a0 ^ 2) * (2 * phi' / a0 ^ 2) := by
+  have hd : deriv (fun q : ℝ => aqualLagrangianDensity1D a0 G F rho phi q) phi'
+      = -(a0 ^ 2 / (8 * Real.pi * G)) * deriv (fun q : ℝ => F (q ^ 2 / a0 ^ 2)) phi' := by
+    simp [aqualLagrangianDensity1D]
+  have hg : DifferentiableAt ℝ (fun q : ℝ => q ^ 2 / a0 ^ 2) phi' := by fun_prop
+  have hcomp : deriv (fun q : ℝ => F (q ^ 2 / a0 ^ 2)) phi'
+      = deriv F (phi' ^ 2 / a0 ^ 2) * deriv (fun q : ℝ => q ^ 2 / a0 ^ 2) phi' := by
+    simpa [Function.comp_def] using deriv_comp phi' hF.differentiableAt hg
+  have hdg : deriv (fun q : ℝ => q ^ 2 / a0 ^ 2) phi' = 2 * phi' / a0 ^ 2 := by simp
+  rw [hd, hcomp, hF.deriv, hdg]
+  ring
 
 end GeneralRelativity

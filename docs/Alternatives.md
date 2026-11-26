@@ -28,8 +28,8 @@ limit, degrees of freedom and background cosmology are all machine-checked. It
 goes through the alternatives one by one against that standard, records what is
 already there and what each needs, and states the verdict criterion. MOND, MOG and TeVeS
 now carry stated actions and field equations; the AQUAL Euler-Lagrange residual
-is assembled in a one-dimensional model, but no full derivation from an action
-is formalised. No alternative is claimed to be a full theory today.
+is assembled and its two partial derivatives computed in a one-dimensional
+model, but no full derivation from an action is formalised. No alternative is claimed to be a full theory today.
 
 **Keywords:** modified gravity · MOND · TeVeS · MOG · PPN · formal verification
 
@@ -79,14 +79,15 @@ $\nabla\cdot[\mu(|\nabla\phi|/a_0)\nabla\phi]=4\pi G\rho$ are stated, with the
 interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
 $\mu=1$.
 
-**Needs.** The chain-rule evaluation of the two partial derivatives and the
+**Needs.** The derivative of the conjugate momentum along the slice and the
 functional-analytic minimisation behind the derivation, the interpolating
 function selected by the action's free function, lensing without dark matter,
 and a cosmological background.
 
-**Verdict.** V1 stated, with the Euler-Lagrange residual assembled and
-stationarity proved equivalent to the field equation in a one-dimensional
-model; the chain rule is the remaining gap. The best developed of the three.
+**Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
+partial derivatives computed, and stationarity proved equivalent to the field
+equation in a one-dimensional model; the momentum derivative and the
+functional-analytic step remain. The best developed of the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -259,7 +260,30 @@ $\gamma=1$, $\beta=1$ under the assumption that both metrics are Minkowski at
 zeroth order, and finds $\alpha_3=\xi=\zeta_i=0$. The preferred-frame
 parameters were computed by Sagi: they are generically nonzero even when the
 vector coupling is switched off, because matter couples to the disformal
-metric rather than to the Einstein metric. Solar-System bounds
+metric rather than to the Einstein metric.
+
+With the simple Maxwell-type vector action, Sagi's expressions are
+
+$$\alpha_1=\frac{4G}{K}\left((2K-1)e^{-4\phi_0}-e^{4\phi_0}+8\right)-8,
+\qquad
+\alpha_2=\frac{2G}{(2-K)^2}\left(3(2-K)-(K+4)e^{4\phi_0}\right)-1,$$
+
+where $K$ is the vector coupling, $k$ the scalar coupling, $\phi_0$ the
+cosmological value of the scalar, and
+$G=\left(\frac{1}{1-K/2}+\frac{k}{4\pi}\right)^{-1}$ in units $G_N=1$. The
+divergence of the vector equation links the two by
+$\phi_0=-\tfrac14\ln\frac{2}{2-K}$, so that $e^{4\phi_0}=(2-K)/2$ and the
+expressions reduce to
+
+$$\alpha_2=G-1,\qquad
+\alpha_1=\frac{2G(24-4K-K^2)}{K(2-K)}-8 .$$
+
+For the Einstein-Æther-type vector action the same calculation leaves
+$\alpha_1$ and $\alpha_2$ tunable, and Sagi shows that they can be made small
+within a modest range of coupling parameters. For the simple action they are
+fixed once $K$ and $k$ are chosen.
+
+Solar-System bounds
 ($\lvert\alpha_1\rvert\lesssim10^{-4}$,
 $\lvert\alpha_2\rvert\lesssim4\times10^{-7}$) therefore constrain the vector
 sector rather than being automatic.
@@ -289,6 +313,13 @@ analysis: a constrained vector contributes three degrees of freedom, a massive
 vector also three, and the metric two. The TeVeS vector is normalised with
 respect to the Einstein metric, so its timelike component is not independent;
 the scalar is unconstrained.
+
+In this development the counting is formalised with Dirac's formula: the Proca
+vector has four components and two second-class constraints (three degrees of
+freedom), the unit vector four components and one first-class constraint
+(three), the scalar one and the metric two, giving six for STVG and six for
+TeVeS. The constraint classification is input data; the Poisson brackets that
+establish it are not computed.
 
 For STVG, the vector is a Proca field: its kinetic term is the Maxwell term
 with a mass, which has no ghost at the quadratic level, and the scalar sector
@@ -324,10 +355,11 @@ they are why TeVeS is listed as partial rather than promoted.
 ## 5. What is not claimed
 
 - No alternative is a full field theory in this development today.
-- The Euler-Lagrange residual of the AQUAL action is assembled and stationarity
-  is proved to be the MOND equation in a one-dimensional model; the chain-rule
-  evaluation of the partial derivatives is not formalised; the STVG and TeVeS
-  equations are stated, not derived from their actions.
+- The Euler-Lagrange residual of the AQUAL action is assembled, its two partial
+  derivatives are computed, and stationarity is proved to be the MOND equation
+  in a one-dimensional model; the derivative of the conjugate momentum and the
+  functional-analytic step are not formalised, and the STVG and TeVeS equations
+  are stated, not derived from their actions.
 - The PPN values and degree-of-freedom counts of §3.16–3.17 are collected from
   the literature. None is re-derived, and none is machine-checked; a
   preferred-frame or ghost computation in this development would be new work.

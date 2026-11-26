@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1306 declarations, 790 of them theorem-like. The table below is the
+1323 declarations, 800 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -22,6 +22,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.aqualEulerLagrangeResidual_eq` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.aqual_euler_lagrange_iff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.aqualFreeFunction_stationary_iff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualLagrangianDensity1D_deriv_phi` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_const` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_congr` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.hasDerivAt_update` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -126,6 +127,22 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.FLRW.FLRWSpacetime.einsteinTensorOf_00_iff_friedmann` | `Gravitation/Cosmology/FLRW/PerfectFluid.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.einsteinTensorOf_spatial_iff_friedmann` | `Gravitation/Cosmology/FLRW/PerfectFluid.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.einsteinTensorOf_iff_friedmann` | `Gravitation/Cosmology/FLRW/PerfectFluid.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.DiracCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.DiracCount.dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.procaCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.procaCount_dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.unitVectorCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.unitVectorCount_dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.realScalarCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.realScalarCount_dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.gravitonCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.gravitonCount_dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.stvgCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.stvgCount_dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.stvgCount_dof_eq_sum` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.tevesCount` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.tevesCount_dof` | `Gravitation/DiracCounting.lean` | (none) | proved |
+| `GeneralRelativity.tevesCount_dof_eq_sum` | `Gravitation/DiracCounting.lean` | (none) | proved |
 | `GeneralRelativity.Space3` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.metric` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
