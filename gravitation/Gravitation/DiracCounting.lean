@@ -29,8 +29,10 @@ The counting formula is applied to the constraint classification, and for the
 Proca vector the brackets of the two constraints are computed in a
 finite-dimensional model: with `pi^0` and `sum_i pi^i + m^2 A_0` the Dirac
 matrix is antisymmetric with determinant `m^4`, so the pair is second-class.
-The field-theoretic brackets (smeared constraints, spatial derivatives) and the
-unit-vector bracket are not formalised.
+Smeared constraints are treated on a finite lattice: the bracket of the primary
+constraint with the smeared Gauss constraint is minus the mass squared times the
+smearing inner product, which is nondegenerate for nonzero mass.  The continuum
+field-theoretic bracket and the unit-vector bracket are not formalised.
 
 ## ii. Key results
 
@@ -40,11 +42,16 @@ unit-vector bracket are not formalised.
 - `stvgCount_dof`, `tevesCount_dof` : `6` for both, with the sums made explicit.
 - `procaDiracMatrix_det`, `proca_constraints_second_class` : the Proca Dirac
   matrix has determinant `m^4`, nonzero for `m != 0`.
+- `smearedBracket_primary_gauss`, `smeared_constraints_second_class` : the
+  smeared bracket is `-m^2` times the smearing inner product and has no nonzero
+  null direction for `m != 0`.
 
 ## iii. Table of contents
 
 - A. The counting formula
 - B. Applications
+- C. Dirac brackets for the Proca constraints
+- D. Smeared constraints on a finite lattice
 
 ## iv. References
 
@@ -177,5 +184,78 @@ theorem proca_constraints_second_class (m : ℝ) (hm : m ≠ 0) :
     (procaDiracMatrix m).det ≠ 0 := by
   rw [procaDiracMatrix_det]
   exact pow_ne_zero 4 hm
+
+/-! ## D. Smeared constraints on a finite lattice -/
+
+/-- A linear observable on a lattice Proca phase space: coefficient functions
+for the scalar potential, the spatial potential, and their momenta. -/
+structure SmearedProcaObservable (ι : Type*) where
+  /-- Coefficient of the scalar potential. -/
+  a0 : ι → ℝ
+  /-- Coefficient of the spatial potential. -/
+  ai : ι → ℝ
+  /-- Coefficient of the scalar momentum. -/
+  pi0 : ι → ℝ
+  /-- Coefficient of the spatial momentum. -/
+  pii : ι → ℝ
+
+/-- The canonical Poisson bracket of two linear observables, from
+`{A_mu, pi_nu} = delta_mu_nu` at each site. -/
+def smearedBracket {ι : Type*} [Fintype ι] (A B : SmearedProcaObservable ι) : ℝ :=
+  (∑ i, A.a0 i * B.pi0 i + ∑ i, A.ai i * B.pii i)
+    - (∑ i, A.pi0 i * B.a0 i + ∑ i, A.pii i * B.ai i)
+
+/-- The smeared primary constraint `sum_i xi_i pi^0_i`. -/
+def smearedPrimary {ι : Type*} (ξ : ι → ℝ) : SmearedProcaObservable ι where
+  a0 := 0
+  ai := 0
+  pi0 := ξ
+  pii := 0
+
+/-- The smeared Gauss constraint `sum_i eta_i (div pi_i + m^2 A_0_i)`, with the
+divergence supplied as a linear map on the lattice. -/
+def smearedGauss {ι : Type*} (m : ℝ) (D : (ι → ℝ) →ₗ[ℝ] (ι → ℝ))
+    (η : ι → ℝ) : SmearedProcaObservable ι where
+  a0 := fun i => m ^ 2 * η i
+  ai := 0
+  pi0 := 0
+  pii := D η
+
+/-- The bracket of the smeared primary and Gauss constraints is minus the mass
+squared times the smearing inner product; the divergence drops out. -/
+lemma smearedBracket_primary_gauss {ι : Type*} [Fintype ι] (m : ℝ)
+    (D : (ι → ℝ) →ₗ[ℝ] (ι → ℝ)) (ξ η : ι → ℝ) :
+    smearedBracket (smearedPrimary ξ) (smearedGauss m D η)
+      = -m ^ 2 * ∑ i, ξ i * η i := by
+  have h : (∑ i, ξ i * (m ^ 2 * η i)) = m ^ 2 * ∑ i, ξ i * η i := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun i _ => by ring)
+  simp [smearedBracket, smearedPrimary, smearedGauss, h]
+
+/-- For nonzero mass no nonzero smearing function is null: some smeared Gauss
+constraint has a nonzero bracket with it, so the smeared Proca constraints are
+second-class. -/
+theorem smeared_constraints_second_class {ι : Type*} [Fintype ι] (m : ℝ)
+    (hm : m ≠ 0) (D : (ι → ℝ) →ₗ[ℝ] (ι → ℝ)) (ξ : ι → ℝ) (hξ : ξ ≠ 0) :
+    ∃ η : ι → ℝ, smearedBracket (smearedPrimary ξ) (smearedGauss m D η) ≠ 0 := by
+  classical
+  by_contra h
+  push Not at h
+  have hex : ∃ i, ξ i ≠ 0 := by
+    by_contra hnone
+    push Not at hnone
+    exact hξ (funext hnone)
+  obtain ⟨i, hi⟩ := hex
+  have hzero := h (fun j => if j = i then 1 else 0)
+  rw [smearedBracket_primary_gauss] at hzero
+  have hsum : (∑ j : ι, ξ j * (if j = i then (1 : ℝ) else 0)) = ξ i := by
+    rw [Finset.sum_eq_single i]
+    · simp
+    · intro j _ hji
+      simp [hji]
+    · intro hi'
+      exact absurd (Finset.mem_univ i) hi'
+  rw [hsum] at hzero
+  exact (mul_ne_zero (neg_ne_zero.mpr (pow_ne_zero 2 hm)) hi) hzero
 
 end GeneralRelativity

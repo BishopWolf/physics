@@ -43,7 +43,7 @@ the present pointwise framework. The missing layers are identified and ordered
 into a concrete roadmap: manifold Lorentzian geometry, Sobolev and elliptic
 theory for the constraints, quasilinear hyperbolic existence in a suitable
 gauge, and gauge/constraint propagation together with geometric maximality.
-The Cauchy-programme modules contribute 356 of the 1336 audited declarations
+The Cauchy-programme modules contribute 356 of the 1353 audited declarations
 in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints ·
@@ -279,9 +279,13 @@ Four layers separate the present pointwise development from the theorem above.
 3. **Quasilinear hyperbolic existence.** In harmonic or wave gauge the vacuum
    Einstein equations become a quasilinear symmetric hyperbolic system. Local
    existence for that system is the analytic core of [4]. No Mathlib or
-   dependency PDE theorem supplies it, and the surveyed Lean PDE projects are
-   elliptic or Navier–Stokes formalisations. The linear wave theorem of §4 is a
-   constant-coefficient model, not this layer.
+   dependency PDE theorem supplies it. The surveyed Lean PDE projects are
+   elliptic or Navier–Stokes formalisations; the 2026 Navier–Stokes blow-up
+   certificates (OpenAI's, and the Alpöge–Buckmaster development) treat a
+   parabolic system and prove finite-time breakdown, not local well-posedness of
+   the quasilinear hyperbolic Einstein system, so they do not supply this layer.
+   The linear wave theorem of §4 is a constant-coefficient model, not this
+   layer.
 4. **Gauge and constraint propagation, then maximality.** One must show that a
    reduced solution satisfies the gauge condition and the full Einstein
    equations, that the constraints propagate, and that developments patch to a
@@ -337,7 +341,7 @@ the maximality problem until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I has 1336 declarations. It contains the
+The development audited in Paper I has 1353 declarations. It contains the
 constraint, geodesic, wave, energy, uniqueness, chart, Bianchi, Sobolev,
 reduced-Cauchy, gauge-recovery, maximal-development and explicit-development
 layers discussed here, together with the solution theory, the alternative
@@ -358,7 +362,7 @@ take for granted when they exhibit a solution.
 The build is silent, no declaration uses `sorry`, `admit` or an axiom of its
 own, and every axiom report stays inside
 $\{\mathrm{propext},\mathrm{Classical.choice},\mathrm{Quot.sound}\}$. The
-axiom audit covers 1336 declarations, 807 of them theorem-like, and the
+axiom audit covers 1353 declarations, 813 of them theorem-like, and the
 generated proof-status table is checked against the audit. The commands are:
 
 ```sh

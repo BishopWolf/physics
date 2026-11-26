@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1336 declarations, 807 of them theorem-like. The table below is the
+1353 declarations, 813 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -25,6 +25,17 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.aqualLagrangianDensity1D_deriv_phi` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.aqualLagrangianDensity1D_deriv_phi'` | `Gravitation/AqualVariation.lean` | - | unverified |
 | `GeneralRelativity.aqualMomentumDensity_deriv` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discreteAction` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discreteDivergence` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.sum_link_mul_difference` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discreteMomentum` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discreteResidual` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discreteFirstVariation` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discreteFirstVariation_eq_neg_sum` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_discreteAction` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsBoundary` | `Gravitation/AqualVariation.lean` | (none) | proved |
+| `GeneralRelativity.VanishesOnBoundary` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.discrete_stationary_iff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_const` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_congr` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.hasDerivAt_update` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -156,6 +167,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.procaDiracMatrix` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.procaDiracMatrix_det` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.proca_constraints_second_class` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.SmearedProcaObservable` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedBracket` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedPrimary` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedGauss` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedBracket_primary_gauss` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smeared_constraints_second_class` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Space3` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.metric` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |

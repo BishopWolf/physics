@@ -80,14 +80,17 @@ $\nabla\cdot[\mu(|\nabla\phi|/a_0)\nabla\phi]=4\pi G\rho$ are stated, with the
 interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
 $\mu=1$.
 
-**Needs.** The functional-analytic minimisation behind the derivation
-(compact-support variations, integration by parts), the interpolating
+**Needs.** The continuum functional-analytic minimisation behind the derivation
+(compact-support variations on the line, integration by parts), the interpolating
 function selected by the action's free function, lensing without dark matter,
 and a cosmological background.
 
 **Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
 partial derivatives computed, and stationarity proved equivalent to the field
-equation in a one-dimensional model; the functional-analytic step remains. The best developed of the three.
+equation in a one-dimensional model. A finite-graph version computes the first
+variation, proves summation by parts, and derives the discrete Euler-Lagrange
+equation from stationarity; the continuum step remains. The best developed of
+the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -308,9 +311,10 @@ completion such as TeVeS or a newer construction, not to the AQUAL action.
 | STVG | 2 | 3 (massive Proca) | 1 for $G$, plus 1 if the vector mass $\mu$ is dynamical | 6 (7) | Proca sector ghost-free; the scalar needs a positive kinetic term and a bounded potential; no nonlinear Hamiltonian analysis is available |
 | TeVeS | 2 | 3 (constrained unit timelike) | 1 | 6 | claimed ghost-free in the Hamiltonian analysis of Skordis–Złośnik; other analyses report a linear instability of the Schwarzschild–TeVeS solution, caustic formation in the vector field, and superluminal scalar modes for some parameter choices |
 
-The counts are field-content counts, not the outcome of a Dirac constraint
-analysis: a constrained vector contributes three degrees of freedom, a massive
-vector also three, and the metric two. The TeVeS vector is normalised with
+The counts are field-content counts, and the formalised Dirac formula
+reproduces them once the constraint classification is supplied: a constrained
+vector contributes three degrees of freedom, a massive vector also three, and
+the metric two. The TeVeS vector is normalised with
 respect to the Einstein metric, so its timelike component is not independent;
 the scalar is unconstrained.
 
@@ -321,8 +325,11 @@ freedom), the unit vector four components and one first-class constraint
 TeVeS. For the Proca pair the brackets are computed in a finite-dimensional model:
 with $\pi^0$ and $\sum_i\pi^i+m^2A_0$ the Dirac matrix is
 $\begin{pmatrix}0&-m^2\\ m^2&0\end{pmatrix}$, whose determinant $m^4$ is
-nonzero, so the two constraints are second-class. The field-theoretic brackets,
-with smeared constraints and spatial derivatives, are not formalised.
+nonzero, so the two constraints are second-class. Smeared constraints are also
+treated on a finite lattice: the bracket of $\pi^0(\xi)$ with the Gauss
+constraint $G(\eta)$ is $-m^2\sum_i\xi_i\eta_i$, which has no nonzero null
+direction, so the pair remains second-class after smearing. The continuum
+bracket, with distributions and spatial derivatives, is not formalised.
 
 For STVG, the vector is a Proca field: its kinetic term is the Maxwell term
 with a mass, which has no ghost at the quadratic level, and the scalar sector
@@ -343,8 +350,9 @@ they are why TeVeS is listed as partial rather than promoted.
 
 ## 4. The order of work
 
-1. Extend the AQUAL derivation from the one-dimensional model to variations of
-   the full action, with the compact-support and integration-by-parts steps.
+1. Carry the AQUAL derivation from the finite-graph and one-dimensional models
+   to variations of the full action on the line, with compact support and
+   integration by parts.
 2. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
 3. Compute V2 for every theory that passes V1, using the PPN dictionary.
@@ -360,11 +368,16 @@ they are why TeVeS is listed as partial rather than promoted.
 - No alternative is a full field theory in this development today.
 - The Euler-Lagrange residual of the AQUAL action is assembled, its two partial
   derivatives are computed, and stationarity is proved to be the MOND equation
-  in a one-dimensional model; the functional-analytic step is not formalised,
-  and the STVG and TeVeS equations are stated, not derived from their actions.
-- The PPN values and degree-of-freedom counts of §3.16–3.17 are collected from
-  the literature. None is re-derived, and none is machine-checked; a
-  preferred-frame or ghost computation in this development would be new work.
+  in a one-dimensional model. A finite-graph version computes the first
+  variation, proves summation by parts, and shows that stationarity under
+  boundary-vanishing variations is the discrete Euler-Lagrange equation; the
+  continuum functional-analytic step is not formalised. The STVG and TeVeS
+  equations are stated, not derived from their actions.
+- The PPN values of §3.16 are collected from the literature. The
+  degree-of-freedom counts of §3.17 are reproduced by the formalised Dirac
+  formula for the stated field content, with the constraint classification as
+  input data; no preferred-frame or ghost computation is carried out, and a
+  continuum field-theoretic bracket is not formalised.
 - No observational data analysis: PPN bounds and GW170817 are cited as filters,
   not re-derived.
 - No claim that a theory failing V1 is physically wrong; only that it is not

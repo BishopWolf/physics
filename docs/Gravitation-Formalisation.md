@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1336 declarations, 807 of them theorem-like. An independent Vulkan
+contains 1353 declarations, 813 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1336 declarations, 807 of them theorem-like; no declaration uses `sorry`,
+1353 declarations, 813 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -666,6 +666,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.EddingtonFinkelstein` | 36 |
 | `Gravitation.SchwarzschildManifold` | 34 |
 | `Gravitation.KruskalSzekeres` | 33 |
+| `Gravitation.DiracCounting` | 33 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.Basic` | 28 |
 | `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 27 |
 | `Gravitation.Relativity.General.Modified.ChameleonScreening` | 26 |
@@ -675,13 +676,13 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Kerr.Basic` | 23 |
 | `Gravitation.CauchyInterfaces` | 22 |
 | `Gravitation.ReducedCauchy` | 22 |
+| `Gravitation.AqualVariation` | 22 |
 | `Gravitation.Relativity.General.Modified.EinsteinAether` | 21 |
 | `Gravitation.Relativity.General.GravitationalConstant` | 18 |
 | `Gravitation.Relativity.Metrics.CoordDeriv` | 18 |
 | `Gravitation.Relativity.General.Modified.Lovelock.Basic` | 17 |
 | `Gravitation.Relativity.General.Modified.MOND` | 17 |
 | `Gravitation.Relativity.Metrics.StaticSphericalMetric` | 17 |
-| `Gravitation.DiracCounting` | 27 |
 | `Gravitation.WaveEnergy` | 15 |
 | `Gravitation.ConformalDecomposition` | 15 |
 | `Gravitation.Relativity.General.GeodesicSystem` | 14 |
@@ -714,7 +715,6 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Modified.KaluzaKlein.KaluzaMiracle` | 8 |
 | `Gravitation.Relativity.General.Modified.Teleparallel.Basic` | 8 |
 | `Gravitation.Relativity.General.Modified.Teleparallel.FLRWTorsion` | 8 |
-| `Gravitation.AqualVariation` | 11 |
 | `Gravitation.Cosmology.FLRW.Metric` | 7 |
 | `Gravitation.ExplicitDevelopments` | 7 |
 | `Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature` | 7 |
@@ -757,9 +757,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
 | `Gravitation.ManifoldSobolev` | 1 |
-| **Total** | **1336** |
+| **Total** | **1353** |
 
-All 1336 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1353 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References
