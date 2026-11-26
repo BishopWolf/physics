@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1263 declarations, 776 of them theorem-like. The table below is the
+1272 declarations, 778 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -74,6 +74,15 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ExplicitDevelopmentCertificate.deSitter_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
 | `GeneralRelativity.ExplicitDevelopmentCertificate.kerr_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
 | `GeneralRelativity.ExplicitDevelopmentCertificate.flrw_recovered` | `Gravitation/CauchyInterfaces.lean` | (none) | proved |
+| `GeneralRelativity.ConformalData` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.physicalMetric` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.physicalMetric_g` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.extrinsicCurvature` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.IsTransverseTraceless` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hamiltonianResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.momentumResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsLichnerowiczYorkSolution` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.momentumResidual_zero_gradTau` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.christoffel` | `Gravitation/Cosmology/FLRW/Christoffel.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.christoffelDeriv` | `Gravitation/Cosmology/FLRW/Christoffel.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.christoffel_eq` | `Gravitation/Cosmology/FLRW/Christoffel.lean` | propext, Classical.choice, Quot.sound | proved |
