@@ -99,25 +99,25 @@ Double precision (`GL_ARB_gpu_shader_fp64`) with `h = 1e-4`. The host queries
 second-order accurate, so truncation is about `h² = 1e-8` and roundoff about
 `ε/h² ≈ 1e-8`.
 
-Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354), 108 lattice points:
+Measured on an AMD RX 570 (RADV POLARIS10, Vulkan 1.4.354) and on lavapipe
+(llvmpipe, Mesa 26.2.7, Vulkan 1.4.354 — the driver CI runs), 108 lattice points:
 
-| Case | check | measured |
-| --- | --- | --- |
-| Schwarzschild | `max|Ric|` | `1.83e-7` |
-| Schwarzschild | Kretschmann vs `48M²/r⁶` | `1.11e-7` relative |
-| Schwarzschild–de Sitter | `max|Ric − Λg|` | `6.94e-7` |
-| Schwarzschild–de Sitter | `K` vs `48M²/r⁶ + 8Λ²/3` | `1.91e-7` relative |
-| Kerr `a = 0.5` | `max|Ric|`, `max|G|` | `2.10e-7`, `1.42e-7` |
-| Kerr `a = 0.5` | `K` vs the closed form | `1.71e-7` relative |
-| Kerr `a = 0.5` | `max|∇_a G^{ab}|` (contracted Bianchi) | `5.04e-9` |
-| Reissner–Nordström `Q = 0.5` | `max|G − 8πT|`, `max|R|` | `1.09e-7`, `2.41e-8` |
-| Reissner–Nordström `Q = 0.5` | `K` vs the closed form | `1.17e-7` relative |
-| Reissner–Nordström `Q = 0.5` | `max|∇_a G^{ab}|` (`G ≠ 0`) | `6.83e-5` |
-| FLRW `H = 1`, `k = 0.3` | `Ric`, `R`, `G` vs closed forms | `1.27e-6` |
-| Interior Schwarzschild `Rc = 5`, `Ra = 4` | `max|G − 8π diag(ρ,p,p,p)|` | `8.90e-8` |
-| Schwarzschild `M = 2`, `r ∈ [5, 5.75]` | `max|Ric|`, `K` | `1.93e-7`, `1.05e-7` relative |
-| Schwarzschild–de Sitter `Λ = −0.05` | `max|Ric − Λg|`, `K` | `1.83e-7`, `7.51e-8` relative |
-
+| Case | check | RX 570 | lavapipe |
+| --- | --- | --- | --- |
+| Schwarzschild | `max\|Ric\|` | `1.83e-7` | `1.80e-7` |
+| Schwarzschild | Kretschmann vs `48M²/r⁶` | `1.11e-7 rel` | `1.06e-7 rel` |
+| Schwarzschild–de Sitter | `max\|Ric − Λg\|` | `6.94e-7` | `6.62e-7` |
+| Schwarzschild–de Sitter | `K` vs `48M²/r⁶ + 8Λ²/3` | `1.91e-7 rel` | `1.79e-7 rel` |
+| Kerr `a = 0.5` | `max\|Ric\|`, `max\|G\|` | `2.10e-7, 1.42e-7` | `1.78e-7, 1.28e-7` |
+| Kerr `a = 0.5` | `K` vs the closed form | `1.71e-7 rel` | `1.85e-7 rel` |
+| Kerr `a = 0.5` | `max\|∇_a G^{ab}\|` (contracted Bianchi) | `5.04e-9` | `4.84e-9` |
+| Reissner–Nordström `Q = 0.5` | `max\|G − 8πT\|`, `max\|R\|` | `1.08e-7, 2.41e-8` | `1.16e-7, 2.23e-8` |
+| Reissner–Nordström `Q = 0.5` | `K` vs the closed form | `1.17e-7 rel` | `1.12e-7 rel` |
+| Reissner–Nordström `Q = 0.5` | `max\|∇_a G^{ab}\|` (`G ≠ 0`) | `6.83e-5` | `6.83e-5` |
+| FLRW `H = 1`, `k = 0.3` | `Ric`, `R`, `G` vs closed forms | `1.27e-6` | `1.24e-6` |
+| Interior Schwarzschild `Rc = 5`, `Ra = 4` | `max\|G − 8π diag(ρ,p,p,p)\|` | `8.89e-8` | `9.17e-8` |
+| Schwarzschild `M = 2`, `r ∈ [5, 5.75]` | `max\|Ric\|`, `K` | `1.93e-7, 1.05e-7 rel` | `1.91e-7, 1.02e-7 rel` |
+| Schwarzschild–de Sitter `Λ = −0.05` | `max\|Ric − Λg\|`, `K` | `1.83e-7, 7.51e-8 rel` | `1.80e-7, 8.56e-8 rel` |
 GLSL has no double-precision `sin`, so the metric's `sin²θ` is expanded in
 double around the float `sin`/`cos` of each lattice line's base angle.
 Evaluating `sin` in float directly would put a `1e-7` kink in `θ`, which the
