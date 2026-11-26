@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1298 declarations, 787 of them theorem-like. The table below is the
+1306 declarations, 790 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -14,6 +14,14 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 <!-- proof-status:begin -->
 | Declaration | File | Axioms | Status |
 | --- | --- | --- | --- |
+| `GeneralRelativity.AqualFreeFunction` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualLagrangianDensity1D` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualMomentumDensity` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualDivergence1D` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualEulerLagrangeResidual` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualEulerLagrangeResidual_eq` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqual_euler_lagrange_iff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualFreeFunction_stationary_iff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_const` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_congr` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.hasDerivAt_update` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
