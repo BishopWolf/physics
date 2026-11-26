@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1392 declarations, 839 of them theorem-like. An independent Vulkan
+contains 1399 declarations, 844 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1392 declarations, 839 of them theorem-like; no declaration uses `sorry`,
+1399 declarations, 844 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -659,6 +659,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | --- | --- |
 | `Gravitation.InitialDataInterface` | 77 |
 | `Gravitation.ManifoldInterface` | 72 |
+| `Gravitation.AqualVariation` | 64 |
 | `PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere` | 53 |
 | `Gravitation.Relativity.General.Schwarzschild.Basic` | 43 |
 | `Gravitation.SobolevInitialData` | 41 |
@@ -667,7 +668,6 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.EddingtonFinkelstein` | 36 |
 | `Gravitation.SchwarzschildManifold` | 34 |
 | `Gravitation.KruskalSzekeres` | 33 |
-| `Gravitation.AqualVariation` | 57 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.Basic` | 28 |
 | `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 27 |
 | `Gravitation.Relativity.General.Modified.ChameleonScreening` | 26 |
@@ -757,9 +757,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
 | `Gravitation.ManifoldSobolev` | 1 |
-| **Total** | **1392** |
+| **Total** | **1399** |
 
-All 1392 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1399 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

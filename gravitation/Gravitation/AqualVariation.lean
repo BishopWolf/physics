@@ -843,7 +843,60 @@ lemma aqualLagrangianDensity1D_hasDerivAt_variation
     convert hsub using 1
     · funext ε
       simp [aqualLagrangianDensity1D]
+    · ring_nf
+  convert hdensity using 1
+  unfold aqualMomentumDensity
+  have hpi : Real.pi ≠ 0 := Real.pi_pos.ne'
+  field_simp [ha0, hG, hpi]
+  ring
+
+/-- The pointwise chain rule at an arbitrary parameter value.  This is the form
+needed for differentiating under a whole-line integral, where the derivative is
+required on a neighbourhood of the base parameter. -/
+lemma aqualLagrangianDensity1D_hasDerivAt_variation_at
+    (a0 G : ℝ) (F F' : ℝ → ℝ) (ρ φ φ' v v' : ℝ → ℝ) (x ε₀ : ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : HasDerivAt F (F' ((φ' x + ε₀ * v' x) ^ 2 / a0 ^ 2))
+      ((φ' x + ε₀ * v' x) ^ 2 / a0 ^ 2)) :
+    HasDerivAt
+      (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ x) (φ x + ε * v x) (φ' x + ε * v' x))
+      (-ρ x * v x +
+        aqualMomentumDensity a0 G F' (fun t => φ' t + ε₀ * v' t) x * v' x) ε₀ := by
+  have harg : HasDerivAt (fun ε : ℝ => (φ' x + ε * v' x) ^ 2 / a0 ^ 2)
+      (2 * (φ' x + ε₀ * v' x) * v' x / a0 ^ 2) ε₀ := by
+    have h1 : HasDerivAt (fun ε : ℝ => φ' x + ε * v' x) (v' x) ε₀ := by
+      have h := (hasDerivAt_const (c := φ' x) (x := ε₀)).add
+        ((hasDerivAt_id (𝕜 := ℝ) ε₀).mul_const (v' x))
+      convert h using 1
+      · funext ε
+        simp
+      · ring
+    have h2 := (h1.pow 2).div_const (a0 ^ 2)
+    convert h2 using 1
+    ring
+  have hFarg := hF.comp ε₀ harg
+  have hphi : HasDerivAt (fun ε : ℝ => φ x + ε * v x) (v x) ε₀ := by
+    have h := (hasDerivAt_const (c := φ x) (x := ε₀)).add
+      ((hasDerivAt_id (𝕜 := ℝ) ε₀).mul_const (v x))
+    convert h using 1
+    · funext ε
+      simp
     · ring
+  have hsource : HasDerivAt (fun ε : ℝ => ρ x * (φ x + ε * v x)) (ρ x * v x) ε₀ :=
+    hphi.const_mul (ρ x)
+  have hdensity : HasDerivAt
+      (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ x) (φ x + ε * v x) (φ' x + ε * v' x))
+      (-(a0 ^ 2 / (8 * Real.pi * G)) *
+          (F' ((φ' x + ε₀ * v' x) ^ 2 / a0 ^ 2) *
+            (2 * (φ' x + ε₀ * v' x) * v' x / a0 ^ 2))
+        - ρ x * v x) ε₀ := by
+    have hconst := hFarg.const_mul (-(a0 ^ 2 / (8 * Real.pi * G)))
+    have hsub := hconst.sub hsource
+    convert hsub using 1
+    · funext ε
+      simp [aqualLagrangianDensity1D]
   convert hdensity using 1
   unfold aqualMomentumDensity
   have hpi : Real.pi ≠ 0 := Real.pi_pos.ne'
@@ -985,6 +1038,144 @@ theorem hasDerivAt_aqualActionLine_of_support
   rw [hline]
   exact hasDerivAt_aqualAction1D a0 G F F' ρ φ φ' v a b hcont hcont' hderiv
 
+/-- The AQUAL density along a straight-line whole-line variation, with the field
+derivative varied by `v'`. -/
+noncomputable def aqualVariationDensity (a0 G : ℝ) (F ρ φ φ' v v' : ℝ → ℝ)
+    (ε x : ℝ) : ℝ :=
+  aqualLagrangianDensity1D a0 G F (ρ x) (φ x + ε * v x) (φ' x + ε * v' x)
+
+/-- The parameter derivative of `aqualVariationDensity` at `ε`. -/
+noncomputable def aqualVariationDerivative (a0 G : ℝ) (F' ρ v v' : ℝ → ℝ)
+    (φ' : ℝ → ℝ) (ε x : ℝ) : ℝ :=
+  -ρ x * v x + aqualMomentumDensity a0 G F' (fun t => φ' t + ε * v' t) x * v' x
+
+/-- The nonlinear interval variation with the parametric `C^1` hypotheses
+discharged from concrete smoothness of the data.  The density is `C^1` on
+`univ × uIcc a b` because `F`, `ρ`, `φ`, `φ'`, `v` and `deriv v` are, and the
+parameter derivative is continuous because `F'` is. -/
+theorem hasDerivAt_aqualAction1D_of_contDiff
+    (a0 G : ℝ) (F F' ρ φ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : ContDiff ℝ 2 F)
+    (hFderiv : ∀ y : ℝ, HasDerivAt F (F' y) y)
+    (hρ : ContDiffOn ℝ 1 ρ (Set.uIcc a b))
+    (hφ : ContDiffOn ℝ 1 φ (Set.uIcc a b))
+    (hφ' : ContDiffOn ℝ 1 φ' (Set.uIcc a b))
+    (hv : ContDiffOn ℝ 1 v (Set.uIcc a b))
+    (hv' : ContDiffOn ℝ 1 (deriv v) (Set.uIcc a b)) :
+    HasDerivAt
+      (fun ε : ℝ => aqualAction1D a0 G F ρ (φ + ε • v) (φ' + ε • deriv v) a b)
+      (aqualFirstVariationIntegral a0 G F' ρ φ' v a b) 0 := by
+  have hF'eq : F' = deriv F := funext fun y => (hFderiv y).deriv.symm
+  have hF' : ContDiff ℝ 1 F' := by
+    rw [hF'eq]
+    exact hF.deriv'
+  have hcont : ContDiffOn ℝ 1
+      (Function.uncurry (fun (ε : ℝ) (t : ℝ) =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)))
+      (Set.univ ×ˢ Set.uIcc a b) := by
+    have hs : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => p.2) (Set.univ ×ˢ Set.uIcc a b) :=
+      contDiffOn_snd
+    have hρs : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => ρ p.2) (Set.univ ×ˢ Set.uIcc a b) :=
+      hρ.comp hs (fun p hp => hp.2)
+    have hφs : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => φ p.2) (Set.univ ×ˢ Set.uIcc a b) :=
+      hφ.comp hs (fun p hp => hp.2)
+    have hφ's : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => φ' p.2) (Set.univ ×ˢ Set.uIcc a b) :=
+      hφ'.comp hs (fun p hp => hp.2)
+    have hvs : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => v p.2) (Set.univ ×ˢ Set.uIcc a b) :=
+      hv.comp hs (fun p hp => hp.2)
+    have hdv : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => deriv v p.2) (Set.univ ×ˢ Set.uIcc a b) :=
+      hv'.comp hs (fun p hp => hp.2)
+    have hfst : ContDiffOn ℝ 1 (fun p : ℝ × ℝ => p.1) (Set.univ ×ˢ Set.uIcc a b) :=
+      contDiffOn_fst
+    have hy : ContDiffOn ℝ 1
+        (fun p : ℝ × ℝ => (φ' p.2 + p.1 * deriv v p.2) ^ 2 / a0 ^ 2)
+        (Set.univ ×ˢ Set.uIcc a b) :=
+      ((hφ's.add (hfst.mul hdv)).pow 2).div_const (a0 ^ 2)
+    have hFy : ContDiffOn ℝ 1
+        (fun p : ℝ × ℝ => F ((φ' p.2 + p.1 * deriv v p.2) ^ 2 / a0 ^ 2))
+        (Set.univ ×ˢ Set.uIcc a b) :=
+      (hF.contDiffOn.of_le (by norm_num)).comp hy (fun p _ => Set.mem_univ _)
+    have hsrc : ContDiffOn ℝ 1
+        (fun p : ℝ × ℝ => ρ p.2 * (φ p.2 + p.1 * v p.2)) (Set.univ ×ˢ Set.uIcc a b) :=
+      hρs.mul (hφs.add (hfst.mul hvs))
+    exact ((contDiffOn_const (c := (-(a0 ^ 2 / (8 * Real.pi * G))))).mul hFy).sub hsrc
+  have hcontD : ContinuousOn (aqualVariationDerivative a0 G F' ρ v (deriv v) φ' 0)
+      (Set.uIcc a b) := by
+    have hφ's : ContDiffOn ℝ 1 (fun t : ℝ => φ' t) (Set.uIcc a b) := hφ'
+    have hdv : ContDiffOn ℝ 1 (fun t : ℝ => deriv v t) (Set.uIcc a b) := hv'
+    have hy : ContDiffOn ℝ 1 (fun t : ℝ => φ' t ^ 2 / a0 ^ 2) (Set.uIcc a b) :=
+      (hφ's.pow 2).div_const (a0 ^ 2)
+    have hF'y : ContDiffOn ℝ 1 (fun t : ℝ => F' (φ' t ^ 2 / a0 ^ 2)) (Set.uIcc a b) :=
+      hF'.contDiffOn.comp hy (fun t _ => Set.mem_univ _)
+    have hmom : ContDiffOn ℝ 1 (fun t : ℝ => aqualMomentumDensity a0 G F' φ' t)
+        (Set.uIcc a b) := by
+      unfold aqualMomentumDensity
+      exact ((contDiffOn_const (c := (-(1 / (4 * Real.pi * G))))).mul hF'y).mul hφ's
+    have hmain : ContinuousOn
+        (fun t : ℝ => -ρ t * v t + aqualMomentumDensity a0 G F' φ' t * deriv v t)
+        (Set.uIcc a b) :=
+      (hρ.continuousOn.neg.mul hv.continuousOn).add (hmom.continuousOn.mul hdv.continuousOn)
+    convert hmain using 1
+    funext t
+    simp [aqualVariationDerivative]
+  have hderiv0 : ∀ t ∈ Set.uIcc a b, HasDerivAt
+      (fun ε : ℝ => aqualVariationDensity a0 G F ρ φ φ' v (deriv v) ε t)
+      (aqualVariationDerivative a0 G F' ρ v (deriv v) φ' 0 t) 0 := by
+    intro t ht
+    simpa [aqualVariationDensity, aqualVariationDerivative] using
+      aqualLagrangianDensity1D_hasDerivAt_variation_at a0 G F F' ρ φ φ' v (deriv v) t 0
+        hG ha0 (hFderiv _)
+  have hcont' : ContinuousOn (fun t : ℝ => fderiv ℝ
+      (fun ε : ℝ => aqualVariationDensity a0 G F ρ φ φ' v (deriv v) ε t) 0)
+      (Set.uIcc a b) := by
+    have hmap : ContinuousOn (fun t => ContinuousLinearMap.toSpanSingleton ℝ
+        (aqualVariationDerivative a0 G F' ρ v (deriv v) φ' 0 t)) (Set.uIcc a b) :=
+      (ContinuousLinearMap.toSpanSingletonLIE ℝ ℝ).continuous.comp_continuousOn hcontD
+    refine hmap.congr ?_
+    intro t ht
+    apply ContinuousLinearMap.ext
+    intro x
+    rw [fderiv_eq_smul_deriv, ContinuousLinearMap.toSpanSingleton_apply]
+    rw [(hderiv0 t ht).deriv]
+  refine hasDerivAt_aqualAction1D_of_hasDerivAt a0 G F F' ρ φ φ' v a b hG ha0 hFderiv ?_ ?_
+  · simpa [Function.uncurry, aqualVariationDensity] using hcont
+  · simpa [aqualVariationDensity] using hcont'
+
+/-- The whole-line AQUAL variation without a compact-support hypothesis.  The
+support condition is replaced by the standard dominated-differentiation data for
+an integral over the line: integrability at the base parameter, measurability,
+and an integrable bound for the parameter derivative on a neighbourhood of zero.
+No restriction on the support of the field or the variation is imposed. -/
+theorem hasDerivAt_aqualActionLine_of_dominated
+    (a0 G : ℝ) (F F' ρ φ φ' v v' bound : ℝ → ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : ∀ y : ℝ, HasDerivAt F (F' y) y)
+    (hL0_int : MeasureTheory.Integrable
+      (aqualVariationDensity a0 G F ρ φ φ' v v' 0) MeasureTheory.volume)
+    (hmeas : ∀ᶠ ε in nhds (0 : ℝ), MeasureTheory.AEStronglyMeasurable
+      (aqualVariationDensity a0 G F ρ φ φ' v v' ε) MeasureTheory.volume)
+    (hmeas' : MeasureTheory.AEStronglyMeasurable
+      (aqualVariationDerivative a0 G F' ρ v v' φ' 0) MeasureTheory.volume)
+    (hbound : ∀ᵐ x ∂MeasureTheory.volume, ∀ ε ∈ Set.Ioo (-1 : ℝ) 1,
+      ‖aqualVariationDerivative a0 G F' ρ v v' φ' ε x‖ ≤ bound x)
+    (hbound_int : MeasureTheory.Integrable bound MeasureTheory.volume) :
+    HasDerivAt
+      (fun ε : ℝ => ∫ x, aqualVariationDensity a0 G F ρ φ φ' v v' ε x)
+      (∫ x, aqualVariationDerivative a0 G F' ρ v v' φ' 0 x) 0 := by
+  obtain ⟨_, hderiv⟩ := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := fun ε x => aqualVariationDensity a0 G F ρ φ φ' v v' ε x)
+    (F' := fun ε x => aqualVariationDerivative a0 G F' ρ v v' φ' ε x)
+    (s := Set.Ioo (-1 : ℝ) 1) (x₀ := (0 : ℝ)) (bound := bound)
+    (isOpen_Ioo.mem_nhds (by norm_num)) hmeas hL0_int hmeas' hbound hbound_int (by
+      filter_upwards with x
+      intro ε hε
+      simpa [aqualVariationDensity, aqualVariationDerivative] using
+        (aqualLagrangianDensity1D_hasDerivAt_variation_at a0 G F F' ρ φ φ' v v' x ε
+          hG ha0 (hF _)))
+  exact hderiv
+
 /-! ## J. From the discrete residual to the continuum residual -/
 
 /-- A profile sampled at the sites of a path with spacing `h`. -/
@@ -1001,6 +1192,51 @@ private lemma taylorWithinEval_two (f : ℝ → ℝ) (x y : ℝ) :
   rw [taylor_within_apply]
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
   simp [iteratedDerivWithin_succ]
+
+private lemma taylorWithinEval_one_eq (φ : ℝ → ℝ) (x₀ y : ℝ)
+    (hφ : DifferentiableAt ℝ φ x₀) (hxy : x₀ ≠ y) :
+    taylorWithinEval φ 1 (Set.uIcc x₀ y) x₀ y = φ x₀ + (y - x₀) * deriv φ x₀ := by
+  rw [taylor_within_apply]
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  simp only [Nat.factorial_zero, Nat.factorial_one, Nat.cast_one, inv_one, pow_zero, pow_one,
+    iteratedDerivWithin_zero, iteratedDerivWithin_one]
+  rw [hφ.derivWithin]
+  · ring
+  · exact (uniqueDiffOn_uIcc hxy).uniqueDiffWithinAt Set.left_mem_uIcc
+
+private lemma secondDifference_eq_lagrange (φ : ℝ → ℝ) (hφ : ContDiff ℝ 2 φ)
+    (x h : ℝ) (hh : h ≠ 0) :
+    ∃ ξ η : ℝ, ξ ∈ Set.uIoo x (x + h) ∧ η ∈ Set.uIoo x (x - h) ∧
+      secondDifference φ x h =
+        (deriv (deriv φ) ξ + deriv (deriv φ) η) / 2 := by
+  have hxp : x ≠ x + h := by intro hc; exact hh (by linarith)
+  have hxm : x ≠ x - h := by intro hc; exact hh (by linarith)
+  have hφ2 : ContDiffOn ℝ ((1 : ℕ) + 1) φ (Set.uIcc x (x + h)) := hφ.contDiffOn
+  have hφ2' : ContDiffOn ℝ ((1 : ℕ) + 1) φ (Set.uIcc x (x - h)) := hφ.contDiffOn
+  obtain ⟨ξ, hξ, hξeq⟩ := taylor_mean_remainder_lagrange_iteratedDeriv
+    (f := φ) (x := x + h) (x₀ := x) (n := 1) hxp hφ2
+  obtain ⟨η, hη, hηeq⟩ := taylor_mean_remainder_lagrange_iteratedDeriv
+    (f := φ) (x := x - h) (x₀ := x) (n := 1) hxm hφ2'
+  refine ⟨ξ, η, hξ, hη, ?_⟩
+  have hφd : DifferentiableAt ℝ φ x := hφ.differentiable (by norm_num) x
+  have htp := taylorWithinEval_one_eq φ x (x + h) hφd hxp
+  have htm := taylorWithinEval_one_eq φ x (x - h) hφd hxm
+  have hξ' : φ (x + h) = φ x + h * deriv φ x + deriv (deriv φ) ξ * h ^ 2 / 2 := by
+    rw [htp] at hξeq
+    have hξeq' : φ (x + h) - (φ x + h * deriv φ x) = deriv (deriv φ) ξ * h ^ 2 / 2 := by
+      simpa [iteratedDeriv_succ, iteratedDeriv_one, Nat.factorial] using hξeq
+    linarith
+  have hη' : φ (x - h) = φ x - h * deriv φ x + deriv (deriv φ) η * h ^ 2 / 2 := by
+    rw [htm] at hηeq
+    have hηeq' : φ (x - h) - (φ x + (x - h - x) * deriv φ x)
+        = deriv (deriv φ) η * h ^ 2 / 2 := by
+      simpa [iteratedDeriv_succ, iteratedDeriv_one, Nat.factorial] using hηeq
+    have hsub : x - h - x = -h := by ring
+    rw [hsub] at hηeq'
+    linarith
+  rw [secondDifference, hξ', hη']
+  field_simp [hh]
+  ring
 
 /-- The symmetric second difference of a `C^2` profile tends to the second
 derivative at the centre.  This is Taylor's theorem at order two. -/
@@ -1058,6 +1294,72 @@ theorem secondDifference_tendsto (φ : ℝ → ℝ) (hφ : ContDiff ℝ 2 φ) (x
     field_simp [hh0]
     ring
   exact htarget.congr' (hsd.mono fun h hh => hh.symm)
+
+/-- The symmetric second difference of a `C^2` profile tends to the second
+derivative at the centre, along any refinement whose sampled sites tend to the
+centre.  The proof uses Taylor's theorem with the Lagrange remainder at each
+moving centre, so no relation between the rate of the site and the spacing is
+needed. -/
+theorem secondDifference_tendsto_of_tendsto_site (φ : ℝ → ℝ) (hφ : ContDiff ℝ 2 φ)
+    {ι : Type*} {l : Filter ι} {x : ℝ} (h : ι → ℝ) (i : ι → ℕ)
+    (hh : ∀ k, h k ≠ 0)
+    (hh0 : Filter.Tendsto h l (nhdsWithin (0 : ℝ) ({0}ᶜ)))
+    (hx : Filter.Tendsto (fun k => (i k : ℝ) * h k) l (nhds x)) :
+    Filter.Tendsto (fun k => secondDifference φ ((i k : ℝ) * h k) (h k))
+      l (nhds (deriv (deriv φ) x)) := by
+  let xk : ι → ℝ := fun k => (i k : ℝ) * h k
+  have hx' : Filter.Tendsto xk l (nhds x) := hx
+  classical
+  choose ξ η hξ hη heq using fun k =>
+    secondDifference_eq_lagrange φ hφ (xk k) (h k) (hh k)
+  have hξclose : ∀ k, |ξ k - xk k| ≤ |h k| := by
+    intro k
+    have hmem : ξ k ∈ Set.uIcc (xk k) (xk k + h k) := Set.Ioo_subset_Icc_self (hξ k)
+    simpa using Set.abs_sub_left_of_mem_uIcc hmem
+  have hηclose : ∀ k, |η k - xk k| ≤ |h k| := by
+    intro k
+    have hmem : η k ∈ Set.uIcc (xk k) (xk k - h k) := Set.Ioo_subset_Icc_self (hη k)
+    simpa using Set.abs_sub_left_of_mem_uIcc hmem
+  have hhab : Filter.Tendsto (fun k => |h k|) l (nhds 0) := by
+    simpa [Function.comp_def, abs_zero] using
+      (continuous_abs.tendsto 0).comp (hh0.mono_right nhdsWithin_le_nhds)
+  have hξt : Filter.Tendsto ξ l (nhds x) := by
+    rw [tendsto_iff_norm_sub_tendsto_zero]
+    refine squeeze_zero (f := fun k => ‖ξ k - x‖)
+      (g := fun k => |h k| + |xk k - x|) (fun k => abs_nonneg _) (fun k => ?_) ?_
+    · rw [Real.norm_eq_abs]
+      calc |ξ k - x| = |(ξ k - xk k) + (xk k - x)| := by ring_nf
+        _ ≤ |ξ k - xk k| + |xk k - x| := abs_add_le _ _
+        _ ≤ |h k| + |xk k - x| := add_le_add (hξclose k) le_rfl
+    · have h2 : Filter.Tendsto (fun k => |xk k - x|) l (nhds 0) := by
+        simpa using (hx'.sub_const x).abs
+      simpa using hhab.add h2
+  have hηt : Filter.Tendsto η l (nhds x) := by
+    rw [tendsto_iff_norm_sub_tendsto_zero]
+    refine squeeze_zero (f := fun k => ‖η k - x‖)
+      (g := fun k => |h k| + |xk k - x|) (fun k => abs_nonneg _) (fun k => ?_) ?_
+    · rw [Real.norm_eq_abs]
+      calc |η k - x| = |(η k - xk k) + (xk k - x)| := by ring_nf
+        _ ≤ |η k - xk k| + |xk k - x| := abs_add_le _ _
+        _ ≤ |h k| + |xk k - x| := add_le_add (hηclose k) le_rfl
+    · have h2 : Filter.Tendsto (fun k => |xk k - x|) l (nhds 0) := by
+        simpa using (hx'.sub_const x).abs
+      simpa using hhab.add h2
+  have hcont2 : Continuous (deriv (deriv φ)) := by
+    simpa [iteratedDeriv_succ, iteratedDeriv_one] using
+      hφ.continuous_iteratedDeriv 2 (by norm_num)
+  have hξlim : Filter.Tendsto (fun k => deriv (deriv φ) (ξ k)) l
+      (nhds (deriv (deriv φ) x)) := hcont2.tendsto x |> fun h => h.comp hξt
+  have hηlim : Filter.Tendsto (fun k => deriv (deriv φ) (η k)) l
+      (nhds (deriv (deriv φ) x)) := hcont2.tendsto x |> fun h => h.comp hηt
+  have hhalf := (hξlim.add hηlim).div_const 2
+  have hhalf' : Filter.Tendsto
+      (fun k => (deriv (deriv φ) (ξ k) + deriv (deriv φ) (η k)) / 2)
+      l (nhds (deriv (deriv φ) x)) := by
+    convert hhalf using 1
+    ring_nf
+  refine hhalf'.congr' (Filter.Eventually.of_forall fun k => ?_)
+  exact (heq k).symm
 
 /-- The discrete residual of a sampled profile is the negative second difference
 over `4 pi G`, plus the source term. -/
@@ -1140,6 +1442,24 @@ theorem sampledPath_residual_tendsto_of_contDiff
   apply sampledPath_residual_tendsto G ρ x φ hG h i hpos hh
   have hsd := (secondDifference_tendsto φ hφ x).comp hh0
   simpa [Function.comp_def, hsite] using hsd
+
+/-- The residual convergence with moving sampled sites: the only remaining
+hypothesis on the refinement is that the interior site tends to `x` and the
+spacing tends to zero, so the second-difference limit is unconditional for
+`C^2` profiles. -/
+theorem sampledPath_residual_tendsto_of_contDiff_site
+    (G ρ x : ℝ) (φ : ℝ → ℝ) (hG : G ≠ 0) (hφ : ContDiff ℝ 2 φ)
+    {ι : Type*} {l : Filter ι} (h : ι → ℝ) (i : ι → ℕ)
+    (hpos : ∀ k, 0 < i k) (hh : ∀ k, h k ≠ 0)
+    (hh0 : Filter.Tendsto h l (nhdsWithin (0 : ℝ) ({0}ᶜ)))
+    (hx : Filter.Tendsto (fun k => (i k : ℝ) * h k) l (nhds x)) :
+    Filter.Tendsto
+      (fun k => discreteResidual (pathNA (i k + 1)) (pathNB (i k + 1)) G (h k)
+        (fun _ => ρ) (sampledPath φ (h k) (i k + 1))
+        ⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩ / h k)
+      l (nhds (ρ - deriv (deriv φ) x / (4 * Real.pi * G))) := by
+  apply sampledPath_residual_tendsto G ρ x φ hG h i hpos hh
+  exact secondDifference_tendsto_of_tendsto_site φ hφ h i hh hh0 hx
 
 /-- The same convergence, expressed as minus the continuum AQUAL residual in the
 Poisson limit `F' = 1`, `F'' = 0`. -/

@@ -83,7 +83,8 @@ $\mu=1$.
 **Needs.** The interpolating function selected by the action's free function,
 lensing without dark matter, and a cosmological background; the one-dimensional
 variational theory on a compact interval, including the nonlinear free function,
-is now closed under `C^1` regularity.
+is now proved from smoothness of the data rather than an abstract parametric
+regularity hypothesis.
 
 **Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
 partial derivatives computed, and stationarity proved equivalent to the field
@@ -98,13 +99,18 @@ continuous residuals is proved. The exact quadratic profile satisfies the
 discrete equation at every interior site of an arbitrary path and converges to
 the continuum Poisson solution under grid refinement. The nonlinear density has
 the same chain rule for an arbitrary free function, and the nonlinear action is
-differentiable under the interval integral when its parametric integrand is
-`C^1`. The discrete residual of a sampled profile is the negative second
-difference over $4\pi G$ plus the source; the symmetric second difference tends
-to the second derivative for `C^2` profiles, so the normalized residual
-converges at fixed sampled sites. The varying-site version still assumes that
-limit. The compact-support whole-line action reduces to the interval action. The
-best developed of the three.
+differentiable under the interval integral whenever the free function is `C^2`,
+its derivative is continuous, and the fields and their first derivatives are
+`C^1`; the parametric `C^1` hypothesis is derived from these assumptions, not
+imposed separately. The discrete residual of a sampled profile is the negative
+second difference over $4\pi G$ plus the source; the symmetric second difference
+tends to the second derivative for `C^2` profiles, so the normalized residual
+converges at fixed sampled sites, and the same Taylor argument with a moving
+centre gives the limit at varying sites without any relation between site
+convergence and spacing. The whole-line action is differentiated without compact
+support, under the standard domination data: integrability at zero, measurability,
+and an integrable bound for the parameter derivative on a neighbourhood of zero.
+The best developed of the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -367,17 +373,14 @@ they are why TeVeS is listed as partial rather than promoted.
 
 ## 4. The order of work
 
-1. Remove the `C^1` hypothesis from the nonlinear AQUAL variation and lift the
-   fixed-site second-difference limit to varying sample sites; the
-   compact-support whole-line extension is done.
-2. Derive the STVG and TeVeS field equations from their actions, adding the
+1. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
-3. Compute V2 for every theory that passes V1, using the PPN dictionary.
-4. Audit V3, starting with the theories whose actions carry higher derivatives
+2. Compute V2 for every theory that passes V1, using the PPN dictionary.
+3. Audit V3, starting with the theories whose actions carry higher derivatives
    or vector sectors. The literature audit of §3.17 is the starting point; a
    Dirac or Hamiltonian analysis is new work.
-5. Add V4 for the theories that survive V2 and V3.
-6. Apply V5 as a filter and record the verdicts in the first paper's
+4. Add V4 for the theories that survive V2 and V3.
+5. Apply V5 as a filter and record the verdicts in the first paper's
    alternatives section, demoting prose that no longer matches.
 
 ## 5. What is not claimed
@@ -393,13 +396,15 @@ they are why TeVeS is listed as partial rather than promoted.
   first-variation integral to the residual integral; in the Poisson limit the
   action is differentiated under the integral, the fundamental lemma for
   continuous residuals is proved, and the quadratic profile on a general path
-  converges to the continuum solution. The nonlinear interval variation still
-  assumes `C^1` regularity of the parametric density; the free-function corollary
-  with nonvanishing field derivative is complemented by a global-derivative
-  version. The sampled residual bridge is unconditional at fixed sites and takes
-  the second-difference limit as a hypothesis when the sites move. The whole-line
-  action is treated only under compact support. The STVG and TeVeS equations are
-  stated, not derived from their actions.
+  converges to the continuum solution. The nonlinear interval variation derives
+  its parametric `C^1` regularity from smoothness of the free function, its
+  derivative, and the fields; the free-function corollary with nonvanishing field
+  derivative is complemented by a global-derivative version. The sampled residual
+  bridge is unconditional at both fixed and varying sites, the latter by Taylor's
+  theorem at each moving centre. The whole-line action is differentiated without
+  compact support, assuming the standard domination data for the parameter
+  derivative. The STVG and TeVeS equations are stated, not derived from their
+  actions.
 - The PPN values of §3.16 are collected from the literature. The
   degree-of-freedom counts of §3.17 are reproduced by the formalised Dirac
   formula for the stated field content; the Proca and unit-vector brackets are
