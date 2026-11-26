@@ -714,7 +714,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Modified.KaluzaKlein.KaluzaMiracle` | 8 |
 | `Gravitation.Relativity.General.Modified.Teleparallel.Basic` | 8 |
 | `Gravitation.Relativity.General.Modified.Teleparallel.FLRWTorsion` | 8 |
-| `Gravitation.AqualVariation` | 10 |
+| `Gravitation.AqualVariation` | 9 |
 | `Gravitation.Cosmology.FLRW.Metric` | 7 |
 | `Gravitation.ExplicitDevelopments` | 7 |
 | `Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature` | 7 |
