@@ -81,16 +81,19 @@ interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
 $\mu=1$.
 
 **Needs.** The continuum functional-analytic minimisation behind the derivation
-(compact-support variations on the line, integration by parts), the interpolating
-function selected by the action's free function, lensing without dark matter,
-and a cosmological background.
+(compact-support variations on the line, differentiation under the integral, and
+the fundamental lemma), the interpolating function selected by the action's free
+function, lensing without dark matter, and a cosmological background.
 
 **Verdict.** V1 stated, with the Euler-Lagrange residual assembled, its two
 partial derivatives computed, and stationarity proved equivalent to the field
 equation in a one-dimensional model. A finite-graph version computes the first
 variation, proves summation by parts, and derives the discrete Euler-Lagrange
-equation from stationarity; the continuum step remains. The best developed of
-the three.
+equation from stationarity, and the exact quadratic profile on a three-site path
+reproduces the Poisson solution. On an interval, integration by parts converts
+the first-variation integral into the residual integral when the test function
+vanishes at both endpoints; differentiation under the integral and the
+fundamental lemma remain. The best developed of the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -329,7 +332,10 @@ nonzero, so the two constraints are second-class. Smeared constraints are also
 treated on a finite lattice: the bracket of $\pi^0(\xi)$ with the Gauss
 constraint $G(\eta)$ is $-m^2\sum_i\xi_i\eta_i$, which has no nonzero null
 direction, so the pair remains second-class after smearing. The continuum
-bracket, with distributions and spatial derivatives, is not formalised.
+bracket, with distributions and spatial derivatives, is not formalised. The
+unit-vector sector has the complementary structure: its smeared primary
+constraints are abelian, hence first-class, and the unit-norm condition is the
+gauge slice, consistent with the $4-1=3$ count.
 
 For STVG, the vector is a Proca field: its kinetic term is the Maxwell term
 with a mass, which has no ghost at the quadratic level, and the scalar sector
@@ -369,15 +375,19 @@ they are why TeVeS is listed as partial rather than promoted.
 - The Euler-Lagrange residual of the AQUAL action is assembled, its two partial
   derivatives are computed, and stationarity is proved to be the MOND equation
   in a one-dimensional model. A finite-graph version computes the first
-  variation, proves summation by parts, and shows that stationarity under
-  boundary-vanishing variations is the discrete Euler-Lagrange equation; the
-  continuum functional-analytic step is not formalised. The STVG and TeVeS
-  equations are stated, not derived from their actions.
+  variation, proves summation by parts, shows that stationarity under
+  boundary-vanishing variations is the discrete Euler-Lagrange equation, and
+  reproduces the Poisson solution with the exact quadratic profile on a
+  three-site path. On an interval, integration by parts converts the
+  first-variation integral to the residual integral; differentiating the action
+  under the integral and the fundamental lemma are not formalised. The STVG and
+  TeVeS equations are stated, not derived from their actions.
 - The PPN values of §3.16 are collected from the literature. The
   degree-of-freedom counts of §3.17 are reproduced by the formalised Dirac
-  formula for the stated field content, with the constraint classification as
-  input data; no preferred-frame or ghost computation is carried out, and a
-  continuum field-theoretic bracket is not formalised.
+  formula for the stated field content; the Proca and unit-vector brackets are
+  computed on finite models, with the constraint classification as input data.
+  No preferred-frame or ghost computation is carried out, and a continuum
+  field-theoretic bracket is not formalised.
 - No observational data analysis: PPN bounds and GW170817 are cited as filters,
   not re-derived.
 - No claim that a theory failing V1 is physically wrong; only that it is not

@@ -117,8 +117,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1353
-declarations, 813 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1367
+declarations, 822 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -383,7 +383,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1353 at this revision, 813 theorem-like) and rejects any axiom outside
+declaration (1367 at this revision, 822 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

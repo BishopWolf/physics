@@ -7,6 +7,7 @@ module
 
 public import Gravitation.MondFieldTheory
 public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
@@ -54,13 +55,19 @@ function carries its derivative data and the identification
 - `aqual_euler_lagrange_iff` : stationarity is the MOND field equation.
 - `sum_link_mul_difference` : summation by parts on a finite graph.
 - `discrete_stationary_iff` : stationarity of the discrete action is the
-  discrete Euler-Lagrange equation at every interior site.
+  discrete Euler-Lagrange equation away from a chosen Dirichlet set.
+- `quadraticProfile_stationary` : the exact quadratic solution on a three-site
+  path.
+- `aqual_first_variation_eq_integral_residual` : the continuum
+  integration-by-parts step for the first-variation integral.
 
 ## iii. Table of contents
 
 - A. The free function and the one-dimensional density
 - B. The residual and stationarity
 - C. A discrete variational derivation
+- D. A worked example on a three-site path
+- E. The continuum integration-by-parts step
 
 ## iv. References
 
@@ -381,26 +388,18 @@ lemma hasDerivAt_discreteAction (a b : E → V) (G h : ℝ) (ρ φ v : V → ℝ
   · rw [Finset.mul_sum, ← Finset.sum_neg_distrib]
     exact Finset.sum_congr rfl (fun e _ => by ring_nf)
 
-/-- A site is a boundary site when no link is incident to it. -/
-def IsBoundary (a b : E → V) (x : V) : Prop :=
-  ∀ e : E, a e ≠ x ∧ b e ≠ x
-
-/-- A variation vanishes on the boundary when it is zero at every boundary
-site; this is the discrete analogue of compact support. -/
-def VanishesOnBoundary (a b : E → V) (v : V → ℝ) : Prop :=
-  ∀ x : V, IsBoundary a b x → v x = 0
-
 /-- Stationarity of the discrete action under every variation that vanishes on
-the boundary is the discrete Euler-Lagrange equation at every interior site. -/
-theorem discrete_stationary_iff (a b : E → V) (G h : ℝ) (ρ φ : V → ℝ) :
-    (∀ v : V → ℝ, VanishesOnBoundary a b v →
+a chosen set `S` of sites (the Dirichlet boundary) is the discrete
+Euler-Lagrange equation at every site outside `S`. -/
+theorem discrete_stationary_iff (a b : E → V) (G h : ℝ) (ρ φ : V → ℝ) (S : Set V) :
+    (∀ v : V → ℝ, (∀ x ∈ S, v x = 0) →
         discreteFirstVariation a b G h ρ φ v = 0) ↔
-      ∀ x : V, ¬ IsBoundary a b x → discreteResidual a b G h ρ φ x = 0 := by
+      ∀ x : V, x ∉ S → discreteResidual a b G h ρ φ x = 0 := by
   classical
   constructor
   · intro hstat x hx
     let v : V → ℝ := fun y => if y = x then 1 else 0
-    have hv : VanishesOnBoundary a b v := by
+    have hv : ∀ y ∈ S, v y = 0 := by
       intro y hy
       by_cases hyx : y = x
       · subst hyx
@@ -423,9 +422,128 @@ theorem discrete_stationary_iff (a b : E → V) (G h : ℝ) (ρ φ : V → ℝ) 
     have hzero : (∑ x : V, v x * discreteResidual a b G h ρ φ x) = 0 := by
       apply Finset.sum_eq_zero
       intro x _
-      by_cases hx : IsBoundary a b x
+      by_cases hx : x ∈ S
       · rw [hv x hx, zero_mul]
       · rw [hres x hx, mul_zero]
     rw [hzero, neg_zero]
+
+/-! ## D. A worked example on a three-site path -/
+
+/-- The tail map of a two-link path on three sites. -/
+def pathA : Fin 2 → Fin 3 := fun e => e.castSucc
+
+/-- The head map of a two-link path on three sites. -/
+def pathB : Fin 2 → Fin 3 := fun e => e.succ
+
+/-- A quadratic field on the three sites, `C * i^2`. -/
+def quadraticProfile (C : ℝ) : Fin 3 → ℝ := fun i => C * ((i : ℕ) : ℝ) ^ 2
+
+/-- At the middle site the divergence is the incoming link momentum minus the
+outgoing one. -/
+lemma path_divergence_mid (d : Fin 2 → ℝ) :
+    discreteDivergence pathA pathB d 1 = d 0 - d 1 := by
+  simp [discreteDivergence, pathA, pathB, Fin.sum_univ_two]
+
+/-- The first link momentum of the quadratic profile. -/
+lemma path_momentum_zero (G h C : ℝ) :
+    discreteMomentum pathA pathB G h (quadraticProfile C) 0
+      = C / (4 * Real.pi * G * h) := by
+  simp [discreteMomentum, pathA, pathB, quadraticProfile]
+
+/-- The second link momentum of the quadratic profile. -/
+lemma path_momentum_one (G h C : ℝ) :
+    discreteMomentum pathA pathB G h (quadraticProfile C) 1
+      = 3 * C / (4 * Real.pi * G * h) := by
+  simp [discreteMomentum, pathA, pathB, quadraticProfile]
+  ring
+
+/-- The quadratic profile with `C = 2 pi G h^2 rho` satisfies the discrete
+Euler-Lagrange equation at the middle site for every link length: its grid
+values are exactly the continuum Poisson solution `2 pi G rho x^2` sampled at
+`x = i h`. -/
+theorem quadraticProfile_residual_mid (G h ρ : ℝ) (hG : G ≠ 0) :
+    discreteResidual pathA pathB G h (fun _ : Fin 3 => ρ)
+      (quadraticProfile (2 * Real.pi * G * h ^ 2 * ρ)) 1 = 0 := by
+  simp [discreteResidual, path_divergence_mid, path_momentum_zero, path_momentum_one]
+  field_simp
+  ring
+
+/-- Consequently the quadratic profile is stationary under every variation that
+vanishes at the two endpoints of the path. -/
+theorem quadraticProfile_stationary (G h ρ : ℝ) (hG : G ≠ 0) :
+    ∀ v : Fin 3 → ℝ, (∀ x ∈ ({0, 2} : Set (Fin 3)), v x = 0) →
+      discreteFirstVariation pathA pathB G h (fun _ : Fin 3 => ρ)
+        (quadraticProfile (2 * Real.pi * G * h ^ 2 * ρ)) v = 0 := by
+  intro v hv
+  rw [discreteFirstVariation_eq_neg_sum]
+  have hres := quadraticProfile_residual_mid G h ρ hG
+  have h0 : v 0 = 0 := hv 0 (by simp)
+  have h2 : v 2 = 0 := hv 2 (by simp)
+  rw [Fin.sum_univ_three]
+  simp [h0, h2, hres]
+
+/-- The continuum profile has second derivative `4 pi G rho`, the Poisson
+equation sourced by the same density. -/
+theorem quadraticProfile_second_deriv (G ρ : ℝ) (x : ℝ) :
+    deriv (deriv (fun y : ℝ => 2 * Real.pi * G * ρ * y ^ 2)) x
+      = 4 * Real.pi * G * ρ := by
+  have h1 : deriv (fun z : ℝ => 2 * Real.pi * G * ρ * z ^ 2)
+      = fun y : ℝ => 4 * Real.pi * G * ρ * y := by
+    funext y
+    simp
+    ring
+  rw [h1]
+  simp
+
+/-! ## E. The continuum integration-by-parts step -/
+
+/-- Integration by parts on an interval when the test function vanishes at both
+endpoints. -/
+theorem aqual_integral_mul_deriv_eq_neg_integral_deriv_mul
+    {u v u' v' : ℝ → ℝ} {a b : ℝ}
+    (hu : ContinuousOn u (Set.uIcc a b)) (hv : ContinuousOn v (Set.uIcc a b))
+    (hu' : ∀ x ∈ Set.Ioo (min a b) (max a b), HasDerivAt u (u' x) x)
+    (hv' : ∀ x ∈ Set.Ioo (min a b) (max a b), HasDerivAt v (v' x) x)
+    (hiu : IntervalIntegrable u' MeasureTheory.volume a b) (hiv : IntervalIntegrable v' MeasureTheory.volume a b)
+    (hva : v a = 0) (hvb : v b = 0) :
+    (∫ x in a..b, u x * v' x ∂MeasureTheory.volume) = -∫ x in a..b, u' x * v x ∂MeasureTheory.volume := by
+  rw [intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt hu hv hu' hv' hiu hiv,
+    hva, hvb]
+  ring
+
+/-- The first variation of the AQUAL action on an interval, before integration by
+parts: the integral of `-rho v + momentum v'`. -/
+noncomputable def aqualFirstVariationIntegral (a0 G : ℝ) (F' : ℝ → ℝ)
+    (ρ φ' v : ℝ → ℝ) (a b : ℝ) : ℝ :=
+  ∫ x in a..b, (-ρ x) * v x + aqualMomentumDensity a0 G F' φ' x * deriv v x ∂MeasureTheory.volume
+
+/-- On an interval, with the test function vanishing at both endpoints, the
+first variation is the integral of the AQUAL Euler-Lagrange residual against the
+test function. -/
+theorem aqual_first_variation_eq_integral_residual
+    (a0 G : ℝ) (F' ρ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hu : ContinuousOn (aqualMomentumDensity a0 G F' φ') (Set.uIcc a b))
+    (hv : ContinuousOn v (Set.uIcc a b))
+    (hu' : ∀ x ∈ Set.Ioo (min a b) (max a b),
+      HasDerivAt (aqualMomentumDensity a0 G F' φ')
+        (deriv (aqualMomentumDensity a0 G F' φ') x) x)
+    (hv' : ∀ x ∈ Set.Ioo (min a b) (max a b), HasDerivAt v (deriv v x) x)
+    (hiu : IntervalIntegrable (deriv (aqualMomentumDensity a0 G F' φ')) MeasureTheory.volume a b)
+    (hiv : IntervalIntegrable (deriv v) MeasureTheory.volume a b)
+    (hρv : IntervalIntegrable (fun x => (-ρ x) * v x) MeasureTheory.volume a b)
+    (huv : IntervalIntegrable
+      (fun x => aqualMomentumDensity a0 G F' φ' x * deriv v x) MeasureTheory.volume a b)
+    (hva : v a = 0) (hvb : v b = 0) :
+    aqualFirstVariationIntegral a0 G F' ρ φ' v a b =
+      ∫ x in a..b,
+        (-ρ x - deriv (aqualMomentumDensity a0 G F' φ') x) * v x ∂MeasureTheory.volume := by
+  unfold aqualFirstVariationIntegral
+  rw [intervalIntegral.integral_add hρv huv]
+  rw [aqual_integral_mul_deriv_eq_neg_integral_deriv_mul hu hv hu' hv' hiu hiv hva hvb]
+  have hiu_v : IntervalIntegrable
+      (fun x => deriv (aqualMomentumDensity a0 G F' φ') x * v x) MeasureTheory.volume a b :=
+    hiu.mul_continuousOn hv
+  rw [← sub_eq_add_neg, ← intervalIntegral.integral_sub hρv hiu_v]
+  exact intervalIntegral.integral_congr (fun x _ => by ring)
 
 end GeneralRelativity

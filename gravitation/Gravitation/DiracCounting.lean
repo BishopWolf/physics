@@ -52,6 +52,7 @@ field-theoretic bracket and the unit-vector bracket are not formalised.
 - B. Applications
 - C. Dirac brackets for the Proca constraints
 - D. Smeared constraints on a finite lattice
+- E. The unit-vector primary constraints
 
 ## iv. References
 
@@ -257,5 +258,30 @@ theorem smeared_constraints_second_class {ι : Type*} [Fintype ι] (m : ℝ)
       exact absurd (Finset.mem_univ i) hi'
   rw [hsum] at hzero
   exact (mul_ne_zero (neg_ne_zero.mpr (pow_ne_zero 2 hm)) hi) hzero
+
+/-! ## E. The unit-vector primary constraints -/
+
+/-- A linear observable on the four-component unit-vector phase space. -/
+structure UnitVectorObservable where
+  /-- Coefficient of the vector components. -/
+  u : Fin 4 → ℝ
+  /-- Coefficient of the momentum components. -/
+  p : Fin 4 → ℝ
+
+/-- The canonical bracket of two linear observables. -/
+def unitVectorBracket (A B : UnitVectorObservable) : ℝ :=
+  (∑ i, A.u i * B.p i) - ∑ i, A.p i * B.u i
+
+/-- The smeared primary constraint `sum_i xi_i p_i` of the unit-vector sector. -/
+def unitVectorPrimary (ξ : Fin 4 → ℝ) : UnitVectorObservable where
+  u := 0
+  p := ξ
+
+/-- The smeared primary constraints of the unit-vector sector are abelian, hence
+first-class; the unit-norm condition is the gauge slice, not an independent
+constraint.  This is the bracket behind the `4 - 1 = 3` count. -/
+theorem unitVectorPrimary_first_class (ξ η : Fin 4 → ℝ) :
+    unitVectorBracket (unitVectorPrimary ξ) (unitVectorPrimary η) = 0 := by
+  simp [unitVectorBracket, unitVectorPrimary]
 
 end GeneralRelativity
