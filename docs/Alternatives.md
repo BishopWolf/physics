@@ -100,9 +100,11 @@ the continuum Poisson solution under grid refinement. The nonlinear density has
 the same chain rule for an arbitrary free function, and the nonlinear action is
 differentiable under the interval integral when its parametric integrand is
 `C^1`. The discrete residual of a sampled profile is the negative second
-difference over $4\pi G$ plus the source, and converges to minus the continuum
-residual whenever the symmetric second difference converges to the second
-derivative. The best developed of the three.
+difference over $4\pi G$ plus the source; the symmetric second difference tends
+to the second derivative for `C^2` profiles, so the normalized residual
+converges at fixed sampled sites. The varying-site version still assumes that
+limit. The compact-support whole-line action reduces to the interval action. The
+best developed of the three.
 
 **PPN and degrees of freedom.** See §3.16–3.17.
 
@@ -365,10 +367,9 @@ they are why TeVeS is listed as partial rather than promoted.
 
 ## 4. The order of work
 
-1. Remove the `C^1` and nonvanishing-derivative hypotheses from the nonlinear
-   AQUAL variation, and replace the sampled residual's second-difference
-   hypothesis by a proved Taylor limit for `C^2` profiles; then extend the
-   derivation from the compact interval to the whole line.
+1. Remove the `C^1` hypothesis from the nonlinear AQUAL variation and lift the
+   fixed-site second-difference limit to varying sample sites; the
+   compact-support whole-line extension is done.
 2. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
 3. Compute V2 for every theory that passes V1, using the PPN dictionary.
@@ -392,12 +393,13 @@ they are why TeVeS is listed as partial rather than promoted.
   first-variation integral to the residual integral; in the Poisson limit the
   action is differentiated under the integral, the fundamental lemma for
   continuous residuals is proved, and the quadratic profile on a general path
-  converges to the continuum solution. The nonlinear variation still assumes
-  `C^1` regularity of the parametric density and a nonvanishing field derivative
-  for the free function's derivative data, and the sampled residual bridge takes
-  the second-difference limit as a hypothesis; the full action on the whole line
-  is not treated. The STVG and TeVeS equations are stated, not derived from their
-  actions.
+  converges to the continuum solution. The nonlinear interval variation still
+  assumes `C^1` regularity of the parametric density; the free-function corollary
+  with nonvanishing field derivative is complemented by a global-derivative
+  version. The sampled residual bridge is unconditional at fixed sites and takes
+  the second-difference limit as a hypothesis when the sites move. The whole-line
+  action is treated only under compact support. The STVG and TeVeS equations are
+  stated, not derived from their actions.
 - The PPN values of §3.16 are collected from the literature. The
   degree-of-freedom counts of §3.17 are reproduced by the formalised Dirac
   formula for the stated field content; the Proca and unit-vector brackets are

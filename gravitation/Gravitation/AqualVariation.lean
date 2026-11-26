@@ -13,6 +13,7 @@ public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Comp
 public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
+public import Mathlib.Analysis.Calculus.Taylor
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Linarith
@@ -40,7 +41,9 @@ integration by parts and the fundamental lemma of the calculus of variations are
 proved.  The Poisson-limit action is differentiated under the integral, the
 nonlinear density has a pointwise chain rule for an arbitrary free function and
 an interval derivative under `C^1` regularity, and the discrete residual of a
-sampled profile is bridged to the continuum residual.  The free function carries
+sampled profile is bridged to the continuum residual.  The symmetric second
+difference tends to the second derivative for `C^2` profiles, and the whole-line
+action follows from the interval one under compact support.  The free function carries
 its derivative data and the identification `F' = mu ∘ sqrt` as hypotheses.
 
 ## ii. Key results
@@ -73,6 +76,11 @@ its derivative data and the identification `F' = mu ∘ sqrt` as hypotheses.
   arbitrary nonlinear free function.
 - `sampledPath_residual_eq`, `sampledPath_residual_tendsto` : the discrete
   residual of a sampled profile and its continuum limit.
+- `secondDifference_tendsto`, `sampledPath_residual_tendsto_of_contDiff` : the
+  `C^2` Taylor limit and the unconditional fixed-site residual convergence.
+- `hasDerivAt_aqualAction1D_of_hasDerivAt`,
+  `hasDerivAt_aqualActionLine_of_support` : the global-derivative and
+  compact-support whole-line versions.
 
 ## iii. Table of contents
 
@@ -915,6 +923,68 @@ theorem hasDerivAt_aqualAction1D_freeFunction
   exact aqualLagrangianDensity1D_hasDerivAt_variation a0 G A.F A.F' ρ φ φ' v
     (deriv v) t hG ha0 (A.hasDeriv _ hy)
 
+/-- The nonlinear interval variation with a global derivative for the free
+function, so the field derivative need not be nonzero. -/
+theorem hasDerivAt_aqualAction1D_of_hasDerivAt
+    (a0 G : ℝ) (F F' ρ φ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : ∀ y : ℝ, HasDerivAt F (F' y) y)
+    (hcont : ContDiffOn ℝ 1
+      (Function.uncurry (fun (ε : ℝ) (t : ℝ) =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)))
+      (Set.univ ×ˢ Set.uIcc a b))
+    (hcont' : ContinuousOn
+      (fun t : ℝ => fderiv ℝ (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)) 0) (Set.uIcc a b)) :
+    HasDerivAt
+      (fun ε : ℝ => aqualAction1D a0 G F ρ (φ + ε • v) (φ' + ε • deriv v) a b)
+      (aqualFirstVariationIntegral a0 G F' ρ φ' v a b) 0 := by
+  refine hasDerivAt_aqualAction1D a0 G F F' ρ φ φ' v a b hcont hcont' ?_
+  intro t _
+  exact aqualLagrangianDensity1D_hasDerivAt_variation a0 G F F' ρ φ φ' v
+    (deriv v) t hG ha0 (hF _)
+
+/-- The whole-line action variation under compact support: if the density
+vanishes outside `[a, b]`, the integral over the line is the interval integral,
+so the nonlinear interval theorem applies. -/
+theorem hasDerivAt_aqualActionLine_of_support
+    (a0 G : ℝ) (F F' ρ φ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hab : a ≤ b)
+    (hsupp : ∀ ε x, x ∉ Set.Icc a b →
+      aqualLagrangianDensity1D a0 G F (ρ x)
+        (φ x + ε * v x) (φ' x + ε * deriv v x) = 0)
+    (hcont : ContDiffOn ℝ 1
+      (Function.uncurry (fun (ε : ℝ) (t : ℝ) =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)))
+      (Set.univ ×ˢ Set.uIcc a b))
+    (hcont' : ContinuousOn
+      (fun t : ℝ => fderiv ℝ (fun ε : ℝ =>
+        aqualLagrangianDensity1D a0 G F (ρ t)
+          (φ t + ε * v t) (φ' t + ε * deriv v t)) 0) (Set.uIcc a b))
+    (hderiv : ∀ t ∈ Set.uIcc a b,
+      HasDerivAt (fun ε : ℝ => aqualLagrangianDensity1D a0 G F (ρ t)
+        (φ t + ε * v t) (φ' t + ε * deriv v t))
+        (-ρ t * v t + aqualMomentumDensity a0 G F' φ' t * deriv v t) 0) :
+    HasDerivAt
+      (fun ε : ℝ => ∫ x,
+        aqualLagrangianDensity1D a0 G F (ρ x)
+          (φ x + ε * v x) (φ' x + ε * deriv v x))
+      (aqualFirstVariationIntegral a0 G F' ρ φ' v a b) 0 := by
+  have hline : (fun ε : ℝ => ∫ x,
+      aqualLagrangianDensity1D a0 G F (ρ x)
+        (φ x + ε * v x) (φ' x + ε * deriv v x))
+      = fun ε : ℝ => aqualAction1D a0 G F ρ (φ + ε • v) (φ' + ε • deriv v) a b := by
+    funext ε
+    rw [← MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero
+      (s := Set.Icc a b) (fun x hx => hsupp ε x hx)]
+    rw [MeasureTheory.integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le hab]
+    rfl
+  rw [hline]
+  exact hasDerivAt_aqualAction1D a0 G F F' ρ φ φ' v a b hcont hcont' hderiv
+
 /-! ## J. From the discrete residual to the continuum residual -/
 
 /-- A profile sampled at the sites of a path with spacing `h`. -/
@@ -924,6 +994,70 @@ noncomputable def sampledPath (φ : ℝ → ℝ) (h : ℝ) (n : ℕ) : Fin (n + 
 /-- The symmetric second difference of a profile. -/
 noncomputable def secondDifference (φ : ℝ → ℝ) (x h : ℝ) : ℝ :=
   (φ (x + h) - 2 * φ x + φ (x - h)) / h ^ 2
+
+private lemma taylorWithinEval_two (f : ℝ → ℝ) (x y : ℝ) :
+    taylorWithinEval f 2 Set.univ x y =
+      f x + (y - x) * deriv f x + (1 / 2) * (y - x) ^ 2 * deriv (deriv f) x := by
+  rw [taylor_within_apply]
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+  simp [iteratedDerivWithin_succ]
+
+/-- The symmetric second difference of a `C^2` profile tends to the second
+derivative at the centre.  This is Taylor's theorem at order two. -/
+theorem secondDifference_tendsto (φ : ℝ → ℝ) (hφ : ContDiff ℝ 2 φ) (x : ℝ) :
+    Filter.Tendsto (fun h : ℝ => secondDifference φ x h)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds (deriv (deriv φ) x)) := by
+  let r : ℝ → ℝ := fun y => φ y - taylorWithinEval φ 2 Set.univ x y
+  have ht : Filter.Tendsto (fun y : ℝ => ((y - x) ^ 2)⁻¹ • r y) (nhds x) (nhds 0) := by
+    have h := taylor_tendsto (s := Set.univ) convex_univ (Set.mem_univ x) (n := 2)
+      hφ.contDiffOn
+    simpa [r] using h
+  have hplus0 : Filter.Tendsto (fun h : ℝ => x + h) (nhds 0) (nhds x) := by
+    have hc : Continuous fun h : ℝ => x + h := continuous_const.add continuous_id
+    simpa using hc.tendsto (0 : ℝ)
+  have hplus : Filter.Tendsto (fun h : ℝ => x + h)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds x) :=
+    hplus0.mono_left nhdsWithin_le_nhds
+  have hminus0 : Filter.Tendsto (fun h : ℝ => x - h) (nhds 0) (nhds x) := by
+    have hc : Continuous fun h : ℝ => x - h := continuous_const.sub continuous_id
+    simpa using hc.tendsto (0 : ℝ)
+  have hminus : Filter.Tendsto (fun h : ℝ => x - h)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds x) :=
+    hminus0.mono_left nhdsWithin_le_nhds
+  have hp : Filter.Tendsto (fun h : ℝ => r (x + h) / h ^ 2)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds 0) := by
+    have h := ht.comp hplus
+    convert h using 1
+    ext h
+    simp only [Function.comp_apply]
+    ring_nf
+  have hm : Filter.Tendsto (fun h : ℝ => r (x - h) / h ^ 2)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds 0) := by
+    have h := ht.comp hminus
+    convert h using 1
+    ext h
+    simp only [Function.comp_apply]
+    ring_nf
+  have hsum : Filter.Tendsto (fun h : ℝ => (r (x + h) + r (x - h)) / h ^ 2)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds 0) := by
+    have h := hp.add hm
+    convert h using 1
+    · ext h
+      ring_nf
+    · simp
+  have htarget : Filter.Tendsto
+      (fun h : ℝ => deriv (deriv φ) x + (r (x + h) + r (x - h)) / h ^ 2)
+      (nhdsWithin (0 : ℝ) ({0}ᶜ)) (nhds (deriv (deriv φ) x)) := by
+    simpa [Pi.add_apply] using (tendsto_const_nhds (x := deriv (deriv φ) x)).add hsum
+  have hsd : ∀ᶠ h in nhdsWithin (0 : ℝ) ({0}ᶜ),
+      secondDifference φ x h = deriv (deriv φ) x + (r (x + h) + r (x - h)) / h ^ 2 := by
+    filter_upwards [self_mem_nhdsWithin] with h hh
+    simp only [r]
+    rw [secondDifference, taylorWithinEval_two φ x (x + h), taylorWithinEval_two φ x (x - h)]
+    have hh0 : h ≠ 0 := by simpa using hh
+    field_simp [hh0]
+    ring
+  exact htarget.congr' (hsd.mono fun h hh => hh.symm)
 
 /-- The discrete residual of a sampled profile is the negative second difference
 over `4 pi G`, plus the source term. -/
@@ -988,6 +1122,24 @@ theorem sampledPath_residual_tendsto
       l (nhds (deriv (deriv φ) x / (4 * Real.pi * G))) :=
     hsecond.div_const _
   simpa using (tendsto_const_nhds (x := ρ)).sub hdiv
+
+/-- The fixed-site version of the residual convergence: if the sampled sites are
+the fixed point `x` and the spacing tends to zero, the `C^2` Taylor limit
+discharges the second-difference hypothesis. -/
+theorem sampledPath_residual_tendsto_of_contDiff
+    (G ρ x : ℝ) (φ : ℝ → ℝ) (hG : G ≠ 0) (hφ : ContDiff ℝ 2 φ)
+    {ι : Type*} {l : Filter ι} (h : ι → ℝ) (i : ι → ℕ)
+    (hpos : ∀ k, 0 < i k) (hh : ∀ k, h k ≠ 0)
+    (hh0 : Filter.Tendsto h l (nhdsWithin (0 : ℝ) ({0}ᶜ)))
+    (hsite : ∀ k, (i k : ℝ) * h k = x) :
+    Filter.Tendsto
+      (fun k => discreteResidual (pathNA (i k + 1)) (pathNB (i k + 1)) G (h k)
+        (fun _ => ρ) (sampledPath φ (h k) (i k + 1))
+        ⟨i k, Nat.lt_succ_of_lt (Nat.lt_succ_self (i k))⟩ / h k)
+      l (nhds (ρ - deriv (deriv φ) x / (4 * Real.pi * G))) := by
+  apply sampledPath_residual_tendsto G ρ x φ hG h i hpos hh
+  have hsd := (secondDifference_tendsto φ hφ x).comp hh0
+  simpa [Function.comp_def, hsite] using hsd
 
 /-- The same convergence, expressed as minus the continuum AQUAL residual in the
 Poisson limit `F' = 1`, `F'' = 0`. -/

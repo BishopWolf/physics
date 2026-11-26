@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1388 declarations, 835 of them theorem-like. The table below is the
+1392 declarations, 839 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -62,10 +62,14 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.aqualLagrangianDensity1D_hasDerivAt_variation` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_aqualAction1D` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_aqualAction1D_freeFunction` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_aqualAction1D_of_hasDerivAt` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_aqualActionLine_of_support` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sampledPath` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.secondDifference` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.secondDifference_tendsto` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sampledPath_residual_eq` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sampledPath_residual_tendsto` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.sampledPath_residual_tendsto_of_contDiff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sampledPath_residual_tendsto_continuum` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_const` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_congr` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
