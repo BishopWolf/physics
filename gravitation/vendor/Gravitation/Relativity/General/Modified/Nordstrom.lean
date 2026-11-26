@@ -5,7 +5,7 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.General.Linearized.TraceReversed
+public import Gravitation.Relativity.General.Linearized.BoxEta
 public import Gravitation.Relativity.Metrics.ConformalMetric
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Gravitation.Relativity.Metrics.Minkowski

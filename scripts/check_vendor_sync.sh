@@ -10,12 +10,12 @@
 #   PhyslibAlpha/Cosmology/            -> Gravitation/Cosmology/
 #
 # Import lines are rewritten from `PhyslibAlpha.*` to `Gravitation.*` so the
-# modules do not collide with the dependency's own library globs.  The one
-# compatibility patch is in `Modified/MOND.lean`: `[Fact frame.IsMetricConserved]`
-# is removed because the pinned Physlib revision no longer has that class.  This
-# script fetches the branch and checks both that it still points at the recorded
-# commit and that every vendored Lean file equals the branch file after applying
-# the same rewrites and patch.
+# modules do not collide with the dependency's own library globs.  No local
+# compatibility patch is applied: the branch itself dropped
+# `ReferenceFrame.IsMetricConserved` in `296991d`.  This script fetches the
+# branch and checks both that it still points at the recorded commit and that
+# every vendored Lean file equals the branch file after applying the same
+# rewrites.
 #
 # Requires network access and git; it runs in CI before the build.
 set -euo pipefail
@@ -70,8 +70,7 @@ rewrite() {
     -e 's/PhyslibAlpha\.Relativity\.Metrics\./Gravitation.Relativity.Metrics./g' \
     -e 's/PhyslibAlpha\.Relativity\.Tensors\./Gravitation.Relativity.Tensors./g' \
     -e 's/PhyslibAlpha\.Cosmology\./Gravitation.Cosmology./g' \
-    -e 's/Gravitation\.Relativity\.General\.Schwarzschild\.IncompressibleSphere/PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere/g' \
-    -e 's/ \[Fact frame\.IsMetricConserved\]//g'
+    -e 's/Gravitation\.Relativity\.General\.Schwarzschild\.IncompressibleSphere/PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere/g'
 }
 
 check_subtree() {
@@ -120,7 +119,7 @@ check_subtree() {
 check_subtree "PhyslibAlpha/Relativity/General" "Gravitation/Relativity/General" all ""
 check_subtree "PhyslibAlpha/Relativity/Metrics" "Gravitation/Relativity/Metrics" all ""
 check_subtree "PhyslibAlpha/Relativity/Tensors" "Gravitation/Relativity/Tensors" allow \
-  "Tensor2.lean,RiemannTensor.lean,RicciTensor.lean,EinsteinTensor.lean,MaxwellStressEnergy.lean"
+  "Tensor2.lean,RiemannTensor.lean,RicciTensor.lean,EinsteinTensor.lean,MaxwellStressEnergy.lean,EMFieldStrength.lean"
 check_subtree "PhyslibAlpha/Cosmology" "Gravitation/Cosmology" all ""
 
 if [ "$mismatch" -ne 0 ]; then

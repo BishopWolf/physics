@@ -2,7 +2,7 @@
 
 Downstream formalisation of general relativity. The development itself lives in
 Physlib's unmerged `gravity` branch; this repository depends on `physlib` and
-vendors the branch's 37 GR modules under `vendor/` until they are merged. The
+vendors the branch's 69 GR modules under `vendor/` until they are merged. The
 umbrella module `Gravitation.lean` imports them (plus `IncompressibleSphere`
 from the dependency) under the `Gravitation.Relativity.General.*` path. A local
 `Gravitation.KretschmannTotal` addendum removes the remaining `r ≠ 0` from the

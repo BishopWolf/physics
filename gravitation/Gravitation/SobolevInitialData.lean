@@ -46,6 +46,16 @@ namespace GeneralRelativity
 open MeasureTheory Filter Topology
 open scoped Interval
 
+/-- Schwarzschild spacetime of mass `M`, named so lapse expressions read as
+`(schwarzschildSpacetime M).lapse r`. -/
+abbrev schwarzschildSpacetime (M : ℝ) : Schwarzschild.SchwarzschildSpacetime :=
+  ⟨M⟩
+
+/-- Schwarzschild–de Sitter spacetime of mass `M` and cosmological constant
+`Λ`, named so lapse expressions read as `(sdsSpacetime M Λ).lapse r`. -/
+abbrev sdsSpacetime (M Λ : ℝ) : SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime :=
+  ⟨M, Λ⟩
+
 /-! ## A. 1D Sobolev H¹ norm, Sobolev embedding, and trace estimate -/
 
 /-- Squared `H¹([a, b])` Sobolev norm `∫ u² + ∫ (u')²`. -/
@@ -457,7 +467,7 @@ in coordinates `(r, θ, φ)` (`x 0 = r`, `x 1 = θ`, `x 2 = φ`). -/
 noncomputable def sdsSpatialMetric (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
   fun i j =>
     if i = j then
-      if i = 0 then (SchwarzschildDeSitter.sdsLapse M Λ (x 0))⁻¹
+      if i = 0 then ((sdsSpacetime M Λ).lapse (x 0))⁻¹
       else if i = 1 then (x 0) ^ 2
       else (x 0) ^ 2 * Real.sin (x 1) ^ 2
     else 0
@@ -466,7 +476,7 @@ noncomputable def sdsSpatialMetric (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
 noncomputable def sdsSpatialMetricInv (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
   fun i j =>
     if i = j then
-      if i = 0 then SchwarzschildDeSitter.sdsLapse M Λ (x 0)
+      if i = 0 then (sdsSpacetime M Λ).lapse (x 0)
       else if i = 1 then ((x 0) ^ 2)⁻¹
       else ((x 0) ^ 2 * Real.sin (x 1) ^ 2)⁻¹
     else 0
@@ -475,9 +485,9 @@ noncomputable def sdsSpatialMetricInv (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
 noncomputable def sdsSpatialG (M Λ : ℝ) (x : Space3) (k i j : Fin 3) : ℝ :=
   if k = 0 then
     if i = 0 ∧ j = 0 then
-      -(SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) / SchwarzschildDeSitter.sdsLapse M Λ (x 0))
-    else if i = 1 ∧ j = 1 then -(x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))
-    else if i = 2 ∧ j = 2 then -(x 0 * Real.sin (x 1) ^ 2 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))
+      -((sdsSpacetime M Λ).lapseHalfDeriv (x 0) / (sdsSpacetime M Λ).lapse (x 0))
+    else if i = 1 ∧ j = 1 then -(x 0 * (sdsSpacetime M Λ).lapse (x 0))
+    else if i = 2 ∧ j = 2 then -(x 0 * Real.sin (x 1) ^ 2 * (sdsSpacetime M Λ).lapse (x 0))
     else 0
   else if k = 1 then
     if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then 1 / x 0
@@ -489,19 +499,19 @@ noncomputable def sdsSpatialG (M Λ : ℝ) (x : Space3) (k i j : Fin 3) : ℝ :=
     else 0
 
 lemma pd_sdsSpatial_00 (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) :
-    Pipeline.coordDeriv 0 (fun y => (SchwarzschildDeSitter.sdsLapse M Λ (y 0))⁻¹) x =
-      -(2 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0)) /
-        SchwarzschildDeSitter.sdsLapse M Λ (x 0) ^ 2 := by
-  have hd := (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr).fun_inv hf
-  have hfun : (fun s : ℝ => (SchwarzschildDeSitter.sdsLapse M Λ (Function.update x 0 s 0))⁻¹) =
-      fun s : ℝ => (SchwarzschildDeSitter.sdsLapse M Λ s)⁻¹ := by
+    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) :
+    Pipeline.coordDeriv 0 (fun y => ((sdsSpacetime M Λ).lapse (y 0))⁻¹) x =
+      -(2 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0)) /
+        (sdsSpacetime M Λ).lapse (x 0) ^ 2 := by
+  have hd := ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr).fun_inv hf
+  have hfun : (fun s : ℝ => ((sdsSpacetime M Λ).lapse (Function.update x 0 s 0))⁻¹) =
+      fun s : ℝ => ((sdsSpacetime M Λ).lapse s)⁻¹ := by
     funext s; simp
   unfold Pipeline.coordDeriv
   rw [hfun, hd.deriv]
 
 lemma christoffel_eq_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (k i j : Fin 3) :
     Pipeline.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
       sdsSpatialG M Λ x k i j := by
@@ -543,21 +553,21 @@ lemma christoffel_eq_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
     field_simp [hr, hf, hsin]
 
 lemma pd_christoffel_eq_pd_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (μ k i j : Fin 3) :
     Pipeline.coordDeriv μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
         (sdsSpatialMetricInv M Λ) y k i j) x =
       Pipeline.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x := by
-  have hev_r : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 ∧ SchwarzschildDeSitter.sdsLapse M Λ r ≠ 0 := by
+  have hev_r : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 ∧ (sdsSpacetime M Λ).lapse r ≠ 0 := by
     have h1 : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 := continuousAt_id.eventually_ne hr
-    have h2 : ∀ᶠ r in 𝓝 (x 0), SchwarzschildDeSitter.sdsLapse M Λ r ≠ 0 :=
-      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr).continuousAt.eventually_ne hf
+    have h2 : ∀ᶠ r in 𝓝 (x 0), (sdsSpacetime M Λ).lapse r ≠ 0 :=
+      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr).continuousAt.eventually_ne hf
     exact h1.and h2
   have hev_th : ∀ᶠ th in 𝓝 (x 1), Real.sin th ≠ 0 :=
     Real.continuous_sin.continuousAt.eventually_ne hsin
   have hcont : ∀ p : Fin 3, ContinuousAt (fun y : Space3 => y p) x := fun p => continuousAt_apply p x
   have hev_y : ∀ᶠ y in 𝓝 x,
-      y 0 ≠ 0 ∧ SchwarzschildDeSitter.sdsLapse M Λ (y 0) ≠ 0 ∧ Real.sin (y 1) ≠ 0 := by
+      y 0 ≠ 0 ∧ (sdsSpacetime M Λ).lapse (y 0) ≠ 0 ∧ Real.sin (y 1) ≠ 0 := by
     have hr' := (hcont 0).eventually hev_r
     have hth' := (hcont 1).eventually hev_th
     filter_upwards [hr', hth'] with y hy1 hy2
@@ -572,15 +582,15 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
   if μ = 0 then
     if k = 0 then
       if i = 0 ∧ j = 0 then
-        -(((-2 * M / (x 0) ^ 3 - Λ / 3) * SchwarzschildDeSitter.sdsLapse M Λ (x 0) -
-            2 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) ^ 2) /
-          SchwarzschildDeSitter.sdsLapse M Λ (x 0) ^ 2)
+        -(((-2 * M / (x 0) ^ 3 - Λ / 3) * (sdsSpacetime M Λ).lapse (x 0) -
+            2 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0) ^ 2) /
+          (sdsSpacetime M Λ).lapse (x 0) ^ 2)
       else if i = 1 ∧ j = 1 then
-        -(SchwarzschildDeSitter.sdsLapse M Λ (x 0) +
-          2 * x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0))
+        -((sdsSpacetime M Λ).lapse (x 0) +
+          2 * x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0))
       else if i = 2 ∧ j = 2 then
-        -(Real.sin (x 1) ^ 2 * (SchwarzschildDeSitter.sdsLapse M Λ (x 0) +
-          2 * x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0)))
+        -(Real.sin (x 1) ^ 2 * ((sdsSpacetime M Λ).lapse (x 0) +
+          2 * x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0)))
       else 0
     else if k = 1 then
       if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then -(1 / x 0 ^ 2) else 0
@@ -590,7 +600,7 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
     if k = 0 then
       if i = 2 ∧ j = 2 then
         -(2 * x 0 * Real.sin (x 1) * Real.cos (x 1) *
-          SchwarzschildDeSitter.sdsLapse M Λ (x 0))
+          (sdsSpacetime M Λ).lapse (x 0))
       else 0
     else if k = 1 then
       if i = 2 ∧ j = 2 then -(Real.cos (x 1) ^ 2 - Real.sin (x 1) ^ 2) else 0
@@ -599,40 +609,40 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
   else 0
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_0 (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (k i j : Fin 3) :
+    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (k i j : Fin 3) :
     Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 0 x k i j := by
   have h000 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 0 0) x =
       sdsSpatialDG M Λ 0 x 0 0 0 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 0 0) =
-        fun s : ℝ => -(SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ s /
-          SchwarzschildDeSitter.sdsLapse M Λ s) := by
+        fun s : ℝ => -((sdsSpacetime M Λ).lapseHalfDeriv s /
+          (sdsSpacetime M Λ).lapse s) := by
       funext s; simp [sdsSpatialG]
     unfold Pipeline.coordDeriv; rw [hfun]
-    have hd := ((SchwarzschildDeSitter.hasDerivAt_sdsLapseHalfDeriv M Λ (x 0) hr).fun_div
-      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr) hf).fun_neg
+    have hd := (((sdsSpacetime M Λ).hasDerivAt_lapseHalfDeriv (x 0) hr).fun_div
+      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr) hf).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
   have h011 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 1 1) x =
       sdsSpatialDG M Λ 0 x 0 1 1 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 1 1) =
-        fun s : ℝ => -(s * SchwarzschildDeSitter.sdsLapse M Λ s) := by
+        fun s : ℝ => -(s * (sdsSpacetime M Λ).lapse s) := by
       funext s; simp [sdsSpatialG]
     unfold Pipeline.coordDeriv; rw [hfun]
     have hd := ((hasDerivAt_id' (x 0)).fun_mul
-      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr)).fun_neg
+      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr)).fun_neg
     rw [hd.deriv]
     dsimp [sdsSpatialDG]
     ring
   have h022 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 2 2) x =
       sdsSpatialDG M Λ 0 x 0 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 2 2) =
-        fun s : ℝ => -(Real.sin (x 1) ^ 2 * (s * SchwarzschildDeSitter.sdsLapse M Λ s)) := by
+        fun s : ℝ => -(Real.sin (x 1) ^ 2 * (s * (sdsSpacetime M Λ).lapse s)) := by
       funext s; simp [sdsSpatialG]; ring
     unfold Pipeline.coordDeriv; rw [hfun]
     have hd := (((hasDerivAt_id' (x 0)).fun_mul
-      (SchwarzschildDeSitter.hasDerivAt_sdsLapse M Λ (x 0) hr)).const_mul
+      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr)).const_mul
         (Real.sin (x 1) ^ 2)).fun_neg
     rw [hd.deriv]
     dsimp [sdsSpatialDG]
@@ -656,11 +666,11 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG_1 (M Λ : ℝ) (x : Space3)
   have h022 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 0 2 2) x =
       sdsSpatialDG M Λ 1 x 0 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 0 2 2) =
-        fun s : ℝ => -(x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0) * Real.sin s ^ 2) := by
+        fun s : ℝ => -(x 0 * (sdsSpacetime M Λ).lapse (x 0) * Real.sin s ^ 2) := by
       funext s; simp [sdsSpatialG]; ring
     unfold Pipeline.coordDeriv; rw [hfun]
     have hd := ((Pipeline.hasDerivAt_sin_sq (x 1)).const_mul
-      (x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))).fun_neg
+      (x 0 * (sdsSpacetime M Λ).lapse (x 0))).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
@@ -696,7 +706,7 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG_2 (M Λ : ℝ) (x : Space3) (k i j : Fin 3)
     simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (μ k i j : Fin 3) :
     Pipeline.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ μ x k i j := by
@@ -710,7 +720,7 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
 nontrivial curved 3D vacuum initial data (`³R = 0` while `³Ric_{00} ≠ 0` for
 `M ≠ 0`). -/
 theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : SchwarzschildDeSitter.sdsLapse M Λ (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
+    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
     spatialScalarCurvOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x = 2 * Λ := by
   have hG : ∀ k i j,
       Pipeline.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
@@ -726,23 +736,23 @@ theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0
   have hcos_sq : Real.cos (x 1) ^ 2 = 1 - Real.sin (x 1) ^ 2 := by
     linear_combination Real.sin_sq_add_cos_sq (x 1)
   have hric00 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 0 0 =
-      -(2 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) /
-        (x 0 * SchwarzschildDeSitter.sdsLapse M Λ (x 0))) := by
+      -(2 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0) /
+        (x 0 * (sdsSpacetime M Λ).lapse (x 0))) := by
     simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hf]
     ring
   have hric11 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 1 1 =
-      1 - SchwarzschildDeSitter.sdsLapse M Λ (x 0) -
-        x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0) := by
+      1 - (sdsSpacetime M Λ).lapse (x 0) -
+        x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0) := by
     simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hsin]
     rw [hcos_sq]
     ring
   have hric22 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 2 2 =
-      Real.sin (x 1) ^ 2 * (1 - SchwarzschildDeSitter.sdsLapse M Λ (x 0) -
-        x 0 * SchwarzschildDeSitter.sdsLapseHalfDeriv M Λ (x 0)) := by
+      Real.sin (x 1) ^ 2 * (1 - (sdsSpacetime M Λ).lapse (x 0) -
+        x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0)) := by
     simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hsin]
@@ -771,18 +781,19 @@ theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0
   simp [spatialScalarCurvOf, Pipeline.ricciScalarOf, Fin.sum_univ_three, sdsSpatialMetricInv,
     hric00, hric11, hric22]
   field_simp [hr, hf, hsin]
-  simp only [SchwarzschildDeSitter.sdsLapse, SchwarzschildDeSitter.sdsLapseHalfDeriv]
+  simp only [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse,
+    SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapseHalfDeriv]
   field_simp [hr]
   ring
 
 /-- Time-symmetric curved Schwarzschild spatial slice (`K = 0`, `Λ = 0`) solves
 the derived nonlinear Hamiltonian constraint identically. -/
 theorem schwarzschild_spatial_hamiltonian_zero (M : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : Schwarzschild.schwarzschildLapse M (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
+    (hf : (schwarzschildSpacetime M).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
     hamiltonianConstraintOf (sdsSpatialMetric M 0) (sdsSpatialMetricInv M 0)
       (fun _ => 0) x = 0 := by
-  have hf0 : SchwarzschildDeSitter.sdsLapse M 0 (x 0) ≠ 0 := by
-    rwa [SchwarzschildDeSitter.sdsLapse_zero_lambda]
+  have hf0 : (sdsSpacetime M 0).lapse (x 0) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse_zero_lambda]
   have hS := spatialScalarCurvOf_sdsSpatial M 0 x hr hf0 hsin
   simp [hamiltonianConstraintOf, hS]
 

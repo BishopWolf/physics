@@ -80,11 +80,11 @@ listed at the end of this document.
 The general-relativity development lives in Physlib on the `gravity` branch
 (`PhyslibAlpha/Relativity/General` plus the branch-only `Metrics`, `Tensors` and
 `Cosmology` trees, 67 Lean modules on the branch, namespace `GeneralRelativity`),
-which is not yet merged upstream. Since 25 November 2026 the 57 vendored modules
+which is not yet merged upstream. Since 26 November 2026 the 69 vendored modules
 are **vendored** here under `gravitation/vendor/Gravitation/Relativity/{General,
 Metrics,Tensors}/` and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lean`
 (module paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, namespace
-`GeneralRelativity` unchanged) at branch commit `b81c896a`, while the `physlib`
+`GeneralRelativity` unchanged) at branch commit `626ada74`, while the `physlib`
 requirement points at merged master `7910f51f`
 — the merge base the branch was written against, which also supplies the
 already-merged `Schwarzschild.IncompressibleSphere` and the base library. The 1248 audited declarations are those sources plus the local
@@ -142,7 +142,7 @@ branch lands.
 * Axiom policy — no `axiom`, `constant`, `opaque`, `sorry`, `admit` or
   `native_decide` in the audited surface; `scripts/audit_axioms.sh` now covers
   both the local module and the Physlib GR subtree, prints `#print axioms` for
-  all 1262 declarations (774 theorem-like) and rejects anything outside
+  all 1263 declarations (776 theorem-like) and rejects anything outside
   `{propext, Classical.choice, Quot.sound}`. `Proof-Status.md` is regenerated
   from that audit and CI fails if it is stale.
 * Silent build — `lake build` emits no messages; `scripts/check_messages.sh`

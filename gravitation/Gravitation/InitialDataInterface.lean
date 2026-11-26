@@ -78,7 +78,8 @@ module
 
 public import Gravitation.Bianchi
 public import Gravitation.ManifoldInterface
-public import Gravitation.Relativity.General.InitialData
+public import Gravitation.Relativity.General.InitialData.Basic
+public import Gravitation.Relativity.General.InitialData.FlatSlice
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 @[expose] public section

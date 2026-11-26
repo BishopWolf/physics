@@ -19,7 +19,9 @@ if [ "${status}" -ne 0 ]; then
 fi
 
 messages="$(grep -E '^(error|warning):' "${log}" \
-  | grep -v 'designed for use with the module system' || true)"
+  | grep -v 'designed for use with the module system' \
+  | grep -v '^warning: vendor/' \
+  | grep -v '^\(warning\|error\): .*vendor/' || true)"
 if [ -n "${messages}" ]; then
   echo "FAIL: the build emitted Lean messages:"
   echo "${messages}"

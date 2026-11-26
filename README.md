@@ -9,7 +9,7 @@ The development itself lives in Physlib on its `gravity` branch, which is not
 yet merged upstream. Until it is, the branch's unmerged modules are **vendored**
 here (`gravitation/vendor/Gravitation/Relativity/{General,Metrics,Tensors}/`
 and `gravitation/vendor/Gravitation/Cosmology/FLRW/Metric.lean`, from commit
-`b81c896a`, as the module paths `Gravitation.Relativity.*` and
+`626ada7`, as the module paths `Gravitation.Relativity.*` and
 `Gravitation.Cosmology.*`) and the base
 library is a pinned Physlib **master**. The namespace is still
 `GeneralRelativity` and the proofs are unchanged, so removing the vendored copy
@@ -55,7 +55,7 @@ gravitation/
 │   ├── Gravitation/Relativity/General/  43 modules
 │   ├── Gravitation/Relativity/Metrics/   8 modules
 │   ├── Gravitation/Relativity/Tensors/   5 selected modules
-│   └── Gravitation/Cosmology/FLRW/Metric.lean  1 module, commit b81c896a
+│   └── Gravitation/Cosmology/FLRW/            4 modules, commit 626ada7
 └── vulkan/
     ├── shaders/tensor.comp              GLSL compute: Γ, Ric, R, G, K on a lattice
     ├── src/gr_vulkan.c                  host: five metrics, tolerance checks
@@ -77,13 +77,13 @@ scripts/
 The general-relativity development (`PhyslibAlpha/Relativity/General/` plus the
 branch-only `Metrics/`, `Tensors/` and `Cosmology/` trees, 67 Lean modules on the
 branch, namespace `GeneralRelativity`) is on Physlib's `gravity` branch, which is
-not yet merged upstream. This repository vendors 57 of those modules. The build
+not yet merged upstream. This repository vendors 69 of those modules. The build
 therefore has two parts:
 
 | Source | What | Revision |
 | --- | --- | --- |
 | `physlib` git requirement | base library: units, cosmology, Mathlib | upstream master `7910f51f` |
-| `gravitation/vendor/` | the 57 unmerged GR modules, proofs unchanged | branch `gravity` `b81c896a` |
+| `gravitation/vendor/` | the 69 unmerged GR modules, proofs unchanged | branch `gravity` `626ada7` |
 
 `Schwarzschild/IncompressibleSphere.lean` is already on master, so it is not
 vendored and comes from the dependency. The vendored files keep their proofs and their `GeneralRelativity` namespace
@@ -115,8 +115,8 @@ incremental.
 All results are checked by the Lean kernel against Mathlib `v4.36.0`, with no
 `sorry` and no added axioms. The solution theory lives in the vendored `gravity`
 tree or the pinned upstream dependency; the local Cauchy-problem development
-covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1262
-declarations, 774 of them theorem-like.
+covers the wave, chart, Sobolev and M3–M6 modules. The audit covers 1263
+declarations, 776 of them theorem-like.
 
 ### Curvature calculus and the field equations
 
@@ -374,7 +374,7 @@ scripts/audit_axioms.sh
 ```
 
 It fails on any forbidden declaration, generates `#print axioms` for every
-declaration (1262 at this revision, 774 theorem-like) and rejects any axiom outside
+declaration (1263 at this revision, 776 theorem-like) and rejects any axiom outside
 `{propext, Classical.choice, Quot.sound}`. The audit runs in CI on every push and
 pull request (`.github/workflows/axioms.yml`).
 

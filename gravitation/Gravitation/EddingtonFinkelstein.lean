@@ -584,7 +584,7 @@ lemma transitionJacobian_zero_one (M : ℝ) (x : SpacetimeChart) (hM : 0 < M)
 the overlap transition map. -/
 lemma schwarzschild_eq_pullback (M : ℝ) (x : SpacetimeChart) (hM : 0 < M)
     (hr : 2 * M < x 1) :
-    Schwarzschild.schwarzschildMetricField M x =
+    (schwarzschildSpacetime M).metric x =
       (transitionJacobian M x).transpose * metric M (schwarzschildToEF M x) *
         transitionJacobian M x := by
   have hx1 : (0 : ℝ) < x 1 := by linarith
@@ -595,8 +595,9 @@ lemma schwarzschild_eq_pullback (M : ℝ) (x : SpacetimeChart) (hM : 0 < M)
     exact div_ne_zero (by linarith) hx1.ne'
   ext σ ν
   fin_cases σ <;> fin_cases ν <;>
-    simp [Schwarzschild.schwarzschildMetricField, Schwarzschild.schwarzschildMetric,
-      StaticSpherical.staticSphericalMetric, Schwarzschild.schwarzschildLapse,
+    simp [Schwarzschild.SchwarzschildSpacetime.metric, Schwarzschild.SchwarzschildSpacetime.metric,
+      StaticSpherical.StaticSphericalMetric.metric, schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.lapse,
+      Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
       metric, schwarzschildToEF, transitionJacobian,
       Matrix.mul_apply, Matrix.transpose_apply, Fin.sum_univ_four] <;>
     field_simp [hx1.ne', hM.ne', hf] <;>

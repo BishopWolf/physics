@@ -13,18 +13,18 @@ would otherwise be located in the upstream checkout (where they do not exist).
 | --- | --- |
 | Upstream project | [leanprover-community/physlib](https://github.com/leanprover-community/physlib) |
 | Branch | `gravity` (`origin/gravity` of the author's fork) |
-| Commit | `b81c896ac3b7a25487d3d97aaa869dd6704e0ae5` (merge of master `7910f51f` into `gravity`) |
-| Copied | 25 November 2026 |
-| Scope | `PhyslibAlpha/Relativity/General/` (except `Schwarzschild/IncompressibleSphere.lean`), `PhyslibAlpha/Relativity/Metrics/`, `PhyslibAlpha/Relativity/Tensors/{Tensor2,RiemannTensor,RicciTensor,EinsteinTensor,MaxwellStressEnergy}.lean`, and `PhyslibAlpha/Cosmology/FLRW/Metric.lean` |
+| Commit | `626ada74afc29e16f85da0924c393e00af3ff5cd` (branch tip, based on master `7910f51f`) |
+| Copied | 26 November 2026 |
+| Scope | `PhyslibAlpha/Relativity/General/` (including the `InitialData/` and `Linearized/` subdirectories, except `Schwarzschild/IncompressibleSphere.lean`), `PhyslibAlpha/Relativity/Metrics/`, `PhyslibAlpha/Relativity/Tensors/{Tensor2,RiemannTensor,RicciTensor,EinsteinTensor,MaxwellStressEnergy,EMFieldStrength}.lean`, and `PhyslibAlpha/Cosmology/FLRW/` |
 | Rewrites | import lines only: `PhyslibAlpha.Relativity.General.` → `Gravitation.Relativity.General.`, `PhyslibAlpha.Relativity.Metrics.` → `Gravitation.Relativity.Metrics.`, `PhyslibAlpha.Relativity.Tensors.` → `Gravitation.Relativity.Tensors.`, `PhyslibAlpha.Cosmology.` → `Gravitation.Cosmology.` |
-| Local patch | `Modified/MOND.lean`: removed `[Fact frame.IsMetricConserved]`, because that class is not present in the pinned Physlib revision `7910f51f`; the lemma statement and proof are otherwise unchanged |
+| Local patch | none: the branch dropped `ReferenceFrame.IsMetricConserved` itself in `296991d`, so the earlier `Modified/MOND.lean` compatibility patch is no longer needed |
 
 `Schwarzschild/IncompressibleSphere.lean` is **not** copied: it is already on
 Physlib master, so the build imports it from the upstream dependency. The
 vendored files are otherwise unchanged from the branch commit, including their
-Apache-2.0 headers; the rest of this repository is MIT. There are 57 vendored
-Lean modules in total (43 under `Relativity/General`, 8 under
-`Relativity/Metrics`, 5 under `Relativity/Tensors`, and 1 under
+Apache-2.0 headers; the rest of this repository is MIT. There are 69 vendored
+Lean modules in total (48 under `Relativity/General`, 11 under
+`Relativity/Metrics`, 6 under `Relativity/Tensors`, and 4 under
 `Cosmology/FLRW`).
 
 The `physlib` requirement in `gravitation/lakefile.toml` therefore points at
@@ -41,8 +41,7 @@ covers the vendored tree as well as the local module.
 
 `scripts/check_vendor_sync.sh` runs in CI: it fetches the branch, fails if its
 tip differs from `REVISION`, and diffs every vendored file against the branch
-after applying the same import rewrites and the MOND compatibility patch, so
-this copy cannot drift unnoticed.
+after applying the same import rewrites, so this copy cannot drift unnoticed.
 
 ## Removal once merged
 

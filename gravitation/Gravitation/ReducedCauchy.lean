@@ -283,10 +283,10 @@ noncomputable def linearizedBoxReducedProblem (I : BoxIntegral.Box (Fin 3)) :
     F.vel0 = 0 ∧
     F.grad0 = 0
   IsWaveGauge := fun F =>
-    ∃ h : (Fin 4 → ℝ) → Tensor2 4,
-      (∀ y, Linearized.WaveGaugePerturbation h y) ∧
+    ∃ P : Linearized.MetricPerturbation,
+      (∀ y, Linearized.WaveGaugePerturbation P y) ∧
       (∀ t (x : Space3) (hx : x ∈ BoxIntegral.Box.Icc I),
-        F.val t ⟨x, hx⟩ = h ![t, x 0, x 1, x 2] 1 1)
+        F.val t ⟨x, hx⟩ = P.h ![t, x 0, x 1, x 2] 1 1)
 
 private lemma zero_waveSolution3D (I : BoxIntegral.Box (Fin 3)) :
     WaveSolution3D (fun _ _ => 0) (fun _ _ => 0) (fun _ _ => 0)
@@ -383,7 +383,7 @@ theorem ttWave_reduced_solution (hPlus hCross : ℝ) (f f' f'' : ℝ → ℝ)
           spatialLaplacian3D
             (directionalWave3D ![0, 0, 1] f0 g0 t) x ∧
           directionalWave3D ![0, 0, 1] f0 g0 t x =
-            Linearized.ttWave hPlus hCross f ![t, x 0, x 1, x 2] 1 1) := by
+            (Linearized.ttWave hPlus hCross f).h ![t, x 0, x 1, x 2] 1 1) := by
   refine ⟨fun y => Linearized.ttWave_waveGauge hPlus hCross f hf y,
     fun y i j => Linearized.ttWave_linEinstein_zero hPlus hCross f hf y i j,
     fun t x => ?_⟩

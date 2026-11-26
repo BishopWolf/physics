@@ -7,7 +7,7 @@ module
 
 public import Gravitation.Relativity.General.GeodesicSystem
 public import Gravitation.Relativity.General.GravitationalConstant
-public import Gravitation.Relativity.General.InitialData
+public import Gravitation.Relativity.General.InitialData.Basic
 public import Gravitation.KretschmannTotal
 public import Gravitation.WaveCauchy
 public import Gravitation.WaveEnergy
@@ -39,7 +39,7 @@ public import Gravitation.Relativity.General.Linearized.LorenzGauge
 public import Gravitation.Relativity.General.Linearized.NewtonianPerturb
 public import Gravitation.Relativity.General.Linearized.TTWave
 public import Gravitation.Relativity.General.Linearized.TraceReversed
-public import Gravitation.Relativity.General.MinkowskiVacuum
+public import Gravitation.Relativity.General.MinkowskiCoordinateMetric
 public import Gravitation.Relativity.General.Modified.BransDicke
 public import Gravitation.Relativity.General.Modified.ChameleonScreening
 public import Gravitation.Relativity.General.Modified.EinsteinAether
@@ -72,6 +72,32 @@ public import PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.CoordinateCurvature
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
+public import Gravitation.Cosmology.FLRW.Christoffel
+public import Gravitation.Cosmology.FLRW.FriedmannBridge
+public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Cosmology.FLRW.PerfectFluid
+public import Gravitation.Relativity.General.InitialData.FlatSlice
+public import Gravitation.Relativity.General.Linearized.Basic
+public import Gravitation.Relativity.General.Linearized.BoxEta
+public import Gravitation.Relativity.General.Linearized.GaugeTransform
+public import Gravitation.Relativity.General.Linearized.Laplacian3
+public import Gravitation.Relativity.Metrics.Basic
+public import Gravitation.Relativity.Metrics.ConformalMetric
+public import Gravitation.Relativity.Metrics.CoordDeriv
+public import Gravitation.Relativity.Metrics.CoordinateMetric
+public import Gravitation.Relativity.Metrics.CurvDeriv
+public import Gravitation.Relativity.Metrics.MetricTrace
+public import Gravitation.Relativity.Metrics.Minkowski
+public import Gravitation.Relativity.Metrics.Pipeline
+public import Gravitation.Relativity.Metrics.RiemannFromData
+public import Gravitation.Relativity.Metrics.ScalarCurvature
+public import Gravitation.Relativity.Metrics.StaticSphericalMetric
+public import Gravitation.Relativity.Tensors.EinsteinTensor
+public import Gravitation.Relativity.Tensors.EMFieldStrength
+public import Gravitation.Relativity.Tensors.MaxwellStressEnergy
+public import Gravitation.Relativity.Tensors.RicciTensor
+public import Gravitation.Relativity.Tensors.RiemannTensor
+public import Gravitation.Relativity.Tensors.Tensor2
 
 /-!
 
@@ -80,8 +106,8 @@ public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
 Umbrella module for the general-relativity development maintained in Physlib
 (`PhyslibAlpha/Relativity/General`, branch `gravity`).  Until that branch is
 merged, its modules are vendored under `vendor/Gravitation/Relativity/{General,Metrics,
-Tensors}/` and `vendor/Gravitation/Cosmology/FLRW/Metric.lean` at commit
-`b81c896a` as `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`; the namespace is
+Tensors}/` and `vendor/Gravitation/Cosmology/FLRW/` at commit
+`626ada7` as `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`; the namespace is
 still `GeneralRelativity` and the proofs are unchanged, so migrating consists of
 switching these imports back to `PhyslibAlpha.Relativity.General.*`.  The
 repository adds the numerical verification and the written account.

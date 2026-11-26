@@ -43,7 +43,7 @@ the present pointwise framework. The missing layers are identified and ordered
 into a concrete roadmap: manifold Lorentzian geometry, Sobolev and elliptic
 theory for the constraints, quasilinear hyperbolic existence in a suitable
 gauge, and gauge/constraint propagation together with geometric maximality.
-The Cauchy-programme modules contribute 352 of the 1262 audited declarations
+The Cauchy-programme modules contribute 356 of the 1263 audited declarations
 in Paper I's development.
 
 **Keywords:** general relativity · Cauchy problem · ADM constraints ·
@@ -332,12 +332,12 @@ the maximality problem until M5.
 
 ## 8. Relation to Paper I
 
-The development audited in Paper I has 1262 declarations. It contains the
+The development audited in Paper I has 1263 declarations. It contains the
 constraint, geodesic, wave, energy, uniqueness, chart, Bianchi, Sobolev,
 reduced-Cauchy, gauge-recovery, maximal-development and explicit-development
 layers discussed here, together with the solution theory, the alternative
 theories, the axiom audit and the numerical pass. This paper's formal
-contribution is 352 declarations. The remainder of Paper I is the written
+contribution is 356 declarations. The remainder of Paper I is the written
 account of the exact solutions.
 
 The two papers share a boundary. Paper I proves that explicit metrics solve
@@ -353,7 +353,7 @@ take for granted when they exhibit a solution.
 The build is silent, no declaration uses `sorry`, `admit` or an axiom of its
 own, and every axiom report stays inside
 $\{\mathrm{propext},\mathrm{Classical.choice},\mathrm{Quot.sound}\}$. The
-axiom audit covers 1262 declarations, 774 of them theorem-like, and the
+axiom audit covers 1263 declarations, 776 of them theorem-like, and the
 generated proof-status table is checked against the audit. The commands are:
 
 ```sh
