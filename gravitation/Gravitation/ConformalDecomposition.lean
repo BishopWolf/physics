@@ -6,6 +6,7 @@ Authors: Alex Vergara Gil
 module
 
 public import Gravitation.Relativity.Metrics.ConformalMetric
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 /-!
 # The Lichnerowicz-York conformal decomposition (interface)
@@ -27,7 +28,13 @@ constraint equations.
 
 ## ii. Key results
 
-- `ConformalData` : seed metric, conformal factor, TT tensor and mean curvature.
+- `ConformalData` : seed metric, conformal factor, shift, TT tensor and mean
+  curvature.
+- `ConformalData.extrinsicCurvatureOfShift` : the same `K` with the conformal
+  Killing term `(L beta)` added.
+- `shiftMomentumResidual`, `IsShiftSolution` : the momentum constraint for the
+  shift.
+- `ShiftRegular` : the shift is `C^2` on the slice.
 - `ConformalData.physicalMetric` : `h = phi^4 hbar`, packaged with its inverse.
 - `ConformalData.extrinsicCurvature` : `K = phi^{-2} sigma + (tau/3) h`.
 - `hamiltonianResidual` : `8 lap phi - R phi + |sigma|^2 phi^{-7}`.
@@ -38,6 +45,7 @@ constraint equations.
 
 - A. Conformal data
 - B. The Lichnerowicz-York residuals
+- C. The shift and the momentum constraint
 
 ## iv. References
 
@@ -53,6 +61,8 @@ constraint equations.
 -/
 
 @[expose] public section
+
+open scoped ContDiff
 
 namespace GeneralRelativity
 
@@ -72,6 +82,8 @@ structure ConformalData where
   sigma : Tensor2 3
   /-- The mean extrinsic curvature `tau`. -/
   meanCurvature : ℝ
+  /-- The shift vector field `beta^i` on the slice. -/
+  shift : (Fin 3 → ℝ) → Fin 3 → ℝ
 
 namespace ConformalData
 
@@ -88,6 +100,28 @@ lemma physicalMetric_g (D : ConformalData) :
 noncomputable def extrinsicCurvature (D : ConformalData) : Tensor2 3 :=
   fun i j => (D.phi ^ 2)⁻¹ * D.sigma i j
     + (D.meanCurvature / 3) * D.physicalMetric.g i j
+
+/-- The extrinsic curvature with the conformal Killing term of the shift,
+`K = phi^{-2} ((L beta) + sigma) + (tau/3) h`.  The tensor `(L beta)` is
+supplied by the caller: this repository has no manifold covariant derivative
+with which to form it from `D.shift`. -/
+noncomputable def extrinsicCurvatureOfShift (D : ConformalData) (killing : Tensor2 3) :
+    Tensor2 3 :=
+  fun i j => (D.phi ^ 2)⁻¹ * (killing i j + D.sigma i j)
+    + (D.meanCurvature / 3) * D.physicalMetric.g i j
+
+/-- With zero conformal Killing term the shift-decorated extrinsic curvature is
+the decomposition without a shift. -/
+lemma extrinsicCurvatureOfShift_zero (D : ConformalData) :
+    D.extrinsicCurvatureOfShift 0 = D.extrinsicCurvature := by
+  funext i j
+  simp [extrinsicCurvatureOfShift, extrinsicCurvature]
+
+/-- The shift is twice continuously differentiable on the slice.  Seed-metric
+regularity stays in the chart layer (`ChartInitialData.Regular`), since
+`ConformalData` stores the seed pointwise. -/
+def ShiftRegular (D : ConformalData) : Prop :=
+  ∀ i : Fin 3, ContDiff ℝ 2 (fun x : Fin 3 → ℝ => D.shift x i)
 
 /-- The transverse-traceless condition on `sigma` with respect to the seed
 metric: `hbar^{ij} sigma_{ij} = 0`. -/
@@ -125,5 +159,27 @@ lemma momentumResidual_zero_gradTau (divSigma : Fin 3 → ℝ) (phi : ℝ) :
     momentumResidual divSigma (fun _ => 0) phi = divSigma := by
   funext i
   simp [momentumResidual]
+
+/-! ## C. The shift and the momentum constraint -/
+
+/-- The momentum residual with a shift: the divergence of the conformal Killing
+term plus the divergence of `sigma`, minus the mean-curvature source. -/
+noncomputable def shiftMomentumResidual (divKilling divSigma gradTau : Fin 3 → ℝ)
+    (phi : ℝ) : Fin 3 → ℝ :=
+  fun i => divKilling i + divSigma i - (2 / 3) * phi ^ 6 * gradTau i
+
+/-- With constant mean curvature and transverse `sigma` the shift residual is
+the divergence of the conformal Killing term. -/
+lemma shiftMomentumResidual_zero (divKilling : Fin 3 → ℝ) (phi : ℝ) :
+    shiftMomentumResidual divKilling (fun _ => 0) (fun _ => 0) phi = divKilling := by
+  funext i
+  simp [shiftMomentumResidual]
+
+/-- The momentum constraint for the shift at a point: the shift residual
+vanishes.  The covariant divergences are inputs, as in `momentumResidual`. -/
+structure IsShiftSolution (D : ConformalData) (divKilling divSigma gradTau : Fin 3 → ℝ) :
+    Prop where
+  /-- The momentum constraint for the shift vanishes. -/
+  momentum : ∀ i, shiftMomentumResidual divKilling divSigma gradTau D.phi i = 0
 
 end GeneralRelativity

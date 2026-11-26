@@ -4,9 +4,9 @@
 
 26 November 2026
 
-> **Companion paper.** This is the third of the programme's papers. Paper I
+> **Companion paper.** This is the third of four accounts. The first
 > (`Gravitation-Formalisation.md`) proves that the explicit metrics have the
-> curvature and solve the field equations claimed for them. Paper II
+> curvature and solve the field equations claimed for them. The second
 > (`Cauchy-Problem.md`) isolates the initial-value problem and identifies
 > constraint solving as the layer it consumes but does not supply. This paper
 > takes that layer: solving the Hamiltonian and momentum constraints on an
@@ -20,15 +20,14 @@
 The initial-value problem of general relativity starts with data that satisfy
 the Hamiltonian and momentum constraints. The conformal method of Lichnerowicz
 and York reduces those four equations to an elliptic system for a conformal
-factor and a transverse-traceless tensor. This paper records what the
-development already has — derived spatial curvature and the nonlinear ADM
-constraint functionals, 1D and 3D-box Sobolev $H^1$ estimates, the
+factor, a shift and a transverse-traceless tensor. This paper records what the
+development already has — derived spatial curvature and the nonlinear constraint
+functionals, Sobolev $H^1$ estimates on a box and in one dimension, the
 Brill–Lindquist conformal factor, the curved Schwarzschild–de Sitter spatial
-slice, and flat FLRW data — states the conformal decomposition as a Lean
-interface (`Gravitation.ConformalDecomposition`), and orders the layers still
-missing: function spaces on the manifold, the linearised operator and its
-Fredholm property, a nonlinear fixed point, and regularity and uniqueness.
-None of those layers is claimed here.
+slice, flat FLRW data — states the conformal decomposition as a mathematical
+interface, and orders the layers still missing: function spaces on the manifold,
+the linearised operator and its Fredholm property, a nonlinear fixed point, and
+regularity and uniqueness. None of those layers is claimed here.
 
 **Keywords:** Einstein constraints · Lichnerowicz–York · conformal method ·
 elliptic PDE · formal verification
@@ -37,130 +36,128 @@ elliptic PDE · formal verification
 
 ## 1. Why a third paper
 
-Paper II's §6 lists four layers between the present development and the
+The Cauchy paper lists four layers between the present development and the
 Choquet–Bruhat–Geroch theorem. The second — Sobolev spaces and the constraint
 problem — is not a corollary of any curvature computation. It is a quasilinear
-elliptic system on a three-manifold, and it is the input Paper II needs before
-hyperbolic existence can even be stated for arbitrary data.
+elliptic system on a three-manifold, and it is the input the hyperbolic layer
+needs before existence can even be stated for arbitrary data.
 
-Treating it inside Paper II would conflate two different bodies of analysis.
-This paper owns the elliptic layer; Paper II takes its result as a black box.
+Treating it inside the Cauchy paper would conflate two different bodies of
+analysis. This paper owns the elliptic layer; the Cauchy paper takes its result
+as a black box.
 
 ## 2. The conformal system
 
 Let $\bar h$ be a seed Riemannian metric on a compact three-manifold $\Sigma$,
-$\phi>0$ a conformal factor, $\sigma$ a symmetric tensor, and $\tau$ the mean
-extrinsic curvature. The physical data are
+$\phi>0$ a conformal factor, $\beta$ a shift, $\sigma$ a symmetric tensor, and
+$\tau$ the mean extrinsic curvature. The physical data are
 
 $$h_{ij}=\phi^4\bar h_{ij},\qquad
-K_{ij}=\phi^{-2}\sigma_{ij}+\tfrac13\tau\,h_{ij},$$
+K_{ij}=\phi^{-2}\big((\bar L\beta)_{ij}+\sigma_{ij}\big)+\tfrac13\tau\,h_{ij},$$
 
-with $\sigma$ transverse-traceless with respect to $\bar h$:
-$\bar h^{ij}\sigma_{ij}=0$ and $\bar\nabla^j\sigma_{ij}=0$. In this split the
+where $(\bar L\beta)_{ij}=\bar\nabla_i\beta_j+\bar\nabla_j\beta_i
+-\tfrac23\bar h_{ij}\bar\nabla_k\beta^k$ is the conformal Killing operator and
+$\sigma$ is transverse-traceless with respect to $\bar h$:
+$\bar h^{ij}\sigma_{ij}=0$, $\bar\nabla^j\sigma_{ij}=0$. In this split the
 constraints become
 
-$$8\bar\Delta\phi-\bar R\phi+|\sigma|^2_{\bar h}\,\phi^{-7}=0,
+$$8\bar\Delta\phi-\bar R\phi+|\sigma+\bar L\beta|^2_{\bar h}\,\phi^{-7}=0,
 \qquad
-\bar\nabla^j\sigma_{ij}=\tfrac23\phi^6\bar\nabla_i\tau .$$
+\bar\nabla_j(\bar L\beta)^{ij}+\bar\nabla^j\sigma_{ij}
+=\tfrac23\phi^6\bar\nabla^i\tau .$$
 
 The first is the Lichnerowicz equation; the second is the momentum constraint,
-linear in $\sigma$ for fixed $\phi$ and $\tau$. The system is elliptic, and its
-solvability depends on $\bar R$, on $\tau$, and on whether $\Sigma$ is compact
-with or without boundary.
+linear in $\beta$ for fixed $\phi$ and $\tau$. For constant mean curvature with
+a transverse $\sigma$ and no shift it reduces to the divergence equation of the
+shift-free form.
 
-## 3. What is already formalised
+## 3. What the development already contains
 
-| Layer | Module | Content |
-| --- | --- | --- |
-| Derived spatial curvature | `Gravitation.SobolevInitialData` | `spatialRiemannOf`, `spatialRicciOf`, `spatialScalarCurvOf` from a 3-metric field |
-| Constraint functionals | `Gravitation.SobolevInitialData` | `hamiltonianConstraintOf`, `momentumConstraintOf`, and `minkowskiChart_spatial_constraints_zero` |
-| Sobolev estimates | `Gravitation.SobolevInitialData` | `sobolevH1NormSq3D`, `l2_le_sobolevH1_3D`, `grad_le_sobolevH1_3D` on a box; `sobolev_embedding_1D`, `trace_estimate_1D` in 1D |
-| Conformal factor | `Gravitation.SobolevInitialData` | `brillLindquistPhi`, `spatialLaplacian3D_brillLindquistPhi` |
-| Curved slice | `Gravitation.SobolevInitialData` | `sdsSpatialMetric`, `spatialScalarCurvOf_sdsSpatial` |
-| FLRW data | `Gravitation.SobolevInitialData` | `flrw_initial_constraints` |
-| Packaging | `Gravitation.InitialDataInterface` | `ChartInitialData.ofChartData`, `ConstraintResidual`, `constraintResidual_eq_zero` |
-| Conformal metrics | `Gravitation.Relativity.Metrics.ConformalMetric` | `conformalRescaleMetric`, `conformalMetric` with a proved inverse |
-| This paper's interface | `Gravitation.ConformalDecomposition` | `ConformalData`, `physicalMetric`, `extrinsicCurvature`, the two residuals |
+| Content | Depth |
+| --- | --- |
+| Spatial Riemann, Ricci and scalar curvature derived from a 3-metric field | pointwise, chart coordinates |
+| Hamiltonian and momentum constraint functionals, with the flat case shown to vanish | pointwise |
+| Sobolev $H^1$ norm on a 3D box, with coercivity | constant-coefficient box |
+| 1D $H^1$ embedding and boundary trace inequality | interval |
+| Brill–Lindquist conformal factor, with $\bar\Delta\phi=0$ proved | $\mathbb{R}^3\setminus\{0\}$ |
+| Schwarzschild–de Sitter spatial slice, with $^3R=2\Lambda$ | curved slice |
+| Flat FLRW data: momentum constraint identically, Hamiltonian $6H^2$ | flat slice |
+| Chart initial data packaged with a vanishing constraint residual | pointwise |
+| Conformal rescaling $h\mapsto\phi^4h$ with its inverse | pointwise |
+| Conformal decomposition interface: $\phi$, $\beta$, $\sigma$, $\tau$ and both residual equations | stated, not solved |
+| $H^s$ interface on a compact manifold: norm, completeness, point evaluation and product bounds | hypotheses, not constructed |
 
-Every row is a statement at a point or on a chart. None of them solves a
+Every row is a statement at a point, on a chart, or an interface. None solves a
 boundary-value problem, and none constructs a global solution.
 
 ## 4. The interface
 
-`ConformalData` carries the seed metric, the conformal factor with its
-positivity proof, the transverse-traceless tensor and the mean curvature. From
-it the module defines the physical metric $\phi^4\bar h$ (packaged as a
-`MetricTensor` with inverse $\phi^{-4}\bar h^{-1}$, so the existing conformal
-machinery is reused rather than duplicated) and the physical extrinsic
-curvature.
+The conformal data are a seed metric, a positive conformal factor, a shift
+field, a transverse-traceless tensor and the mean curvature. The physical
+metric is $\phi^4\bar h$, packaged so that its inverse $\phi^{-4}\bar h^{-1}$ is
+available; the physical extrinsic curvature is the expression of §2, with and
+without the conformal Killing term.
 
-The equations are stated as residuals with the operators taken as explicit
-arguments:
+The two constraints are stated as residuals rather than as existence problems:
 
-- `hamiltonianResidual lapPhi R sigmaSq phi = 8 * lapPhi - R * phi + sigmaSq / phi^7`,
-- `momentumResidual divSigma gradTau phi = fun i => divSigma i - (2/3) * phi^6 * gradTau i`.
+$$8\Delta\phi-\bar R\phi+|\sigma|^2\phi^{-7},
+\qquad
+(\bar\nabla_j(\bar L\beta)^{ij}+\bar\nabla^j\sigma_{ij})
+-\tfrac23\phi^6\bar\nabla^i\tau .$$
 
-`IsLichnerowiczYorkSolution` is the predicate that both residuals vanish at a
-point. That is deliberately all it is: the module supplies the shape of the
-system, not an existence theorem. The only derived result is
-`momentumResidual_zero_gradTau`, which records that constant mean curvature
-reduces the momentum residual to the divergence of $\sigma$.
+A solution is the predicate that both vanish at a point. The covariant
+derivatives and the conformal Killing term are inputs: the development has
+coordinate expressions for them but no manifold connection with which to build
+them from the shift. The shift's regularity is recorded separately (it is
+$C^2$ on the slice); seed-metric regularity stays with the chart data, since
+the seed is stored pointwise.
 
-Supplying $\bar\Delta\phi$, $\bar R$, $|\sigma|^2$ and $\bar\nabla\sigma$ as
-arguments is honest about the current boundary: the repository has coordinate
-expressions for these quantities, but no manifold operators to feed them.
+The one derived statement is that constant mean curvature with a transverse
+$\sigma$ reduces the momentum residual to the divergence of the conformal
+Killing term — the shift-free form of the equation.
 
 ## 5. The layers still missing
 
 | Layer | Content | Status |
 | --- | --- | --- |
-| L0 | The conformal decomposition as a Lean interface | **Done** in `Gravitation.ConformalDecomposition` |
-| L1 | Manifold Sobolev spaces $H^s(\Sigma)$ with trace and multiplication estimates on a compact 3-manifold | open; only $\mathbb{R}$/box $H^1$ exists |
-| L2 | The linearised Lichnerowicz operator: invertibility or Fredholm alternative, maximum principle and Schauder/`H^s` estimates | open; no elliptic theory in the repository or its dependencies |
+| L0 | The conformal decomposition as an interface | **Done** — conformal factor, shift, transverse-traceless tensor, both residual systems |
+| L1 | Manifold Sobolev spaces $H^s(\Sigma)$ with embedding, trace and product estimates | **Interface stated**; the space is not constructed |
+| L2 | The linearised Lichnerowicz operator: invertibility or Fredholm alternative, maximum principle and Schauder/$H^s$ estimates | open; no elliptic theory in the development or its dependencies |
 | L3 | Nonlinear existence by a fixed point, with small-data or near-flat hypotheses explicit | open |
 | L4 | Regularity and uniqueness of the solution; comparison with the constant, warped and Brill–Lindquist instances | open |
-| L5 | Handing the solved constraints to Paper II's hyperbolic layer | open; depends on L1–L4 |
+| L5 | Handing the solved constraints to the hyperbolic layer | open; depends on L1–L4 |
 
 ## 6. What is not claimed
 
 - No existence theorem for the constraint equations on any manifold.
-- No manifold Sobolev spaces. The formalised estimates are 1D $H^1$ and a 3D
-  box $H^1$ norm; there is no $H^s(\Sigma)$ for $s$ large.
+- No constructed Sobolev space. The $H^s$ interface records the estimates a
+  solver would use; it does not prove them.
 - No elliptic regularity, Fredholm property, maximum principle or a priori
   estimate.
 - No statement about boundary conditions, asymptotically flat ends, or
   non-compact $\Sigma$.
-- No numerical constraint solver. The Vulkan pass computes the curvature of
-  metrics it is given; it does not solve for data.
-- `IsLichnerowiczYorkSolution` is a predicate on supplied operators, not a
+- No derivation of the field equation from the action for the alternatives
+  (that is the fourth paper), and no numerical constraint solver.
+- No construction of the conformal Killing operator or of covariant
+  derivatives; they are supplied as data.
+- The solution predicate is a condition on supplied operators, not a
   construction of them.
 
-## 7. Relation to Papers I and II
+## 7. Relation to the other papers
 
-Paper I supplies the tensor calculus and the exact solutions; Paper II supplies
-the ADM constraints, the chart data packaging and the hyperbolic roadmap. This
-paper adds the conformal split and nothing else. A solution of the system here
-would enter Paper II as its layer 2 and would not by itself prove
-Choquet–Bruhat–Geroch: hyperbolic existence and geometric maximality remain
-separate layers.
+The first paper supplies the tensor calculus and the exact solutions; the
+Cauchy paper supplies the constraint functionals, the chart data packaging and
+the hyperbolic roadmap. This paper adds the conformal split and the $H^s$
+interface. A solution of the system here would enter the Cauchy paper as its
+second layer and would not by itself prove Choquet–Bruhat–Geroch: hyperbolic
+existence and geometric maximality remain separate layers.
 
 ## 8. Reproducibility and trust
 
 The build is silent, no declaration uses `sorry`, `admit` or an axiom of its
-own, and every axiom report stays inside
-$\{\mathrm{propext},\mathrm{Classical.choice},\mathrm{Quot.sound}\}$. The
-commands are the repository's standard ones:
-
-```sh
-cd gravitation
-lake build
-bash ../scripts/check_messages.sh
-bash ../scripts/audit_axioms.sh
-bash ../scripts/proof_status.sh --check
-```
-
-The new module adds nine declarations, two of them theorem-like; the audit and
-`Proof-Status.md` carry the exact totals.
+own, and every axiom report stays inside the three standard axioms of the base
+libraries. The repository's audit covers every declaration, and the generated
+proof-status table is checked against it in continuous integration.
 
 ## References
 
@@ -170,5 +167,6 @@ The new module adds nine declarations, two of them theorem-like; the audit and
 4. R. Bartnik, J. Isenberg. *The constraint equations.* In *The Einstein Equations and the Large Scale Behavior of Gravitational Fields* (Birkhäuser, 2004). arXiv:gr-qc/0405092.
 5. Y. Choquet-Bruhat. *General Relativity and the Einstein Equations.* Oxford University Press, 2009.
 6. R. M. Wald. *General Relativity.* University of Chicago Press, 1984.
-7. A. Vergara Gil. *A Machine-Checked Solution Theory of General Relativity and Its Alternatives.* `docs/Gravitation-Formalisation.md`, 2026.
-8. A. Vergara Gil. *The Cauchy Problem for the Einstein Equations: Formalised Constraints, a Wave Model, and a Roadmap.* `docs/Cauchy-Problem.md`, 2026.
+7. R. A. Adams, J. J. F. Fournier. *Sobolev Spaces.* 2nd ed., Academic Press, 2003.
+8. A. Vergara Gil. *A Machine-Checked Solution Theory of General Relativity and Its Alternatives.* `docs/Gravitation-Formalisation.md`, 2026.
+9. A. Vergara Gil. *The Cauchy Problem for the Einstein Equations: Formalised Constraints, a Wave Model, and a Roadmap.* `docs/Cauchy-Problem.md`, 2026.

@@ -6,7 +6,7 @@ surface is this repository's `Gravitation` module together with the vendored
 copy of the unmerged `gravity` branch (`gravitation/vendor/Gravitation/`, module
 paths `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, commit `626ada7`)
 and the already-merged `Schwarzschild.IncompressibleSphere` from upstream master:
-1272 declarations, 778 of them theorem-like. The table below is the
+1286 declarations, 783 of them theorem-like. The table below is the
 status of each one: "proved" means the audit has a `#print axioms` report for it
 and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 `scripts/proof_status.sh` generates it, and CI fails if it is out of date.
@@ -78,11 +78,17 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ConformalData.physicalMetric` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ConformalData.physicalMetric_g` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ConformalData.extrinsicCurvature` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.extrinsicCurvatureOfShift` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.extrinsicCurvatureOfShift_zero` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ConformalData.ShiftRegular` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ConformalData.IsTransverseTraceless` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hamiltonianResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.momentumResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsLichnerowiczYorkSolution` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.momentumResidual_zero_gradTau` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.shiftMomentumResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.shiftMomentumResidual_zero` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsShiftSolution` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.christoffel` | `Gravitation/Cosmology/FLRW/Christoffel.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.christoffelDeriv` | `Gravitation/Cosmology/FLRW/Christoffel.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.FLRW.FLRWSpacetime.christoffel_eq` | `Gravitation/Cosmology/FLRW/Christoffel.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -357,6 +363,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ChartSpacetime.Embedding` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartSpacetime.Embedding.refl` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ChartSpacetime.Embedding.trans` | `Gravitation/ManifoldInterface.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ManifoldSobolev` | `Gravitation/ManifoldSobolev.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem.IsMaximal` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem.toDevelopmentInterface` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
@@ -368,6 +375,13 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ChartMaximalDevelopmentCertificate.unique_up_to_isometry` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.intervalDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.intervalMaximalDevelopmentCertificate` | `Gravitation/MaximalDevelopment.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.mondMu` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.mondMu_zero` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.mondMu_pos` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualActionDensity` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualFieldResidual` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.IsAqualSolution` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.aqualFieldResidual_eq_zero_iff` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

@@ -4,13 +4,13 @@
 
 26 November 2026
 
-> **Companion paper.** This is the fourth of the programme's papers. Paper I
+> **Companion paper.** This is the fourth of four accounts. The first
 > (`Gravitation-Formalisation.md`) records sixteen alternative and modified
 > theories, but with uneven depth: some carry their field equations, while MOND,
 > MOG and TeVeS remain structural statements. This paper's goal is to promote
 > each alternative to a full field theory — action, field equations, weak-field
 > limit, stability and cosmology — or to record precisely why it cannot be
-> promoted. It is a plan; the present formalisation is the starting point it
+> promoted. It is a plan; the present development is the starting point it
 > describes.
 
 ---
@@ -22,12 +22,14 @@ deep-MOND relation and flat rotation curves, the bounded MOG enhancement, the
 TeVeS disformal metric, Brans–Dicke and $f(R)$ field equations, chameleon
 screening, Einstein–Aether, massive gravity, Kaluza–Klein, Lovelock,
 Einstein–Cartan, teleparallel, Nordström, Galileon and PPN parameters. The
-depth is uneven and stated per module. This paper sets a uniform standard: a
-theory counts as formalised when its action, field equations, parameterised
-post-Newtonian limit, degrees of freedom and background cosmology are all
-machine-checked. It then goes through the alternatives one by one against that
-standard, records what is already there and what each needs, and states the
-verdict criterion. No alternative is claimed to be a full theory today.
+depth is uneven. This paper sets a uniform standard: a theory counts as
+formalised when its action, field equations, parameterised post-Newtonian
+limit, degrees of freedom and background cosmology are all machine-checked. It
+goes through the alternatives one by one against that standard, records what is
+already there and what each needs, and states the verdict criterion. The first
+promotion is MOND, whose AQUAL action and field equation are now stated; the
+derivation of the equation from the action is not formalised. No alternative is
+claimed to be a full theory today.
 
 **Keywords:** modified gravity · MOND · TeVeS · MOG · PPN · formal verification
 
@@ -35,7 +37,7 @@ verdict criterion. No alternative is claimed to be a full theory today.
 
 ## 1. The gap
 
-Paper I's §4.6 says it plainly: Einstein–Cartan, teleparallel, Kaluza–Klein,
+The first paper says it plainly: Einstein–Cartan, teleparallel, Kaluza–Klein,
 Lovelock, Einstein–Aether, massive gravity, PPN, Brans–Dicke/$f(R)$ and
 chameleon screening carry their field equations or exact reductions, while
 MOND, MOG and TeVeS remain structural, and the Galileon result is
@@ -49,7 +51,7 @@ field theory or simply has not been written down yet in this development.
 ## 2. The standard
 
 An alternative is **promoted** when all of the following are machine-checked
-statements about it, in the same tensor language as Papers I–II:
+statements about it:
 
 | Criterion | Content |
 | --- | --- |
@@ -70,19 +72,23 @@ verdict under §2.
 
 ### 3.1 MOND
 
-**Now.** The deep-MOND relation, the flat-rotation law `MOND.flat_rotation`, and
-the acceleration scale, in `Gravitation.Relativity.General.Modified.MOND`.
+**Now.** The deep-MOND relation, the flat-rotation law and the acceleration
+scale. The AQUAL action density
+$-(a_0^2/8\pi G)F(|\nabla\phi|^2/a_0^2)-\rho\phi$ and the field equation
+$\nabla\cdot[\mu(|\nabla\phi|/a_0)\nabla\phi]=4\pi G\rho$ are stated, with the
+interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
+$\mu=1$.
 
-**Needs.** A choice between modified inertia and a modified-gravity action
-(AQUAL/quasi-linear), the field equation that produces the interpolating
-function, lensing without dark matter, and a cosmological background.
+**Needs.** The derivation of the field equation from the action, the
+interpolating function selected by the action's free function, lensing without
+dark matter, and a cosmological background.
 
-**Verdict.** Shadow: kinematics only.
+**Verdict.** V1 stated, not derived: the closest of the shadows to promotion.
 
 ### 3.2 MOG / STVG
 
-**Now.** The Yukawa-like enhancement $\Phi=-(GM/r)[1+\alpha(1-e^{-\mu r})]$ and
-the bounded-enhancement statement, in `Modified.MOG`.
+**Now.** The Yukawa-like enhancement
+$\Phi=-(GM/r)[1+\alpha(1-e^{-\mu r})]$ and the bounded-enhancement statement.
 
 **Needs.** The massive-vector action, its field equations coupled to the
 metric, the PPN parameters, and stability of the vector sector.
@@ -91,20 +97,21 @@ metric, the PPN parameters, and stability of the vector sector.
 
 ### 3.3 TeVeS
 
-**Now.** The disformal physical metric with explicit inverse,
-`TeVeS.metric_lorentzian` and `TeVeS.metric_spatial`, in `Modified.TeVeS`.
+**Now.** The disformal physical metric with explicit inverse; the physical
+metric is shown to stay Lorentzian for every scalar, and its spatial part is a
+conformal rescaling.
 
 **Needs.** The full TeVeS action (metric, scalar, unit vector), the scalar and
 vector field equations, the lensing prediction, and the cosmological
 perturbation spectrum. The known constraints (GW speed, cluster lensing, CMB)
 should then be checked rather than asserted.
 
-**Verdict.** Shadow, but the closest to promotion: the geometric core exists.
+**Verdict.** Shadow, but the geometric core exists.
 
 ### 3.4 Brans–Dicke
 
 **Now.** The field equation, the Cassini bound on $\omega$, the
-$\omega\to\infty$ limit and the ghost pole, in `Modified.BransDicke`.
+$\omega\to\infty$ limit and the ghost pole.
 
 **Needs.** The PPN map at finite $\omega$, the cosmological solution, and the
 stability statement beyond the pole.
@@ -114,11 +121,10 @@ stability statement beyond the pole.
 ### 3.5 f(R) gravity
 
 **Now.** The algebraic field equation, the trace identity, the Starobinsky
-potential, the scalar mass and the Einstein-frame plateau, in
-`Modified.FRGravity`.
+potential, the scalar mass and the Einstein-frame plateau.
 
 **Needs.** Well-posedness of the fourth-order system, the chameleon/screening
-limit, and the perturbation equations used by Cosmology.
+limit, and the perturbation equations used by cosmology.
 
 **Verdict.** Partial.
 
@@ -126,7 +132,7 @@ limit, and the perturbation equations used by Cosmology.
 
 **Now.** The density–mass–range chain, Yukawa suppression, the thin-shell
 factor, and the exterior profile with screened and unscreened fifth-force
-bounds, in `Modified.ChameleonScreening`.
+bounds.
 
 **Needs.** Embedding in a specific scalar–tensor action and the cosmological
 evolution of the screening radius.
@@ -135,8 +141,7 @@ evolution of the screening radius.
 
 ### 3.7 Einstein–Aether
 
-**Now.** The aether field and its field equations in
-`Modified.EinsteinAether`.
+**Now.** The aether field and its field equations.
 
 **Needs.** The PPN parameters, the linearised spectrum and the cosmological
 background, plus the GW-speed constraint.
@@ -145,8 +150,7 @@ background, plus the GW-speed constraint.
 
 ### 3.8 Massive gravity
 
-**Now.** Fierz–Pauli, the vDVZ discontinuity and the dRGT mass term, in
-`Modified.MassiveGravity.{FierzPauli,VDVZ,DRGT}`.
+**Now.** Fierz–Pauli, the vDVZ discontinuity and the dRGT mass term.
 
 **Needs.** The nonlinear field equations, the absence of the Boulware–Deser
 ghost, and the cosmological background.
@@ -156,7 +160,7 @@ ghost, and the cosmological background.
 ### 3.9 Kaluza–Klein
 
 **Now.** The five-dimensional metric, the Kaluza miracle and the gauge
-transformation, in `Modified.KaluzaKlein.*`.
+transformation.
 
 **Needs.** The full reduction of the five-dimensional Einstein equations,
 including the scalar and the tower, and the PPN limit.
@@ -165,8 +169,7 @@ including the scalar and the tower, and the PPN limit.
 
 ### 3.10 Lovelock gravity
 
-**Now.** The Lovelock invariants and the generalised Kronecker symbol, in
-`Modified.Lovelock.*`.
+**Now.** The Lovelock invariants and the generalised Kronecker symbol.
 
 **Needs.** The field equations in $D\ge5$, their linearisation and the
 cosmological solutions.
@@ -175,8 +178,7 @@ cosmological solutions.
 
 ### 3.11 Einstein–Cartan
 
-**Now.** Torsion and the Einstein–Cartan field equations, in
-`Modified.EinsteinCartan`.
+**Now.** Torsion and the Einstein–Cartan field equations.
 
 **Needs.** The spin-fluid coupling, the avoidance-of-singularity claim and the
 perturbation theory.
@@ -185,8 +187,7 @@ perturbation theory.
 
 ### 3.12 Teleparallel gravity
 
-**Now.** The tetrad formulation, $f(T)$ gravity and the FLRW torsion ansatz, in
-`Modified.Teleparallel.*`.
+**Now.** The tetrad formulation, $f(T)$ gravity and the FLRW torsion ansatz.
 
 **Needs.** The full $f(T)$ field equations, the extra degrees of freedom and
 the PPN limit.
@@ -196,7 +197,7 @@ the PPN limit.
 ### 3.13 Nordström's theory
 
 **Now.** The conformal metric, $S=-6\Box\phi/\phi^3$ and the Einstein–Fokker
-equivalence, in `Modified.Nordstrom`.
+equivalence.
 
 **Needs.** Little: it is a complete, if empirically excluded, scalar theory.
 The promotion here is to state its PPN parameters and its failure against
@@ -208,8 +209,7 @@ observation.
 
 **Now.** The one-dimensional total-derivative and shift structure, the
 degenerate velocity Hessian and the unbounded Hamiltonian, contrasted with a
-positive-definite kinetic term, in `Modified.Galileon` and
-`Modified.Ostrogradsky`.
+positive-definite kinetic term.
 
 **Needs.** The covariant Galileon action, its field equations and the
 Vainshtein screening solution.
@@ -218,7 +218,7 @@ Vainshtein screening solution.
 
 ### 3.15 PPN parameters
 
-**Now.** The parameter dictionary in `Modified.PPNParameters`.
+**Now.** The parameter dictionary.
 
 **Needs.** Nothing for promotion: PPN is the comparison framework V2, not a
 theory. Its role is to receive the parameters from the sections above.
@@ -227,45 +227,46 @@ theory. Its role is to receive the parameters from the sections above.
 
 ## 4. The order of work
 
-1. Complete V1 for MOND, MOG and TeVeS — the three shadows.
-2. Compute V2 for every theory that passes V1, using `Modified.PPNParameters`.
-3. Audit V3, starting with the theories whose actions carry higher derivatives
+1. Derive the AQUAL field equation from the action, closing MOND's V1.
+2. Complete V1 for MOG and TeVeS — the remaining shadows.
+3. Compute V2 for every theory that passes V1, using the PPN dictionary.
+4. Audit V3, starting with the theories whose actions carry higher derivatives
    or vector sectors.
-4. Add V4 for the theories that survive V2 and V3.
-5. Apply V5 as a filter and record the verdicts in Paper I's alternatives
-   section, demoting the prose that no longer matches its module.
+5. Add V4 for the theories that survive V2 and V3.
+6. Apply V5 as a filter and record the verdicts in the first paper's
+   alternatives section, demoting prose that no longer matches.
 
 ## 5. What is not claimed
 
 - No alternative is a full field theory in this development today.
+- The AQUAL field equation is stated, not derived from the action.
 - No observational data analysis: PPN bounds and GW170817 are cited as filters,
   not re-derived.
 - No claim that a theory failing V1 is physically wrong; only that it is not
   formalised as a field theory here.
-- No quantum-gravity embedding. The structural correspondences collected in
+- No quantum-gravity embedding. The structural correspondences in
   `QUANTUM-GRAVITY-MAPPING.md` are classification, not derivation.
 
 ## 6. Relation to the other papers
 
-Paper I owns the alternatives' current statements; this paper owns their
-promotion. Paper II and the constraint paper are independent of this track.
-`QUANTUM-GRAVITY-MAPPING.md` records which quantum-gravity programmes the
-structures resemble; it is not part of the promotion test.
+The first paper owns the alternatives' current statements; this paper owns their
+promotion. The Cauchy and constraint papers are independent of this track.
+The quantum-gravity mapping note records which programmes the structures
+resemble; it is not part of the promotion test.
 
 ## 7. Reproducibility and trust
 
-The standard gates apply unchanged: silent build, no `sorry` or `admit`, axiom
-footprints inside $\{\mathrm{propext},\mathrm{Classical.choice},\mathrm{Quot.sound}\}$,
-and a current `Proof-Status.md`. Any promoted statement is a theorem in the
-`Gravitation` module, audited like the rest.
+The development's build, axiom and proof-status checks apply unchanged. Any
+promoted statement is kernel-checked like the rest, with no axiom of its own
+and no `sorry` or `admit`.
 
 ## References
 
 1. M. Milgrom. *A modification of the Newtonian dynamics as a possible alternative to the hidden mass hypothesis.* ApJ 270 (1983) 365.
-2. J. Bekenstein. *Relativistic gravitation theory for the modified Newtonian dynamics paradigm.* Phys. Rev. D 70 (2004) 083509.
-3. J. W. Moffat. *Scalar–tensor–vector gravity theory.* JCAP 03 (2006) 004.
-4. T. Clifton, P. G. Ferreira, A. Padilla, C. Skordis. *Modified gravity and cosmology.* Phys. Rept. 513 (2012) 1.
-5. C. M. Will. *The confrontation between general relativity and experiment.* Living Rev. Relativ. 17 (2014) 4.
-6. B. P. Abbott et al. *Gravitational waves and gamma-rays from a binary neutron star merger: GW170817 and GRB 170817A.* ApJL 848 (2017) L13.
-7. C. Skordis, T. Złośnik. *New relativistic theory for modified Newtonian dynamics.* Phys. Rev. Lett. 127 (2021) 161302.
-8. A. Vergara Gil. *Which modified-gravity theory matches which quantum-gravity approach?* `QUANTUM-GRAVITY-MAPPING.md`, 2026.
+2. J. Bekenstein, M. Milgrom. *Does the missing mass problem signal the breakdown of Newtonian gravity?* ApJ 286 (1984) 7.
+3. J. Bekenstein. *Relativistic gravitation theory for the modified Newtonian dynamics paradigm.* Phys. Rev. D 70 (2004) 083509.
+4. J. W. Moffat. *Scalar–tensor–vector gravity theory.* JCAP 03 (2006) 004.
+5. T. Clifton, P. G. Ferreira, A. Padilla, C. Skordis. *Modified gravity and cosmology.* Phys. Rept. 513 (2012) 1.
+6. C. M. Will. *The confrontation between general relativity and experiment.* Living Rev. Relativ. 17 (2014) 4.
+7. B. P. Abbott et al. *Gravitational waves and gamma-rays from a binary neutron star merger: GW170817 and GRB 170817A.* ApJL 848 (2017) L13.
+8. C. Skordis, T. Złośnik. *New relativistic theory for modified Newtonian dynamics.* Phys. Rev. Lett. 127 (2021) 161302.

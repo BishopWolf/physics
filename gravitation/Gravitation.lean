@@ -25,6 +25,8 @@ public import Gravitation.Bianchi
 public import Gravitation.InitialDataInterface
 public import Gravitation.SobolevInitialData
 public import Gravitation.ConformalDecomposition
+public import Gravitation.MondFieldTheory
+public import Gravitation.ManifoldSobolev
 public import Gravitation.SchwarzschildManifold
 public import Gravitation.CauchyInterfaces
 public import Gravitation.ReducedWave3D
