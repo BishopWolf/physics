@@ -83,7 +83,7 @@ $\mu=1$.
 interpolating function selected by the action's free function, lensing without
 dark matter, and a cosmological background.
 
-**Verdict.** V1 stated, not derived: the closest of the shadows to promotion.
+**Verdict.** V1 stated, not derived: the best developed of the three.
 
 ### 3.2 MOG / STVG
 
@@ -232,7 +232,7 @@ theory. Its role is to receive the parameters from the sections above.
 
 ## 4. The order of work
 
-1. Derive the AQUAL field equation from the action, closing MOND's V1.
+1. Derive the AQUAL field equation from the action; V1 is stated but unproved.
 2. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
 3. Compute V2 for every theory that passes V1, using the PPN dictionary.
