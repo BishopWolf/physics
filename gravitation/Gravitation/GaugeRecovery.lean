@@ -19,7 +19,7 @@ conservation identity:
    `Box.Icc I`, `WaveUniqueness3D.wave_zero_of_zero_data3D` forces `Γ_k = 0`
    on `Box.Icc I`.  Because `Box.Ioo I` is open, Lorenz gauge holds on a
    neighborhood of every interior spacetime point, so
-   `Linearized.linEinstein_eq_zero_of_waveGauge` recovers the full linearized
+   `Linearized.linearizedEinstein_eq_zero_of_waveGauge` recovers the full linearized
    vacuum Einstein equations `G^{(1)}_{ij} = 0` and preserves the `(0, j)`
    constraints.
 3. **Nonlinear 4D flat FLRW Einstein system (`flrw_gaugeRecovery`)**:
@@ -35,7 +35,7 @@ module
 
 public import Gravitation.Bianchi
 public import Gravitation.ReducedCauchy
-public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Cosmology.FLRW.Basic
 public import Gravitation.Cosmology.FLRW.PerfectFluid
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.Calculus.MeanValue
@@ -53,7 +53,7 @@ namespace GeneralRelativity
 
 /-- FLRW spacetime with scale factor `a` and curvature `k`, named so the
 structure-based metric API reads as `(flrwSpacetime a k).metric`. -/
-abbrev flrwSpacetime (a : ℝ → ℝ) (k : ℝ) : FLRW.FLRWSpacetime :=
+abbrev flrwSpacetime (a : ℝ → ℝ) (k : ℝ) : Cosmology.FLRW.FLRWSpacetime :=
   ⟨a, k⟩
 
 /-! ## A. General nonlinear Bianchi constraint-propagation split -/
@@ -72,31 +72,31 @@ theorem bianchi_constraint_propagation_split
       ∑ k, g y i k * ginv y k j = if i = j then 1 else 0)
     (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => g y i j) x)
     (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
-    (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => Pipeline.christoffel g ginv y k i j) x)
+    (hΓC2 : ∀ k i j, ContDiffAt ℝ 2 (fun y => CoordinateCurvature.christoffel g ginv y k i j) x)
     (l : Fin 4) :
-    ginv x 0 0 * Pipeline.coordDeriv 0 (fun y => Pipeline.einsteinTensorOf g ginv y 0 l) x =
+    ginv x 0 0 * CoordinateCurvature.coordDeriv 0 (fun y => CoordinateCurvature.einsteinTensor g ginv y 0 l) x =
       -(ginv x 0 0 *
-          (-(∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 0 *
-              Pipeline.einsteinTensorOf g ginv x a l)
-            - ∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 l *
-              Pipeline.einsteinTensorOf g ginv x 0 a)
+          (-(∑ a : Fin 4, CoordinateCurvature.christoffel g ginv x a 0 0 *
+              CoordinateCurvature.einsteinTensor g ginv x a l)
+            - ∑ a : Fin 4, CoordinateCurvature.christoffel g ginv x a 0 l *
+              CoordinateCurvature.einsteinTensor g ginv x 0 a)
         + ∑ ν : Fin 3, ginv x 0 ν.succ *
-            Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x 0 ν.succ l
+            Bianchi.covDeriv2 g ginv (CoordinateCurvature.einsteinTensor g ginv) x 0 ν.succ l
         + ∑ μ : Fin 3, ∑ ν : Fin 4, ginv x μ.succ ν *
-            Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x μ.succ ν l) := by
+            Bianchi.covDeriv2 g ginv (CoordinateCurvature.einsteinTensor g ginv) x μ.succ ν l) := by
   have hdiv := Bianchi.covDiv_einstein_eq_zero g ginv
     hgSymm hginvSymm hInvL hInvR hgC2 hginvD hΓC2 l
   unfold Bianchi.covDiv2 at hdiv
   have hsum4 : ∀ f : Fin 4 → ℝ, (∑ μ : Fin 4, f μ) = f 0 + ∑ μ : Fin 3, f μ.succ :=
     Fin.sum_univ_succ
   rw [hsum4] at hdiv
-  rw [hsum4 (fun ν => ginv x 0 ν * Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x 0 ν l)] at hdiv
-  have h00 : Bianchi.covDeriv2 g ginv (Pipeline.einsteinTensorOf g ginv) x 0 0 l =
-      Pipeline.coordDeriv 0 (fun y => Pipeline.einsteinTensorOf g ginv y 0 l) x
-        - ∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 0 *
-            Pipeline.einsteinTensorOf g ginv x a l
-        - ∑ a : Fin 4, Pipeline.christoffel g ginv x a 0 l *
-            Pipeline.einsteinTensorOf g ginv x 0 a := rfl
+  rw [hsum4 (fun ν => ginv x 0 ν * Bianchi.covDeriv2 g ginv (CoordinateCurvature.einsteinTensor g ginv) x 0 ν l)] at hdiv
+  have h00 : Bianchi.covDeriv2 g ginv (CoordinateCurvature.einsteinTensor g ginv) x 0 0 l =
+      CoordinateCurvature.coordDeriv 0 (fun y => CoordinateCurvature.einsteinTensor g ginv y 0 l) x
+        - ∑ a : Fin 4, CoordinateCurvature.christoffel g ginv x a 0 0 *
+            CoordinateCurvature.einsteinTensor g ginv x a l
+        - ∑ a : Fin 4, CoordinateCurvature.christoffel g ginv x a 0 l *
+            CoordinateCurvature.einsteinTensor g ginv x 0 a := rfl
   rw [h00] at hdiv
   linarith
 
@@ -110,16 +110,16 @@ def IsLinearizedGaugeReducedSol (I : BoxIntegral.Box (Fin 3))
     (P : Linearized.MetricPerturbation) : Prop :=
   (∀ y i j, P.h y i j = P.h y j i) ∧
   (∀ y, P.IsC2At y) ∧
-  (∀ y i j, Linearized.boxEta (fun z => P.traceReversed.h z i j) y = 0) ∧
+  (∀ y i j, Linearized.minkowskiDalembertian (fun z => P.traceReversed.h z i j) y = 0) ∧
   (∀ k : Fin 4,
     ∃ (ut : ℝ → Space3 → ℝ) (grad : ℝ → Space3 → Space3)
       (utt : ℝ → Space3 → ℝ) (gradt : ℝ → Space3 → Space3)
       (Dut : ℝ → Space3 → Space3 →L[ℝ] ℝ)
       (Dgrad : ℝ → Space3 → Space3 →L[ℝ] Space3)
       (lap : ℝ → Space3 → ℝ) (M : ℝ),
-      WaveSolution3D (fun t x => Linearized.lorenzDiv P ![t, x 0, x 1, x 2] k)
+      WaveSolution3D (fun t x => Linearized.lorenzDivergence P ![t, x 0, x 1, x 2] k)
         ut grad utt gradt Dut Dgrad lap I M ∧
-      (∀ x : Space3, Linearized.lorenzDiv P ![0, x 0, x 1, x 2] k = 0) ∧
+      (∀ x : Space3, Linearized.lorenzDivergence P ![0, x 0, x 1, x 2] k = 0) ∧
       (∀ x : Space3, ut 0 x = 0) ∧
       (∀ (x : Space3) (i : Fin 3), grad 0 x i = 0))
 
@@ -130,32 +130,32 @@ noncomputable def linearizedGaugeReducedProblem (I : BoxIntegral.Box (Fin 3)) :
   Solution := Linearized.MetricPerturbation
   IsSolution := IsLinearizedGaugeReducedSol I
   HasCauchyData := fun P =>
-    ∀ x : Space3, ∀ k : Fin 4, Linearized.lorenzDiv P ![0, x 0, x 1, x 2] k = 0
+    ∀ x : Space3, ∀ k : Fin 4, Linearized.lorenzDivergence P ![0, x 0, x 1, x 2] k = 0
   IsWaveGauge := fun P =>
     ∀ t (x : Space3), x ∈ BoxIntegral.Box.Icc I → ∀ k : Fin 4,
-      Linearized.lorenzGaugeCond P ![t, x 0, x 1, x 2] k
+      Linearized.IsLorenzGauge P ![t, x 0, x 1, x 2] k
 
 /-- M4 gauge-recovery problem attached to `linearizedGaugeReducedProblem I`. -/
 noncomputable def linearizedBoxGaugeProblem (I : BoxIntegral.Box (Fin 3)) :
     GaugeRecoveryProblem (linearizedGaugeReducedProblem I) where
   GaugeRecovered := fun P =>
     ∀ t (x : Space3), x ∈ BoxIntegral.Box.Icc I → ∀ k : Fin 4,
-      Linearized.lorenzGaugeCond P ![t, x 0, x 1, x 2] k
+      Linearized.IsLorenzGauge P ![t, x 0, x 1, x 2] k
   IsFullEinsteinSolution := fun P =>
     ∀ t (x : Space3), x ∈ BoxIntegral.Box.Ioo I → ∀ i j : Fin 4,
-      Linearized.linEinstein P ![t, x 0, x 1, x 2] i j = 0
+      Linearized.linearizedEinstein P ![t, x 0, x 1, x 2] i j = 0
   ConstraintsPreserved := fun P =>
     ∀ t (x : Space3), x ∈ BoxIntegral.Box.Ioo I → ∀ j : Fin 4,
-      Linearized.linEinstein P ![t, x 0, x 1, x 2] 0 j = 0
+      Linearized.linearizedEinstein P ![t, x 0, x 1, x 2] 0 j = 0
 
 private lemma lorenzGauge_propagates_box (I : BoxIntegral.Box (Fin 3))
     (P : Linearized.MetricPerturbation) (hsol : IsLinearizedGaugeReducedSol I P) :
     ∀ t (x : Space3), x ∈ BoxIntegral.Box.Icc I → ∀ k : Fin 4,
-      Linearized.lorenzGaugeCond P ![t, x 0, x 1, x 2] k := by
+      Linearized.IsLorenzGauge P ![t, x 0, x 1, x 2] k := by
   intro t x hx k
   rcases hsol.2.2.2 k with ⟨ut, grad, utt, gradt, Dut, Dgrad, lap, M, hS, h0, hv0, hg0⟩
   exact wave_zero_of_zero_data3D
-    (fun s y => Linearized.lorenzDiv P ![s, y 0, y 1, y 2] k)
+    (fun s y => Linearized.lorenzDivergence P ![s, y 0, y 1, y 2] k)
     ut grad utt gradt Dut Dgrad lap I M hS h0 hv0 hg0 t x hx
 
 private lemma isOpen_boxIoo (I : BoxIntegral.Box (Fin 3)) :
@@ -171,7 +171,7 @@ private lemma isOpen_boxIoo (I : BoxIntegral.Box (Fin 3)) :
 private lemma linearizedBox_fullEinstein_aux (I : BoxIntegral.Box (Fin 3))
     (P : Linearized.MetricPerturbation) (hsol : IsLinearizedGaugeReducedSol I P)
     (t : ℝ) (x : Space3) (hx : x ∈ BoxIntegral.Box.Ioo I) (i j : Fin 4) :
-    Linearized.linEinstein P ![t, x 0, x 1, x 2] i j = 0 := by
+    Linearized.linearizedEinstein P ![t, x 0, x 1, x 2] i j = 0 := by
   have hgauge := lorenzGauge_propagates_box I P hsol
   have hopen_pre : IsOpen {y : Fin 4 → ℝ | (fun m : Fin 3 => y m.succ) ∈ BoxIntegral.Box.Ioo I} := by
     have hcont : Continuous (fun y : Fin 4 → ℝ => fun m : Fin 3 => y m.succ) :=
@@ -184,7 +184,7 @@ private lemma linearizedBox_fullEinstein_aux (I : BoxIntegral.Box (Fin 3))
       ext m; fin_cases m <;> rfl
     rwa [hsub]
   have hev : ∀ᶠ y in 𝓝 ![t, x 0, x 1, x 2], ∀ k : Fin 4,
-      Linearized.lorenzGaugeCond P y k := by
+      Linearized.IsLorenzGauge P y k := by
     filter_upwards [hopen_pre.mem_nhds hmem] with y hy k
     have hy_vec : ![y 0, y 1, y 2, y 3] = y := by
       ext m; fin_cases m <;> rfl
@@ -196,13 +196,13 @@ private lemma linearizedBox_fullEinstein_aux (I : BoxIntegral.Box (Fin 3))
     smooth := hsol.2.1 ![t, x 0, x 1, x 2]
     gauge := hev
     wave := hsol.2.2.1 ![t, x 0, x 1, x 2] }
-  exact Linearized.linEinstein_eq_zero_of_waveGauge P ![t, x 0, x 1, x 2] hwg i j
+  exact Linearized.linearizedEinstein_eq_zero_of_waveGauge P ![t, x 0, x 1, x 2] hwg i j
 
 /-- **M4 Certificate (Linearized 3D wave-gauge recovery and constraint propagation)**:
 `WaveUniqueness3D.wave_zero_of_zero_data3D` forces the Lorenz gauge residual
 `Γ_k` to remain zero throughout `ℝ × Box.Icc I`; openness of `Box.Ioo I` then
 gives Lorenz gauge in a spacetime neighborhood of every interior box point,
-so `Linearized.linEinstein_eq_zero_of_waveGauge` yields `G^{(1)}_{ij} = 0` and
+so `Linearized.linearizedEinstein_eq_zero_of_waveGauge` yields `G^{(1)}_{ij} = 0` and
 preserves the linearized constraints. -/
 theorem linearizedBox_gaugeRecovery (I : BoxIntegral.Box (Fin 3)) :
     GaugeRecoveryCertificate (linearizedBoxGaugeProblem I) where
@@ -296,7 +296,7 @@ theorem flrw_full_einstein_of_reduced
     (hham0 : 3 * a' 0 ^ 2 = Λ * a 0 ^ 2)
     {x : Fin 4 → ℝ} (hx0 : x 0 ∈ Ioo (-δ) δ)
     (hr : x 1 ≠ 0) (hsin : Real.sin (x 2) ≠ 0) (i j : Fin 4) :
-    Pipeline.einsteinTensorOf ((flrwSpacetime a 0).metric) ((flrwSpacetime a 0).metricInv) x i j +
+    CoordinateCurvature.einsteinTensor ((flrwSpacetime a 0).metric) ((flrwSpacetime a 0).metricInv) x i j +
       Λ * (flrwSpacetime a 0).metric x i j = 0 := by
   have hham := flrw_constraint_propagates a a' a'' Λ δ hδ ha_ne ha1 ha2 hevol hham0
   have ha_x0 : a (x 0) ≠ 0 := ha_ne (x 0) hx0
@@ -310,24 +310,27 @@ theorem flrw_full_einstein_of_reduced
     (ha2 (x 0) hx0).congr_of_eventuallyEq hderiv_eq
   have hd1_eq : deriv a (x 0) = a' (x 0) := (ha1 (x 0) hx0).deriv
   have hd2_eq : deriv (deriv a) (x 0) = a'' (x 0) := hd2.deriv
-  have hf1 : (deriv a (x 0) / a (x 0)) ^ 2 = (8 * Real.pi * 0 / 3) * 0 - 0 / a (x 0) ^ 2 + Λ / 3 := by
+  have hf1 : (deriv a (x 0) / a (x 0)) ^ 2 = Λ / 3 := by
     rw [hd1_eq]
     have h1 := hham (x 0) hx0
-    simp only [mul_zero, zero_div, zero_sub, zero_add, neg_zero]
     field_simp [ha_x0]
     linarith
-  have hf2 : deriv (deriv a) (x 0) / a (x 0) = -(4 * Real.pi * 0 / 3) * (0 + 3 * 0) + Λ / 3 := by
+  have hf2 : deriv (deriv a) (x 0) / a (x 0) = Λ / 3 := by
     rw [hd2_eq]
     have h1 := hham (x 0) hx0
     have h2 := hevol (x 0) hx0
     have hprod : a (x 0) * (3 * a'' (x 0)) = a (x 0) * (Λ * a (x 0)) := by linarith
     have hcancel := mul_left_cancel₀ ha_x0 hprod
-    simp only [mul_zero, zero_div, zero_add, neg_zero]
     field_simp [ha_x0]
     linarith
-  have hiff := (FLRW.FLRWSpacetime.einsteinTensorOf_iff_friedmann (flrwSpacetime a 0) Λ 0 0 0 x
-    ha_x0 hr (by norm_num) hsin hdiff_nhds hd2.differentiableAt).mpr ⟨hf1, hf2⟩ i j
-  simpa [FLRW.perfectFluidT] using hiff
+  have hiff := (Cosmology.FLRW.FLRWSpacetime.einsteinTensor_iff_friedmann (flrwSpacetime a 0) 1 Λ 1 0 0 x
+    ha_x0 hr (by norm_num) hsin hdiff_nhds hd2.differentiableAt).mpr
+      ⟨by simpa using hf1, by simpa using hf2⟩ i j
+  have heq : (flrwSpacetime a 0).toCoordinateMetric.einsteinTensor x i j =
+      CoordinateCurvature.einsteinTensor ((flrwSpacetime a 0).metric)
+        ((flrwSpacetime a 0).metricInv) x i j := rfl
+  rw [heq] at hiff
+  simpa [GeneralRelativity.perfectFluidStressEnergy] using hiff
 
 /-- Reduced Cauchy problem for flat FLRW with initial Hamiltonian constraint
 `3 a'(0)² = Λ a(0)²`. -/
@@ -351,7 +354,7 @@ noncomputable def flrwGaugeRecoveryProblem (Λ δ : ℝ) (hδ : 0 < δ) :
   IsFullEinsteinSolution := fun a =>
     ∀ x : Fin 4 → ℝ, x 0 ∈ Ioo (-δ) δ → x 1 ≠ 0 → Real.sin (x 2) ≠ 0 →
       ∀ i j : Fin 4,
-        Pipeline.einsteinTensorOf ((flrwSpacetime a 0).metric) ((flrwSpacetime a 0).metricInv) x i j +
+        CoordinateCurvature.einsteinTensor ((flrwSpacetime a 0).metric) ((flrwSpacetime a 0).metricInv) x i j +
           Λ * (flrwSpacetime a 0).metric x i j = 0
   ConstraintsPreserved := fun a =>
     ∀ t ∈ Ioo (-δ) δ, ∃ a', HasDerivAt a a' t ∧ 3 * a' ^ 2 = Λ * a t ^ 2

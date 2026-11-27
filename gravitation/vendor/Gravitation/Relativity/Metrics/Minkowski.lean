@@ -17,27 +17,26 @@ public import Gravitation.Relativity.Metrics.MetricTrace
 # The four-dimensional Minkowski metric
 
 The flat metric `η = diag(-1, 1, 1, 1)` in inertial coordinates, constructed from
-`Physlib.Relativity.MinkowskiMatrix` and packaged as a `MetricTensor 4` and constant field.
+`Physlib.Relativity.MinkowskiMatrix`, together with its certified `MetricTensor 4` instance and its
+constant field on spacetime.
 
 ## i. Overview
 
 Throughout `GeneralRelativity`, the Minkowski metric `minkowskiMetric4` uses the mostly-plus
-Lorentzian
-signature `(-, +, +, +)` standard in general relativity (Wald / Misner–Thorne–Wheeler), whereas
-`Physlib.Relativity.MinkowskiMatrix.minkowskiMatrix` (and `realLorentzTensor.coMetric 3`) uses the
-particle-physics mostly-minus convention `(+, -, -, -)`.
+Lorentzian signature `(-, +, +, +)` standard in general relativity (Wald / Misner–Thorne–Wheeler),
+whereas `Physlib.Relativity.MinkowskiMatrix.minkowskiMatrix` (and `realLorentzTensor.coMetric 3`)
+uses the particle-physics mostly-minus convention `(+, -, -, -)`.
 
 We define `minkowskiMetric4` directly as the negation of `minkowskiMatrix (d := 3)` transported
-along
-`finSumFinEquiv : Fin 1 ⊕ Fin 3 ≃ Fin 4`, inherit its symmetry and self-inverse property from
-`minkowskiMatrix.eq_transpose` and `minkowskiMatrix.sq`, and bridge it to
+along `finSumFinEquiv : Fin 1 ⊕ Fin 3 ≃ Fin 4`. It inherits its symmetry and self-inverse
+property from `minkowskiMatrix.eq_transpose` and `minkowskiMatrix.sq`, and is bridged to
 `realLorentzTensor.coMetric 3`.
 
 ## ii. Key results
 
-- `minkowskiMetric4`, `minkowskiMetric4_symm`, `minkowskiMetric4_mul_self` : the 4D Minkowski
-  metric `diag(-1, 1, 1, 1)` and its
-  self-inverse property derived from `minkowskiMatrix`.
+- `minkowskiMetric4`, `minkowskiMetric4_symm`, `minkowskiMetric4_mul_self`,
+  `sum_minkowskiMetric4_mul` : the 4D Minkowski metric `diag(-1, 1, 1, 1)`, its self-inverse
+  property derived from `minkowskiMatrix`, and its index contraction law.
 - `minkowskiMetric4_eq_neg_coMetric_repr` : component bridge to `realLorentzTensor.coMetric 3`.
 - `minkowski` : four-dimensional Minkowski spacetime metric as a `MetricTensor 4`.
 - `minkowski_ginv_offdiag`, `metricTrace_minkowski` : diagonal property and Minkowski trace.
@@ -46,7 +45,7 @@ along
 ## iii. Table of contents
 
 - A. The Minkowski matrix `η`
-- B. The Minkowski spacetime metric bundle
+- B. The Minkowski spacetime metric
 
 ## iv. References
 
@@ -66,6 +65,9 @@ namespace GeneralRelativity
 /-!
 
 ## A. The Minkowski matrix `η`
+
+Fixing the `(-, +, +, +)` signature convention defines the constant reference metric
+`minkowskiMetric4` and its component contractions.
 
 -/
 
@@ -124,9 +126,27 @@ lemma minkowskiMetric4_mul_self : minkowskiMetric4 * minkowskiMetric4 = (1 : Ten
     (finSumFinEquiv.symm i)) (finSumFinEquiv.symm j)
   simpa [Matrix.mul_apply, Matrix.one_apply, finSumFinEquiv.symm.injective.eq_iff] using hsq
 
+/-- Raising and lowering with the Minkowski metric cancels:
+`∑ a, f a * (η_{aa} η_{ab}) = f b`. -/
+lemma sum_minkowskiMetric4_mul (f : Fin 4 → ℝ) (b : Fin 4) :
+    (∑ a : Fin 4, f a * (minkowskiMetric4 a a * minkowskiMetric4 a b)) = f b := by
+  fin_cases b <;> simp
+
+/-- Contracting a vector with the diagonal Minkowski metric selects the diagonal entry:
+`∑ k, η_{ik} f_k = η_{ii} f_i`. -/
+lemma sum_minkowskiMetric4_left (i : Fin 4) (f : Fin 4 → ℝ) :
+    (∑ k : Fin 4, minkowskiMetric4 i k * f k) = minkowskiMetric4 i i * f i := by
+  rw [Finset.sum_eq_single i]
+  · intro k _ hki
+    simp [minkowskiMetric4_apply, hki.symm]
+  · simp
+
 /-!
 
-## B. The Minkowski spacetime metric bundle
+## B. The Minkowski spacetime metric
+
+Flat Minkowski spacetime equips the constant matrix `η` with its symmetry and self-inverse
+properties as a `MetricTensor 4` and supplies the constant metric field on `ℝ⁴`.
 
 -/
 
@@ -150,9 +170,7 @@ lemma metricTrace_minkowski (T : Tensor2 4) :
   rw [metricTrace_diag minkowski T (fun _ _ h => minkowski_ginv_offdiag h)]
   rfl
 
-/-- The Minkowski metric as a constant coordinate field on `Fin 4 → ℝ`, needed separately from
-the pointwise matrix `minkowskiMetric4` and `MetricTensor 4` bundle `minkowski` to supply a
-field `(Fin 4 → ℝ) → Tensor2 4` to the differential curvature pipeline. -/
+/-- The constant Minkowski metric field on `ℝ⁴` in global inertial coordinates. -/
 noncomputable def minkowskiMetricField : (Fin 4 → ℝ) → Tensor2 4 := fun _ => minkowskiMetric4
 
 end GeneralRelativity

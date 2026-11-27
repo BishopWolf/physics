@@ -37,7 +37,7 @@ module
 public import Gravitation.ReducedWave3D
 public import Gravitation.LinearizedWaveGauge
 public import Gravitation.CauchyInterfaces
-public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Cosmology.FLRW.Basic
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.ODE.ExistUnique
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
@@ -231,17 +231,17 @@ spacetime chart point `x`. -/
 noncomputable def harmonicGaugeCond (g ginv : (Fin 4 → ℝ) → Tensor2 4)
     (x : Fin 4 → ℝ) (μ : Fin 4) : Prop :=
   (∑ α : Fin 4, ∑ β : Fin 4,
-    ginv x α β * Pipeline.christoffel g ginv x μ α β) = 0
+    ginv x α β * CoordinateCurvature.christoffel g ginv x μ α β) = 0
 
 /-- Minkowski spacetime satisfies the nonlinear harmonic gauge condition
 identically. -/
 theorem minkowski_harmonicGauge (x : Fin 4 → ℝ) (μ : Fin 4) :
     harmonicGaugeCond (fun _ => minkowski.g) (fun _ => minkowski.ginv) x μ := by
   unfold harmonicGaugeCond
-  have hG : ∀ α β, Pipeline.christoffel (fun _ => minkowski.g) (fun _ => minkowski.ginv)
+  have hG : ∀ α β, CoordinateCurvature.christoffel (fun _ => minkowski.g) (fun _ => minkowski.ginv)
       x μ α β = 0 := by
     intro α β
-    simp [Pipeline.christoffel, Pipeline.coordDeriv_const]
+    simp [CoordinateCurvature.christoffel, CoordinateCurvature.coordDeriv_const]
   simp [hG]
 
 /-! ## C. Linearized 3D wave-gauge reduced Cauchy problem on a box -/
@@ -374,7 +374,7 @@ theorem ttWave_reduced_solution (hPlus hCross : ℝ) (f f' f'' : ℝ → ℝ)
     (hf : ContDiff ℝ 2 f) (hf1 : ∀ z, HasDerivAt f (f' z) z)
     (hf2 : ∀ z, HasDerivAt f' (f'' z) z) :
     (∀ y, Linearized.WaveGaugePerturbation (Linearized.ttWave hPlus hCross f) y) ∧
-      (∀ y i j, Linearized.linEinstein (Linearized.ttWave hPlus hCross f) y i j = 0) ∧
+      (∀ y i j, Linearized.linearizedEinstein (Linearized.ttWave hPlus hCross f) y i j = 0) ∧
       (∀ t (x : Space3),
         let f0 : ℝ → ℝ := fun z => hPlus * f (-z)
         let g0 : ℝ → ℝ := fun z => hPlus * f' (-z)
@@ -385,7 +385,7 @@ theorem ttWave_reduced_solution (hPlus hCross : ℝ) (f f' f'' : ℝ → ℝ)
           directionalWave3D ![0, 0, 1] f0 g0 t x =
             (Linearized.ttWave hPlus hCross f).h ![t, x 0, x 1, x 2] 1 1) := by
   refine ⟨fun y => Linearized.ttWave_waveGauge hPlus hCross f hf y,
-    fun y i j => Linearized.ttWave_linEinstein_zero hPlus hCross f hf y i j,
+    fun y i j => Linearized.ttWave_linearizedEinstein_zero hPlus hCross f hf y i j,
     fun t x => ?_⟩
   let f0 : ℝ → ℝ := fun z => hPlus * f (-z)
   let f0' : ℝ → ℝ := fun z => -(hPlus * f' (-z))

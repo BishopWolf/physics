@@ -39,6 +39,7 @@ not claim a global development.
 module
 
 public import Gravitation.InitialDataInterface
+public import Gravitation.Relativity.Metrics.CovariantDerivTensor2
 public import Gravitation.SobolevInitialData
 
 @[expose] public section
@@ -62,7 +63,7 @@ lemma exteriorPoint_radial_pos {M : ℝ} (hM : 0 < M) (x : SpacetimeChart) :
   nlinarith
 
 lemma exteriorPoint_lapse_pos {M : ℝ} (hM : 0 < M) (x : SpacetimeChart) :
-    0 < (schwarzschildSpacetime M).lapse (exteriorPoint M x 1) := by
+    0 < (schwarzschildSpacetime M).metricFn (exteriorPoint M x 1) := by
   have hr : 0 < exteriorPoint M x 1 := exteriorPoint_radial_pos hM x
   have hlt : 2 * M < exteriorPoint M x 1 := by
     have he : 0 < Real.exp (x 1) := Real.exp_pos _
@@ -70,7 +71,7 @@ lemma exteriorPoint_lapse_pos {M : ℝ} (hM : 0 < M) (x : SpacetimeChart) :
     nlinarith
   have hdiv : 2 * M / exteriorPoint M x 1 < 1 :=
     (div_lt_one hr).2 hlt
-  simp only [Schwarzschild.SchwarzschildSpacetime.lapse]
+  simp only [Schwarzschild.SchwarzschildSpacetime.metricFn]
   linarith
 
 lemma exteriorPoint_sin_pos (x : SpacetimeChart) :
@@ -87,8 +88,8 @@ lemma contDiff_exteriorRadial (M : ℝ) :
 
 lemma contDiff_exteriorLapse (M : ℝ) (hM : 0 < M) :
     ContDiff ℝ ∞ fun x : SpacetimeChart =>
-      (schwarzschildSpacetime M).lapse (2 * M + Real.exp (x 1)) := by
-  simp only [Schwarzschild.SchwarzschildSpacetime.lapse]
+      (schwarzschildSpacetime M).metricFn (2 * M + Real.exp (x 1)) := by
+  simp only [Schwarzschild.SchwarzschildSpacetime.metricFn]
   refine (contDiff_const.sub (contDiff_const.div (contDiff_exteriorRadial M) ?_))
   intro x
   exact ne_of_gt (by
@@ -97,7 +98,7 @@ lemma contDiff_exteriorLapse (M : ℝ) (hM : 0 < M) :
 
 lemma contDiff_exteriorLapseInv (M : ℝ) (hM : 0 < M) :
     ContDiff ℝ ∞ fun x : SpacetimeChart =>
-      ((schwarzschildSpacetime M).lapse (2 * M + Real.exp (x 1)))⁻¹ := by
+      ((schwarzschildSpacetime M).metricFn (2 * M + Real.exp (x 1)))⁻¹ := by
   exact (contDiff_exteriorLapse M hM).inv
     (fun x => ne_of_gt (exteriorPoint_lapse_pos hM x))
 
@@ -151,7 +152,7 @@ lemma exteriorChart_isSmooth (M : ℝ) (hM : 0 < M) :
     funext x
     exact congrFun (congrFun (exteriorChart_coordinateMetric M hM x) i) j]
   fin_cases i <;> fin_cases j <;>
-    simp [StaticSpherical.StaticSphericalMetric.metric, exteriorPoint]
+    simp [StaticSpherical.Metric.metric, exteriorPoint]
   all_goals
     first
     | exact contDiff_const
@@ -187,9 +188,9 @@ noncomputable def exteriorPartialChart (M : ℝ) (hM : 0 < M) : PartialChartSpac
     exact (schwarzschildSpacetime M).toStaticSpherical.metricTensor x
       hx1.ne'
       (by
-        have hfrm : (schwarzschildSpacetime M).toStaticSpherical.lapse (x 1) =
+        have hfrm : (schwarzschildSpacetime M).toStaticSpherical.metricFn (x 1) =
             (x 1 - 2 * M) / x 1 := by
-          simp only [schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.lapse,
+          simp only [schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.metricFn,
             Schwarzschild.SchwarzschildSpacetime.toStaticSpherical]
           field_simp [hx1.ne']
         rw [hfrm]
@@ -218,13 +219,13 @@ lemma exteriorSpatialPoint_radial_pos {M : ℝ} (hM : 0 < M) :
   linarith
 
 lemma exteriorSpatialPoint_lapse_pos {M : ℝ} (hM : 0 < M) :
-    0 < (sdsSpacetime M 0).lapse (exteriorSpatialPoint M 0) := by
-  rw [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse_zero_lambda]
+    0 < (sdsSpacetime M 0).metricFn (exteriorSpatialPoint M 0) := by
+  rw [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn_zero_lambda]
   have hr : 0 < exteriorSpatialPoint M 0 := exteriorSpatialPoint_radial_pos hM
   have hlt : 2 * M < exteriorSpatialPoint M 0 := by
     simp [exteriorSpatialPoint]
   have hdiv : 2 * M / exteriorSpatialPoint M 0 < 1 := (div_lt_one hr).2 hlt
-  simp only [Schwarzschild.SchwarzschildSpacetime.lapse]
+  simp only [Schwarzschild.SchwarzschildSpacetime.metricFn]
   linarith
 
 lemma exteriorSpatialPoint_sin_pos {M : ℝ} :
@@ -234,7 +235,7 @@ lemma exteriorSpatialPoint_sin_pos {M : ℝ} :
 /-- The Schwarzschild spatial metric at a regular point as a bundled
 `MetricTensor 3`. -/
 noncomputable def spatialMetricTensor (M : ℝ) (x : Space3)
-    (hr : x 0 ≠ 0) (hf : (sdsSpacetime M 0).lapse (x 0) ≠ 0)
+    (hr : x 0 ≠ 0) (hf : (sdsSpacetime M 0).metricFn (x 0) ≠ 0)
     (hsin : Real.sin (x 1) ≠ 0) : MetricTensor 3 where
   g := sdsSpatialMetric M 0 x
   ginv := sdsSpatialMetricInv M 0 x
@@ -261,13 +262,13 @@ lemma ricciScalar_spatialRiemannTensorOf
     (hgSymm : ∀ᶠ y in 𝓝 x, ∀ i j, h y i j = h y j i)
     (hInv : ∀ᶠ y in 𝓝 x, ∀ m j, ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
     (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
-    (hΓD : ∀ k i j, DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
+    (hΓD : ∀ k i j, DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel h hinv y k i j) x)
     (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j,
-      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i) :
+      CoordinateCurvature.christoffel h hinv y k i j = CoordinateCurvature.christoffel h hinv y k j i) :
     ricciScalar M (spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ) =
-      Pipeline.ricciScalarOf h hinv x := by
-  simp only [ricciScalar, ricci, spatialRiemannTensorOf, Pipeline.ricciScalarOf,
-    Pipeline.ricciTensorOf]
+      CoordinateCurvature.ricciScalar h hinv x := by
+  simp only [ricciScalar, ricci, spatialRiemannTensorOf, CoordinateCurvature.ricciScalar,
+    CoordinateCurvature.ricciTensor]
   rw [← hMinv]
   apply Finset.sum_congr rfl
   intro i _
@@ -276,10 +277,10 @@ lemma ricciScalar_spatialRiemannTensorOf
   congr 1
   have hrel := hInv.self_of_nhds
   calc
-    (∑ k, ∑ l, hinv x k l * ∑ e, h x k e * Pipeline.riemann h hinv x e i l j)
-        = ∑ l, ∑ k, hinv x k l * ∑ e, h x k e * Pipeline.riemann h hinv x e i l j := by
+    (∑ k, ∑ l, hinv x k l * ∑ e, h x k e * CoordinateCurvature.riemann h hinv x e i l j)
+        = ∑ l, ∑ k, hinv x k l * ∑ e, h x k e * CoordinateCurvature.riemann h hinv x e i l j := by
           rw [Finset.sum_comm]
-    _ = ∑ l, ∑ e, (∑ k, hinv x k l * h x k e) * Pipeline.riemann h hinv x e i l j := by
+    _ = ∑ l, ∑ e, (∑ k, hinv x k l * h x k e) * CoordinateCurvature.riemann h hinv x e i l j := by
           apply Finset.sum_congr rfl
           intro l _
           simp_rw [Finset.mul_sum]
@@ -290,7 +291,7 @@ lemma ricciScalar_spatialRiemannTensorOf
           apply Finset.sum_congr rfl
           intro k _
           ring
-    _ = ∑ l, Pipeline.riemann h hinv x l i l j := by
+    _ = ∑ l, CoordinateCurvature.riemann h hinv x l i l j := by
           apply Finset.sum_congr rfl
           intro l _
           rw [Finset.sum_eq_single l]
@@ -299,7 +300,7 @@ lemma ricciScalar_spatialRiemannTensorOf
             simp [hrel, hne.symm]
           · intro hnot
             exact absurd (Finset.mem_univ l) hnot
-    _ = ∑ ρ, Pipeline.riemann h hinv x ρ i ρ j := rfl
+    _ = ∑ ρ, CoordinateCurvature.riemann h hinv x ρ i ρ j := rfl
 
 lemma sdsSpatialMetric_isSymm (M Λ : ℝ) (x : Space3) :
     IsSymm (sdsSpatialMetric M Λ x) := by
@@ -309,28 +310,28 @@ lemma sdsSpatialMetric_isSymm (M Λ : ℝ) (x : Space3) :
 
 lemma contDiffAt_sdsLapse_zero (M : ℝ) {r : ℝ} (hr : r ≠ 0) :
     ContDiffAt ℝ 2 (fun s : ℝ =>
-      (sdsSpacetime M 0).lapse s) r := by
-  have h : (fun s : ℝ => (sdsSpacetime M 0).lapse s) =
+      (sdsSpacetime M 0).metricFn s) r := by
+  have h : (fun s : ℝ => (sdsSpacetime M 0).metricFn s) =
       fun s : ℝ => 1 - 2 * M / s := by
     funext s
-    rw [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse_zero_lambda]
-    simp [Schwarzschild.SchwarzschildSpacetime.lapse]
+    rw [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn_zero_lambda]
+    simp [Schwarzschild.SchwarzschildSpacetime.metricFn]
   rw [h]
   fun_prop (disch := exact hr)
 
 lemma contDiffAt_sdsLapse_zero_comp (M : ℝ) (x : Space3) (hr : x 0 ≠ 0) :
     ContDiffAt ℝ 2 (fun y : Space3 =>
-      (sdsSpacetime M 0).lapse (y 0)) x := by
-  have h : (fun y : Space3 => (sdsSpacetime M 0).lapse (y 0)) =
+      (sdsSpacetime M 0).metricFn (y 0)) x := by
+  have h : (fun y : Space3 => (sdsSpacetime M 0).metricFn (y 0)) =
       fun y : Space3 => 1 - 2 * M / (y 0) := by
     funext y
-    rw [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse_zero_lambda]
-    simp [Schwarzschild.SchwarzschildSpacetime.lapse]
+    rw [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn_zero_lambda]
+    simp [Schwarzschild.SchwarzschildSpacetime.metricFn]
   rw [h]
   fun_prop (disch := exact hr)
 
 lemma contDiffAt_sdsSpatialMetric (M : ℝ) (x : Space3)
-    (hr : x 0 ≠ 0) (hf : (sdsSpacetime M 0).lapse (x 0) ≠ 0)
+    (hr : x 0 ≠ 0) (hf : (sdsSpacetime M 0).metricFn (x 0) ≠ 0)
     (_hsin : Real.sin (x 1) ≠ 0) :
     ∀ i j, ContDiffAt ℝ 2 (fun y : Space3 => sdsSpatialMetric M 0 y i j) x := by
   intro i j
@@ -342,7 +343,7 @@ lemma contDiffAt_sdsSpatialMetric (M : ℝ) (x : Space3)
     | fun_prop
 
 lemma contDiffAt_sdsSpatialMetricInv (M : ℝ) (x : Space3)
-    (hr : x 0 ≠ 0) (_hf : (sdsSpacetime M 0).lapse (x 0) ≠ 0)
+    (hr : x 0 ≠ 0) (_hf : (sdsSpacetime M 0).metricFn (x 0) ≠ 0)
     (hsin : Real.sin (x 1) ≠ 0) :
     ∀ i j, ContDiffAt ℝ 2 (fun y : Space3 => sdsSpatialMetricInv M 0 y i j) x := by
   intro i j
@@ -372,7 +373,7 @@ noncomputable def chartInitialData (M : ℝ) (hM : 0 < M) :
   let hinv : Space3 → Tensor2 3 := fun y => sdsSpatialMetricInv M 0 y
   let K : Space3 → Tensor2 3 := fun _ => 0
   have hr : x 0 ≠ 0 := ne_of_gt (exteriorSpatialPoint_radial_pos hM)
-  have hf : (sdsSpacetime M 0).lapse (x 0) ≠ 0 :=
+  have hf : (sdsSpacetime M 0).metricFn (x 0) ≠ 0 :=
     ne_of_gt (exteriorSpatialPoint_lapse_pos hM)
   have hsin : Real.sin (x 1) ≠ 0 :=
     ne_of_gt (exteriorSpatialPoint_sin_pos (M := M))
@@ -380,12 +381,12 @@ noncomputable def chartInitialData (M : ℝ) (hM : 0 < M) :
     filter_upwards with y i j
     exact ((sdsSpatialMetric_isSymm M 0 y).apply i j).symm
   have hev : ∀ᶠ y in 𝓝 x,
-      y 0 ≠ 0 ∧ (sdsSpacetime M 0).lapse (y 0) ≠ 0 ∧
+      y 0 ≠ 0 ∧ (sdsSpacetime M 0).metricFn (y 0) ≠ 0 ∧
         Real.sin (y 1) ≠ 0 := by
     have h0 : ∀ᶠ y : Space3 in 𝓝 x, y 0 ≠ 0 :=
       (continuousAt_apply 0 x).eventually_ne hr
     have h1 : ∀ᶠ y : Space3 in 𝓝 x,
-        (sdsSpacetime M 0).lapse (y 0) ≠ 0 :=
+        (sdsSpacetime M 0).metricFn (y 0) ≠ 0 :=
       (continuousAt_apply 0 x).eventually
         ((contDiffAt_sdsLapse_zero M hr).continuousAt.eventually_ne hf)
     have h2 : ∀ᶠ y : Space3 in 𝓝 x, Real.sin (y 1) ≠ 0 :=
@@ -403,11 +404,11 @@ noncomputable def chartInitialData (M : ℝ) (hM : 0 < M) :
   have hginvD : ∀ i j, DifferentiableAt ℝ (fun y : Space3 => hinv y i j) x :=
     fun i j => (contDiffAt_sdsSpatialMetricInv M x hr hf hsin i j).differentiableAt (by norm_num)
   have hΓD : ∀ k i j,
-      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x :=
+      DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel h hinv y k i j) x :=
     differentiableAt_christoffel_of_contDiffAt_two hC2 hginvD
   have hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j,
-      Pipeline.christoffel h hinv y k i j =
-        Pipeline.christoffel h hinv y k j i := by
+      CoordinateCurvature.christoffel h hinv y k i j =
+        CoordinateCurvature.christoffel h hinv y k j i := by
     filter_upwards with y k i j
     exact Bianchi.christoffel_symm h hinv
       (Filter.Eventually.of_forall fun z i j =>
@@ -418,12 +419,12 @@ noncomputable def chartInitialData (M : ℝ) (hM : 0 < M) :
     rw [show R3 = spatialRiemannTensorOf h hinv x hsymm hInv hC2 hΓD hΓ from rfl]
     rw [ricciScalar_spatialRiemannTensorOf (exteriorSpatialMetricTensor M hM)
       h hinv x (by rfl) hsymm hInv hC2 hΓD hΓ]
-    have hfS : (schwarzschildSpacetime M).lapse (x 0) ≠ 0 := by
+    have hfS : (schwarzschildSpacetime M).metricFn (x 0) ≠ 0 := by
       intro h
       apply hf
-      rwa [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse_zero_lambda]
+      rwa [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn_zero_lambda]
     have hham := GeneralRelativity.schwarzschild_spatial_hamiltonian_zero M x hr hfS hsin
-    change Pipeline.ricciScalarOf (sdsSpatialMetric M 0)
+    change CoordinateCurvature.ricciScalar (sdsSpatialMetric M 0)
       (sdsSpatialMetricInv M 0) x = 0
     simpa [spatialScalarCurvOf, hamiltonianConstraintOf] using hham
   refine ChartInitialData.ofFields (exteriorChart M hM) (exteriorSpatialMetricTensor M hM)
@@ -432,9 +433,9 @@ noncomputable def chartInitialData (M : ℝ) (hM : 0 < M) :
   · rw [InitialData.hamiltonianConstraint_eq_ricciScalar_of_K_zero _ (by rfl)]
     exact hscalar
   · intro i
-    apply InitialData.momConstraint_zero_of_dK_zero
-    intro μ
-    exact extrinsicDerivativeOf_const (0 : Tensor2 3) x μ
+    apply InitialData.momentumConstraint_zero_of_covariantDeriv_zero
+    intro μ i j
+    simp [InitialData.covariantDerivTensor2, K, extrinsicDerivativeOf_const]
 
 /-- The Schwarzschild manifold-level initial-data instance. -/
 noncomputable def manifoldInitialData (M : ℝ) (hM : 0 < M) :
@@ -449,11 +450,11 @@ lemma manifoldInitialData_isInduced (M : ℝ) (hM : 0 < M) :
   ext i j
   rw [ChartSpacetime.spatialMetric, exteriorChart_coordinateMetric M hM 0]
   fin_cases i <;> fin_cases j <;>
-    simp [StaticSpherical.StaticSphericalMetric.metric, exteriorPoint,
+    simp [StaticSpherical.Metric.metric, exteriorPoint,
       exteriorSpatialPoint, sdsSpatialMetric,
       Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
-      Schwarzschild.SchwarzschildSpacetime.lapse,
-      SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse]
+      Schwarzschild.SchwarzschildSpacetime.metricFn,
+      SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn]
 
 /-- The Schwarzschild instance is compatible with itself under the identity
 chart transition. -/

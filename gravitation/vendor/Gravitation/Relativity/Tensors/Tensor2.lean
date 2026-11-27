@@ -50,6 +50,8 @@ namespace GeneralRelativity
 
 ## A. Rank-2 tensors and symmetry
 
+Symmetric rank-2 tensors include the spacetime metric, Ricci, Einstein, and stress-energy tensors.
+
 -/
 
 /-- A rank-2 covariant tensor in a fixed frame or coordinate basis: a real matrix of

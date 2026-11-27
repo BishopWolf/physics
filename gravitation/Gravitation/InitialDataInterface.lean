@@ -169,19 +169,19 @@ noncomputable def spatialRiemannTensorOf
     (hInv : ∀ᶠ y in 𝓝 x, ∀ m j, ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
     (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
     (hΓD : ∀ k i j,
-      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
-    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, Pipeline.christoffel h hinv y k i j =
-      Pipeline.christoffel h hinv y k j i) : RiemannTensor 3 where
-  comp := fun a b c d => ∑ e, h x a e * Pipeline.riemann h hinv x e b c d
+      DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel h hinv y k i j) x)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, CoordinateCurvature.christoffel h hinv y k i j =
+      CoordinateCurvature.christoffel h hinv y k j i) : RiemannTensor 3 where
+  comp := fun a b c d => ∑ e, h x a e * CoordinateCurvature.riemann h hinv x e b c d
   skew_last := by
     intro a b c d
     calc
-      (∑ e, h x a e * Pipeline.riemann h hinv x e b c d)
-          = ∑ e, h x a e * (-Pipeline.riemann h hinv x e b d c) := by
+      (∑ e, h x a e * CoordinateCurvature.riemann h hinv x e b c d)
+          = ∑ e, h x a e * (-CoordinateCurvature.riemann h hinv x e b d c) := by
             apply Finset.sum_congr rfl
             intro e _
             rw [Bianchi.riemann_skew_last]
-      _ = -∑ e, h x a e * Pipeline.riemann h hinv x e b d c := by
+      _ = -∑ e, h x a e * CoordinateCurvature.riemann h hinv x e b d c := by
             simp_rw [mul_neg, Finset.sum_neg_distrib]
   pair_symm := by
     intro a b c d
@@ -198,17 +198,17 @@ theorem spatialRiemannTensorOf_const
     (hInv : ∀ᶠ y in 𝓝 x, ∀ m j, ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
     (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
     (hΓD : ∀ k i j,
-      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
-    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, Pipeline.christoffel h hinv y k i j =
-      Pipeline.christoffel h hinv y k j i) :
+      DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel h hinv y k i j) x)
+    (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j, CoordinateCurvature.christoffel h hinv y k i j =
+      CoordinateCurvature.christoffel h hinv y k j i) :
     spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ =
       RiemannTensor.flat 3 := by
   apply riemannTensor_ext
   intro a b c d
-  change (∑ e, h x a e * Pipeline.riemann h hinv x e b c d) = 0
+  change (∑ e, h x a e * CoordinateCurvature.riemann h hinv x e b c d) = 0
   apply Finset.sum_eq_zero
   intro e _
-  rw [Pipeline.riemann_const h hinv G hG x e b c d]
+  rw [CoordinateCurvature.riemann_const h hinv G hG x e b c d]
   ring
 
 /-- The derived Riemann tensor of a constant bundled metric.  Symmetry and the
@@ -233,17 +233,17 @@ noncomputable def spatialRiemannTensorOfConstMetric
     (by
       intro k i j
       have hc : (fun y : Fin 3 → ℝ =>
-          Pipeline.christoffel (fun _ => M.g) (fun _ => M.ginv) y k i j) = fun _ => 0 := by
+          CoordinateCurvature.christoffel (fun _ => M.g) (fun _ => M.ginv) y k i j) = fun _ => 0 := by
         funext y
-        exact Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+        exact CoordinateCurvature.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
           (fun _ => rfl) y k i j
       rw [hc]
       exact differentiableAt_const 0)
     (by
       filter_upwards with y k i j
-      rw [Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+      rw [CoordinateCurvature.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
           (fun _ => rfl) y k i j,
-        Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+        CoordinateCurvature.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
           (fun _ => rfl) y k j i])
 
 /-- A constant bundled metric has flat derived Riemann curvature. -/
@@ -267,59 +267,63 @@ theorem spatialRiemannTensorOfConstMetric_eq_flat
     (by
       intro k i j
       have hc : (fun y : Fin 3 → ℝ =>
-          Pipeline.christoffel (fun _ => M.g) (fun _ => M.ginv) y k i j) = fun _ => 0 := by
+          CoordinateCurvature.christoffel (fun _ => M.g) (fun _ => M.ginv) y k i j) = fun _ => 0 := by
         funext y
-        exact Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+        exact CoordinateCurvature.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
           (fun _ => rfl) y k i j
       rw [hc]
       exact differentiableAt_const 0)
     (by
       filter_upwards with y k i j
-      rw [Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+      rw [CoordinateCurvature.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
           (fun _ => rfl) y k i j,
-        Pipeline.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
+        CoordinateCurvature.christoffel_const (fun _ => M.g) (fun _ => M.ginv) M.g
           (fun _ => rfl) y k j i])
 
 /-- The momentum-constraint derivative table `dK_μij = ∂_μ K_ij` derived from
 the extrinsic-curvature field. -/
 noncomputable def extrinsicDerivativeOf
     (K : (Fin 3 → ℝ) → Tensor2 3) (x : Fin 3 → ℝ) : Fin 3 → Tensor2 3 :=
-  fun μ i j => Pipeline.coordDeriv μ (fun y => K y i j) x
+  fun μ i j => CoordinateCurvature.coordDeriv μ (fun y => K y i j) x
 
 /-- A constant extrinsic curvature has vanishing derived derivative table. -/
 lemma extrinsicDerivativeOf_const (K : Tensor2 3) (x : Fin 3 → ℝ) (μ : Fin 3) :
     extrinsicDerivativeOf (fun _ => K) x μ = 0 := by
   ext i j
-  simp [extrinsicDerivativeOf, Pipeline.coordDeriv_const]
+  simp [extrinsicDerivativeOf, CoordinateCurvature.coordDeriv_const]
 
 /-- The Minkowski chart induces the Euclidean spatial metric components on the
 `t = 0` slice. -/
 lemma minkowskiChart_spatialMetric :
-    minkowskiChart.spatialMetric = euclid3.g := by
+    minkowskiChart.spatialMetric = euclideanMetric3.g := by
   ext i j
   fin_cases i <;> fin_cases j <;>
     simp [ChartSpacetime.spatialMetric, ChartSpacetime.coordinateMetric,
-      minkowskiChart, minkowski, euclid3, minkowskiMetric4_apply]
+      minkowskiChart, minkowski, euclideanMetric3, minkowskiMetric4_apply]
 
 /-- ADM data on a chart slice, together with the momentum-constraint derivative
 and a proof that the vacuum constraints hold. -/
 structure ChartInitialData (X : ChartSpacetime) where
   /-- The ADM metric, spatial curvature and extrinsic curvature. -/
   data : InitialData
+  /-- The spatial Christoffel symbols `Γ^k_{ij}` at the slice point. -/
+  Γ : Fin 3 → Fin 3 → Fin 3 → ℝ
   /-- The coordinate derivative `∂K` used by the momentum constraint. -/
   dK : Fin 3 → Tensor2 3
   /-- The vacuum constraint equations. -/
-  vacuum : data.IsVacuumData dK
+  vacuum : data.IsVacuumData Γ dK
 
 /-- Chart initial data whose curvature and momentum derivative are supplied by
 the derived constructors `spatialRiemannTensorOf` and `extrinsicDerivativeOf`.
 The vacuum proof is still an input: no constraint-solving theorem is claimed. -/
 noncomputable def ChartInitialData.ofDerivedData
     (X : ChartSpacetime) (h : MetricTensor 3) (K : Tensor2 3)
-    (Ksymm : IsSymm K) (R3 : RiemannTensor 3) (dK : Fin 3 → Tensor2 3)
-    (vacuum : (InitialData.mk h R3 K Ksymm).IsVacuumData dK) :
+    (Ksymm : IsSymm K) (R3 : RiemannTensor 3) (Γ : Fin 3 → Fin 3 → Fin 3 → ℝ)
+    (dK : Fin 3 → Tensor2 3)
+    (vacuum : (InitialData.mk h R3 K Ksymm).IsVacuumData Γ dK) :
     ChartInitialData X where
   data := InitialData.mk h R3 K Ksymm
+  Γ := Γ
   dK := dK
   vacuum := vacuum
 
@@ -334,16 +338,19 @@ noncomputable def ChartInitialData.ofFields
       ∑ a, hinv y a m * h y a j = if m = j then 1 else 0)
     (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) x)
     (hΓD : ∀ k i j,
-      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) x)
+      DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel h hinv y k i j) x)
     (hΓ : ∀ᶠ y in 𝓝 x, ∀ k i j,
-      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i)
+      CoordinateCurvature.christoffel h hinv y k i j = CoordinateCurvature.christoffel h hinv y k j i)
     (Ksymm : IsSymm (K x))
     (vacuum : (InitialData.mk M
       (spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ)
-      (K x) Ksymm).IsVacuumData (extrinsicDerivativeOf K x)) :
+      (K x) Ksymm).IsVacuumData
+      (fun k i j => CoordinateCurvature.christoffel h hinv x k i j)
+      (extrinsicDerivativeOf K x)) :
     ChartInitialData X :=
   ChartInitialData.ofDerivedData X M (K x) Ksymm
     (spatialRiemannTensorOf h hinv x hgSymm hInv hgC2 hΓD hΓ)
+    (fun k i j => CoordinateCurvature.christoffel h hinv x k i j)
     (extrinsicDerivativeOf K x) vacuum
 
 /-- A field of bundled metrics is symmetric near every point. -/
@@ -369,8 +376,8 @@ lemma metricField_inv (M : (Fin 3 → ℝ) → MetricTensor 3) (x : Fin 3 → �
 lemma metricField_christoffel_symm (M : (Fin 3 → ℝ) → MetricTensor 3)
     (x : Fin 3 → ℝ) :
     ∀ᶠ y in 𝓝 x, ∀ k i j,
-      Pipeline.christoffel (fun z => (M z).g) (fun z => (M z).ginv) y k i j =
-        Pipeline.christoffel (fun z => (M z).g) (fun z => (M z).ginv) y k j i := by
+      CoordinateCurvature.christoffel (fun z => (M z).g) (fun z => (M z).ginv) y k i j =
+        CoordinateCurvature.christoffel (fun z => (M z).g) (fun z => (M z).ginv) y k j i := by
   filter_upwards with y k i j
   exact Bianchi.christoffel_symm (fun z => (M z).g) (fun z => (M z).ginv)
     (x := y) (by
@@ -384,18 +391,18 @@ lemma differentiableAt_christoffel_of_contDiffAt_two {n : ℕ}
     (hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => g y i j) x)
     (hginvD : ∀ i j, DifferentiableAt ℝ (fun y => ginv y i j) x)
     (k i j : Fin n) :
-    DifferentiableAt ℝ (fun y => Pipeline.christoffel g ginv y k i j) x := by
+    DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel g ginv y k i j) x := by
   have hpdD : ∀ (μ a b : Fin n),
-      DifferentiableAt ℝ (fun y => Pipeline.coordDeriv μ (fun z => g z a b) y) x :=
-    fun μ a b => Pipeline.coordDeriv_differentiableAt μ (hgC2 a b)
+      DifferentiableAt ℝ (fun y => CoordinateCurvature.coordDeriv μ (fun z => g z a b) y) x :=
+    fun μ a b => CoordinateCurvature.coordDeriv_differentiableAt μ (hgC2 a b)
   have hterm : ∀ l : Fin n,
       DifferentiableAt ℝ (fun y => ginv y k l *
-        (Pipeline.coordDeriv i (fun z => g z j l) y
-          + Pipeline.coordDeriv j (fun z => g z i l) y
-          - Pipeline.coordDeriv l (fun z => g z i j) y)) x := by
+        (CoordinateCurvature.coordDeriv i (fun z => g z j l) y
+          + CoordinateCurvature.coordDeriv j (fun z => g z i l) y
+          - CoordinateCurvature.coordDeriv l (fun z => g z i j) y)) x := by
     intro l
     exact (hginvD k l).mul (((hpdD i j l).add (hpdD j i l)).sub (hpdD l i j))
-  unfold Pipeline.christoffel
+  unfold CoordinateCurvature.christoffel
   exact DifferentiableAt.const_mul (DifferentiableAt.fun_sum fun l _ => hterm l) _
 
 /-- Warped spatial metric `dx₀² + (1 + x₀²)(dx₁² + dx₂²)`. -/
@@ -474,9 +481,9 @@ noncomputable def warpedSpatialRiemann : RiemannTensor 3 := by
       (Filter.Eventually.of_forall hsymmAll) k i j
 
 lemma warpedChristoffel_011 (x : Fin 3 → ℝ) :
-    Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv x 0 1 1 = -x 0 := by
-  have hderiv : Pipeline.coordDeriv 0 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) x = 2 * x 0 := by
-    apply Pipeline.coordDeriv_of_hasDerivAt
+    CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv x 0 1 1 = -x 0 := by
+  have hderiv : CoordinateCurvature.coordDeriv 0 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) x = 2 * x 0 := by
+    apply CoordinateCurvature.coordDeriv_of_hasDerivAt
     have h : (fun s : ℝ => 1 + (Function.update x 0 s 0) ^ 2) =
         fun s : ℝ => 1 + s ^ 2 := by
       funext s
@@ -484,19 +491,19 @@ lemma warpedChristoffel_011 (x : Fin 3 → ℝ) :
     rw [h]
     convert (hasDerivAt_const (x 0) (1 : ℝ)).add (hasDerivAt_pow 2 (x 0)) using 1
     ring
-  simp only [Pipeline.christoffel, warpedSpatialMetric, warpedSpatialMetricInv]
-  simp [hderiv, Pipeline.coordDeriv_const]
+  simp only [CoordinateCurvature.christoffel, warpedSpatialMetric, warpedSpatialMetricInv]
+  simp [hderiv, CoordinateCurvature.coordDeriv_const]
 
 lemma warpedChristoffel_001 (x : Fin 3 → ℝ) :
-    Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv x 0 0 1 = 0 := by
-  simp only [Pipeline.christoffel, warpedSpatialMetric, warpedSpatialMetricInv]
-  simp [Pipeline.coordDeriv_const]
+    CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv x 0 0 1 = 0 := by
+  simp only [CoordinateCurvature.christoffel, warpedSpatialMetric, warpedSpatialMetricInv]
+  simp [CoordinateCurvature.coordDeriv_const]
 
 lemma warpedChristoffel_zero (x : Fin 3 → ℝ) (hx : x = 0) :
-    ∀ k i j, Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv x k i j = 0 := by
+    ∀ k i j, CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv x k i j = 0 := by
   subst hx
-  have hderiv : Pipeline.coordDeriv 0 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
-    apply Pipeline.coordDeriv_of_hasDerivAt
+  have hderiv : CoordinateCurvature.coordDeriv 0 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
+    apply CoordinateCurvature.coordDeriv_of_hasDerivAt
     have h : (fun s : ℝ => 1 + (Function.update (0 : Fin 3 → ℝ) 0 s 0) ^ 2) =
         fun s : ℝ => 1 + s ^ 2 := by
       funext s
@@ -504,37 +511,37 @@ lemma warpedChristoffel_zero (x : Fin 3 → ℝ) (hx : x = 0) :
     rw [h]
     convert (hasDerivAt_const (0 : ℝ) (1 : ℝ)).add (hasDerivAt_pow 2 (0 : ℝ)) using 1
     ring
-  have hderiv1 : Pipeline.coordDeriv 1 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
-    apply Pipeline.coordDeriv_const_slice 1 (c := 1 + ((0 : Fin 3 → ℝ) 0) ^ 2)
+  have hderiv1 : CoordinateCurvature.coordDeriv 1 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
+    apply CoordinateCurvature.coordDeriv_const_slice 1 (c := 1 + ((0 : Fin 3 → ℝ) 0) ^ 2)
     intro s
     simp
-  have hderiv2 : Pipeline.coordDeriv 2 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
-    apply Pipeline.coordDeriv_const_slice 2 (c := 1 + ((0 : Fin 3 → ℝ) 0) ^ 2)
+  have hderiv2 : CoordinateCurvature.coordDeriv 2 (fun y : Fin 3 → ℝ => 1 + (y 0) ^ 2) 0 = 0 := by
+    apply CoordinateCurvature.coordDeriv_const_slice 2 (c := 1 + ((0 : Fin 3 → ℝ) 0) ^ 2)
     intro s
     simp
   intro k i j
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
-    simp [Pipeline.christoffel, warpedSpatialMetric, warpedSpatialMetricInv,
-      hderiv, hderiv1, hderiv2, Pipeline.coordDeriv_const]
+    simp [CoordinateCurvature.christoffel, warpedSpatialMetric, warpedSpatialMetricInv,
+      hderiv, hderiv1, hderiv2, CoordinateCurvature.coordDeriv_const]
 
 lemma warpedRiemann_0101 :
-    Pipeline.riemann warpedSpatialMetric warpedSpatialMetricInv 0 0 1 0 1 = -1 := by
-  have h1 : Pipeline.coordDeriv 0
-      (fun y => Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv y 0 1 1) 0 = -1 := by
-    rw [Pipeline.coordDeriv_congr 0 0 (fun y => warpedChristoffel_011 y)]
-    simp [Pipeline.coordDeriv]
-  have h2 : Pipeline.coordDeriv 1
-      (fun y => Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv y 0 0 1) 0 = 0 := by
-    rw [Pipeline.coordDeriv_congr 1 0 (fun y => warpedChristoffel_001 y)]
-    exact Pipeline.coordDeriv_const 1 0 0
+    CoordinateCurvature.riemann warpedSpatialMetric warpedSpatialMetricInv 0 0 1 0 1 = -1 := by
+  have h1 : CoordinateCurvature.coordDeriv 0
+      (fun y => CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv y 0 1 1) 0 = -1 := by
+    rw [CoordinateCurvature.coordDeriv_congr 0 0 (fun y => warpedChristoffel_011 y)]
+    simp [CoordinateCurvature.coordDeriv]
+  have h2 : CoordinateCurvature.coordDeriv 1
+      (fun y => CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv y 0 0 1) 0 = 0 := by
+    rw [CoordinateCurvature.coordDeriv_congr 1 0 (fun y => warpedChristoffel_001 y)]
+    exact CoordinateCurvature.coordDeriv_const 1 0 0
   have h3 : (∑ l : Fin 3,
-      (Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 0 0 l *
-        Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 l 1 1 -
-      Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 0 1 l *
-        Pipeline.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 l 0 1)) = 0 := by
+      (CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 0 0 l *
+        CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 l 1 1 -
+      CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 0 1 l *
+        CoordinateCurvature.christoffel warpedSpatialMetric warpedSpatialMetricInv 0 l 0 1)) = 0 := by
     have hz := warpedChristoffel_zero 0 rfl
     simp [hz]
-  simp only [Pipeline.riemann, h1, h2, h3]
+  simp only [CoordinateCurvature.riemann, h1, h2, h3]
   ring
 
 /-- The nonconstant warped metric gives nonzero derived curvature: `R_{0101} = -1`. -/
@@ -542,7 +549,7 @@ theorem spatialRiemannTensorOf_warped_nonconstant :
     warpedSpatialRiemann.comp 0 1 0 1 = -1 := by
   rw [warpedSpatialRiemann]
   change (∑ e, warpedSpatialMetric 0 0 e *
-    Pipeline.riemann warpedSpatialMetric warpedSpatialMetricInv 0 e 1 0 1) = -1
+    CoordinateCurvature.riemann warpedSpatialMetric warpedSpatialMetricInv 0 e 1 0 1) = -1
   rw [Fin.sum_univ_three]
   norm_num [warpedSpatialMetric, warpedRiemann_0101]
 
@@ -561,7 +568,10 @@ noncomputable def ChartInitialData.ofChartData
         (metricField_symm M x) (metricField_inv M x) hgC2
         (fun k i j => differentiableAt_christoffel_of_contDiffAt_two hgC2 hginvD k i j)
         (metricField_christoffel_symm M x))
-      (K x) Ksymm).IsVacuumData (extrinsicDerivativeOf K x)) :
+      (K x) Ksymm).IsVacuumData
+      (fun k i j => CoordinateCurvature.christoffel (fun y => (M y).g)
+        (fun y => (M y).ginv) x k i j)
+      (extrinsicDerivativeOf K x)) :
     ChartInitialData X :=
   ChartInitialData.ofFields X (M x) (fun y => (M y).g) (fun y => (M y).ginv) K x
     (metricField_symm M x) (metricField_inv M x) hgC2
@@ -584,12 +594,12 @@ lemma ChartInitialData.ham_zero (D : ChartInitialData X) :
 
 /-- Every bundled chart initial data set satisfies the momentum constraint. -/
 lemma ChartInitialData.mom_zero (D : ChartInitialData X) (i : Fin 3) :
-    D.data.momentumConstraint D.dK i = 0 :=
+    D.data.momentumConstraint D.Γ D.dK i = 0 :=
   D.vacuum.2 i
 
 /-- The bundled vacuum predicate is exactly `InitialData.IsVacuumData`. -/
 lemma ChartInitialData.isVacuumData (D : ChartInitialData X) :
-    D.data.IsVacuumData D.dK :=
+    D.data.IsVacuumData D.Γ D.dK :=
   D.vacuum
 
 /-- The Hamiltonian and momentum constraint residuals of chart initial data. -/
@@ -603,7 +613,7 @@ structure ConstraintResidual where
 noncomputable def ChartInitialData.constraintResidual
     (D : ChartInitialData X) : ConstraintResidual where
   ham := D.data.hamiltonianConstraint
-  mom := fun i => D.data.momentumConstraint D.dK i
+  mom := fun i => D.data.momentumConstraint D.Γ D.dK i
 
 /-- The packaged Hamiltonian residual vanishes. -/
 lemma ChartInitialData.constraintResidual_ham (D : ChartInitialData X) :
@@ -638,9 +648,10 @@ lemma minkowskiChart_isSmooth : minkowskiChart.IsSmooth := by
 
 /-- Flat Minkowski initial data on the Minkowski chart. -/
 def minkowskiChartInitialData : ChartInitialData minkowskiChart where
-  data := flatData
-  dK := fun _ => 0
-  vacuum := flatData_isVacuum
+  data := flatInitialData
+  Γ := 0
+  dK := 0
+  vacuum := flatInitialData_isVacuum
 
 /-- The induced spatial metric on the Minkowski slice is the metric carried by
 the flat chart initial data. -/
@@ -652,7 +663,7 @@ lemma minkowskiChartInitialData_metric :
 /-- The flat instance has vanishing Hamiltonian constraint. -/
 lemma minkowskiChartInitialData_ham_zero :
     minkowskiChartInitialData.data.hamiltonianConstraint = 0 :=
-  flatData_ham_zero
+  flatInitialData_hamiltonianConstraint_zero
 
 /-- The Minkowski chart initial data are regular. -/
 lemma minkowskiChartInitialData_regular :
@@ -669,43 +680,46 @@ lemma minkowskiChartInitialData_constraintResidual_eq_zero :
 momentum constructors: the constant Euclidean metric gives `R3 = flat 3`, and
 zero extrinsic curvature gives `dK = 0`. -/
 noncomputable def minkowskiChartInitialDataDerived : ChartInitialData minkowskiChart := by
-  let h : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.g
-  let hinv : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclid3.ginv
+  let h : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclideanMetric3.g
+  let hinv : (Fin 3 → ℝ) → Tensor2 3 := fun _ => euclideanMetric3.ginv
   let K : (Fin 3 → ℝ) → Tensor2 3 := fun _ => 0
   let hgSymm : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ i j, h y i j = h y j i := by
     filter_upwards with y i j
-    simp [h, euclid3, Matrix.one_apply, eq_comm]
+    simp [h, euclideanMetric3, Matrix.one_apply, eq_comm]
   let hInv : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ m j,
       ∑ a, hinv y a m * h y a j = if m = j then 1 else 0 := by
     filter_upwards with y m j
-    simp [h, hinv, euclid3, Matrix.one_apply, eq_comm]
+    simp [h, hinv, euclideanMetric3, Matrix.one_apply, eq_comm]
   let hgC2 : ∀ i j, ContDiffAt ℝ 2 (fun y => h y i j) 0 := by
     intro i j
     exact contDiffAt_const
   let hΓD : ∀ k i j,
-      DifferentiableAt ℝ (fun y => Pipeline.christoffel h hinv y k i j) 0 := by
+      DifferentiableAt ℝ (fun y => CoordinateCurvature.christoffel h hinv y k i j) 0 := by
     intro k i j
-    have hc : (fun y : Fin 3 → ℝ => Pipeline.christoffel h hinv y k i j) = fun _ => 0 := by
+    have hc : (fun y : Fin 3 → ℝ => CoordinateCurvature.christoffel h hinv y k i j) = fun _ => 0 := by
       funext y
-      exact Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j
+      exact CoordinateCurvature.christoffel_const h hinv euclideanMetric3.g (fun _ => rfl) y k i j
     rw [hc]
     exact differentiableAt_const 0
   let hΓ : ∀ᶠ y in 𝓝 (0 : Fin 3 → ℝ), ∀ k i j,
-      Pipeline.christoffel h hinv y k i j = Pipeline.christoffel h hinv y k j i := by
+      CoordinateCurvature.christoffel h hinv y k i j = CoordinateCurvature.christoffel h hinv y k j i := by
     filter_upwards with y k i j
-    rw [Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k i j,
-      Pipeline.christoffel_const h hinv euclid3.g (fun _ => rfl) y k j i]
+    rw [CoordinateCurvature.christoffel_const h hinv euclideanMetric3.g (fun _ => rfl) y k i j,
+      CoordinateCurvature.christoffel_const h hinv euclideanMetric3.g (fun _ => rfl) y k j i]
   have hR3 : spatialRiemannTensorOf h hinv 0 hgSymm hInv hgC2 hΓD hΓ =
       RiemannTensor.flat 3 :=
-    spatialRiemannTensorOf_const euclid3.g h hinv 0 (fun _ => rfl) hgSymm hInv hgC2 hΓD hΓ
+    spatialRiemannTensorOf_const euclideanMetric3.g h hinv 0 (fun _ => rfl) hgSymm hInv hgC2 hΓD hΓ
   have hdK : extrinsicDerivativeOf K 0 = fun _ => 0 := by
     change extrinsicDerivativeOf (fun _ : Fin 3 → ℝ => (0 : Tensor2 3)) 0 = fun _ => 0
     funext μ
     exact extrinsicDerivativeOf_const 0 0 μ
-  refine ChartInitialData.ofFields minkowskiChart euclid3 h hinv K 0 hgSymm hInv hgC2 hΓD hΓ
+  have hΓ0 : (fun k i j => CoordinateCurvature.christoffel h hinv 0 k i j) = 0 := by
+    funext k i j
+    exact CoordinateCurvature.christoffel_const h hinv euclideanMetric3.g (fun _ => rfl) 0 k i j
+  refine ChartInitialData.ofFields minkowskiChart euclideanMetric3 h hinv K 0 hgSymm hInv hgC2 hΓD hΓ
     Matrix.isSymm_zero ?_
-  rw [hR3, hdK]
-  simpa [h, K, flatData] using flatData_isVacuum
+  rw [hR3, hdK, hΓ0]
+  simpa [h, K, flatInitialData] using flatInitialData_isVacuum
 
 /-! ## D. Manifold-level packaging
 
@@ -900,7 +914,10 @@ noncomputable def ofChartData
         (metricField_symm M x) (metricField_inv M x) hgC2
         (fun k i j => differentiableAt_christoffel_of_contDiffAt_two hgC2 hginvD k i j)
         (metricField_christoffel_symm M x))
-      (K x) Ksymm).IsVacuumData (extrinsicDerivativeOf K x)) :
+      (K x) Ksymm).IsVacuumData
+      (fun k i j => CoordinateCurvature.christoffel (fun y => (M y).g)
+        (fun y => (M y).ginv) x k i j)
+      (extrinsicDerivativeOf K x)) :
     ManifoldInitialData X :=
   ⟨ChartInitialData.ofChartData X.chartSpacetime M K x hgC2 hginvD Ksymm vacuum⟩
 
@@ -917,12 +934,12 @@ lemma ham_zero {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
 
 /-- Manifold-level data have vanishing momentum residual. -/
 lemma mom_zero {X : ManifoldSpacetime} (D : ManifoldInitialData X) (i : Fin 3) :
-    D.data.data.momentumConstraint D.data.dK i = 0 :=
+    D.data.data.momentumConstraint D.data.Γ D.data.dK i = 0 :=
   D.data.mom_zero i
 
 /-- Manifold-level data satisfy the vacuum constraints. -/
 lemma isVacuumData {X : ManifoldSpacetime} (D : ManifoldInitialData X) :
-    D.data.data.IsVacuumData D.data.dK :=
+    D.data.data.IsVacuumData D.data.Γ D.data.dK :=
   D.data.isVacuumData
 
 /-- Manifold-level data have zero constraint residual. -/
@@ -946,7 +963,7 @@ noncomputable def minkowskiManifoldInitialData : ManifoldInitialData minkowskiMa
 lemma minkowskiManifoldInitialData_isInduced :
     ManifoldInitialData.IsInduced minkowskiManifoldInitialData := by
   rw [ManifoldInitialData.IsInduced]
-  change euclid3.g = minkowskiChart.spatialMetric
+  change euclideanMetric3.g = minkowskiChart.spatialMetric
   exact minkowskiChart_spatialMetric.symm
 
 /-- The Minkowski manifold data are compatible with themselves under the

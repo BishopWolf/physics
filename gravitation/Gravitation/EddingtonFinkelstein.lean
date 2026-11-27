@@ -245,9 +245,9 @@ private noncomputable def efGammaDeriv (M : ℝ) (x : Fin 4 → ℝ) (μ k i j :
 set_option maxHeartbeats 2000000 in
 private lemma christoffel_eq_efGamma (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hsin : Real.sin (x 2) ≠ 0) (k i j : Fin 4) :
-    Pipeline.christoffel (metric M) (metricInv M) x k i j = efGamma M x k i j := by
+    CoordinateCurvature.christoffel (metric M) (metricInv M) x k i j = efGamma M x k i j := by
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
-    simp [Pipeline.christoffel, Pipeline.coordDeriv, efGamma, metric, metricInv,
+    simp [CoordinateCurvature.christoffel, CoordinateCurvature.coordDeriv, efGamma, metric, metricInv,
       Fin.sum_univ_four] <;>
     try field_simp [hr, hsin] <;>
     try ring_nf
@@ -255,9 +255,9 @@ private lemma christoffel_eq_efGamma (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠
 set_option maxHeartbeats 2000000 in
 private lemma coordDeriv_efGamma_eq (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hsin : Real.sin (x 2) ≠ 0) (μ k i j : Fin 4) :
-    Pipeline.coordDeriv μ (fun y => efGamma M y k i j) x = efGammaDeriv M x μ k i j := by
+    CoordinateCurvature.coordDeriv μ (fun y => efGamma M y k i j) x = efGammaDeriv M x μ k i j := by
   fin_cases μ <;> fin_cases k <;> fin_cases i <;> fin_cases j <;>
-    simp [Pipeline.coordDeriv, efGamma, efGammaDeriv, hr, hsin] <;>
+    simp [CoordinateCurvature.coordDeriv, efGamma, efGammaDeriv, hr, hsin] <;>
     try ring_nf <;>
     try field_simp [hr, hsin] <;>
     try rw [deriv_gamma_100_alt M (x 1) hr] <;>
@@ -278,21 +278,21 @@ point with `r ≠ 0` and `sin θ ≠ 0`.  No condition on `1 - 2M/r` is used, so
 statement includes the horizon `r = 2M`. -/
 lemma ricciTensorOf_metric (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hsin : Real.sin (x 2) ≠ 0) (σ ν : Fin 4) :
-    Pipeline.ricciTensorOf (metric M) (metricInv M) x σ ν = 0 := by
+    CoordinateCurvature.ricciTensor (metric M) (metricInv M) x σ ν = 0 := by
   have hr' : ∀ᶠ y in nhds x, y 1 ≠ 0 :=
     (continuous_apply 1).continuousAt.eventually_ne hr
   have hsin' : ∀ᶠ y in nhds x, Real.sin (y 2) ≠ 0 :=
     (Real.continuous_sin.continuousAt.comp (continuous_apply 2).continuousAt).eventually_ne hsin
   have hcoord : ∀ (μ k i j : Fin 4),
-      Pipeline.coordDeriv μ
-        (fun y => Pipeline.christoffel (metric M) (metricInv M) y k i j) x =
-      Pipeline.coordDeriv μ (fun y => efGamma M y k i j) x := by
+      CoordinateCurvature.coordDeriv μ
+        (fun y => CoordinateCurvature.christoffel (metric M) (metricInv M) y k i j) x =
+      CoordinateCurvature.coordDeriv μ (fun y => efGamma M y k i j) x := by
     intro μ k i j
-    apply Pipeline.coordDeriv_congr_nhds
+    apply CoordinateCurvature.coordDeriv_congr_nhds
     filter_upwards [hr', hsin'] with y hy1 hy2
     exact christoffel_eq_efGamma M y hy1 hy2 k i j
   fin_cases σ <;> fin_cases ν <;>
-    simp [Pipeline.ricciTensorOf, Pipeline.riemann, hcoord, coordDeriv_efGamma_eq,
+    simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, hcoord, coordDeriv_efGamma_eq,
       christoffel_eq_efGamma, Fin.sum_univ_four, hr, hsin]
   all_goals simp [efGamma, efGammaDeriv]
   all_goals try field_simp [hr, hsin]
@@ -438,7 +438,7 @@ vanishing coordinate Ricci tensor.  This is the same direct computation as
 continuation from the exterior Schwarzschild chart. -/
 lemma ricciTensorOf_metric_horizon (M v θ φ : ℝ) (hM : M ≠ 0)
     (hsin : Real.sin θ ≠ 0) (σ ν : Fin 4) :
-    Pipeline.ricciTensorOf (metric M) (metricInv M) (horizonPoint M v θ φ) σ ν = 0 := by
+    CoordinateCurvature.ricciTensor (metric M) (metricInv M) (horizonPoint M v θ φ) σ ν = 0 := by
   exact ricciTensorOf_metric M (horizonPoint M v θ φ)
     (by
       simp only [horizonPoint_one]
@@ -596,7 +596,7 @@ lemma schwarzschild_eq_pullback (M : ℝ) (x : SpacetimeChart) (hM : 0 < M)
   ext σ ν
   fin_cases σ <;> fin_cases ν <;>
     simp [Schwarzschild.SchwarzschildSpacetime.metric, Schwarzschild.SchwarzschildSpacetime.metric,
-      StaticSpherical.StaticSphericalMetric.metric, schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.lapse,
+      StaticSpherical.Metric.metric, schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.metricFn,
       Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
       metric, schwarzschildToEF, transitionJacobian,
       Matrix.mul_apply, Matrix.transpose_apply, Fin.sum_univ_four] <;>

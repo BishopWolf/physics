@@ -31,7 +31,7 @@ module
 public import Gravitation.CauchyInterfaces
 public import Gravitation.SobolevInitialData
 public import Gravitation.Relativity.Metrics.CoordinateMetric
-public import Gravitation.Cosmology.FLRW.Metric
+public import Gravitation.Cosmology.FLRW.Basic
 public import Gravitation.Cosmology.FLRW.PerfectFluid
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
 public import Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature
@@ -52,11 +52,11 @@ Schwarzschild, Schwarzschild–de Sitter, Kerr, and FLRW. -/
 def explicitSolutionObligations : ExplicitDevelopmentObligations where
   schwarzschild :=
     ∀ (M : ℝ),
-      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → (schwarzschildSpacetime M).lapse (x 1) ≠ 0 →
+      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → (schwarzschildSpacetime M).metricFn (x 1) ≠ 0 →
         Real.sin (x 2) ≠ 0 → ∀ i j : Fin 4,
-          Pipeline.einsteinTensorOf ((schwarzschildSpacetime M).metric)
+          CoordinateCurvature.einsteinTensor ((schwarzschildSpacetime M).metric)
             ((schwarzschildSpacetime M).metricInv) x i j = 0) ∧
-      (∀ (r θ φ : ℝ), r ≠ 0 → (schwarzschildSpacetime M).lapse r ≠ 0 → Real.sin θ ≠ 0 →
+      (∀ (r θ φ : ℝ), r ≠ 0 → (schwarzschildSpacetime M).metricFn r ≠ 0 → Real.sin θ ≠ 0 →
         (∀ i j : Fin 3,
           (schwarzschildSpacetime M).metric ![0, r, θ, φ] i.succ j.succ =
             sdsSpatialMetric M 0 ![r, θ, φ] i j) ∧
@@ -64,12 +64,12 @@ def explicitSolutionObligations : ExplicitDevelopmentObligations where
           (fun _ => 0) ![r, θ, φ] = 0)
   deSitter :=
     ∀ (M Λ : ℝ),
-      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → (sdsSpacetime M Λ).lapse (x 1) ≠ 0 →
+      (∀ (x : Fin 4 → ℝ), x 1 ≠ 0 → (sdsSpacetime M Λ).metricFn (x 1) ≠ 0 →
         Real.sin (x 2) ≠ 0 → ∀ i j : Fin 4,
-          Pipeline.einsteinTensorOf ((sdsSpacetime M Λ).metric)
+          CoordinateCurvature.einsteinTensor ((sdsSpacetime M Λ).metric)
             ((sdsSpacetime M Λ).metricInv) x i j +
             Λ * (sdsSpacetime M Λ).metric x i j = 0) ∧
-      (∀ (r θ φ : ℝ), r ≠ 0 → (sdsSpacetime M Λ).lapse r ≠ 0 → Real.sin θ ≠ 0 →
+      (∀ (r θ φ : ℝ), r ≠ 0 → (sdsSpacetime M Λ).metricFn r ≠ 0 → Real.sin θ ≠ 0 →
         (∀ i j : Fin 3,
           (sdsSpacetime M Λ).metric ![0, r, θ, φ] i.succ j.succ =
             sdsSpatialMetric M Λ ![r, θ, φ] i j) ∧
@@ -79,41 +79,46 @@ def explicitSolutionObligations : ExplicitDevelopmentObligations where
     ∀ (M a : ℝ),
       (∀ (x : Fin 4 → ℝ), (kerrSpacetime M a).sigma (x 1) (x 2) ≠ 0 →
         (kerrSpacetime M a).delta (x 1) ≠ 0 → Real.sin (x 2) ≠ 0 → ∀ i j : Fin 4,
-          Pipeline.einsteinTensorOf ((kerrSpacetime M a).metric) ((kerrSpacetime M a).metricInv) x i j = 0) ∧
+          CoordinateCurvature.einsteinTensor ((kerrSpacetime M a).metric) ((kerrSpacetime M a).metricInv) x i j = 0) ∧
       (∀ (x : Fin 4 → ℝ) (i j : Fin 4),
         (kerrSpacetime M a).metric x i j = (kerrSpacetime M a).metric x j i) ∧
       (∀ (r θ φ : ℝ),
         (kerrSpacetime M a).metric ![0, r, θ, φ] 0 3 =
           -(2 * M * a * r * Real.sin θ ^ 2 / (kerrSpacetime M a).sigma r θ))
   flrw :=
-    ∀ (a : ℝ → ℝ) (k Λ G ρ p : ℝ) (x : Fin 4 → ℝ),
+    ∀ (a : ℝ → ℝ) (k Λ : ℝ) (c : SpeedOfLight) (G : GravitationalConstant) (ρ p : ℝ)
+      (x : Fin 4 → ℝ),
       a (x 0) ≠ 0 → x 1 ≠ 0 → 1 - k * (x 1) ^ 2 ≠ 0 → Real.sin (x 2) ≠ 0 →
       (∀ᶠ t in nhds (x 0), DifferentiableAt ℝ a t) →
       DifferentiableAt ℝ (deriv a) (x 0) →
-      ((deriv a (x 0) / a (x 0)) ^ 2 = (8 * Real.pi * G / 3) * ρ - k / a (x 0) ^ 2 + Λ / 3 ∧
-        deriv (deriv a) (x 0) / a (x 0) = -(4 * Real.pi * G / 3) * (ρ + 3 * p) + Λ / 3) →
+      ((deriv a (x 0) / a (x 0)) ^ 2 =
+          (8 * Real.pi * G.val / (3 * (c : ℝ) ^ 2)) * ρ - k / a (x 0) ^ 2 + Λ / 3 ∧
+        deriv (deriv a) (x 0) / a (x 0) =
+          -(4 * Real.pi * G.val / (3 * (c : ℝ) ^ 2)) * (ρ + 3 * p / (c : ℝ) ^ 2) + Λ / 3) →
       (∀ i j : Fin 4,
-        Pipeline.einsteinTensorOf ((⟨a, k⟩ : FLRW.FLRWSpacetime).metric) ((⟨a, k⟩ : FLRW.FLRWSpacetime).metricInv) x i j +
-          Λ * (⟨a, k⟩ : FLRW.FLRWSpacetime).metric x i j =
-          8 * Real.pi * G * FLRW.perfectFluidT ρ p ((⟨a, k⟩ : FLRW.FLRWSpacetime).metric x) i j) ∧
+        (⟨a, k⟩ : Cosmology.FLRW.FLRWSpacetime).toCoordinateMetric.einsteinTensor x i j +
+          Λ * (⟨a, k⟩ : Cosmology.FLRW.FLRWSpacetime).metric x i j =
+          8 * Real.pi * G.val / (c : ℝ) ^ 4 *
+            GeneralRelativity.perfectFluidStressEnergy c ρ p
+              ((⟨a, k⟩ : Cosmology.FLRW.FLRWSpacetime).metric x) i j) ∧
       (∀ (r θ φ : ℝ),
-        (⟨a, 0⟩ : FLRW.FLRWSpacetime).metric ![0, r, θ, φ] 1 1 = a 0 ^ 2 ∧
-        (⟨a, 0⟩ : FLRW.FLRWSpacetime).metric ![0, r, θ, φ] 2 2 = a 0 ^ 2 * r ^ 2 ∧
-        (⟨a, 0⟩ : FLRW.FLRWSpacetime).metric ![0, r, θ, φ] 3 3 = a 0 ^ 2 * r ^ 2 * Real.sin θ ^ 2)
+        (⟨a, 0⟩ : Cosmology.FLRW.FLRWSpacetime).metric ![0, r, θ, φ] 1 1 = a 0 ^ 2 ∧
+        (⟨a, 0⟩ : Cosmology.FLRW.FLRWSpacetime).metric ![0, r, θ, φ] 2 2 = a 0 ^ 2 * r ^ 2 ∧
+        (⟨a, 0⟩ : Cosmology.FLRW.FLRWSpacetime).metric ![0, r, θ, φ] 3 3 = a 0 ^ 2 * r ^ 2 * Real.sin θ ^ 2)
 
 /-- Schwarzschild explicit-development verification: 4D vacuum Einstein equation,
 `t = 0` spatial slice metric match, and 3D nonlinear Hamiltonian constraint. -/
 theorem schwarzschild_explicit_development : explicitSolutionObligations.schwarzschild := by
   intro M
   refine ⟨fun x hr hf hsin i j =>
-      (schwarzschildSpacetime M).einsteinTensorOf x hr hf hsin i j,
+      (schwarzschildSpacetime M).einsteinTensor x hr hf hsin i j,
     fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
   · fin_cases i <;> fin_cases j <;>
       simp [schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.metric,
-        StaticSpherical.StaticSphericalMetric.metric, sdsSpatialMetric,
-        Schwarzschild.SchwarzschildSpacetime.lapse,
+        StaticSpherical.Metric.metric, sdsSpatialMetric,
+        Schwarzschild.SchwarzschildSpacetime.metricFn,
         Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
-        SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse]
+        SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn]
   · exact schwarzschild_spatial_hamiltonian_zero M ![r, θ, φ]
       (by simpa using hr) (by simpa using hf) (by simpa using hsin)
 
@@ -123,14 +128,15 @@ spatial scalar curvature `³R = 2 Λ`. -/
 theorem sds_explicit_development : explicitSolutionObligations.deSitter := by
   intro M Λ
   refine ⟨fun x hr hf hsin i j => ?_, fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
-  · have h := (sdsSpacetime M Λ).einsteinTensorOf x hr hf hsin i j
-    rw [h]
-    ring
+  · have h := (sdsSpacetime M Λ).einsteinTensor x hr hf hsin i j
+    have h' : CoordinateCurvature.einsteinTensor (sdsSpacetime M Λ).metric
+        (sdsSpacetime M Λ).metricInv x i j = -(Λ * (sdsSpacetime M Λ).metric x i j) := h
+    linarith
   · fin_cases i <;> fin_cases j <;>
       simp [sdsSpacetime, SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metric,
-        StaticSpherical.StaticSphericalMetric.metric, sdsSpatialMetric,
+        StaticSpherical.Metric.metric, sdsSpatialMetric,
         SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.toStaticSpherical,
-        SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse]
+        SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn]
   · exact spatialScalarCurvOf_sdsSpatial M Λ ![r, θ, φ]
       (by simpa using hr) (by simpa using hf) (by simpa using hsin)
 
@@ -139,7 +145,7 @@ equation `G = 0`, metric symmetry, and `t = 0` Boyer–Lindquist shift block. -/
 theorem kerr_explicit_development : explicitSolutionObligations.kerr := by
   intro M a
   refine ⟨fun x hsig hdel hs i j =>
-      (kerrSpacetime M a).einsteinTensorOf_eq_zero x hsig hdel hs i j,
+      (kerrSpacetime M a).einsteinTensor_eq_zero x hsig hdel hs i j,
     fun x i j => ((kerrSpacetime M a).metric_symm x).apply j i,
     fun r θ φ => ?_⟩
   simp [kerrSpacetime, Kerr.KerrSpacetime.metric]
@@ -147,11 +153,12 @@ theorem kerr_explicit_development : explicitSolutionObligations.kerr := by
 /-- FLRW explicit-development verification: 4D Einstein–Friedmann equivalence
 `G + Λ g = 8πG T` and `t = 0` flat (`k = 0`) spatial scale-factor metric components. -/
 theorem flrw_explicit_development : explicitSolutionObligations.flrw := by
-  intro a k Λ G ρ p x ha hr hkr hsin ha_diff ha2 hfried
-  refine ⟨(FLRW.FLRWSpacetime.einsteinTensorOf_iff_friedmann (⟨a, k⟩ : FLRW.FLRWSpacetime) Λ G ρ p x
+  intro a k Λ c G ρ p x ha hr hkr hsin ha_diff ha2 hfried
+  refine ⟨(Cosmology.FLRW.FLRWSpacetime.einsteinTensor_iff_friedmann
+      (⟨a, k⟩ : Cosmology.FLRW.FLRWSpacetime) c Λ G ρ p x
       ha hr hkr hsin ha_diff ha2).mpr hfried,
     fun r θ φ => ?_⟩
-  simp [FLRW.FLRWSpacetime.metric]
+  simp [Cosmology.FLRW.FLRWSpacetime.metric]
 
 /-- **M6 Certificate**: inhabits `ExplicitDevelopmentCertificate explicitSolutionObligations`
 with kernel-verified proofs for Schwarzschild, Schwarzschild–de Sitter, Kerr,

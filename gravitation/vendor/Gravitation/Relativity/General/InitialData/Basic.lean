@@ -7,7 +7,8 @@ module
 
 public import Mathlib.Algebra.BigOperators.Fin
 public import Gravitation.Relativity.Metrics.Basic
-public import Gravitation.Relativity.Metrics.ScalarCurvature
+public import Gravitation.Relativity.Metrics.CovariantDerivTensor2
+public import Gravitation.Relativity.Metrics.RicciScalar
 import Mathlib.Tactic.Linarith
 
 /-!
@@ -21,7 +22,10 @@ The Hamiltonian and momentum constraints on a three-dimensional Cauchy slice.
 In the ADM 3+1 decomposition of vacuum general relativity, initial data on a spatial slice `Σ`
 consist of a Riemannian 3-metric `h`, its 3D curvature tensor `R3`, and a symmetric extrinsic
 curvature `K`. The normal components of `G = 0` impose the Hamiltonian constraint
-`H = ³R + (tr K)² - K_ij K^ij = 0` and the momentum constraint `M_i = ∂_j K_{ij} - ∂_i (tr K) = 0`.
+`H = ³R + (tr K)² - K_ij K^ij = 0` and the momentum constraint
+`M_i = g^{jk} (∇_j K_{ik} - ∇_i K_{jk}) = 0`,
+where `∇` is the 3D Levi-Civita covariant derivative of `h` (reducing to coordinate partial
+derivatives `∂` in locally flat / normal coordinates where `Γ = 0`).
 
 This module defines `InitialData` and formalises the constraint functions together with their
 reductions under time symmetry (`K = 0`) and maximal slicing (`tr K = 0`). Global development
@@ -32,10 +36,13 @@ nor axiomatised here.
 
 - `InitialData`, `InitialData.momentumConstraint`, `InitialData.hamiltonianConstraint`,
   `InitialData.IsVacuumData` : Cauchy data and vacuum constraint equations.
-- `InitialData.ham_zero_iff_scalarCurv_zero_of_K_zero` : time-symmetric vacuum data are
-  scalar flat.
+- `InitialData.hamiltonianConstraint_zero_iff_ricciScalar_zero_of_K_zero` : time-symmetric
+  vacuum data are scalar flat.
 - `InitialData.hamiltonianConstraint_eq_of_trace_zero` : maximal-slicing reduction `H = ³R - K_ij
   K^ij`.
+- `InitialData.trace_sq_eq_of_hamiltonianConstraint_zero`,
+  `InitialData.momentumConstraint_zero_of_covariantDeriv_zero` : scalar-flat trace identity and
+  vanishing momentum constraint under zero covariant derivative `∇K = 0`.
 
 ## iii. Table of contents
 
@@ -81,11 +88,13 @@ structure InitialData where
 
 namespace InitialData
 
-/-- The momentum constraint `M_i = g^{jk} ∂_j K_{ik} - g^{jk} ∂_i K_{jk}` on a spatial slice `D`,
-with partial derivatives supplied as `dK μ i j = ∂_μ K_{ij}`. -/
-noncomputable def momentumConstraint (D : InitialData) (dK : Fin 3 → Tensor2 3) (i : Fin 3) :
-    ℝ :=
-  (∑ j, ∑ k, D.h.ginv j k * dK j i k) - ∑ j, ∑ k, D.h.ginv j k * dK i j k
+/-- The momentum constraint `M_i = g^{jk} (∇_j K_{ik} - ∇_i K_{jk})` on a spatial slice. The
+table `dK μ i j = ∂_μ K_{ij}` holds coordinate partial derivatives of the extrinsic curvature, and
+`covariantDerivTensor2` supplies the 3D Levi-Civita covariant derivative from `Γ`. -/
+noncomputable def momentumConstraint (D : InitialData) (Γ : Fin 3 → Fin 3 → Fin 3 → ℝ)
+    (dK : Fin 3 → Tensor2 3) (i : Fin 3) : ℝ :=
+  (∑ j, ∑ k, D.h.ginv j k * covariantDerivTensor2 Γ dK D.K j i k)
+    - ∑ j, ∑ k, D.h.ginv j k * covariantDerivTensor2 Γ dK D.K i j k
 
 /-- The Hamiltonian (energy) constraint `H = ³R + (tr K)² - K_ij K^ij`, contracting `K` with the
 inverse spatial metric `D.h.ginv`. -/
@@ -94,8 +103,9 @@ noncomputable def hamiltonianConstraint (D : InitialData) : ℝ :=
     - ∑ i, ∑ j, ∑ k, ∑ l, D.h.ginv i k * D.h.ginv j l * D.K i j * D.K k l
 
 /-- Combined predicate stating that the data satisfy both vacuum constraints. -/
-def IsVacuumData (D : InitialData) (dK : Fin 3 → Tensor2 3) : Prop :=
-  D.hamiltonianConstraint = 0 ∧ ∀ i, D.momentumConstraint dK i = 0
+def IsVacuumData (D : InitialData) (Γ : Fin 3 → Fin 3 → Fin 3 → ℝ)
+    (dK : Fin 3 → Tensor2 3) : Prop :=
+  D.hamiltonianConstraint = 0 ∧ ∀ i, D.momentumConstraint Γ dK i = 0
 
 /-!
 
@@ -110,11 +120,11 @@ simplifies directly into algebraic conditions on the spatial scalar curvature `�
 curvature. -/
 lemma hamiltonianConstraint_eq_ricciScalar_of_K_zero (D : InitialData) (hK : D.K = 0) :
     D.hamiltonianConstraint = ricciScalar D.h D.R3 := by
-  simp [hamiltonianConstraint, metricTrace, hK]
+  simp [hamiltonianConstraint, hK]
 
 /-- At a moment of time symmetry (`K = 0`), vanishing Hamiltonian constraint is equivalent to
 scalar flatness. -/
-lemma ham_zero_iff_scalarCurv_zero_of_K_zero (D : InitialData)
+lemma hamiltonianConstraint_zero_iff_ricciScalar_zero_of_K_zero (D : InitialData)
     (hK : D.K = 0) : D.hamiltonianConstraint = 0 ↔ ricciScalar D.h D.R3 = 0 := by
   rw [hamiltonianConstraint_eq_ricciScalar_of_K_zero D hK]
 
@@ -127,16 +137,19 @@ lemma hamiltonianConstraint_eq_of_trace_zero (D : InitialData) (htr : metricTrac
   simp [hamiltonianConstraint, htr]
 
 /-- On a scalar-flat slice, `H = 0` forces `(tr K)² = K_ij K^ij`. -/
-lemma trace_sq_eq_of_ham_zero (D : InitialData) (hH : D.hamiltonianConstraint = 0)
-    (hR : ricciScalar D.h D.R3 = 0) :
+lemma trace_sq_eq_of_hamiltonianConstraint_zero (D : InitialData)
+    (hH : D.hamiltonianConstraint = 0) (hR : ricciScalar D.h D.R3 = 0) :
     (metricTrace D.h D.K) ^ 2 =
       ∑ i, ∑ j, ∑ k, ∑ l, D.h.ginv i k * D.h.ginv j l * D.K i j * D.K k l := by
   simp only [hamiltonianConstraint] at hH
   linarith
 
-/-- Constant extrinsic curvature (`∂_μ K = 0`) satisfies the momentum constraint identically. -/
-lemma momConstraint_zero_of_dK_zero (D : InitialData) (dK : Fin 3 → Tensor2 3)
-    (hdK : ∀ μ, dK μ = 0) : ∀ i, D.momentumConstraint dK i = 0 := by
+/-- If the covariant derivative `∇K` vanishes everywhere on the spatial slice, the momentum
+constraint holds identically. -/
+lemma momentumConstraint_zero_of_covariantDeriv_zero (D : InitialData)
+    (Γ : Fin 3 → Fin 3 → Fin 3 → ℝ) (dK : Fin 3 → Tensor2 3)
+    (hdK : ∀ μ i j, covariantDerivTensor2 Γ dK D.K μ i j = 0) :
+    ∀ i, D.momentumConstraint Γ dK i = 0 := by
   intro i
   simp [momentumConstraint, hdK]
 

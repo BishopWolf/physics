@@ -5,9 +5,6 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.General.GeodesicSystem
-public import Gravitation.Relativity.General.GravitationalConstant
-public import Gravitation.Relativity.General.InitialData.Basic
 public import Gravitation.KretschmannTotal
 public import Gravitation.WaveCauchy
 public import Gravitation.WaveEnergy
@@ -38,39 +35,37 @@ public import Gravitation.ReducedCauchy
 public import Gravitation.GaugeRecovery
 public import Gravitation.MaximalDevelopment
 public import Gravitation.ExplicitDevelopments
+public import Gravitation.ClassicalMechanics.OrbitalMechanics.NewtonianGravity
+public import Gravitation.Cosmology.FLRW.Basic
+public import Gravitation.Cosmology.FLRW.Christoffel
+public import Gravitation.Cosmology.FLRW.Curvature
+public import Gravitation.Cosmology.FLRW.FriedmannEquations
+public import Gravitation.Cosmology.FLRW.PerfectFluid
+public import Gravitation.Mathematics.Calculus.CoordDeriv
+public import Gravitation.Mathematics.GeneralizedKronecker
+public import Gravitation.Relativity.General.FrameKretschmann
+public import Gravitation.Relativity.General.GeodesicSystem
+public import Gravitation.Relativity.General.GravitationalConstant
+public import Gravitation.Relativity.General.InitialData.AnisotropicSlice
+public import Gravitation.Relativity.General.InitialData.Basic
+public import Gravitation.Relativity.General.InitialData.FlatSlice
 public import Gravitation.Relativity.General.Kerr.Basic
 public import Gravitation.Relativity.General.Kerr.Christoffel
+public import Gravitation.Relativity.General.Kerr.MetricDeriv
 public import Gravitation.Relativity.General.Kerr.RicciCurvature
-public import Gravitation.Relativity.General.Linearized.LinearizedCurvature
+public import Gravitation.Relativity.General.Linearized.Basic
+public import Gravitation.Relativity.General.Linearized.GaugeTransform
+public import Gravitation.Relativity.General.Linearized.Laplacian3
+public import Gravitation.Relativity.General.Linearized.LinearizedChristoffel
+public import Gravitation.Relativity.General.Linearized.LinearizedEinstein
+public import Gravitation.Relativity.General.Linearized.LinearizedRicci
+public import Gravitation.Relativity.General.Linearized.LinearizedRiemann
 public import Gravitation.Relativity.General.Linearized.LorenzGauge
-public import Gravitation.Relativity.General.Linearized.NewtonianPerturb
+public import Gravitation.Relativity.General.Linearized.MinkowskiDalembertian
+public import Gravitation.Relativity.General.Linearized.NewtonianPerturbation
 public import Gravitation.Relativity.General.Linearized.TTWave
 public import Gravitation.Relativity.General.Linearized.TraceReversed
 public import Gravitation.Relativity.General.MinkowskiCoordinateMetric
-public import Gravitation.Relativity.General.Modified.BransDicke
-public import Gravitation.Relativity.General.Modified.ChameleonScreening
-public import Gravitation.Relativity.General.Modified.EinsteinAether
-public import Gravitation.Relativity.General.Modified.EinsteinCartan
-public import Gravitation.Relativity.General.Modified.FRGravity
-public import Gravitation.Relativity.General.Modified.Galileon
-public import Gravitation.Relativity.General.Modified.KaluzaKlein.Basic
-public import Gravitation.Relativity.General.Modified.KaluzaKlein.GaugeTransform
-public import Gravitation.Relativity.General.Modified.KaluzaKlein.KaluzaMiracle
-public import Gravitation.Relativity.General.Modified.KaluzaKlein.TriangularFactorization
-public import Gravitation.Relativity.General.Modified.Lovelock.Basic
-public import Gravitation.Relativity.General.Modified.Lovelock.GeneralizedKronecker
-public import Gravitation.Relativity.General.Modified.MOG
-public import Gravitation.Relativity.General.Modified.MOND
-public import Gravitation.Relativity.General.Modified.MassiveGravity.DRGT
-public import Gravitation.Relativity.General.Modified.MassiveGravity.FierzPauli
-public import Gravitation.Relativity.General.Modified.MassiveGravity.VDVZ
-public import Gravitation.Relativity.General.Modified.Nordstrom
-public import Gravitation.Relativity.General.Modified.Ostrogradsky
-public import Gravitation.Relativity.General.Modified.PPNParameters
-public import Gravitation.Relativity.General.Modified.TeVeS
-public import Gravitation.Relativity.General.Modified.Teleparallel.Basic
-public import Gravitation.Relativity.General.Modified.Teleparallel.FLRWTorsion
-public import Gravitation.Relativity.General.Modified.Teleparallel.FTGravity
 public import Gravitation.Relativity.General.ReissnerNordstrom.Basic
 public import Gravitation.Relativity.General.Schwarzschild.Basic
 public import Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature
@@ -79,33 +74,60 @@ public import PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.CoordinateCurvature
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
-public import Gravitation.Cosmology.FLRW.Christoffel
-public import Gravitation.Cosmology.FLRW.FriedmannBridge
-public import Gravitation.Cosmology.FLRW.Metric
-public import Gravitation.Cosmology.FLRW.PerfectFluid
-public import Gravitation.Relativity.General.InitialData.FlatSlice
-public import Gravitation.Relativity.General.Linearized.Basic
-public import Gravitation.Relativity.General.Linearized.BoxEta
-public import Gravitation.Relativity.General.Linearized.GaugeTransform
-public import Gravitation.Relativity.General.Linearized.Laplacian3
 public import Gravitation.Relativity.Metrics.Basic
+public import Gravitation.Relativity.Metrics.Christoffel
 public import Gravitation.Relativity.Metrics.ConformalMetric
 public import Gravitation.Relativity.Metrics.CoordDeriv
 public import Gravitation.Relativity.Metrics.CoordinateMetric
-public import Gravitation.Relativity.Metrics.CurvDeriv
+public import Gravitation.Relativity.Metrics.CovariantDerivTensor2
+public import Gravitation.Relativity.Metrics.CurvatureBridge
+public import Gravitation.Relativity.Metrics.CurvatureDerivatives
+public import Gravitation.Relativity.Metrics.Einstein
 public import Gravitation.Relativity.Metrics.MetricTrace
 public import Gravitation.Relativity.Metrics.Minkowski
-public import Gravitation.Relativity.Metrics.Pipeline
+public import Gravitation.Relativity.Metrics.NullVector
+public import Gravitation.Relativity.Metrics.Ricci
+public import Gravitation.Relativity.Metrics.RicciScalar
+public import Gravitation.Relativity.Metrics.Riemann
 public import Gravitation.Relativity.Metrics.RiemannFromData
-public import Gravitation.Relativity.Metrics.ScalarCurvature
-public import Gravitation.Relativity.Metrics.StaticSphericalMetric
-public import Gravitation.Relativity.Tensors.EinsteinTensor
+public import Gravitation.Relativity.Metrics.StaticSphericalMetric.Basic
+public import Gravitation.Relativity.Metrics.StaticSphericalMetric.Christoffel
+public import Gravitation.Relativity.Metrics.StaticSphericalMetric.RicciCurvature
+public import Gravitation.Relativity.Modified.BransDicke
+public import Gravitation.Relativity.Modified.ChameleonScreening
+public import Gravitation.Relativity.Modified.EinsteinAether
+public import Gravitation.Relativity.Modified.EinsteinCartan.Basic
+public import Gravitation.Relativity.Modified.EinsteinCartan.Contorsion
+public import Gravitation.Relativity.Modified.EinsteinCartan.ModifiedTorsion
+public import Gravitation.Relativity.Modified.FRGravity
+public import Gravitation.Relativity.Modified.Galileon
+public import Gravitation.Relativity.Modified.KaluzaKlein.Basic
+public import Gravitation.Relativity.Modified.KaluzaKlein.GaugeTransform
+public import Gravitation.Relativity.Modified.KaluzaKlein.KaluzaMiracle
+public import Gravitation.Relativity.Modified.KaluzaKlein.TriangularFactorization
+public import Gravitation.Relativity.Modified.Lovelock.Basic
+public import Gravitation.Relativity.Modified.Lovelock.ConstantCurvature
+public import Gravitation.Relativity.Modified.Lovelock.Contract5
+public import Gravitation.Relativity.Modified.MOG
+public import Gravitation.Relativity.Modified.MOND
+public import Gravitation.Relativity.Modified.MassiveGravity.Basic
+public import Gravitation.Relativity.Modified.MassiveGravity.DRGT
+public import Gravitation.Relativity.Modified.MassiveGravity.FierzPauli
+public import Gravitation.Relativity.Modified.MassiveGravity.VDVZ
+public import Gravitation.Relativity.Modified.Nordstrom
+public import Gravitation.Relativity.Modified.Ostrogradsky
+public import Gravitation.Relativity.Modified.PPNParameters
+public import Gravitation.Relativity.Modified.TeVeS
+public import Gravitation.Relativity.Modified.Teleparallel.Basic
+public import Gravitation.Relativity.Modified.Teleparallel.FLRWTorsion
+public import Gravitation.Relativity.Modified.Teleparallel.FTGravity
 public import Gravitation.Relativity.Tensors.EMFieldStrength
+public import Gravitation.Relativity.Tensors.EinsteinTensor
 public import Gravitation.Relativity.Tensors.MaxwellStressEnergy
+public import Gravitation.Relativity.Tensors.PerfectFluidStressEnergy
 public import Gravitation.Relativity.Tensors.RicciTensor
 public import Gravitation.Relativity.Tensors.RiemannTensor
 public import Gravitation.Relativity.Tensors.Tensor2
-
 /-!
 
 # General relativity: the Physlib development
@@ -113,10 +135,12 @@ public import Gravitation.Relativity.Tensors.Tensor2
 Umbrella module for the general-relativity development maintained in Physlib
 (`PhyslibAlpha/Relativity/General`, branch `gravity`).  Until that branch is
 merged, its modules are vendored under `vendor/Gravitation/Relativity/{General,Metrics,
-Tensors}/` and `vendor/Gravitation/Cosmology/FLRW/` at commit
-`626ada7` as `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`; the namespace is
-still `GeneralRelativity` and the proofs are unchanged, so migrating consists of
-switching these imports back to `PhyslibAlpha.Relativity.General.*`.  The
+Modified,Tensors}/`, `vendor/Gravitation/Cosmology/FLRW/`, and the shared
+helpers under `vendor/Gravitation/{Mathematics,ClassicalMechanics}/` at commit
+`3540573` as `Gravitation.Relativity.*`, `Gravitation.Cosmology.*`,
+`Gravitation.Mathematics.*` and `Gravitation.ClassicalMechanics.*`; the namespace
+is still `GeneralRelativity` and the proofs are unchanged, so migrating consists
+of switching these imports back to the corresponding `PhyslibAlpha.*` paths.  The
 repository adds the numerical verification and the written account.
 
 ## i. Overview

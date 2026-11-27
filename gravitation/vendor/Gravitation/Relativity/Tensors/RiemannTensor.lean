@@ -57,6 +57,9 @@ namespace GeneralRelativity
 
 ## A. The Riemann curvature tensor
 
+An algebraic `RiemannTensor n` carries last-pair antisymmetry, pair-exchange symmetry, and the
+first Bianchi identity, inducing the full component symmetry relations.
+
 -/
 
 /-- Covariant components of the Riemann tensor with its algebraic symmetries. `bianchi` is the
@@ -80,6 +83,18 @@ namespace RiemannTensor
 -/
 
 variable {n : ℕ} (R : RiemannTensor n)
+
+/-- Extensionality for the algebraic Riemann tensor: equality of all covariant components. -/
+@[ext] lemma ext {R S : RiemannTensor n}
+    (h : ∀ i j k l, R.comp i j k l = S.comp i j k l) : R = S := by
+  cases R with
+  | mk c1 s1 p1 b1 =>
+  cases S with
+  | mk c2 s2 p2 b2 =>
+  have hc : c1 = c2 :=
+    funext fun i => funext fun j => funext fun k => funext fun l => h i j k l
+  subst hc
+  rfl
 
 /-- Antisymmetry in the first pair follows from pair symmetry and antisymmetry in the second
 pair, so it need not be assumed. -/

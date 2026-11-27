@@ -6,8 +6,8 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Gravitation.Relativity.Tensors.EinsteinTensor
-public import Gravitation.Relativity.Metrics.Basic
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Ring
@@ -21,20 +21,22 @@ on `KerrSpacetime`.
 
 ## i. Overview
 
-This module defines the Boyer–Lindquist Kerr metric `KerrSpacetime.metric` and its analytical
-inverse `KerrSpacetime.metricInv`, packages them as a `MetricTensor 4`
-(`KerrSpacetime.metricTensor`) away from the ring singularity `Σ = 0`, horizons `Δ = 0`, and polar
-axis `sin θ = 0`, and establishes the basic causal and rotational properties of the Kerr geometry:
-outer/inner event horizons `r±`, extremal coalescence `a² = M²`, stationary-limit surface
-(ergosphere) `g₀₀ = 0`, zero-angular-momentum observer (ZAMO) frame-dragging angular velocity
-`ω = -g_{tφ}/g_{φφ}`, and reduction to Schwarzschild at `a = 0`.
+This module defines the Boyer–Lindquist Kerr metric `KerrSpacetime.metric` of a spin-`a` mass-`M`
+black hole together with its analytical inverse `KerrSpacetime.metricInv`, and certifies them as a
+`MetricTensor 4` at each point and as a `CoordinateMetric 4` on the chart away from the ring
+singularity `Σ = 0`, horizons `Δ = 0`, and polar axis `sin θ = 0`, and establishes the basic causal
+and rotational properties of the Kerr geometry: outer/inner event horizons `r±`, extremal
+coalescence `a² = M²`, stationary-limit surface (ergosphere) `g₀₀ = 0`, zero-angular-momentum
+observer (ZAMO) frame-dragging angular velocity `ω = -g_{tφ}/g_{φφ}`, and reduction to Schwarzschild
+at `a = 0`.
 
 ## ii. Key results
 
 - `KerrSpacetime`, `KerrSpacetime.sigma`, `KerrSpacetime.delta`, `KerrSpacetime.axialFactor` :
   Kerr spacetime structure and Boyer–Lindquist auxiliary functions `Σ`, `Δ`, and `axialFactor`.
-- `KerrSpacetime.metric`, `KerrSpacetime.metricInv`, `KerrSpacetime.metricTensor` : Kerr metric and
-  inverse `MetricTensor 4`.
+- `KerrSpacetime.metric`, `KerrSpacetime.metricInv`, `KerrSpacetime.metricTensor`,
+  `KerrSpacetime.toCoordinateMetric` : Kerr metric, its inverse, and the coordinate metric on the
+  regular chart.
 - `KerrSpacetime.horizonPlus`, `KerrSpacetime.horizonMinus`, `KerrSpacetime.delta_horizonPlus`,
   `KerrSpacetime.extremal` : event horizons `r±`.
 - `KerrSpacetime.ergosphereRadius`, `KerrSpacetime.metric_00_ergosphere` : stationary-limit
@@ -69,6 +71,10 @@ namespace Kerr
 
 ## A. Boyer–Lindquist metric functions and inverse
 
+In Boyer–Lindquist coordinates `(t, r, θ, φ)`, a rotating uncharged black hole of mass `M` and spin
+`a` is governed by the auxiliary polynomials `Σ = r² + a² cos²θ`, `Δ = r² - 2Mr + a²`, and
+`A = (r² + a²)² - a² Δ sin²θ`.
+
 -/
 
 /-- Rotating Boyer–Lindquist Kerr black hole spacetime parameterized by mass `M` and spin `a`. -/
@@ -92,6 +98,35 @@ Misner–Thorne–Wheeler and Chandrasekhar), factored out because it governs bo
 noncomputable def axialFactor (K : KerrSpacetime) (r θ : ℝ) : ℝ :=
   (r ^ 2 + K.a ^ 2) ^ 2 - K.a ^ 2 * K.delta r * Real.sin θ ^ 2
 
+/-- Kerr spacetime metric in Boyer–Lindquist coordinates `x = (t, r, θ, φ)` with signature
+`(-, +, +, +)` and geometrized units `G = c = 1`. -/
+noncomputable def metric (K : KerrSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 :=
+  let sig := K.sigma (x 1) (x 2)
+  let del := K.delta (x 1)
+  let aval := K.axialFactor (x 1) (x 2)
+  let s2 := Real.sin (x 2) ^ 2
+  Matrix.of fun i j =>
+    if i = 0 ∧ j = 0 then -(1 - 2 * K.M * x 1 / sig)
+    else if (i = 0 ∧ j = 3) ∨ (i = 3 ∧ j = 0) then -(2 * K.M * K.a * x 1 * s2 / sig)
+    else if i = 1 ∧ j = 1 then sig / del
+    else if i = 2 ∧ j = 2 then sig
+    else if i = 3 ∧ j = 3 then aval * s2 / sig
+    else 0
+
+/-- Analytical inverse of the Boyer–Lindquist Kerr metric `K.metric x`. -/
+noncomputable def metricInv (K : KerrSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 :=
+  let sig := K.sigma (x 1) (x 2)
+  let del := K.delta (x 1)
+  let aval := K.axialFactor (x 1) (x 2)
+  let s2 := Real.sin (x 2) ^ 2
+  Matrix.of fun i j =>
+    if i = 0 ∧ j = 0 then -(aval / (sig * del))
+    else if (i = 0 ∧ j = 3) ∨ (i = 3 ∧ j = 0) then -(2 * K.M * K.a * x 1 / (sig * del))
+    else if i = 1 ∧ j = 1 then del / sig
+    else if i = 2 ∧ j = 2 then 1 / sig
+    else if i = 3 ∧ j = 3 then (sig - 2 * K.M * x 1) / (sig * del * s2)
+    else 0
+
 /-- Alternative expansion of the Boyer–Lindquist axial metric factor:
 `axialFactor = Σ (r² + a²) + 2 M a² r sin² θ`. -/
 lemma axialFactor_eq_sigma (K : KerrSpacetime) (r θ : ℝ) :
@@ -110,35 +145,6 @@ lemma tphi_det_id (K : KerrSpacetime) (r θ : ℝ) :
   rw [Real.sin_sq θ]
   ring
 
-/-- Kerr spacetime metric in Boyer–Lindquist coordinates `x = (t, r, θ, φ)` with signature
-`(-, +, +, +)` and geometrized units `G = c = 1`. -/
-noncomputable def metric (K : KerrSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 :=
-  let sig := K.sigma (x 1) (x 2)
-  let del := K.delta (x 1)
-  let aval := K.axialFactor (x 1) (x 2)
-  let s2 := Real.sin (x 2) ^ 2
-  fun i j =>
-    if i = 0 ∧ j = 0 then -(1 - 2 * K.M * x 1 / sig)
-    else if (i = 0 ∧ j = 3) ∨ (i = 3 ∧ j = 0) then -(2 * K.M * K.a * x 1 * s2 / sig)
-    else if i = 1 ∧ j = 1 then sig / del
-    else if i = 2 ∧ j = 2 then sig
-    else if i = 3 ∧ j = 3 then aval * s2 / sig
-    else 0
-
-/-- Analytical inverse of the Boyer–Lindquist Kerr metric `K.metric x`. -/
-noncomputable def metricInv (K : KerrSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 :=
-  let sig := K.sigma (x 1) (x 2)
-  let del := K.delta (x 1)
-  let aval := K.axialFactor (x 1) (x 2)
-  let s2 := Real.sin (x 2) ^ 2
-  fun i j =>
-    if i = 0 ∧ j = 0 then -(aval / (sig * del))
-    else if (i = 0 ∧ j = 3) ∨ (i = 3 ∧ j = 0) then -(2 * K.M * K.a * x 1 / (sig * del))
-    else if i = 1 ∧ j = 1 then del / sig
-    else if i = 2 ∧ j = 2 then 1 / sig
-    else if i = 3 ∧ j = 3 then (sig - 2 * K.M * x 1) / (sig * del * s2)
-    else 0
-
 /-- Symmetry of the Boyer–Lindquist Kerr metric `K.metric`. -/
 lemma metric_symm (K : KerrSpacetime) (x : Fin 4 → ℝ) : IsSymm (K.metric x) :=
   Matrix.IsSymm.ext fun i j => by
@@ -153,7 +159,7 @@ lemma metricInv_mul_metric (K : KerrSpacetime) (x : Fin 4 → ℝ)
   have hid := K.tphi_det_id (x 1) (x 2)
   rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;>
-    simp only [Matrix.one_apply, Fin.sum_univ_four, metric, metricInv] <;>
+    simp only [Matrix.one_apply, Fin.sum_univ_four, metric, metricInv, Matrix.of_apply] <;>
     norm_num
   · field_simp [hsig, hdel]; linear_combination hid
   · field_simp [hsig, hdel]; ring
@@ -166,19 +172,9 @@ lemma metricInv_mul_metric (K : KerrSpacetime) (x : Fin 4 → ℝ)
 lemma metric_mul_metricInv (K : KerrSpacetime) (x : Fin 4 → ℝ)
     (hsig : K.sigma (x 1) (x 2) ≠ 0) (hdel : K.delta (x 1) ≠ 0)
     (hs : Real.sin (x 2) ≠ 0) :
-    K.metric x * K.metricInv x = 1 := by
-  ext i j
-  have hid := K.tphi_det_id (x 1) (x 2)
-  rw [Matrix.mul_apply]
-  fin_cases i <;> fin_cases j <;>
-    simp only [Matrix.one_apply, Fin.sum_univ_four, metric, metricInv] <;>
-    norm_num
-  · field_simp [hsig, hdel]; linear_combination hid
-  · field_simp [hsig, hdel, hs]; ring
-  · field_simp [hsig, hdel]
-  · field_simp [hsig]
-  · field_simp [hsig, hdel, hs]; ring
-  · field_simp [hsig, hdel, hs]; linear_combination hid
+    K.metric x * K.metricInv x = 1 :=
+  mul_eq_one_of_isSymm_of_mul_eq_one (K.metric_symm x)
+    (K.metricInv_mul_metric x hsig hdel hs)
 
 /-- Package the Boyer–Lindquist Kerr metric at a regular point (`Σ ≠ 0`, `Δ ≠ 0`, `sin θ ≠ 0`) as a
 `MetricTensor 4`. -/
@@ -191,9 +187,30 @@ noncomputable def metricTensor (K : KerrSpacetime) (x : Fin 4 → ℝ)
   inv_left := K.metric_mul_metricInv x hsig hdel hs
   inv_right := K.metricInv_mul_metric x hsig hdel hs
 
+/-- The Boyer–Lindquist Kerr metric as a `CoordinateMetric 4` on the chart away from the ring
+singularity `Σ = 0`, horizons `Δ = 0`, and polar axis `sin θ = 0`. -/
+noncomputable def toCoordinateMetric (K : KerrSpacetime) : CoordinateMetric 4 where
+  g := K.metric
+  ginv := K.metricInv
+  domain := {x | K.sigma (x 1) (x 2) ≠ 0 ∧ K.delta (x 1) ≠ 0 ∧ Real.sin (x 2) ≠ 0}
+  symm := K.metric_symm
+  inv_left x hx := K.metric_mul_metricInv x hx.1 hx.2.1 hx.2.2
+  inv_right x hx := K.metricInv_mul_metric x hx.1 hx.2.1 hx.2.2
+
+/-- The covariant field of `K.toCoordinateMetric` is `K.metric`. -/
+@[simp] lemma toCoordinateMetric_g (K : KerrSpacetime) :
+    K.toCoordinateMetric.g = K.metric := rfl
+
+/-- The inverse field of `K.toCoordinateMetric` is `K.metricInv`. -/
+@[simp] lemma toCoordinateMetric_ginv (K : KerrSpacetime) :
+    K.toCoordinateMetric.ginv = K.metricInv := rfl
+
 /-!
 
 ## B. Event horizons, ergosphere, and frame dragging
+
+Because the rotating spacetime admits distinct horizon (`Δ = 0`) and static-limit (`g_{tt} = 0`)
+surfaces, observers inside the ergosphere are dragged in the direction of the black hole spin.
 
 -/
 
@@ -245,7 +262,7 @@ lemma metric_00_ergosphere (K : KerrSpacetime) (x : Fin 4 → ℝ)
     rw [hx1]
     simp only [sigma, ergosphereRadius]
     linear_combination hsq
-  simp only [metric, Fin.isValue, and_self, ↓reduceIte]
+  simp only [metric, Matrix.of_apply, Fin.isValue, and_self, ↓reduceIte]
   field_simp [hsig]
   linear_combination -hnum
 
@@ -260,8 +277,8 @@ lemma zamo_omega_eq (K : KerrSpacetime) (x : Fin 4 → ℝ)
     (hA : K.axialFactor (x 1) (x 2) ≠ 0) :
     -(K.metric x 0 3 / K.metric x 3 3)
       = K.frameDraggingOmega (x 1) (x 2) := by
-  simp only [metric, frameDraggingOmega, Fin.isValue, Fin.reduceEq, and_false, and_true,
-    or_false, ↓reduceIte]
+  simp only [metric, frameDraggingOmega, Matrix.of_apply, Fin.isValue, Fin.reduceEq, and_false,
+    and_true, or_false, ↓reduceIte]
   field_simp [hsig, hs, hA]
 
 /-- At the outer event horizon `r₊`, `A(r₊, θ) = (r₊² + a²)²`, giving the horizon angular
@@ -275,6 +292,9 @@ lemma frameDraggingOmega_horizonPlus (K : KerrSpacetime) (ha : K.a ^ 2 ≤ K.M ^
 /-!
 
 ## C. Schwarzschild limit
+
+Setting the spin parameter `a = 0` extinguishes frame dragging and reduces every component of the
+Boyer–Lindquist metric to the static exterior Schwarzschild metric.
 
 -/
 
@@ -292,14 +312,14 @@ lemma metric_zero_spin (M : ℝ) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
   have hd0 : (KerrSpacetime.mk M 0).delta (x 1) = (x 1) ^ 2 * (1 - 2 * M / x 1) := by
     simp only [delta]; field_simp [hr]; ring
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · simp only [metric, hs0, Fin.isValue, and_self, ↓reduceIte]
+  · simp only [metric, Matrix.of_apply, hs0, Fin.isValue, and_self, ↓reduceIte]
     field_simp [hr]
   · simp [metric]
-  · simp only [metric, hs0, hd0, Fin.isValue, Fin.reduceEq, ↓reduceIte,
+  · simp only [metric, Matrix.of_apply, hs0, hd0, Fin.isValue, Fin.reduceEq, ↓reduceIte,
       and_self, or_self]
     field_simp [hr2]
   · simp [metric, hs0]
-  · simp only [metric, hs0, axialFactor, Fin.isValue]
+  · simp only [metric, Matrix.of_apply, hs0, axialFactor, Fin.isValue]
     norm_num
     field_simp [hr2]
 

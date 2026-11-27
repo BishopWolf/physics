@@ -2,4 +2,4 @@
 # gravitation/vendor/Gravitation/; scripts/check_vendor_sync.sh fails CI when
 # the branch tip or any vendored file has moved.
 branch: gravity
-commit: 626ada74afc29e16f85da0924c393e00af3ff5cd
+commit: 3540573fd23acaeaceaf70f76426f1bf93cffb4a

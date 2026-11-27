@@ -17,7 +17,11 @@ it is not a manifold-level derivation of the linearized equations.
 
 module
 
-public import Gravitation.Relativity.General.Linearized.LinearizedCurvature
+public import Gravitation.Relativity.General.Linearized.LinearizedChristoffel
+public import Gravitation.Relativity.General.Linearized.LinearizedRiemann
+public import Gravitation.Relativity.General.Linearized.LinearizedRicci
+public import Gravitation.Relativity.General.Linearized.LinearizedEinstein
+public import Gravitation.Relativity.General.Linearized.MinkowskiDalembertian
 public import Gravitation.Relativity.General.Linearized.LorenzGauge
 public import Gravitation.Relativity.General.Linearized.TTWave
 public import Gravitation.WaveUniqueness3D
@@ -36,9 +40,9 @@ structure WaveGaugePerturbation (P : MetricPerturbation) (x : Fin 4 → ℝ) : P
   /-- Every component is `C²` at the point. -/
   smooth : P.IsC2At x
   /-- The Lorenz gauge condition holds on a neighborhood. -/
-  gauge : ∀ᶠ y in nhds x, ∀ k : Fin 4, lorenzGaugeCond P y k
+  gauge : ∀ᶠ y in nhds x, ∀ k : Fin 4, IsLorenzGauge P y k
   /-- The trace-reversed perturbation solves the component wave equations. -/
-  wave : ∀ i j : Fin 4, boxEta (fun y => P.traceReversed.h y i j) x = 0
+  wave : ∀ i j : Fin 4, minkowskiDalembertian (fun y => P.traceReversed.h y i j) x = 0
 
 /-- A component of a plane-wave profile `f(t-z)` is `C²` when `f` is. -/
 private lemma contDiffAt_waveProfile
@@ -65,22 +69,22 @@ theorem ttWave_waveGauge
     (hPlus hCross : ℝ) (f : ℝ → ℝ) (hf : ContDiff ℝ 2 f) (x : Fin 4 → ℝ) :
     WaveGaugePerturbation (ttWave hPlus hCross f) x := by
   have hlz : ∀ᶠ y in nhds x, ∀ k : Fin 4,
-      lorenzGaugeCond (ttWave hPlus hCross f) y k :=
+      IsLorenzGauge (ttWave hPlus hCross f) y k :=
     Filter.Eventually.of_forall fun y k => ttWave_lorenz_gauge hPlus hCross f y k
   refine { smooth := ttWave_isC2At hPlus hCross f hf x, gauge := hlz, wave := ?_ }
   intro i j
-  have hG := ttWave_linEinstein_zero hPlus hCross f hf x i j
-  rw [linEinstein_lorenz_gauge (ttWave hPlus hCross f) x
+  have hG := ttWave_linearizedEinstein_zero hPlus hCross f hf x i j
+  rw [linearizedEinstein_lorenz_gauge (ttWave hPlus hCross f) x
     (ttWave_isC2At hPlus hCross f hf x) hlz i j] at hG
   linarith
 
 /-- A wave-gauge perturbation is a linearized vacuum solution:
 `G^{(1)}_{ij} = 0`. -/
-theorem linEinstein_eq_zero_of_waveGauge
+theorem linearizedEinstein_eq_zero_of_waveGauge
     (P : MetricPerturbation) (x : Fin 4 → ℝ)
     (S : WaveGaugePerturbation P x) (i j : Fin 4) :
-    linEinstein P x i j = 0 := by
-  rw [linEinstein_lorenz_gauge P x S.smooth S.gauge i j]
+    linearizedEinstein P x i j = 0 := by
+  rw [linearizedEinstein_lorenz_gauge P x S.smooth S.gauge i j]
   simp [S.wave i j]
 
 end Linearized

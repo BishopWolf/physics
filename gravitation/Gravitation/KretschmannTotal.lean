@@ -12,8 +12,8 @@ public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
 
 # Hypothesis-free Kretschmann scalars
 
-The frame theorems `Schwarzschild.kretschmann_scalar` and
-`SchwarzschildDeSitter.kretschmann_sds` assume `r ≠ 0` only to clear denominators.
+The frame theorems `SchwarzschildSpacetime.kretschmann_scalar` and
+`SchwarzschildDeSitter.kretschmann` assume `r ≠ 0` only to clear denominators.
 Division by zero is total in Lean (`a / 0 = 0`), and at `r = 0` both sides of each
 identity are zero, so the hypothesis is not needed. These corollaries remove it,
 leaving the frame Kretschmann statements with no hypotheses at all.
@@ -34,11 +34,12 @@ namespace Schwarzschild
 
 /-- The Schwarzschild frame Kretschmann scalar, with the `r ≠ 0` hypothesis removed. -/
 lemma kretschmann_scalar_total (M r : ℝ) :
-    frameSqSum (schwarzschild (M / r ^ 3)) = 48 * M ^ 2 / r ^ 6 := by
+    ((SchwarzschildSpacetime.mk M).frameRiemann r).frameKretschmannScalar
+      = 48 * M ^ 2 / r ^ 6 := by
   by_cases hr : r = 0
   · subst r
-    simp [frameSqSum_eq]
-  · exact kretschmann_scalar M r hr
+    simp [SchwarzschildSpacetime.frameRiemann, electricWeyl_frameKretschmannScalar_eq]
+  · exact (SchwarzschildSpacetime.mk M).kretschmann_scalar r hr
 
 end Schwarzschild
 
@@ -47,11 +48,13 @@ namespace SchwarzschildDeSitter
 /-- The Schwarzschild–de Sitter frame Kretschmann scalar, with the `r ≠ 0`
 hypothesis removed. -/
 lemma kretschmann_sds_total (M Λ r : ℝ) :
-    sdsFrameSqSum M Λ r = 48 * M ^ 2 / r ^ 6 + 8 * Λ ^ 2 / 3 := by
+    (SchwarzschildDeSitterSpacetime.mk M Λ).frameSumOfSquares r
+      = 48 * M ^ 2 / r ^ 6 + 8 * Λ ^ 2 / 3 := by
   by_cases hr : r = 0
   · subst r
-    simp [sdsFrameSqSum_eq]
-  · exact kretschmann_sds M Λ r hr
+    rw [SchwarzschildDeSitterSpacetime.frameSumOfSquares_eq]
+    norm_num
+  · exact (SchwarzschildDeSitterSpacetime.mk M Λ).kretschmann r hr
 
 end SchwarzschildDeSitter
 

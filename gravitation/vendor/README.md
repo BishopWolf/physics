@@ -13,19 +13,20 @@ would otherwise be located in the upstream checkout (where they do not exist).
 | --- | --- |
 | Upstream project | [leanprover-community/physlib](https://github.com/leanprover-community/physlib) |
 | Branch | `gravity` (`origin/gravity` of the author's fork) |
-| Commit | `626ada74afc29e16f85da0924c393e00af3ff5cd` (branch tip, based on master `7910f51f`) |
-| Copied | 26 November 2026 |
-| Scope | `PhyslibAlpha/Relativity/General/` (including the `InitialData/` and `Linearized/` subdirectories, except `Schwarzschild/IncompressibleSphere.lean`), `PhyslibAlpha/Relativity/Metrics/`, `PhyslibAlpha/Relativity/Tensors/{Tensor2,RiemannTensor,RicciTensor,EinsteinTensor,MaxwellStressEnergy,EMFieldStrength}.lean`, and `PhyslibAlpha/Cosmology/FLRW/` |
-| Rewrites | import lines only: `PhyslibAlpha.Relativity.General.` → `Gravitation.Relativity.General.`, `PhyslibAlpha.Relativity.Metrics.` → `Gravitation.Relativity.Metrics.`, `PhyslibAlpha.Relativity.Tensors.` → `Gravitation.Relativity.Tensors.`, `PhyslibAlpha.Cosmology.` → `Gravitation.Cosmology.` |
+| Commit | `3540573fd23acaeaceaf70f76426f1bf93cffb4a` (branch tip, based on master `7910f51f`) |
+| Copied | 28 November 2026 |
+| Scope | `PhyslibAlpha/Relativity/General/` (including the `InitialData/`, `Kerr/` and `Linearized/` subdirectories, except `Schwarzschild/IncompressibleSphere.lean`), `PhyslibAlpha/Relativity/Metrics/` (including `StaticSphericalMetric/`), `PhyslibAlpha/Relativity/Modified/`, `PhyslibAlpha/Relativity/Tensors/{Tensor2,RiemannTensor,RicciTensor,EinsteinTensor,MaxwellStressEnergy,EMFieldStrength,PerfectFluidStressEnergy}.lean`, `PhyslibAlpha/Cosmology/FLRW/`, and the shared helpers the refactor moved out of the relativity tree: `PhyslibAlpha/Mathematics/Calculus/CoordDeriv.lean`, `PhyslibAlpha/Mathematics/GeneralizedKronecker.lean`, and `PhyslibAlpha/ClassicalMechanics/OrbitalMechanics/NewtonianGravity.lean` |
+| Rewrites | import lines only: `PhyslibAlpha.Relativity.General.` → `Gravitation.Relativity.General.`, `PhyslibAlpha.Relativity.Metrics.` → `Gravitation.Relativity.Metrics.`, `PhyslibAlpha.Relativity.Modified.` → `Gravitation.Relativity.Modified.`, `PhyslibAlpha.Relativity.Tensors.` → `Gravitation.Relativity.Tensors.`, `PhyslibAlpha.Cosmology.` → `Gravitation.Cosmology.`, `PhyslibAlpha.Mathematics.` → `Gravitation.Mathematics.`, `PhyslibAlpha.ClassicalMechanics.` → `Gravitation.ClassicalMechanics.` |
 | Local patch | none: the branch dropped `ReferenceFrame.IsMetricConserved` itself in `296991d`, so the earlier `Modified/MOND.lean` compatibility patch is no longer needed |
 
 `Schwarzschild/IncompressibleSphere.lean` is **not** copied: it is already on
 Physlib master, so the build imports it from the upstream dependency. The
 vendored files are otherwise unchanged from the branch commit, including their
-Apache-2.0 headers; the rest of this repository is MIT. There are 69 vendored
-Lean modules in total (48 under `Relativity/General`, 11 under
-`Relativity/Metrics`, 6 under `Relativity/Tensors`, and 4 under
-`Cosmology/FLRW`).
+Apache-2.0 headers; the rest of this repository is MIT. There are 92 vendored
+Lean modules in total: 30 under `Relativity/General`, 19 under
+`Relativity/Metrics`, 28 under `Relativity/Modified`, 7 under
+`Relativity/Tensors`, 5 under `Cosmology/FLRW`, 2 under `Mathematics`, and 1
+under `ClassicalMechanics/OrbitalMechanics`.
 
 The `physlib` requirement in `gravitation/lakefile.toml` therefore points at
 Physlib **master** (`7910f51f`, the merge base the vendored modules were written
@@ -50,11 +51,12 @@ after applying the same import rewrites, so this copy cannot drift unnoticed.
    `gravitation/lakefile.toml` (and its `srcDir = "vendor"`).
 3. Switch the imports in `gravitation/Gravitation.lean` from
    `Gravitation.Relativity.General.*`, `Gravitation.Relativity.Metrics.*`,
-   `Gravitation.Relativity.Tensors.*`, and `Gravitation.Cosmology.*` back to
-   the corresponding `PhyslibAlpha.*` paths (the already-merged
-   `IncompressibleSphere` line is unchanged).
-4. Change the `physlib` requirement to a revision that contains all four
-   vendored subtrees (upstream master after the merge).
+   `Gravitation.Relativity.Modified.*`, `Gravitation.Relativity.Tensors.*`,
+   `Gravitation.Cosmology.*`, `Gravitation.Mathematics.*` and
+   `Gravitation.ClassicalMechanics.*` back to the corresponding `PhyslibAlpha.*`
+   paths (the already-merged `IncompressibleSphere` line is unchanged).
+4. Change the `physlib` requirement to a revision that contains all vendored
+   subtrees (upstream master after the merge).
 5. Run `lake update physlib && lake build`, then `scripts/audit_axioms.sh` and
    `scripts/proof_status.sh`.
 6. Delete this README.

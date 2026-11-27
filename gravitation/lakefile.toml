@@ -11,15 +11,21 @@ name = "Gravitation"
 globs = ["Gravitation"]
 
 # Temporary home of the unmerged `gravity` branch.  The vendored modules use
-# the `Gravitation.Relativity.*` and `Gravitation.Cosmology.*` module paths so
-# they cannot collide with the dependency's `PhyslibAlpha.*` library globs; their
-# namespace is still `GeneralRelativity` and the proofs are unchanged.  To
-# migrate: delete `vendor/` and switch the umbrella imports back to the
-# corresponding `PhyslibAlpha.*` paths.
+# the `Gravitation.Relativity.*`, `Gravitation.Cosmology.*`,
+# `Gravitation.Mathematics.*` and `Gravitation.ClassicalMechanics.*` module
+# paths so they cannot collide with the dependency's `PhyslibAlpha.*` library
+# globs; their namespace is still `GeneralRelativity` and the proofs are
+# unchanged.  To migrate: delete `vendor/` and switch the umbrella imports back
+# to the corresponding `PhyslibAlpha.*` paths.
 [[lean_lib]]
 name = "GravitationVendor"
 srcDir = "vendor"
-globs = ["Gravitation.Relativity.+", "Gravitation.Cosmology.+"]
+globs = [
+  "Gravitation.Relativity.+",
+  "Gravitation.Cosmology.+",
+  "Gravitation.Mathematics.+",
+  "Gravitation.ClassicalMechanics.+",
+]
 
 # Physlib provides the base library (units, cosmology) and the already-merged
 # `Schwarzschild.IncompressibleSphere` theorem.  The rest of the general-

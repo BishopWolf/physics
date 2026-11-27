@@ -1,13 +1,22 @@
 #!/usr/bin/env bash
 # Fail if the vendored copy of the Physlib `gravity` branch has drifted.
 #
-# `gravitation/vendor/` is a temporary, byte-for-byte copy of four subtrees at
-# the commit recorded in `gravitation/vendor/REVISION`:
+# `gravitation/vendor/` is a temporary, byte-for-byte copy of the PhyslibAlpha
+# subtrees at the commit recorded in `gravitation/vendor/REVISION`:
 #
 #   PhyslibAlpha/Relativity/General/   -> Gravitation/Relativity/General/
 #   PhyslibAlpha/Relativity/Metrics/   -> Gravitation/Relativity/Metrics/
+#   PhyslibAlpha/Relativity/Modified/  -> Gravitation/Relativity/Modified/
 #   PhyslibAlpha/Relativity/Tensors/   -> Gravitation/Relativity/Tensors/
 #   PhyslibAlpha/Cosmology/            -> Gravitation/Cosmology/
+#   PhyslibAlpha/Mathematics/          -> Gravitation/Mathematics/
+#   PhyslibAlpha/ClassicalMechanics/   -> Gravitation/ClassicalMechanics/
+#
+# The last two are the shared helpers the refactor moved out of the relativity
+# tree (`Mathematics/Calculus/CoordDeriv`, `Mathematics/GeneralizedKronecker`,
+# `ClassicalMechanics/OrbitalMechanics/NewtonianGravity`); only the files the
+# vendored closure actually reaches are copied, so they are allow-listed rather
+# than taken whole.
 #
 # Import lines are rewritten from `PhyslibAlpha.*` to `Gravitation.*` so the
 # modules do not collide with the dependency's own library globs.  No local
@@ -68,8 +77,11 @@ rewrite() {
   sed \
     -e 's/PhyslibAlpha\.Relativity\.General\./Gravitation.Relativity.General./g' \
     -e 's/PhyslibAlpha\.Relativity\.Metrics\./Gravitation.Relativity.Metrics./g' \
+    -e 's/PhyslibAlpha\.Relativity\.Modified\./Gravitation.Relativity.Modified./g' \
     -e 's/PhyslibAlpha\.Relativity\.Tensors\./Gravitation.Relativity.Tensors./g' \
     -e 's/PhyslibAlpha\.Cosmology\./Gravitation.Cosmology./g' \
+    -e 's/PhyslibAlpha\.Mathematics\./Gravitation.Mathematics./g' \
+    -e 's/PhyslibAlpha\.ClassicalMechanics\./Gravitation.ClassicalMechanics./g' \
     -e 's/Gravitation\.Relativity\.General\.Schwarzschild\.IncompressibleSphere/PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere/g'
 }
 
@@ -118,9 +130,14 @@ check_subtree() {
 
 check_subtree "PhyslibAlpha/Relativity/General" "Gravitation/Relativity/General" all ""
 check_subtree "PhyslibAlpha/Relativity/Metrics" "Gravitation/Relativity/Metrics" all ""
+check_subtree "PhyslibAlpha/Relativity/Modified" "Gravitation/Relativity/Modified" all ""
 check_subtree "PhyslibAlpha/Relativity/Tensors" "Gravitation/Relativity/Tensors" allow \
-  "Tensor2.lean,RiemannTensor.lean,RicciTensor.lean,EinsteinTensor.lean,MaxwellStressEnergy.lean,EMFieldStrength.lean"
+  "Tensor2.lean,RiemannTensor.lean,RicciTensor.lean,EinsteinTensor.lean,MaxwellStressEnergy.lean,EMFieldStrength.lean,PerfectFluidStressEnergy.lean"
 check_subtree "PhyslibAlpha/Cosmology" "Gravitation/Cosmology" all ""
+check_subtree "PhyslibAlpha/Mathematics" "Gravitation/Mathematics" allow \
+  "Calculus/CoordDeriv.lean,GeneralizedKronecker.lean"
+check_subtree "PhyslibAlpha/ClassicalMechanics" "Gravitation/ClassicalMechanics" allow \
+  "OrbitalMechanics/NewtonianGravity.lean"
 
 if [ "$mismatch" -ne 0 ]; then
   echo "FAIL: the vendored copy differs from $URL $BRANCH @ $REV"

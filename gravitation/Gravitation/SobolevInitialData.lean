@@ -46,13 +46,20 @@ namespace GeneralRelativity
 open MeasureTheory Filter Topology
 open scoped Interval
 
+/-- Coordinate partial derivative of a `Real.sin · ^ 2` slice: `(sin² θ)' = 2 sin θ cos θ`.
+The upstream `hasDerivAt_sin_sq` helper was dropped in the
+refactor, so it is restated here. -/
+lemma hasDerivAt_sin_sq (θ : ℝ) :
+    HasDerivAt (fun t => Real.sin t ^ 2) (2 * Real.sin θ * Real.cos θ) θ :=
+  ((hasDerivAt_pow 2 (Real.sin θ)).comp θ (Real.hasDerivAt_sin θ)).congr_deriv (by ring)
+
 /-- Schwarzschild spacetime of mass `M`, named so lapse expressions read as
-`(schwarzschildSpacetime M).lapse r`. -/
+`(schwarzschildSpacetime M).metricFn r`. -/
 abbrev schwarzschildSpacetime (M : ℝ) : Schwarzschild.SchwarzschildSpacetime :=
   ⟨M⟩
 
 /-- Schwarzschild–de Sitter spacetime of mass `M` and cosmological constant
-`Λ`, named so lapse expressions read as `(sdsSpacetime M Λ).lapse r`. -/
+`Λ`, named so lapse expressions read as `(sdsSpacetime M Λ).metricFn r`. -/
 abbrev sdsSpacetime (M Λ : ℝ) : SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime :=
   ⟨M, Λ⟩
 
@@ -274,17 +281,17 @@ lemma grad_le_sobolevH1_3D
 /-- Spatial Riemann curvature tensor `³R^a_{bcd}` computed from a 3-metric field. -/
 noncomputable def spatialRiemannOf (h hinv : Space3 → Tensor2 3)
     (x : Space3) (a b c d : Fin 3) : ℝ :=
-  Pipeline.riemann h hinv x a b c d
+  CoordinateCurvature.riemann h hinv x a b c d
 
 /-- Spatial Ricci tensor `³Ric_{ab}` computed from a 3-metric field. -/
 noncomputable def spatialRicciOf (h hinv : Space3 → Tensor2 3)
     (x : Space3) (a b : Fin 3) : ℝ :=
-  Pipeline.ricciTensorOf h hinv x a b
+  CoordinateCurvature.ricciTensor h hinv x a b
 
 /-- Spatial scalar curvature `³R` computed from a 3-metric field. -/
 noncomputable def spatialScalarCurvOf (h hinv : Space3 → Tensor2 3)
     (x : Space3) : ℝ :=
-  Pipeline.ricciScalarOf h hinv x
+  CoordinateCurvature.ricciScalar h hinv x
 
 /-- ADM Hamiltonian constraint functional
 `H(h, K) = ³R(h) + (tr K)² - K_{ij} K^{ij}`, with `³R(h)` derived from the
@@ -302,30 +309,30 @@ directly from the fields `hinv` and `K`. -/
 noncomputable def momentumConstraintOf (hinv K : Space3 → Tensor2 3)
     (x : Space3) (i : Fin 3) : ℝ :=
   (∑ j : Fin 3, ∑ k : Fin 3,
-      Pipeline.coordDeriv j (fun y => hinv y j k * K y i k) x)
-    - Pipeline.coordDeriv i (fun y => ∑ j : Fin 3, ∑ k : Fin 3, hinv y j k * K y j k) x
+      CoordinateCurvature.coordDeriv j (fun y => hinv y j k * K y i k) x)
+    - CoordinateCurvature.coordDeriv i (fun y => ∑ j : Fin 3, ∑ k : Fin 3, hinv y j k * K y j k) x
 
 /-- Flat Minkowski slice data with zero extrinsic curvature satisfy both
 derived ADM constraints identically. -/
 theorem minkowskiChart_spatial_constraints_zero (x : Space3) :
     hamiltonianConstraintOf minkowskiChart.spatialMetricField
-        (fun _ => euclid3.ginv) (fun _ => 0) x = 0 ∧
-      ∀ i : Fin 3, momentumConstraintOf (fun _ => euclid3.ginv)
+        (fun _ => euclideanMetric3.ginv) (fun _ => 0) x = 0 ∧
+      ∀ i : Fin 3, momentumConstraintOf (fun _ => euclideanMetric3.ginv)
         (fun _ => 0) x i = 0 := by
   constructor
-  · have hconst : ∀ y : Space3, minkowskiChart.spatialMetricField y = euclid3.g := by
+  · have hconst : ∀ y : Space3, minkowskiChart.spatialMetricField y = euclideanMetric3.g := by
       intro y
       ext a b
       fin_cases a <;> fin_cases b <;>
         simp [ChartSpacetime.spatialMetricField, ChartSpacetime.coordinateMetric,
-          minkowskiChart, minkowski, euclid3, minkowskiMetric4_apply]
+          minkowskiChart, minkowski, euclideanMetric3, minkowskiMetric4_apply]
     have hS : spatialScalarCurvOf minkowskiChart.spatialMetricField
-        (fun _ => euclid3.ginv) x = 0 :=
-      Pipeline.ricciScalarOf_const minkowskiChart.spatialMetricField
-        (fun _ => euclid3.ginv) euclid3.g hconst x
+        (fun _ => euclideanMetric3.ginv) x = 0 :=
+      CoordinateCurvature.ricciScalar_const minkowskiChart.spatialMetricField
+        (fun _ => euclideanMetric3.ginv) euclideanMetric3.g hconst x
     simp [hamiltonianConstraintOf, hS]
   · intro i
-    simp [momentumConstraintOf, Pipeline.coordDeriv_const]
+    simp [momentumConstraintOf, CoordinateCurvature.coordDeriv_const]
 
 /-! ## D. Solving the nonlinear constraints -/
 
@@ -467,7 +474,7 @@ in coordinates `(r, θ, φ)` (`x 0 = r`, `x 1 = θ`, `x 2 = φ`). -/
 noncomputable def sdsSpatialMetric (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
   fun i j =>
     if i = j then
-      if i = 0 then ((sdsSpacetime M Λ).lapse (x 0))⁻¹
+      if i = 0 then ((sdsSpacetime M Λ).metricFn (x 0))⁻¹
       else if i = 1 then (x 0) ^ 2
       else (x 0) ^ 2 * Real.sin (x 1) ^ 2
     else 0
@@ -476,7 +483,7 @@ noncomputable def sdsSpatialMetric (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
 noncomputable def sdsSpatialMetricInv (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
   fun i j =>
     if i = j then
-      if i = 0 then (sdsSpacetime M Λ).lapse (x 0)
+      if i = 0 then (sdsSpacetime M Λ).metricFn (x 0)
       else if i = 1 then ((x 0) ^ 2)⁻¹
       else ((x 0) ^ 2 * Real.sin (x 1) ^ 2)⁻¹
     else 0
@@ -485,9 +492,9 @@ noncomputable def sdsSpatialMetricInv (M Λ : ℝ) (x : Space3) : Tensor2 3 :=
 noncomputable def sdsSpatialG (M Λ : ℝ) (x : Space3) (k i j : Fin 3) : ℝ :=
   if k = 0 then
     if i = 0 ∧ j = 0 then
-      -((sdsSpacetime M Λ).lapseHalfDeriv (x 0) / (sdsSpacetime M Λ).lapse (x 0))
-    else if i = 1 ∧ j = 1 then -(x 0 * (sdsSpacetime M Λ).lapse (x 0))
-    else if i = 2 ∧ j = 2 then -(x 0 * Real.sin (x 1) ^ 2 * (sdsSpacetime M Λ).lapse (x 0))
+      -((sdsSpacetime M Λ).metricFnHalfDeriv (x 0) / (sdsSpacetime M Λ).metricFn (x 0))
+    else if i = 1 ∧ j = 1 then -(x 0 * (sdsSpacetime M Λ).metricFn (x 0))
+    else if i = 2 ∧ j = 2 then -(x 0 * Real.sin (x 1) ^ 2 * (sdsSpacetime M Λ).metricFn (x 0))
     else 0
   else if k = 1 then
     if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then 1 / x 0
@@ -499,75 +506,75 @@ noncomputable def sdsSpatialG (M Λ : ℝ) (x : Space3) (k i j : Fin 3) : ℝ :=
     else 0
 
 lemma pd_sdsSpatial_00 (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) :
-    Pipeline.coordDeriv 0 (fun y => ((sdsSpacetime M Λ).lapse (y 0))⁻¹) x =
-      -(2 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0)) /
-        (sdsSpacetime M Λ).lapse (x 0) ^ 2 := by
-  have hd := ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr).fun_inv hf
-  have hfun : (fun s : ℝ => ((sdsSpacetime M Λ).lapse (Function.update x 0 s 0))⁻¹) =
-      fun s : ℝ => ((sdsSpacetime M Λ).lapse s)⁻¹ := by
+    (hf : (sdsSpacetime M Λ).metricFn (x 0) ≠ 0) :
+    CoordinateCurvature.coordDeriv 0 (fun y => ((sdsSpacetime M Λ).metricFn (y 0))⁻¹) x =
+      -(2 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0)) /
+        (sdsSpacetime M Λ).metricFn (x 0) ^ 2 := by
+  have hd := ((sdsSpacetime M Λ).hasDerivAt_metricFn (x 0) hr).fun_inv hf
+  have hfun : (fun s : ℝ => ((sdsSpacetime M Λ).metricFn (Function.update x 0 s 0))⁻¹) =
+      fun s : ℝ => ((sdsSpacetime M Λ).metricFn s)⁻¹ := by
     funext s; simp
-  unfold Pipeline.coordDeriv
+  unfold CoordinateCurvature.coordDeriv
   rw [hfun, hd.deriv]
 
 lemma christoffel_eq_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : (sdsSpacetime M Λ).metricFn (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (k i j : Fin 3) :
-    Pipeline.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
+    CoordinateCurvature.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
       sdsSpatialG M Λ x k i j := by
   have h0_00 := pd_sdsSpatial_00 M Λ x hr hf
-  have h0_11 : Pipeline.coordDeriv 0 (fun y : Space3 => y 0 ^ 2) x = 2 * x 0 := by
+  have h0_11 : CoordinateCurvature.coordDeriv 0 (fun y : Space3 => y 0 ^ 2) x = 2 * x 0 := by
     have hfun : (fun s : ℝ => Function.update x 0 s 0 ^ 2) = fun s => s ^ 2 := by
       funext s; simp
-    unfold Pipeline.coordDeriv; rw [hfun]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
     have hd := hasDerivAt_pow 2 (x 0)
     convert hd.deriv using 1
     ring
-  have h0_22 : Pipeline.coordDeriv 0 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
+  have h0_22 : CoordinateCurvature.coordDeriv 0 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
       2 * x 0 * Real.sin (x 1) ^ 2 := by
     have hfun : (fun s : ℝ => Function.update x 0 s 0 ^ 2 *
         Real.sin (Function.update x 0 s 1) ^ 2) = fun s => s ^ 2 * Real.sin (x 1) ^ 2 := by
       funext s; simp
-    unfold Pipeline.coordDeriv; rw [hfun]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
     have hd := (hasDerivAt_pow 2 (x 0)).mul_const (Real.sin (x 1) ^ 2)
     convert hd.deriv using 1
     ring
-  have h1_22 : Pipeline.coordDeriv 1 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
+  have h1_22 : CoordinateCurvature.coordDeriv 1 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x =
       2 * x 0 ^ 2 * Real.sin (x 1) * Real.cos (x 1) := by
     have hfun : (fun s : ℝ => Function.update x 1 s 0 ^ 2 *
         Real.sin (Function.update x 1 s 1) ^ 2) = fun s => x 0 ^ 2 * Real.sin s ^ 2 := by
       funext s; simp
-    unfold Pipeline.coordDeriv; rw [hfun]
-    have hd := (Pipeline.hasDerivAt_sin_sq (x 1)).const_mul (x 0 ^ 2)
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
+    have hd := (hasDerivAt_sin_sq (x 1)).const_mul (x 0 ^ 2)
     convert hd.deriv using 1
     ring
-  have h2_22 : Pipeline.coordDeriv 2 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x = 0 := by
+  have h2_22 : CoordinateCurvature.coordDeriv 2 (fun y : Space3 => y 0 ^ 2 * Real.sin (y 1) ^ 2) x = 0 := by
     have hfun : (fun s : ℝ => Function.update x 2 s 0 ^ 2 *
         Real.sin (Function.update x 2 s 1) ^ 2) = fun _ => x 0 ^ 2 * Real.sin (x 1) ^ 2 := by
       funext s; simp
-    unfold Pipeline.coordDeriv; rw [hfun, deriv_const']
+    unfold CoordinateCurvature.coordDeriv; rw [hfun, deriv_const']
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
-    simp [Pipeline.christoffel, sdsSpatialMetric, sdsSpatialMetricInv,
+    simp [CoordinateCurvature.christoffel, sdsSpatialMetric, sdsSpatialMetricInv,
       sdsSpatialG, h0_00, h0_11, h0_22, h1_22, h2_22] <;>
-    (try simp [Pipeline.coordDeriv]) <;>
+    (try simp [CoordinateCurvature.coordDeriv]) <;>
     field_simp [hr, hf, hsin]
 
 lemma pd_christoffel_eq_pd_sdsSpatialG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : (sdsSpacetime M Λ).metricFn (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (μ k i j : Fin 3) :
-    Pipeline.coordDeriv μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
+    CoordinateCurvature.coordDeriv μ (fun y => CoordinateCurvature.christoffel (sdsSpatialMetric M Λ)
         (sdsSpatialMetricInv M Λ) y k i j) x =
-      Pipeline.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x := by
-  have hev_r : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 ∧ (sdsSpacetime M Λ).lapse r ≠ 0 := by
+      CoordinateCurvature.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x := by
+  have hev_r : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 ∧ (sdsSpacetime M Λ).metricFn r ≠ 0 := by
     have h1 : ∀ᶠ r in 𝓝 (x 0), r ≠ 0 := continuousAt_id.eventually_ne hr
-    have h2 : ∀ᶠ r in 𝓝 (x 0), (sdsSpacetime M Λ).lapse r ≠ 0 :=
-      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr).continuousAt.eventually_ne hf
+    have h2 : ∀ᶠ r in 𝓝 (x 0), (sdsSpacetime M Λ).metricFn r ≠ 0 :=
+      ((sdsSpacetime M Λ).hasDerivAt_metricFn (x 0) hr).continuousAt.eventually_ne hf
     exact h1.and h2
   have hev_th : ∀ᶠ th in 𝓝 (x 1), Real.sin th ≠ 0 :=
     Real.continuous_sin.continuousAt.eventually_ne hsin
   have hcont : ∀ p : Fin 3, ContinuousAt (fun y : Space3 => y p) x := fun p => continuousAt_apply p x
   have hev_y : ∀ᶠ y in 𝓝 x,
-      y 0 ≠ 0 ∧ (sdsSpacetime M Λ).lapse (y 0) ≠ 0 ∧ Real.sin (y 1) ≠ 0 := by
+      y 0 ≠ 0 ∧ (sdsSpacetime M Λ).metricFn (y 0) ≠ 0 ∧ Real.sin (y 1) ≠ 0 := by
     have hr' := (hcont 0).eventually hev_r
     have hth' := (hcont 1).eventually hev_th
     filter_upwards [hr', hth'] with y hy1 hy2
@@ -582,15 +589,15 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
   if μ = 0 then
     if k = 0 then
       if i = 0 ∧ j = 0 then
-        -(((-2 * M / (x 0) ^ 3 - Λ / 3) * (sdsSpacetime M Λ).lapse (x 0) -
-            2 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0) ^ 2) /
-          (sdsSpacetime M Λ).lapse (x 0) ^ 2)
+        -(((-2 * M / (x 0) ^ 3 - Λ / 3) * (sdsSpacetime M Λ).metricFn (x 0) -
+            2 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0) ^ 2) /
+          (sdsSpacetime M Λ).metricFn (x 0) ^ 2)
       else if i = 1 ∧ j = 1 then
-        -((sdsSpacetime M Λ).lapse (x 0) +
-          2 * x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0))
+        -((sdsSpacetime M Λ).metricFn (x 0) +
+          2 * x 0 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0))
       else if i = 2 ∧ j = 2 then
-        -(Real.sin (x 1) ^ 2 * ((sdsSpacetime M Λ).lapse (x 0) +
-          2 * x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0)))
+        -(Real.sin (x 1) ^ 2 * ((sdsSpacetime M Λ).metricFn (x 0) +
+          2 * x 0 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0)))
       else 0
     else if k = 1 then
       if (i = 0 ∧ j = 1) ∨ (i = 1 ∧ j = 0) then -(1 / x 0 ^ 2) else 0
@@ -600,7 +607,7 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
     if k = 0 then
       if i = 2 ∧ j = 2 then
         -(2 * x 0 * Real.sin (x 1) * Real.cos (x 1) *
-          (sdsSpacetime M Λ).lapse (x 0))
+          (sdsSpacetime M Λ).metricFn (x 0))
       else 0
     else if k = 1 then
       if i = 2 ∧ j = 2 then -(Real.cos (x 1) ^ 2 - Real.sin (x 1) ^ 2) else 0
@@ -609,85 +616,85 @@ noncomputable def sdsSpatialDG (M Λ : ℝ) (μ : Fin 3) (x : Space3)
   else 0
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_0 (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (k i j : Fin 3) :
-    Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y k i j) x =
+    (hf : (sdsSpacetime M Λ).metricFn (x 0) ≠ 0) (k i j : Fin 3) :
+    CoordinateCurvature.coordDeriv 0 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 0 x k i j := by
-  have h000 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 0 0) x =
+  have h000 : CoordinateCurvature.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 0 0) x =
       sdsSpatialDG M Λ 0 x 0 0 0 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 0 0) =
-        fun s : ℝ => -((sdsSpacetime M Λ).lapseHalfDeriv s /
-          (sdsSpacetime M Λ).lapse s) := by
+        fun s : ℝ => -((sdsSpacetime M Λ).metricFnHalfDeriv s /
+          (sdsSpacetime M Λ).metricFn s) := by
       funext s; simp [sdsSpatialG]
-    unfold Pipeline.coordDeriv; rw [hfun]
-    have hd := (((sdsSpacetime M Λ).hasDerivAt_lapseHalfDeriv (x 0) hr).fun_div
-      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr) hf).fun_neg
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
+    have hd := (((sdsSpacetime M Λ).hasDerivAt_metricFnHalfDeriv (x 0) hr).fun_div
+      ((sdsSpacetime M Λ).hasDerivAt_metricFn (x 0) hr) hf).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
-  have h011 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 1 1) x =
+  have h011 : CoordinateCurvature.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 1 1) x =
       sdsSpatialDG M Λ 0 x 0 1 1 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 1 1) =
-        fun s : ℝ => -(s * (sdsSpacetime M Λ).lapse s) := by
+        fun s : ℝ => -(s * (sdsSpacetime M Λ).metricFn s) := by
       funext s; simp [sdsSpatialG]
-    unfold Pipeline.coordDeriv; rw [hfun]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
     have hd := ((hasDerivAt_id' (x 0)).fun_mul
-      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr)).fun_neg
+      ((sdsSpacetime M Λ).hasDerivAt_metricFn (x 0) hr)).fun_neg
     rw [hd.deriv]
     dsimp [sdsSpatialDG]
     ring
-  have h022 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 2 2) x =
+  have h022 : CoordinateCurvature.coordDeriv 0 (fun y => sdsSpatialG M Λ y 0 2 2) x =
       sdsSpatialDG M Λ 0 x 0 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 0 2 2) =
-        fun s : ℝ => -(Real.sin (x 1) ^ 2 * (s * (sdsSpacetime M Λ).lapse s)) := by
+        fun s : ℝ => -(Real.sin (x 1) ^ 2 * (s * (sdsSpacetime M Λ).metricFn s)) := by
       funext s; simp [sdsSpatialG]; ring
-    unfold Pipeline.coordDeriv; rw [hfun]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
     have hd := (((hasDerivAt_id' (x 0)).fun_mul
-      ((sdsSpacetime M Λ).hasDerivAt_lapse (x 0) hr)).const_mul
+      ((sdsSpacetime M Λ).hasDerivAt_metricFn (x 0) hr)).const_mul
         (Real.sin (x 1) ^ 2)).fun_neg
     rw [hd.deriv]
     dsimp [sdsSpatialDG]
     ring
-  have h101 : Pipeline.coordDeriv 0 (fun y => sdsSpatialG M Λ y 1 0 1) x =
+  have h101 : CoordinateCurvature.coordDeriv 0 (fun y => sdsSpatialG M Λ y 1 0 1) x =
       sdsSpatialDG M Λ 0 x 1 0 1 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 0 s) 1 0 1) =
         fun s : ℝ => s⁻¹ := by funext s; simp [sdsSpatialG]
-    unfold Pipeline.coordDeriv; rw [hfun, (hasDerivAt_inv hr).deriv]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun, (hasDerivAt_inv hr).deriv]
     simp [sdsSpatialDG, one_div]
   fin_cases k <;> fin_cases i <;> fin_cases j
   all_goals first
     | exact h000 | exact h011 | exact h022
     | exact h101
-    | simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
+    | simp [CoordinateCurvature.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_1 (M Λ : ℝ) (x : Space3)
     (hsin : Real.sin (x 1) ≠ 0) (k i j : Fin 3) :
-    Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y k i j) x =
+    CoordinateCurvature.coordDeriv 1 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 1 x k i j := by
-  have h022 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 0 2 2) x =
+  have h022 : CoordinateCurvature.coordDeriv 1 (fun y => sdsSpatialG M Λ y 0 2 2) x =
       sdsSpatialDG M Λ 1 x 0 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 0 2 2) =
-        fun s : ℝ => -(x 0 * (sdsSpacetime M Λ).lapse (x 0) * Real.sin s ^ 2) := by
+        fun s : ℝ => -(x 0 * (sdsSpacetime M Λ).metricFn (x 0) * Real.sin s ^ 2) := by
       funext s; simp [sdsSpatialG]; ring
-    unfold Pipeline.coordDeriv; rw [hfun]
-    have hd := ((Pipeline.hasDerivAt_sin_sq (x 1)).const_mul
-      (x 0 * (sdsSpacetime M Λ).lapse (x 0))).fun_neg
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
+    have hd := ((hasDerivAt_sin_sq (x 1)).const_mul
+      (x 0 * (sdsSpacetime M Λ).metricFn (x 0))).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
-  have h122 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 1 2 2) x =
+  have h122 : CoordinateCurvature.coordDeriv 1 (fun y => sdsSpatialG M Λ y 1 2 2) x =
       sdsSpatialDG M Λ 1 x 1 2 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 1 2 2) =
         fun s : ℝ => -(Real.sin s * Real.cos s) := by funext s; simp [sdsSpatialG]
-    unfold Pipeline.coordDeriv; rw [hfun]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
     have hd := ((Real.hasDerivAt_sin (x 1)).fun_mul (Real.hasDerivAt_cos (x 1))).fun_neg
     convert hd.deriv using 1
     simp [sdsSpatialDG]
     ring
-  have h212 : Pipeline.coordDeriv 1 (fun y => sdsSpatialG M Λ y 2 1 2) x =
+  have h212 : CoordinateCurvature.coordDeriv 1 (fun y => sdsSpatialG M Λ y 2 1 2) x =
       sdsSpatialDG M Λ 1 x 2 1 2 := by
     have hfun : (fun s : ℝ => sdsSpatialG M Λ (Function.update x 1 s) 2 1 2) =
         fun s : ℝ => Real.cos s / Real.sin s := by funext s; simp [sdsSpatialG]
-    unfold Pipeline.coordDeriv; rw [hfun]
+    unfold CoordinateCurvature.coordDeriv; rw [hfun]
     have hd := (Real.hasDerivAt_cos (x 1)).fun_div (Real.hasDerivAt_sin (x 1)) hsin
     have hcos_sin : -Real.sin (x 1) * Real.sin (x 1) - Real.cos (x 1) * Real.cos (x 1) =
         -(Real.sin (x 1) ^ 2 + Real.cos (x 1) ^ 2) := by ring
@@ -697,18 +704,18 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG_1 (M Λ : ℝ) (x : Space3)
   fin_cases k <;> fin_cases i <;> fin_cases j
   all_goals first
     | exact h022 | exact h122 | exact h212
-    | simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
+    | simp [CoordinateCurvature.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG_2 (M Λ : ℝ) (x : Space3) (k i j : Fin 3) :
-    Pipeline.coordDeriv 2 (fun y => sdsSpatialG M Λ y k i j) x =
+    CoordinateCurvature.coordDeriv 2 (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ 2 x k i j := by
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
-    simp [Pipeline.coordDeriv, sdsSpatialG, sdsSpatialDG]
+    simp [CoordinateCurvature.coordDeriv, sdsSpatialG, sdsSpatialDG]
 
 lemma pd_sdsSpatialG_eq_sdsSpatialDG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
+    (hf : (sdsSpacetime M Λ).metricFn (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0)
     (μ k i j : Fin 3) :
-    Pipeline.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x =
+    CoordinateCurvature.coordDeriv μ (fun y => sdsSpatialG M Λ y k i j) x =
       sdsSpatialDG M Λ μ x k i j := by
   fin_cases μ
   · exact pd_sdsSpatialG_eq_sdsSpatialDG_0 M Λ x hr hf k i j
@@ -720,14 +727,14 @@ lemma pd_sdsSpatialG_eq_sdsSpatialDG (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
 nontrivial curved 3D vacuum initial data (`³R = 0` while `³Ric_{00} ≠ 0` for
 `M ≠ 0`). -/
 theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (sdsSpacetime M Λ).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
+    (hf : (sdsSpacetime M Λ).metricFn (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
     spatialScalarCurvOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x = 2 * Λ := by
   have hG : ∀ k i j,
-      Pipeline.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
+      CoordinateCurvature.christoffel (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x k i j =
         sdsSpatialG M Λ x k i j :=
     christoffel_eq_sdsSpatialG M Λ x hr hf hsin
   have hpd : ∀ μ k i j,
-      Pipeline.coordDeriv μ (fun y => Pipeline.christoffel (sdsSpatialMetric M Λ)
+      CoordinateCurvature.coordDeriv μ (fun y => CoordinateCurvature.christoffel (sdsSpatialMetric M Λ)
           (sdsSpatialMetricInv M Λ) y k i j) x =
         sdsSpatialDG M Λ μ x k i j := by
     intro μ k i j
@@ -735,65 +742,65 @@ theorem spatialScalarCurvOf_sdsSpatial (M Λ : ℝ) (x : Space3) (hr : x 0 ≠ 0
       pd_sdsSpatialG_eq_sdsSpatialDG M Λ x hr hf hsin μ k i j]
   have hcos_sq : Real.cos (x 1) ^ 2 = 1 - Real.sin (x 1) ^ 2 := by
     linear_combination Real.sin_sq_add_cos_sq (x 1)
-  have hric00 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 0 0 =
-      -(2 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0) /
-        (x 0 * (sdsSpacetime M Λ).lapse (x 0))) := by
-    simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+  have hric00 : CoordinateCurvature.ricciTensor (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 0 0 =
+      -(2 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0) /
+        (x 0 * (sdsSpacetime M Λ).metricFn (x 0))) := by
+    simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hf]
     ring
-  have hric11 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 1 1 =
-      1 - (sdsSpacetime M Λ).lapse (x 0) -
-        x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0) := by
-    simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+  have hric11 : CoordinateCurvature.ricciTensor (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 1 1 =
+      1 - (sdsSpacetime M Λ).metricFn (x 0) -
+        x 0 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0) := by
+    simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hsin]
     rw [hcos_sq]
     ring
-  have hric22 : Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 2 2 =
-      Real.sin (x 1) ^ 2 * (1 - (sdsSpacetime M Λ).lapse (x 0) -
-        x 0 * (sdsSpacetime M Λ).lapseHalfDeriv (x 0)) := by
-    simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+  have hric22 : CoordinateCurvature.ricciTensor (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x 2 2 =
+      Real.sin (x 1) ^ 2 * (1 - (sdsSpacetime M Λ).metricFn (x 0) -
+        x 0 * (sdsSpacetime M Λ).metricFnHalfDeriv (x 0)) := by
+    simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
       hpd, hG, sdsSpatialG, sdsSpatialDG]
     field_simp [hr, hsin]
     rw [hcos_sq]
     ring
   have hoff : ∀ σ ν : Fin 3, σ ≠ ν →
-      Pipeline.ricciTensorOf (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x σ ν = 0 := by
+      CoordinateCurvature.ricciTensor (sdsSpatialMetric M Λ) (sdsSpatialMetricInv M Λ) x σ ν = 0 := by
     intro σ ν hne
     fin_cases σ <;> fin_cases ν
     · exact absurd rfl hne
-    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
       ring
     · exact absurd rfl hne
-    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
-    · simp [Pipeline.ricciTensorOf, Pipeline.riemann, Fin.sum_univ_three,
+    · simp [CoordinateCurvature.ricciTensor, CoordinateCurvature.riemann, Fin.sum_univ_three,
         hpd, hG, sdsSpatialG, sdsSpatialDG]
     · exact absurd rfl hne
-  simp [spatialScalarCurvOf, Pipeline.ricciScalarOf, Fin.sum_univ_three, sdsSpatialMetricInv,
+  simp [spatialScalarCurvOf, CoordinateCurvature.ricciScalar, Fin.sum_univ_three, sdsSpatialMetricInv,
     hric00, hric11, hric22]
   field_simp [hr, hf, hsin]
-  simp only [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse,
-    SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapseHalfDeriv]
+  simp only [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn,
+    SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFnHalfDeriv]
   field_simp [hr]
   ring
 
 /-- Time-symmetric curved Schwarzschild spatial slice (`K = 0`, `Λ = 0`) solves
 the derived nonlinear Hamiltonian constraint identically. -/
 theorem schwarzschild_spatial_hamiltonian_zero (M : ℝ) (x : Space3) (hr : x 0 ≠ 0)
-    (hf : (schwarzschildSpacetime M).lapse (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
+    (hf : (schwarzschildSpacetime M).metricFn (x 0) ≠ 0) (hsin : Real.sin (x 1) ≠ 0) :
     hamiltonianConstraintOf (sdsSpatialMetric M 0) (sdsSpatialMetricInv M 0)
       (fun _ => 0) x = 0 := by
-  have hf0 : (sdsSpacetime M 0).lapse (x 0) ≠ 0 := by
-    rwa [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.lapse_zero_lambda]
+  have hf0 : (sdsSpacetime M 0).metricFn (x 0) ≠ 0 := by
+    rwa [SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn_zero_lambda]
   have hS := spatialScalarCurvOf_sdsSpatial M 0 x hr hf0 hsin
   simp [hamiltonianConstraintOf, hS]
 
@@ -808,12 +815,12 @@ theorem flrw_initial_constraints (a₀ H : ℝ) (ha : a₀ ≠ 0) (x : Space3) :
         (fun _ => (H * a₀ ^ 2) • (1 : Tensor2 3)) x i = 0 := by
   have hS : spatialScalarCurvOf (fun _ => a₀ ^ 2 • (1 : Tensor2 3))
       (fun _ => (a₀ ^ 2)⁻¹ • (1 : Tensor2 3)) x = 0 :=
-    Pipeline.ricciScalarOf_const _ _ (a₀ ^ 2 • (1 : Tensor2 3)) (fun _ => rfl) x
+    CoordinateCurvature.ricciScalar_const _ _ (a₀ ^ 2 • (1 : Tensor2 3)) (fun _ => rfl) x
   constructor
   · simp [hamiltonianConstraintOf, hS, Fin.sum_univ_three]
     field_simp [ha]
     ring
   · intro i
-    simp [momentumConstraintOf, Pipeline.coordDeriv_const]
+    simp [momentumConstraintOf, CoordinateCurvature.coordDeriv_const]
 
 end GeneralRelativity
