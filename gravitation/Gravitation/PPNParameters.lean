@@ -6,6 +6,11 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Basic.Real.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Tactic.NormNum
 
 /-!
 # The post-Newtonian (PPN) framework
@@ -27,11 +32,14 @@ comparison is to be made.
 - `ppnG00`, `ppnGij` : the leading metric components `-1 + 2U - 2 beta U^2`
   and `(1 + 2 gamma U) delta_ij`.
 - `ppnG00_gr`, `ppnGij_gr` : those components at the GR parameter point.
+- `hasDerivAt_ppnG00`, `hasDerivAt_ppnGij` : the Newtonian-limit slopes
+  `d g_00 / dU = 2` and `d g_ij / dU = 2 gamma delta_ij` at `U = 0`.
 
 ## iii. Table of contents
 
 - A. The parameters
 - B. The leading metric
+- C. The Newtonian limit
 
 ## iv. References
 
@@ -108,5 +116,38 @@ lemma ppnG00_gr (U : ℝ) : ppnG00 grParameters.beta U = -1 + 2 * U - 2 * U ^ 2 
 lemma ppnGij_gr (U : ℝ) (i j : Fin 3) :
     ppnGij grParameters.gamma U i j = (1 + 2 * U) * (if i = j then 1 else 0) := by
   simp [ppnGij, grParameters]
+
+/-! ## C. The Newtonian limit -/
+
+/-- The `g_00` potential has unit Newtonian slope at `U = 0`:
+`d g_00 / dU = 2`, independent of `beta`. -/
+lemma hasDerivAt_ppnG00 (beta : ℝ) :
+    HasDerivAt (fun U => ppnG00 beta U) 2 0 := by
+  have hg := HasDerivAt.sub
+    (HasDerivAt.add (hasDerivAt_const (0 : ℝ) (-1 : ℝ))
+      (HasDerivAt.const_mul (2 : ℝ) (hasDerivAt_id (0 : ℝ))))
+    (HasDerivAt.const_mul (2 * beta) (HasDerivAt.pow (hasDerivAt_id (0 : ℝ)) 2))
+  have hfun : (fun U => ppnG00 beta U) = (fun U => -1 + 2 * U - 2 * beta * U ^ 2) := by
+    funext U; simp [ppnG00]
+  rw [hfun]
+  convert hg using 1
+  · funext U; simp [Pi.add_apply, Pi.sub_apply]
+  · simp only [id_eq]; norm_num
+
+/-- The spatial potential has slope `2 gamma delta_ij` at `U = 0`:
+`d g_ij / dU = 2 gamma delta_ij`. -/
+lemma hasDerivAt_ppnGij (gamma : ℝ) (i j : Fin 3) :
+    HasDerivAt (fun U => ppnGij gamma U i j) (2 * gamma * (if i = j then 1 else 0)) 0 := by
+  have hg := HasDerivAt.mul_const
+    (HasDerivAt.add (hasDerivAt_const (0 : ℝ) (1 : ℝ))
+      (HasDerivAt.const_mul (2 * gamma) (hasDerivAt_id (0 : ℝ))))
+    (if i = j then 1 else 0)
+  have hfun : (fun U => ppnGij gamma U i j) =
+      (fun U => (1 + 2 * gamma * U) * (if i = j then 1 else 0)) := by
+    funext U; simp [ppnGij]
+  rw [hfun]
+  convert hg using 1
+  · funext U; simp [Pi.add_apply]
+  · ring
 
 end GeneralRelativity
