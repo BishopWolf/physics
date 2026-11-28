@@ -78,7 +78,8 @@ scale. The AQUAL action density
 $-(a_0^2/8\pi G)F(|\nabla\phi|^2/a_0^2)-\rho\phi$ and the field equation
 $\nabla\cdot[\mu(|\nabla\phi|/a_0)\nabla\phi]=4\pi G\rho$ are stated, with the
 interpolating function $\mu(x)=x/\sqrt{1+x^2}$ and the Poisson limit at
-$\mu=1$.
+$\mu=1$. The weak-field limits $\mu(x)/x\to1$ as $x\to0$ and $\mu(x)\le x$ for
+$x\ge0$ are proved.
 
 **Needs.** The interpolating function selected by the action's free function,
 lensing without dark matter, and a cosmological background; the one-dimensional
@@ -322,6 +323,17 @@ qualification.
 MOND itself has no PPN parameters. AQUAL is a non-relativistic potential
 theory; any $\gamma$ or $\beta$ attributed to MOND belongs to a relativistic
 completion such as TeVeS or a newer construction, not to the AQUAL action.
+
+**Formalised here.** The PPN language itself is machine-checked in
+`Gravitation.PPNParameters`: the ten parameters (`PPNParameters`), the
+general-relativistic point (`grParameters`), the leading metric components
+`ppnG00`/`ppnGij` with their GR reductions, the Newtonian-limit slopes
+`hasDerivAt_ppnG00` ($d g_{00}/dU=2$) and `hasDerivAt_ppnGij`
+($d g_{ij}/dU=2\gamma\delta_{ij}$) at $U=0$, and the Solar-System observables
+`lightDeflectionFactor`, `perihelionPrecessionFactor` and `nordtvedtParameter`
+with their GR values $1$, $1$, $0$. What remains open is the derivation of each
+theory's parameters and the comparison with the Solar-System bounds; the
+framework in which that comparison is to be made is now fixed.
 
 ### 3.17 Degrees of freedom and ghosts
 

@@ -649,7 +649,7 @@ for arbitrary constraint-satisfying data.
 ## Appendix A. Declaration census
 
 Generated from `gravitation/.lake/decls.tsv` by the axiom audit. The table
-covers the local top-level modules, the 88 vendored modules under
+covers the local top-level modules, the 92 vendored modules under
 `Gravitation.Relativity.*` and `Gravitation.Cosmology.*`, and the already-merged
 `IncompressibleSphere` from the `physlib` dependency; the local
 `Gravitation.KretschmannTotal` addendum contributes two corollaries. The names
