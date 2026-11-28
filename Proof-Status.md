@@ -164,6 +164,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.linearisedHamiltonianResidual_add` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.linearisedHamiltonianResidual_smul` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.linearisedHamiltonianResidual_vacuum` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_hamiltonianResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.momentumResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsLichnerowiczYorkSolution` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.momentumResidual_zero_gradTau` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |

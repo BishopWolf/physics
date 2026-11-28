@@ -7,6 +7,10 @@ module
 
 public import Gravitation.Relativity.Metrics.ConformalMetric
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # The Lichnerowicz-York conformal decomposition (interface)
@@ -39,9 +43,10 @@ constraint equations.
 - `ConformalData.extrinsicCurvature` : `K = phi^{-2} sigma + (tau/3) h`.
 - `hamiltonianResidual` : `8 lap phi - R phi + |sigma|^2 phi^{-7}`.
 - `linearisedHamiltonianResidual` : `8 lap psi - R psi - 7 |sigma|^2 psi phi^{-8}`,
-  the algebraic linearisation; it is additive and homogeneous in the direction
-  and reduces to the conformal Laplacian in vacuum.  Its derivative and
-  elliptic estimates are the open layer.
+  the algebraic linearisation; it is additive and homogeneous in the direction,
+  reduces to the conformal Laplacian in vacuum, and is the Gateaux derivative of
+  the Hamiltonian residual (`hasDerivAt_hamiltonianResidual`).  Its elliptic
+  estimates are the open layer.
 - `momentumResidual` : `(div sigma)_i - (2/3) phi^6 (grad tau)_i`.
 - `IsLichnerowiczYorkSolution` : both residuals vanish.
 
@@ -172,6 +177,36 @@ Laplacian `8 lap psi - R psi`. -/
 lemma linearisedHamiltonianResidual_vacuum (lapPsi R phi psi : ℝ) :
     linearisedHamiltonianResidual lapPsi R 0 phi psi = 8 * lapPsi - R * psi := by
   simp [linearisedHamiltonianResidual]
+
+/-- Linearising the Hamiltonian residual in the conformal factor: along the
+line `phi + t psi` (with Laplacian `lapPhi + t lapPsi`) the residual has
+derivative `linearisedHamiltonianResidual` at `t = 0`, provided `phi ≠ 0`.
+This is the algebraic first variation; existence and estimates for the operator
+are the elliptic layer and are not claimed here. -/
+theorem hasDerivAt_hamiltonianResidual
+    (lapPhi lapPsi R sigmaSq phi psi : ℝ) (hphi : phi ≠ 0) :
+    HasDerivAt
+      (fun t : ℝ => hamiltonianResidual (lapPhi + t * lapPsi) R sigmaSq (phi + t * psi))
+      (linearisedHamiltonianResidual lapPsi R sigmaSq phi psi) 0 := by
+  have hlin := HasDerivAt.add (hasDerivAt_const (0 : ℝ) lapPhi)
+    (HasDerivAt.mul_const (hasDerivAt_id 0) lapPsi)
+  have hphit := HasDerivAt.add (hasDerivAt_const (0 : ℝ) phi)
+    (HasDerivAt.mul_const (hasDerivAt_id 0) psi)
+  have hpow := HasDerivAt.pow hphit 7
+  have hg := HasDerivAt.add
+    (HasDerivAt.sub (HasDerivAt.const_mul 8 hlin) (HasDerivAt.const_mul R hphit))
+    (HasDerivAt.div (hasDerivAt_const (0 : ℝ) sigmaSq) hpow (by simpa using pow_ne_zero 7 hphi))
+  have hfun : (fun t : ℝ => hamiltonianResidual (lapPhi + t * lapPsi) R sigmaSq (phi + t * psi)) =
+      (fun t => 8 * (lapPhi + t * lapPsi) - R * (phi + t * psi) + sigmaSq / (phi + t * psi) ^ 7) := by
+    funext t
+    simp [hamiltonianResidual]
+  rw [hfun]
+  convert hg using 1
+  · funext t; simp [Pi.add_apply, Pi.sub_apply, id_eq, mul_comm]
+  · simp only [Pi.add_apply, Pi.pow_apply, id_eq, zero_mul, zero_add, one_mul,
+      linearisedHamiltonianResidual]
+    field_simp [hphi]
+    ring
 
 /-- The momentum residual `(div sigma)_i - (2/3) phi^6 (grad tau)_i`. -/
 noncomputable def momentumResidual (divSigma gradTau : Fin 3 → ℝ) (phi : ℝ) :
