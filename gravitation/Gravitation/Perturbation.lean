@@ -25,7 +25,10 @@ symmetric whenever the second-gradient data `E` is symmetric.  The gauge
 transformation and the Bardeen potentials are proved invariant, and the
 anisotropic (ij-traceless) sector of the perturbed field equations is started:
 its gauge-invariant source is `bardeenPhi - bardeenPsi`, so the two Bardeen
-potentials coincide when the anisotropic stress vanishes.
+potentials coincide when the anisotropic stress vanishes.  The energy (00),
+momentum (0i) and pressure (ij-trace) field equations are then stated in the
+gauge-invariant Bardeen form and proved invariant under the scalar gauge
+transformation.
 
 ## ii. Key results
 
@@ -41,6 +44,12 @@ potentials coincide when the anisotropic stress vanishes.
 - `bardeenPhi_eq_bardeenPsi_of_no_anisotropic` : the Bardeen potentials
   coincide when the anisotropic stress vanishes.
 - `anisotropicSource_gauge` : gauge invariance of the anisotropic source.
+- `ScalarStress`, `BardeenData` : the gauge-invariant stress and Bardeen data.
+- `energyEquation`, `momentumEquation`, `pressureEquation` : the perturbed
+  field equations in Bardeen form.
+- `PerturbedFieldEq` : the bundle of the three equations.
+- `bardeenData_gauge`, `perturbedFieldEq_gauge` : gauge invariance of the
+  Bardeen data and of the field equations.
 
 ## iii. Table of contents
 
@@ -48,6 +57,7 @@ potentials coincide when the anisotropic stress vanishes.
 - B. The perturbed metric
 - C. The gauge transformation and the Bardeen potentials
 - D. The perturbed field equations: the anisotropic sector
+- E. The perturbed field equations: the energy, momentum and pressure sectors
 
 ## iv. References
 
@@ -212,6 +222,137 @@ lemma anisotropicSource_gauge (a a' phi psi B E' B' E'' xi0 xi0' xi' xi'') (ha :
         bardeenPsi_invariant a a' psi B E' xi0 xi' ha]
     _ = anisotropicSource a a' phi psi B E' B' E'' :=
       (anisotropicSource_eq_bardeen a a' phi psi B E' B' E'').symm
+
+/-! ## E. The perturbed field equations: the energy, momentum and pressure sectors -/
+
+/-- The scalar-sector stress data of the perturbed matter, in the
+gauge-invariant (Newtonian) form: the density and pressure perturbations
+`deltaRho`, `deltaP`, the velocity potential `v`, and the anisotropic stress
+`Pi`. -/
+structure ScalarStress where
+  /-- The density perturbation. -/
+  deltaRho : ℝ
+  /-- The pressure perturbation. -/
+  deltaP : ℝ
+  /-- The velocity potential. -/
+  v : ℝ
+  /-- The anisotropic stress. -/
+  Pi : ℝ
+
+/-- The gauge-invariant Bardeen data: the two Bardeen potentials `Phi`, `Psi`
+and their supplied conformal-time derivatives and Laplacians. -/
+@[ext]
+structure BardeenData where
+  /-- The Bardeen lapse potential. -/
+  Phi : ℝ
+  /-- The Bardeen curvature potential. -/
+  Psi : ℝ
+  /-- The conformal-time derivative of `Phi`. -/
+  Phi1 : ℝ
+  /-- The conformal-time derivative of `Psi`. -/
+  Psi1 : ℝ
+  /-- The second conformal-time derivative of `Psi`. -/
+  Psi2 : ℝ
+  /-- The Laplacian of `Phi`. -/
+  lapPhi : ℝ
+  /-- The Laplacian of `Psi`. -/
+  lapPsi : ℝ
+
+/-- The energy (00) field equation in Bardeen form,
+`3 H (Psi' + H Phi) - lap Psi = -kappa a^2 deltaRho`. -/
+def energyEquation (a H : ℝ) (D : BardeenData) (T : ScalarStress) (κ : ℝ) : Prop :=
+  3 * H * (D.Psi1 + H * D.Phi) - D.lapPsi = -κ * a ^ 2 * T.deltaRho
+
+/-- The momentum (0i) field equation in Bardeen form,
+`Psi' + H Phi = kappa a^2 (rho + p) v`. -/
+def momentumEquation (a H ρ p : ℝ) (D : BardeenData) (T : ScalarStress) (κ : ℝ) : Prop :=
+  D.Psi1 + H * D.Phi = κ * a ^ 2 * (ρ + p) * T.v
+
+/-- The pressure (ij-trace) field equation in Bardeen form,
+`Psi'' + H (Phi' + 2 Psi') + (2 H' + H^2) Phi + (1/3) lap (Phi - Psi) =
+kappa a^2 deltaP`. -/
+def pressureEquation (a H H1 : ℝ) (D : BardeenData) (T : ScalarStress) (κ : ℝ) : Prop :=
+  D.Psi2 + H * (D.Phi1 + 2 * D.Psi1) + (2 * H1 + H ^ 2) * D.Phi
+    + (1 / 3) * (D.lapPhi - D.lapPsi) = κ * a ^ 2 * T.deltaP
+
+/-- The perturbed field equations: the energy, momentum and pressure equations
+in Bardeen form, bundled. -/
+structure PerturbedFieldEq (a H H1 ρ p κ : ℝ) (D : BardeenData) (T : ScalarStress) : Prop where
+  /-- The energy (00) equation. -/
+  energy : energyEquation a H D T κ
+  /-- The momentum (0i) equation. -/
+  momentum : momentumEquation a H ρ p D T κ
+  /-- The pressure (ij-trace) equation. -/
+  pressure : pressureEquation a H H1 D T κ
+
+/-- The scalar kinematics of a point: the background scale factor `a` and its
+conformal-time derivative `a1`, the metric potentials `phi`, `psi`, `B`, `E1`,
+`B1`, `E2`, and the supplied conformal-time derivatives and Laplacians of the
+Bardeen potentials. -/
+structure ScalarKinematics where
+  a : ℝ
+  a1 : ℝ
+  phi : ℝ
+  psi : ℝ
+  B : ℝ
+  E1 : ℝ
+  B1 : ℝ
+  E2 : ℝ
+  phi1 : ℝ
+  psi1 : ℝ
+  psi2 : ℝ
+  lapPhi : ℝ
+  lapPsi : ℝ
+
+/-- The Bardeen data of a kinematics point. -/
+noncomputable def bardeenData (K : ScalarKinematics) : BardeenData where
+  Phi := bardeenPhi K.a K.a1 K.phi K.B K.E1 K.B1 K.E2
+  Psi := bardeenPsi K.a K.a1 K.psi K.B K.E1
+  Phi1 := K.phi1
+  Psi1 := K.psi1
+  Psi2 := K.psi2
+  lapPhi := K.lapPhi
+  lapPsi := K.lapPsi
+
+/-- The gauge transform of a kinematics point: the metric potentials transform
+as in Section C, while the background and the supplied Bardeen derivative data
+are inert. -/
+noncomputable def gaugeKinematics (K : ScalarKinematics) (xi0 xi0' xi' xi'' : ℝ) : ScalarKinematics where
+  a := K.a
+  a1 := K.a1
+  phi := gaugePhi K.a K.a1 K.phi xi0 xi0'
+  psi := gaugePsi K.a K.a1 K.psi xi0
+  B := gaugeB K.B xi0 xi'
+  E1 := K.E1 - xi'
+  B1 := K.B1 + xi0' - xi''
+  E2 := K.E2 - xi''
+  phi1 := K.phi1
+  psi1 := K.psi1
+  psi2 := K.psi2
+  lapPhi := K.lapPhi
+  lapPsi := K.lapPsi
+
+/-- The Bardeen data is invariant under the scalar gauge transformation. -/
+lemma bardeenData_gauge (K : ScalarKinematics) (xi0 xi0' xi' xi'' : ℝ) (ha : K.a ≠ 0) :
+    bardeenData (gaugeKinematics K xi0 xi0' xi' xi'') = bardeenData K := by
+  ext
+  · simp only [bardeenData, gaugeKinematics]
+    exact bardeenPhi_invariant K.a K.a1 K.phi K.B K.E1 K.B1 K.E2 xi0 xi0' xi' xi'' ha
+  · simp only [bardeenData, gaugeKinematics]
+    exact bardeenPsi_invariant K.a K.a1 K.psi K.B K.E1 xi0 xi' ha
+  · rfl
+  · rfl
+  · rfl
+  · rfl
+  · rfl
+
+/-- The perturbed field equations are invariant under the scalar gauge
+transformation. -/
+lemma perturbedFieldEq_gauge (K : ScalarKinematics) (T : ScalarStress) (H H1 ρ p κ : ℝ)
+    (xi0 xi0' xi' xi'' : ℝ) (ha : K.a ≠ 0) :
+    PerturbedFieldEq K.a H H1 ρ p κ (bardeenData (gaugeKinematics K xi0 xi0' xi' xi'')) T ↔
+      PerturbedFieldEq K.a H H1 ρ p κ (bardeenData K) T := by
+  rw [bardeenData_gauge K xi0 xi0' xi' xi'' ha]
 
 end FLRW
 

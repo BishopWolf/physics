@@ -579,6 +579,17 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `Cosmology.FLRW.anisotropicSource_eq_bardeen` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.bardeenPhi_eq_bardeenPsi_of_no_anisotropic` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.anisotropicSource_gauge` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.ScalarStress` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.BardeenData` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.energyEquation` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.momentumEquation` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.pressureEquation` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.PerturbedFieldEq` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.ScalarKinematics` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenData` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.gaugeKinematics` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenData_gauge` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.perturbedFieldEq_gauge` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
