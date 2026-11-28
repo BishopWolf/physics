@@ -31,11 +31,14 @@ transformation and the Bardeen potentials are left to a later increment.
   perturbed FLRW metric.
 - `perturbationMetric_zero`, `perturbedMetric_zero` : background recovery.
 - `perturbationMetric_symm` : symmetry from a symmetric `E`.
+- `bardeenPhi`, `bardeenPsi` : the gauge-invariant Bardeen potentials.
+- `bardeenPhi_invariant`, `bardeenPsi_invariant` : gauge invariance.
 
 ## iii. Table of contents
 
 - A. The scalar-sector data
 - B. The perturbed metric
+- C. The gauge transformation and the Bardeen potentials
 
 ## iv. References
 
@@ -112,6 +115,51 @@ lemma perturbationMetric_symm (S : FLRWSpacetime) (P : ScalarPerturbation)
     IsSymm (perturbationMetric S P x) := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp [perturbationMetric, hE, Matrix.transpose_apply]
+
+/-! ## C. The gauge transformation and the Bardeen potentials -/
+
+/-- The gauge-transformed lapse potential `phi - xi0' - (a'/a) xi0`. -/
+noncomputable def gaugePhi (a a' phi xi0 xi0' : ℝ) : ℝ :=
+  phi - xi0' - (a' / a) * xi0
+
+/-- The gauge-transformed curvature potential `psi + (a'/a) xi0`. -/
+noncomputable def gaugePsi (a a' psi xi0 : ℝ) : ℝ :=
+  psi + (a' / a) * xi0
+
+/-- The gauge-transformed shift gradient `B + xi0 - xi'`. -/
+noncomputable def gaugeB (B xi0 xi' : ℝ) : ℝ :=
+  B + xi0 - xi'
+
+/-- The gauge-transformed second-gradient scalar `E - xi`. -/
+noncomputable def gaugeE (E xi : ℝ) : ℝ :=
+  E - xi
+
+/-- The Bardeen lapse potential `Phi = phi + (a'/a)(B - E') + (B' - E'')`. -/
+noncomputable def bardeenPhi (a a' phi B E' B' E'' : ℝ) : ℝ :=
+  phi + (a' / a) * (B - E') + (B' - E'')
+
+/-- The Bardeen curvature potential `Psi = psi - (a'/a)(B - E')`. -/
+noncomputable def bardeenPsi (a a' psi B E' : ℝ) : ℝ :=
+  psi - (a' / a) * (B - E')
+
+/-- The Bardeen lapse potential is invariant under the scalar gauge
+transformation. -/
+lemma bardeenPhi_invariant (a a' phi B E' B' E'' xi0 xi0' xi' xi'') (ha : a ≠ 0) :
+    bardeenPhi a a' (gaugePhi a a' phi xi0 xi0') (gaugeB B xi0 xi') (E' - xi')
+        (B' + xi0' - xi'') (E'' - xi'') =
+      bardeenPhi a a' phi B E' B' E'' := by
+  simp only [bardeenPhi, gaugePhi, gaugeB]
+  field_simp
+  ring
+
+/-- The Bardeen curvature potential is invariant under the scalar gauge
+transformation. -/
+lemma bardeenPsi_invariant (a a' psi B E' xi0 xi') (ha : a ≠ 0) :
+    bardeenPsi a a' (gaugePsi a a' psi xi0) (gaugeB B xi0 xi') (E' - xi') =
+      bardeenPsi a a' psi B E' := by
+  simp only [bardeenPsi, gaugePsi, gaugeB]
+  field_simp
+  ring
 
 end FLRW
 

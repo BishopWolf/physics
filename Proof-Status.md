@@ -565,6 +565,14 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `Cosmology.FLRW.perturbationMetric_zero` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.perturbedMetric_zero` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.perturbationMetric_symm` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.gaugePhi` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.gaugePsi` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.gaugeB` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.gaugeE` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenPhi` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenPsi` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenPhi_invariant` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenPsi_invariant` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
