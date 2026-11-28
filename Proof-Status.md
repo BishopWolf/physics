@@ -552,6 +552,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ppnGij_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_ppnG00` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hasDerivAt_ppnGij` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.lightDeflectionFactor` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.perihelionPrecessionFactor` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.nordtvedtParameter` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.lightDeflectionFactor_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.perihelionPrecessionFactor_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.nordtvedtParameter_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

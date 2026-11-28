@@ -34,12 +34,15 @@ comparison is to be made.
 - `ppnG00_gr`, `ppnGij_gr` : those components at the GR parameter point.
 - `hasDerivAt_ppnG00`, `hasDerivAt_ppnGij` : the Newtonian-limit slopes
   `d g_00 / dU = 2` and `d g_ij / dU = 2 gamma delta_ij` at `U = 0`.
+- `lightDeflectionFactor`, `perihelionPrecessionFactor`, `nordtvedtParameter` :
+  the Solar-System observables, with their GR-point values `1`, `1`, `0`.
 
 ## iii. Table of contents
 
 - A. The parameters
 - B. The leading metric
 - C. The Newtonian limit
+- D. Solar-System observables
 
 ## iv. References
 
@@ -149,5 +152,36 @@ lemma hasDerivAt_ppnGij (gamma : ℝ) (i j : Fin 3) :
   convert hg using 1
   · funext U; simp [Pi.add_apply]
   · ring
+
+/-! ## D. Solar-System observables -/
+
+/-- The light-deflection factor `(1 + gamma) / 2`, equal to `1` in general
+relativity. -/
+noncomputable def lightDeflectionFactor (P : PPNParameters) : ℝ :=
+  (1 + P.gamma) / 2
+
+/-- The perihelion-precession factor `(2 + 2 gamma - beta) / 3`, equal to `1` in
+general relativity. -/
+noncomputable def perihelionPrecessionFactor (P : PPNParameters) : ℝ :=
+  (2 + 2 * P.gamma - P.beta) / 3
+
+/-- The Nordtvedt parameter `eta_N = 4 beta - gamma - 3 - (10/3) xi - alpha_1
++ (2/3) alpha_2 - (2/3) zeta_1 - (1/3) zeta_2`, equal to `0` in general
+relativity. -/
+noncomputable def nordtvedtParameter (P : PPNParameters) : ℝ :=
+  4 * P.beta - P.gamma - 3 - (10 / 3) * P.xi - P.alpha1 + (2 / 3) * P.alpha2
+    - (2 / 3) * P.zeta1 - (1 / 3) * P.zeta2
+
+/-- In general relativity the light-deflection factor is `1`. -/
+lemma lightDeflectionFactor_gr : lightDeflectionFactor grParameters = 1 := by
+  norm_num [lightDeflectionFactor, grParameters]
+
+/-- In general relativity the perihelion-precession factor is `1`. -/
+lemma perihelionPrecessionFactor_gr : perihelionPrecessionFactor grParameters = 1 := by
+  norm_num [perihelionPrecessionFactor, grParameters]
+
+/-- In general relativity the Nordtvedt parameter is `0`. -/
+lemma nordtvedtParameter_gr : nordtvedtParameter grParameters = 0 := by
+  norm_num [nordtvedtParameter, grParameters]
 
 end GeneralRelativity
