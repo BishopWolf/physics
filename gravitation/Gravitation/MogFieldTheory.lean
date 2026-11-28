@@ -6,7 +6,12 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.FunProp
 
 /-!
 # MOG / STVG as a field theory: action and field equations
@@ -119,5 +124,22 @@ Euler–Lagrange residual of the Proca action vanishes. -/
 lemma procaStationarity_iff (mu phi phi'' : ℝ) :
     procaEulerLagrange1D mu phi phi'' = 0 ↔ procaResidual phi'' mu phi = 0 := by
   rw [procaEulerLagrange1D_eq]
+
+/-- The partial derivative of the Proca Lagrangian with respect to the field is
+`-mu^2 phi`. -/
+lemma procaLagrangian1D_deriv_phi (mu phi phi' : ℝ) :
+    deriv (fun p : ℝ => procaLagrangian1D mu p phi') phi = -mu ^ 2 * phi := by
+  change deriv ((fun p : ℝ => (1 / 2) * phi' ^ 2) - (fun p => (1 / 2) * mu ^ 2 * p ^ 2)) phi = -mu ^ 2 * phi
+  rw [deriv_sub (by fun_prop) (by fun_prop)]
+  simp
+  ring
+
+/-- The partial derivative of the Proca Lagrangian with respect to the field
+derivative is `phi'`. -/
+lemma procaLagrangian1D_deriv_phi' (mu phi phi' : ℝ) :
+    deriv (fun q : ℝ => procaLagrangian1D mu phi q) phi' = phi' := by
+  change deriv ((fun q : ℝ => (1 / 2) * q ^ 2) - (fun _ => (1 / 2) * mu ^ 2 * phi ^ 2)) phi' = phi'
+  rw [deriv_sub (by fun_prop) (by fun_prop)]
+  simp
 
 end GeneralRelativity
