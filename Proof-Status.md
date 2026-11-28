@@ -590,6 +590,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `Cosmology.FLRW.gaugeKinematics` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.bardeenData_gauge` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.perturbedFieldEq_gauge` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenEvolution` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

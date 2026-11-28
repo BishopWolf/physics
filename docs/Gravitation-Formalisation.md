@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1546 declarations, 935 of them theorem-like. An independent Vulkan
+contains 1547 declarations, 936 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1546 declarations, 935 of them theorem-like; no declaration uses `sorry`,
+1547 declarations, 936 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -669,7 +669,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.SchwarzschildManifold` | 34 |
 | `Gravitation.KruskalSzekeres` | 33 |
 | `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 31 |
-| `Gravitation.Perturbation` | 30 |
+| `Gravitation.Perturbation` | 31 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame` | 25 |
 | `Gravitation.Relativity.Modified.PPNParameters` | 25 |
 | `Gravitation.Relativity.General.Kerr.Basic` | 24 |
@@ -782,9 +782,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Metrics.SpaceTimeDerivBridge` | 1 |
 | `Gravitation.Relativity.Tensors.PerfectFluidStressEnergy` | 1 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1546** |
+| **Total** | **1547** |
 
-All 1546 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1547 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

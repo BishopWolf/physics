@@ -7,6 +7,7 @@ module
 
 public import Gravitation.Cosmology.FLRW.Basic
 import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.Linarith
 
 /-!
 # Linear scalar perturbations of an FLRW background
@@ -50,6 +51,9 @@ transformation.
 - `PerturbedFieldEq` : the bundle of the three equations.
 - `bardeenData_gauge`, `perturbedFieldEq_gauge` : gauge invariance of the
   Bardeen data and of the field equations.
+- `bardeenEvolution` : the Bardeen evolution (master) equation, obtained from
+  the energy and pressure equations in a perfect fluid with no anisotropic
+  stress.
 
 ## iii. Table of contents
 
@@ -353,6 +357,24 @@ lemma perturbedFieldEq_gauge (K : ScalarKinematics) (T : ScalarStress) (H H1 ρ 
     PerturbedFieldEq K.a H H1 ρ p κ (bardeenData (gaugeKinematics K xi0 xi0' xi' xi'')) T ↔
       PerturbedFieldEq K.a H H1 ρ p κ (bardeenData K) T := by
   rw [bardeenData_gauge K xi0 xi0' xi' xi'' ha]
+
+/-- The Bardeen evolution (master) equation: in a perfect fluid with
+`deltaP = c_s^2 deltaRho` and no anisotropic stress (so `Phi = Psi`), the
+energy and pressure equations combine to
+`Psi'' + 3 H (1 + c_s^2) Psi' + (2 H' + (1 + 3 c_s^2) H^2) Phi - c_s^2 lap Phi = 0`. -/
+lemma bardeenEvolution (a H H1 κ c_s : ℝ) (D : BardeenData) (T : ScalarStress)
+    (hPhi : D.Phi = D.Psi) (hPhi1 : D.Phi1 = D.Psi1) (hLap : D.lapPhi = D.lapPsi)
+    (hcs : T.deltaP = c_s ^ 2 * T.deltaRho)
+    (hE : energyEquation a H D T κ) (hP : pressureEquation a H H1 D T κ) :
+    D.Psi2 + 3 * H * (1 + c_s ^ 2) * D.Psi1
+      + (2 * H1 + (1 + 3 * c_s ^ 2) * H ^ 2) * D.Phi - c_s ^ 2 * D.lapPhi = 0 := by
+  unfold energyEquation at hE
+  unfold pressureEquation at hP
+  rw [hPhi] at hE
+  rw [hPhi, hPhi1, hLap] at hP
+  rw [hcs] at hP
+  rw [hPhi, hLap]
+  nlinarith [hE, hP]
 
 end FLRW
 
