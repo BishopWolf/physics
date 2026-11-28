@@ -575,6 +575,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `Cosmology.FLRW.bardeenPsi` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.bardeenPhi_invariant` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.bardeenPsi_invariant` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.anisotropicSource` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.anisotropicSource_eq_bardeen` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.bardeenPhi_eq_bardeenPsi_of_no_anisotropic` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `Cosmology.FLRW.anisotropicSource_gauge` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |

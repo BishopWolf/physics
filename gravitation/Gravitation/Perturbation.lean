@@ -22,7 +22,10 @@ derivative operator is needed.  The perturbed metric is the background metric
 plus the scalar perturbation, and the module proves that the perturbation
 vanishes for the zero data (background recovery) and that the perturbation is
 symmetric whenever the second-gradient data `E` is symmetric.  The gauge
-transformation and the Bardeen potentials are left to a later increment.
+transformation and the Bardeen potentials are proved invariant, and the
+anisotropic (ij-traceless) sector of the perturbed field equations is started:
+its gauge-invariant source is `bardeenPhi - bardeenPsi`, so the two Bardeen
+potentials coincide when the anisotropic stress vanishes.
 
 ## ii. Key results
 
@@ -33,12 +36,18 @@ transformation and the Bardeen potentials are left to a later increment.
 - `perturbationMetric_symm` : symmetry from a symmetric `E`.
 - `bardeenPhi`, `bardeenPsi` : the gauge-invariant Bardeen potentials.
 - `bardeenPhi_invariant`, `bardeenPsi_invariant` : gauge invariance.
+- `anisotropicSource`, `anisotropicSource_eq_bardeen` : the gauge-invariant
+  anisotropic (ij-traceless) source `bardeenPhi - bardeenPsi`.
+- `bardeenPhi_eq_bardeenPsi_of_no_anisotropic` : the Bardeen potentials
+  coincide when the anisotropic stress vanishes.
+- `anisotropicSource_gauge` : gauge invariance of the anisotropic source.
 
 ## iii. Table of contents
 
 - A. The scalar-sector data
 - B. The perturbed metric
 - C. The gauge transformation and the Bardeen potentials
+- D. The perturbed field equations: the anisotropic sector
 
 ## iv. References
 
@@ -160,6 +169,49 @@ lemma bardeenPsi_invariant (a a' psi B E' xi0 xi') (ha : a ≠ 0) :
   simp only [bardeenPsi, gaugePsi, gaugeB]
   field_simp
   ring
+
+/-! ## D. The perturbed field equations: the anisotropic sector -/
+
+/-- The gauge-invariant anisotropic (ij-traceless) source of the perturbed
+field equations, `bardeenPhi - bardeenPsi`, written out in the metric data:
+`(phi - psi) + 2 (a'/a)(B - E') + (B' - E'')`. -/
+noncomputable def anisotropicSource (a a' phi psi B E' B' E'' : ℝ) : ℝ :=
+  (phi - psi) + 2 * (a' / a) * (B - E') + (B' - E'')
+
+/-- The anisotropic source is the difference of the Bardeen potentials. -/
+lemma anisotropicSource_eq_bardeen (a a' phi psi B E' B' E'' : ℝ) :
+    anisotropicSource a a' phi psi B E' B' E'' =
+      bardeenPhi a a' phi B E' B' E'' - bardeenPsi a a' psi B E' := by
+  simp only [anisotropicSource, bardeenPhi, bardeenPsi]
+  ring
+
+/-- When the anisotropic stress vanishes, the two Bardeen potentials coincide:
+the ij-traceless field equation forces `Phi = Psi`. -/
+lemma bardeenPhi_eq_bardeenPsi_of_no_anisotropic (a a' phi psi B E' B' E'' κ sigma : ℝ)
+    (h : anisotropicSource a a' phi psi B E' B' E'' = κ * sigma) (hs : sigma = 0) :
+    bardeenPhi a a' phi B E' B' E'' = bardeenPsi a a' psi B E' := by
+  rw [hs, mul_zero] at h
+  rw [anisotropicSource_eq_bardeen a a' phi psi B E' B' E''] at h
+  exact sub_eq_zero.mp h
+
+/-- The anisotropic source is invariant under the scalar gauge transformation,
+so the anisotropic field equation is gauge-invariant. -/
+lemma anisotropicSource_gauge (a a' phi psi B E' B' E'' xi0 xi0' xi' xi'') (ha : a ≠ 0) :
+    anisotropicSource a a' (gaugePhi a a' phi xi0 xi0') (gaugePsi a a' psi xi0)
+        (gaugeB B xi0 xi') (E' - xi') (B' + xi0' - xi'') (E'' - xi'') =
+      anisotropicSource a a' phi psi B E' B' E'' := by
+  calc
+    anisotropicSource a a' (gaugePhi a a' phi xi0 xi0') (gaugePsi a a' psi xi0)
+        (gaugeB B xi0 xi') (E' - xi') (B' + xi0' - xi'') (E'' - xi'') =
+        bardeenPhi a a' (gaugePhi a a' phi xi0 xi0') (gaugeB B xi0 xi')
+          (E' - xi') (B' + xi0' - xi'') (E'' - xi'') -
+          bardeenPsi a a' (gaugePsi a a' psi xi0) (gaugeB B xi0 xi') (E' - xi') :=
+      anisotropicSource_eq_bardeen _ _ _ _ _ _ _ _
+    _ = bardeenPhi a a' phi B E' B' E'' - bardeenPsi a a' psi B E' := by
+      rw [bardeenPhi_invariant a a' phi B E' B' E'' xi0 xi0' xi' xi'' ha,
+        bardeenPsi_invariant a a' psi B E' xi0 xi' ha]
+    _ = anisotropicSource a a' phi psi B E' B' E'' :=
+      (anisotropicSource_eq_bardeen a a' phi psi B E' B' E'').symm
 
 end FLRW
 
