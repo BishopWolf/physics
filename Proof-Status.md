@@ -560,6 +560,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.lightDeflectionFactor_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.perihelionPrecessionFactor_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.nordtvedtParameter_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.bransDickeGamma` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.bransDickeGamma_eq` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.bransDickeGamma_lt_one` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.bransDickeGamma_zero` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.ScalarPerturbation` | `Gravitation/Perturbation.lean` | (none) | proved |
 | `Cosmology.FLRW.ScalarPerturbation.zero` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `Cosmology.FLRW.perturbationMetric` | `Gravitation/Perturbation.lean` | propext, Classical.choice, Quot.sound | proved |

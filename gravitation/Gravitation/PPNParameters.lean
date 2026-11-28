@@ -36,6 +36,9 @@ comparison is to be made.
   `d g_00 / dU = 2` and `d g_ij / dU = 2 gamma delta_ij` at `U = 0`.
 - `lightDeflectionFactor`, `perihelionPrecessionFactor`, `nordtvedtParameter` :
   the Solar-System observables, with their GR-point values `1`, `1`, `0`.
+- `bransDickeGamma` : the Brans–Dicke parameter `gamma = (1 + omega)/(2 + omega)`,
+  with `bransDickeGamma_lt_one` (`gamma < 1` for `omega > -2`) and
+  `bransDickeGamma_zero` (`gamma = 1/2` at `omega = 0`).
 
 ## iii. Table of contents
 
@@ -43,6 +46,7 @@ comparison is to be made.
 - B. The leading metric
 - C. The Newtonian limit
 - D. Solar-System observables
+- E. Theory parameters: Brans–Dicke
 
 ## iv. References
 
@@ -183,5 +187,34 @@ lemma perihelionPrecessionFactor_gr : perihelionPrecessionFactor grParameters = 
 /-- In general relativity the Nordtvedt parameter is `0`. -/
 lemma nordtvedtParameter_gr : nordtvedtParameter grParameters = 0 := by
   norm_num [nordtvedtParameter, grParameters]
+
+/-! ## E. Theory parameters: Brans–Dicke -/
+
+/-- The Brans–Dicke post-Newtonian parameter `gamma = (1 + omega)/(2 + omega)`,
+with `omega` the Brans–Dicke coupling.  The general-relativistic limit is the
+`omega -> infinity` limit, approached from below. -/
+noncomputable def bransDickeGamma (omega : ℝ) : ℝ :=
+  (1 + omega) / (2 + omega)
+
+/-- `gamma = 1 - 1/(2 + omega)` for `omega != -2`. -/
+lemma bransDickeGamma_eq (omega : ℝ) (h : omega ≠ -2) :
+    bransDickeGamma omega = 1 - 1 / (2 + omega) := by
+  unfold bransDickeGamma
+  have h2 : 2 + omega ≠ 0 := by intro hz; apply h; linarith
+  field_simp [h2]
+  ring
+
+/-- The Brans–Dicke `gamma` is strictly below the general-relativistic value
+`1` for every `omega > -2`. -/
+lemma bransDickeGamma_lt_one (omega : ℝ) (h : -2 < omega) :
+    bransDickeGamma omega < 1 := by
+  rw [bransDickeGamma_eq omega (by linarith)]
+  have h2 : 0 < 2 + omega := by linarith
+  have hpos : 0 < 1 / (2 + omega) := by positivity
+  linarith
+
+/-- At `omega = 0` the Brans–Dicke parameter is `gamma = 1/2`. -/
+lemma bransDickeGamma_zero : bransDickeGamma 0 = 1 / 2 := by
+  norm_num [bransDickeGamma]
 
 end GeneralRelativity
