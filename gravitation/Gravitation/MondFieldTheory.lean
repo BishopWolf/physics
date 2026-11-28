@@ -26,6 +26,8 @@ the paper.
 ## ii. Key results
 
 - `mondMu` : the interpolating function `mu(x) = x / sqrt (1 + x^2)`.
+- `tendsto_mondMu_div_self` : the weak-field limit `mu(x) / x → 1` as `x → 0`.
+- `mondMu_le_self` : `mu(x) ≤ x` on the nonnegative axis.
 - `aqualActionDensity` : the AQUAL Lagrangian density at a point.
 - `aqualFieldResidual` : `div (mu grad phi) - 4 pi G rho`.
 - `IsAqualSolution` : the field equation holds at a point.
@@ -62,6 +64,34 @@ lemma mondMu_zero : mondMu 0 = 0 := by
 lemma mondMu_pos {x : ℝ} (hx : 0 < x) : 0 < mondMu x := by
   unfold mondMu
   positivity
+
+/-- Weak-field (Newtonian) limit of the interpolating function: `mu(x) / x → 1`
+as `x → 0` through nonzero values, so `mu(x) ~ x` in the high-acceleration
+regime. -/
+lemma tendsto_mondMu_div_self :
+    Filter.Tendsto (fun x => mondMu x / x) (nhdsWithin 0 ({0}ᶜ : Set ℝ)) (nhds 1) := by
+  have h : (fun x => mondMu x / x) =ᶠ[nhdsWithin 0 ({0}ᶜ : Set ℝ)]
+      (fun x => 1 / Real.sqrt (1 + x ^ 2)) := by
+    filter_upwards [self_mem_nhdsWithin] with x hx
+    simp only [mondMu]
+    field_simp [hx]
+    exact div_self (by simpa using hx)
+  have h' : Filter.Tendsto (fun x => 1 / Real.sqrt (1 + x ^ 2))
+      (nhdsWithin 0 ({0}ᶜ : Set ℝ)) (nhds 1) := by
+    have h2c : Continuous (fun x : ℝ => Real.sqrt (1 + x ^ 2)) :=
+      Real.continuous_sqrt.comp (continuous_const.add (continuous_id.pow 2))
+    have h3c : Continuous (fun x : ℝ => 1 / Real.sqrt (1 + x ^ 2)) :=
+      continuous_const.div h2c (fun x => by positivity)
+    simpa using (h3c.tendsto 0).mono_left (nhdsWithin_le_nhds (a := 0) (s := ({0}ᶜ : Set ℝ)))
+  exact h'.congr' h.symm
+
+/-- The interpolating function is bounded by the identity on the nonnegative
+axis: `mu(x) ≤ x` for `x ≥ 0`. -/
+lemma mondMu_le_self {x : ℝ} (hx : 0 ≤ x) : mondMu x ≤ x := by
+  unfold mondMu
+  rw [div_le_iff₀ (by positivity : (0 : ℝ) < Real.sqrt (1 + x ^ 2))]
+  simpa using mul_le_mul_of_nonneg_left
+    (Real.one_le_sqrt (x := 1 + x ^ 2) |>.mpr (by nlinarith : (1 : ℝ) ≤ 1 + x ^ 2)) hx
 
 /-! ## B. Action and field equation -/
 

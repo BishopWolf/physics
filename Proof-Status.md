@@ -530,6 +530,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.mondMu` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_zero` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_pos` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.tendsto_mondMu_div_self` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.mondMu_le_self` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.aqualActionDensity` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.aqualFieldResidual` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsAqualSolution` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
