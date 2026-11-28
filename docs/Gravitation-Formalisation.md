@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1560 declarations, 946 of them theorem-like. An independent Vulkan
+contains 1562 declarations, 947 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1560 declarations, 946 of them theorem-like; no declaration uses `sorry`,
+1562 declarations, 947 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -687,12 +687,12 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.General.Schwarzschild.ElectricWeyl` | 16 |
 | `Gravitation.Relativity.Modified.FRGravity` | 15 |
 | `Gravitation.WaveEnergy` | 15 |
+| `Gravitation.MogFieldTheory` | 15 |
 | `Gravitation.Relativity.General.GeodesicSystem` | 14 |
 | `Gravitation.Relativity.Metrics.CurvatureBridge` | 14 |
 | `Gravitation.Relativity.Modified.MOND` | 14 |
 | `Gravitation.Relativity.Modified.Teleparallel.FLRWTorsion` | 14 |
 | `Gravitation.ReducedWave3D` | 13 |
-| `Gravitation.MogFieldTheory` | 13 |
 | `Gravitation.Cosmology.FLRW.Basic` | 12 |
 | `Gravitation.Cosmology.FLRW.FriedmannEquations` | 12 |
 | `Gravitation.GaugeRecovery` | 12 |
@@ -782,9 +782,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Metrics.SpaceTimeDerivBridge` | 1 |
 | `Gravitation.Relativity.Tensors.PerfectFluidStressEnergy` | 1 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1560** |
+| **Total** | **1562** |
 
-All 1560 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1562 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

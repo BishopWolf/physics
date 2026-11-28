@@ -10,8 +10,10 @@ public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.FunProp
+import Mathlib.Tactic.Ring
 
 /-!
 # MOG / STVG as a field theory: action and field equations
@@ -39,12 +41,19 @@ post-Newtonian or stability statement is made.
   action density and its Euler–Lagrange residual.
 - `procaEulerLagrange1D_eq`, `procaStationarity_iff` : the residual is the
   Proca residual, so the field equation is the stationarity condition.
+- `procaLagrangian1D_deriv_phi`, `procaLagrangian1D_deriv_phi'`,
+  `procaLagrangian1D_first_variation` : the partial derivatives and the first
+  variation of the Proca Lagrangian.
+- `procaFirstVariationIntegral`,
+  `proca_first_variation_eq_neg_integral_residual` : the first-variation
+  integral equals minus the integral of the Euler–Lagrange residual.
 
 ## iii. Table of contents
 
 - A. The action density
 - B. The field equations
 - C. The one-dimensional Proca variation
+- D. The first-variation integral
 
 ## iv. References
 
@@ -151,6 +160,46 @@ lemma procaLagrangian1D_first_variation (mu phi phi' psi psi' : ℝ) :
     (fun t => (1 / 2) * mu ^ 2 * (phi + t * psi) ^ 2)) 0 = phi' * psi' - mu ^ 2 * phi * psi
   rw [deriv_sub (by fun_prop) (by fun_prop)]
   simp
+  ring
+
+/-! ## D. The first-variation integral -/
+
+/-- The first variation of the one-dimensional Proca action on an interval,
+`∫ (phi' psi' - mu^2 phi psi)`. -/
+noncomputable def procaFirstVariationIntegral (mu : ℝ) (φ φ' ψ ψ' : ℝ → ℝ) (a b : ℝ) : ℝ :=
+  ∫ x in a..b, (φ' x * ψ' x - mu ^ 2 * φ x * ψ x) ∂MeasureTheory.volume
+
+/-- On an interval, with the test function vanishing at both endpoints, the
+first variation of the Proca action is minus the integral of the Euler–Lagrange
+residual against the test function. -/
+theorem proca_first_variation_eq_neg_integral_residual
+    (mu : ℝ) (φ φ' φ'' ψ ψ' : ℝ → ℝ) (a b : ℝ)
+    (hφ' : ContinuousOn φ' (Set.uIcc a b)) (hψ : ContinuousOn ψ (Set.uIcc a b))
+    (hφ'' : ∀ x ∈ Set.Ioo (min a b) (max a b), HasDerivAt φ' (φ'' x) x)
+    (hψ' : ∀ x ∈ Set.Ioo (min a b) (max a b), HasDerivAt ψ (ψ' x) x)
+    (hiφ'' : IntervalIntegrable φ'' MeasureTheory.volume a b)
+    (hiψ' : IntervalIntegrable ψ' MeasureTheory.volume a b)
+    (hiφψ : IntervalIntegrable (fun x => mu ^ 2 * φ x * ψ x) MeasureTheory.volume a b)
+    (hiφ'ψ' : IntervalIntegrable (fun x => φ' x * ψ' x) MeasureTheory.volume a b)
+    (hψa : ψ a = 0) (hψb : ψ b = 0) :
+    procaFirstVariationIntegral mu φ φ' ψ ψ' a b =
+      -∫ x in a..b, (φ'' x + mu ^ 2 * φ x) * ψ x ∂MeasureTheory.volume := by
+  unfold procaFirstVariationIntegral
+  rw [intervalIntegral.integral_sub hiφ'ψ' hiφψ]
+  have hφ''ψ : IntervalIntegrable (fun x => φ'' x * ψ x) MeasureTheory.volume a b :=
+    hiφ''.mul_continuousOn hψ
+  have hIBP : (∫ x in a..b, φ' x * ψ' x ∂MeasureTheory.volume)
+      = -∫ x in a..b, φ'' x * ψ x ∂MeasureTheory.volume := by
+    rw [intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt
+      hφ' hψ hφ'' hψ' hiφ'' hiψ', hψa, hψb]
+    ring
+  rw [hIBP]
+  have hsplit : (∫ x in a..b, (φ'' x + mu ^ 2 * φ x) * ψ x ∂MeasureTheory.volume)
+      = (∫ x in a..b, φ'' x * ψ x ∂MeasureTheory.volume) +
+        (∫ x in a..b, mu ^ 2 * φ x * ψ x ∂MeasureTheory.volume) := by
+    rw [← intervalIntegral.integral_add hφ''ψ hiφψ]
+    exact intervalIntegral.integral_congr (fun x _ => by ring)
+  rw [hsplit]
   ring
 
 end GeneralRelativity

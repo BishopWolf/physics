@@ -540,6 +540,8 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.procaLagrangian1D_deriv_phi` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.procaLagrangian1D_deriv_phi'` | `Gravitation/MogFieldTheory.lean` | - | unverified |
 | `GeneralRelativity.procaLagrangian1D_first_variation` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaFirstVariationIntegral` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.proca_first_variation_eq_neg_integral_residual` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_zero` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_pos` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
