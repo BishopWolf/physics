@@ -115,6 +115,7 @@ public import Gravitation.Relativity.Modified.MassiveGravity.Basic
 public import Gravitation.Relativity.Modified.MassiveGravity.DRGT
 public import Gravitation.Relativity.Modified.MassiveGravity.FierzPauli
 public import Gravitation.Relativity.Modified.MassiveGravity.VDVZ
+public import Gravitation.Perturbation
 public import Gravitation.Relativity.Modified.Nordstrom
 public import Gravitation.Relativity.Modified.Ostrogradsky
 public import Gravitation.Relativity.Modified.PPNParameters
