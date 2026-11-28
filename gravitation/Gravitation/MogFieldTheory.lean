@@ -142,4 +142,15 @@ lemma procaLagrangian1D_deriv_phi' (mu phi phi' : ℝ) :
   rw [deriv_sub (by fun_prop) (by fun_prop)]
   simp
 
+/-- The first variation of the Proca Lagrangian along a direction `(psi, psi')`
+is `phi' psi' - mu^2 phi psi`. -/
+lemma procaLagrangian1D_first_variation (mu phi phi' psi psi' : ℝ) :
+    deriv (fun t : ℝ => procaLagrangian1D mu (phi + t * psi) (phi' + t * psi')) 0
+      = phi' * psi' - mu ^ 2 * phi * psi := by
+  change deriv ((fun t : ℝ => (1 / 2) * (phi' + t * psi') ^ 2) -
+    (fun t => (1 / 2) * mu ^ 2 * (phi + t * psi) ^ 2)) 0 = phi' * psi' - mu ^ 2 * phi * psi
+  rw [deriv_sub (by fun_prop) (by fun_prop)]
+  simp
+  ring
+
 end GeneralRelativity
