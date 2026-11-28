@@ -533,6 +533,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.mogEinsteinResidual` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mogEinsteinResidual_eq_zero_iff` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsMogSolution` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaLagrangian1D` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaEulerLagrange1D` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaEulerLagrange1D_eq` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.procaStationarity_iff` | `Gravitation/MogFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_zero` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.mondMu_pos` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |

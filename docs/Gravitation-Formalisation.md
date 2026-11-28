@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1553 declarations, 941 of them theorem-like. An independent Vulkan
+contains 1557 declarations, 943 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1553 declarations, 941 of them theorem-like; no declaration uses `sorry`,
+1557 declarations, 943 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -709,6 +709,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Metrics.CoordinateMetric` | 10 |
 | `Gravitation.Relativity.Modified.EinsteinCartan.Basic` | 10 |
 | `Gravitation.Relativity.Modified.Nordstrom` | 10 |
+| `Gravitation.MogFieldTheory` | 10 |
 | `Gravitation.MondFieldTheory` | 9 |
 | `Gravitation.Relativity.General.InitialData.Basic` | 9 |
 | `Gravitation.Relativity.General.Kerr.RicciCurvature` | 9 |
@@ -728,7 +729,6 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Tensors.RiemannTensor` | 7 |
 | `Gravitation.WaveEnergy3D` | 7 |
 | `Gravitation.WaveEnergy3DWave` | 7 |
-| `Gravitation.MogFieldTheory` | 6 |
 | `Gravitation.Relativity.General.Linearized.GaugeTransform` | 6 |
 | `Gravitation.Relativity.General.Linearized.MinkowskiDalembertian` | 6 |
 | `Gravitation.Relativity.Metrics.Basic` | 6 |
@@ -782,9 +782,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Metrics.SpaceTimeDerivBridge` | 1 |
 | `Gravitation.Relativity.Tensors.PerfectFluidStressEnergy` | 1 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1553** |
+| **Total** | **1557** |
 
-All 1553 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1557 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

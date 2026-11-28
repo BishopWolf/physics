@@ -30,11 +30,16 @@ post-Newtonian or stability statement is made.
 - `procaResidual_mu_zero_eq_zero_iff` : at zero mass it is the Maxwell equation.
 - `mogEinsteinResidual` : one component of the modified Einstein equation.
 - `IsMogSolution` : both field equations hold at a point.
+- `procaLagrangian1D`, `procaEulerLagrange1D` : the one-dimensional Proca
+  action density and its Euler–Lagrange residual.
+- `procaEulerLagrange1D_eq`, `procaStationarity_iff` : the residual is the
+  Proca residual, so the field equation is the stationarity condition.
 
 ## iii. Table of contents
 
 - A. The action density
 - B. The field equations
+- C. The one-dimensional Proca variation
 
 ## iv. References
 
@@ -89,5 +94,30 @@ structure IsMogSolution (G Ecouple T divB mu phiComp : ℝ) : Prop where
   einstein_eq : mogEinsteinResidual G Ecouple T = 0
   /-- The Proca equation holds. -/
   proca_eq : procaResidual divB mu phiComp = 0
+
+/-! ## C. The one-dimensional Proca variation -/
+
+/-- The one-dimensional Proca (Klein–Gordon) Lagrangian density
+`1/2 (phi')^2 - 1/2 mu^2 phi^2`, the shadow of the STVG Proca sector on a
+single component. -/
+noncomputable def procaLagrangian1D (mu phi phi' : ℝ) : ℝ :=
+  1 / 2 * phi' ^ 2 - 1 / 2 * mu ^ 2 * phi ^ 2
+
+/-- The Euler–Lagrange residual `d/dphi L - d/dx (d/dphi' L)` of the
+one-dimensional Proca Lagrangian, `phi'' + mu^2 phi`. -/
+noncomputable def procaEulerLagrange1D (mu phi phi'' : ℝ) : ℝ :=
+  phi'' + mu ^ 2 * phi
+
+/-- The one-dimensional Proca Euler–Lagrange residual is the Proca residual
+with the divergence supplied by `phi''`. -/
+lemma procaEulerLagrange1D_eq (mu phi phi'' : ℝ) :
+    procaEulerLagrange1D mu phi phi'' = procaResidual phi'' mu phi := by
+  simp [procaEulerLagrange1D, procaResidual]
+
+/-- The one-dimensional Proca field equation holds exactly when the
+Euler–Lagrange residual of the Proca action vanishes. -/
+lemma procaStationarity_iff (mu phi phi'' : ℝ) :
+    procaEulerLagrange1D mu phi phi'' = 0 ↔ procaResidual phi'' mu phi = 0 := by
+  rw [procaEulerLagrange1D_eq]
 
 end GeneralRelativity
