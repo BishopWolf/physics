@@ -11,6 +11,7 @@ public import Gravitation.Relativity.Metrics.Christoffel
 public import Gravitation.Relativity.Metrics.Einstein
 public import Gravitation.Relativity.Metrics.Minkowski
 public import Gravitation.Relativity.Metrics.Ricci
+public import Gravitation.Relativity.Metrics.RicciScalar
 public import Gravitation.Relativity.Metrics.Riemann
 public import Gravitation.Relativity.Tensors.EinsteinTensor
 

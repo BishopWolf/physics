@@ -6,6 +6,7 @@ Authors: Alex Vergara Gil
 module
 
 public import Gravitation.Relativity.Metrics.Ricci
+public import Gravitation.Relativity.Metrics.RicciScalar
 
 /-!
 

@@ -71,6 +71,34 @@ if [ "$TIP" != "$REV" ]; then
 fi
 
 declare -A EXPECTED
+# Upstream now ships modules that duplicate the local top-level modules of the
+# same name (the gravity branch has converged with this development); they are
+# kept local and excluded from the vendored copy, exactly like the already-merged
+# IncompressibleSphere.
+declare -A SKIP=(
+  ["PhyslibAlpha/Relativity/General/Schwarzschild/SchwarzschildManifold.lean"]=1
+  ["PhyslibAlpha/Relativity/General/Schwarzschild/KruskalSzekeres.lean"]=1
+  ["PhyslibAlpha/Relativity/General/Schwarzschild/EddingtonFinkelstein.lean"]=1
+  ["PhyslibAlpha/Relativity/General/ManifoldInterface.lean"]=1
+  ["PhyslibAlpha/Relativity/General/Bianchi.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/Divergence3D.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveUniqueness.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveEnergy3DWave.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveCauchy.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/InitialDataInterface.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/ReducedWave3D.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/SobolevInitialData.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveEnergy3D.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveUniqueness3D.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveEnergy3DConservation.lean"]=1
+  ["PhyslibAlpha/Relativity/General/InitialData/WaveEnergy.lean"]=1
+  ["PhyslibAlpha/Relativity/Modified/PPNParameters.lean"]=1
+  ["PhyslibAlpha/Relativity/Modified/AqualVariation.lean"]=1
+  ["PhyslibAlpha/Relativity/Modified/DiracCounting.lean"]=1
+  ["PhyslibAlpha/Relativity/Modified/MondFieldTheory.lean"]=1
+  ["PhyslibAlpha/Relativity/Modified/MOG.lean"]=1
+  ["PhyslibAlpha/Cosmology/FLRW/Perturbation.lean"]=1
+)
 mismatch=0
 
 rewrite() {
@@ -100,6 +128,12 @@ check_subtree() {
   for rel in "${rels[@]}"; do
     if [ "$src" = "PhyslibAlpha/Relativity/General" ] && \
        [ "$rel" = "Schwarzschild/IncompressibleSphere.lean" ]; then
+      continue
+    fi
+    if [ -n "${SKIP["$src/$rel"]+x}" ]; then
+      continue
+    fi
+    if ! git -C "$TMP/repo" cat-file -e "FETCH_HEAD:$src/$rel" 2>/dev/null; then
       continue
     fi
     EXPECTED["$dest/$rel"]=1

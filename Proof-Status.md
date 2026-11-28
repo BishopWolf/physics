@@ -515,7 +515,6 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralizedKronecker.generalizedKroneckerDelta_eq_zero_of_lt` | `Gravitation/Mathematics/GeneralizedKronecker.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralizedKronecker.generalizedKroneckerDelta_five_eq_sum_perm` | `Gravitation/Mathematics/GeneralizedKronecker.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralizedKronecker.perm_fin5_fiber_split` | `Gravitation/Mathematics/GeneralizedKronecker.lean` | propext, Classical.choice, Quot.sound | proved |
-| `mul_eq_one_of_isSymm_of_mul_eq_one` | `Gravitation/Mathematics/MatrixInverse.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem.IsMaximal` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
 | `GeneralRelativity.OrderedDevelopmentSystem.toDevelopmentInterface` | `Gravitation/MaximalDevelopment.lean` | (none) | proved |
@@ -877,6 +876,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Schwarzschild.tidalPart` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.frameRiemann` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.kretschmann_scalar` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.kretschmann_scalar_total` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.tidalPart_eq_electricPart` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.electric_r_from_metric` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.electric_thetatheta_from_metric` | `Gravitation/Relativity/General/Schwarzschild/ElectricWeyl.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -914,11 +914,6 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.weyl_rr` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.weyl_thetatheta` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.weyl_phiphi` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_M` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_metricFn` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_metric` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_metricInv` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.christoffel` | `Gravitation/Relativity/General/SchwarzschildDeSitter/CoordinateCurvature.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.christoffelDeriv` | `Gravitation/Relativity/General/SchwarzschildDeSitter/CoordinateCurvature.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.christoffel_eq` | `Gravitation/Relativity/General/SchwarzschildDeSitter/CoordinateCurvature.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -939,6 +934,7 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.frameSumOfSquares` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.frameSumOfSquares_eq` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.kretschmann` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.kretschmann_total` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.frameRicciTensor` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.weylRic_zero` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.traceRic_eq` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -956,6 +952,11 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.frameCurvatureDerivatives` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.frame_bianchi` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.frame_einstein_conserved` | `Gravitation/Relativity/General/SchwarzschildDeSitter/DeSitterFrame.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Embedding.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_M` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Embedding.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_metricFn` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Embedding.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_metric` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Embedding.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Schwarzschild.SchwarzschildSpacetime.toDeSitter_metricInv` | `Gravitation/Relativity/General/SchwarzschildDeSitter/Embedding.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.MetricTensor` | `Gravitation/Relativity/Metrics/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.MetricTensor.ginv_symm` | `Gravitation/Relativity/Metrics/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.MetricTensor.sum_ginv_mul_g_left` | `Gravitation/Relativity/Metrics/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -1027,12 +1028,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.NullVector` | `Gravitation/Relativity/Metrics/NullVector.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.nullVector_conformal_iff` | `Gravitation/Relativity/Metrics/NullVector.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.CoordinateCurvature.ricciTensor` | `Gravitation/Relativity/Metrics/Ricci.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.CoordinateCurvature.ricciScalar` | `Gravitation/Relativity/Metrics/Ricci.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.CoordinateCurvature.ricciTensor_const` | `Gravitation/Relativity/Metrics/Ricci.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.CoordinateCurvature.ricciScalar_const` | `Gravitation/Relativity/Metrics/Ricci.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ricciScalar` | `Gravitation/Relativity/Metrics/RicciScalar.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ricciScalar_eq_metricTrace` | `Gravitation/Relativity/Metrics/RicciScalar.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ricciScalar_flat` | `Gravitation/Relativity/Metrics/RicciScalar.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.CoordinateCurvature.ricciScalar` | `Gravitation/Relativity/Metrics/RicciScalar.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.CoordinateCurvature.ricciScalar_const` | `Gravitation/Relativity/Metrics/RicciScalar.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.CoordinateCurvature.riemann` | `Gravitation/Relativity/Metrics/Riemann.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.CoordinateCurvature.riemann_eq_riemannFromData` | `Gravitation/Relativity/Metrics/Riemann.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.CoordinateCurvature.riemann_eq_riemannFromData_of_eventuallyEq` | `Gravitation/Relativity/Metrics/Riemann.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -1232,14 +1233,6 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Modified.Lovelock.lovelockContract5_eq_neg_eight_lanczos` | `Gravitation/Relativity/Modified/Lovelock/Contract5.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Lovelock.bach_lanczos_lt_five` | `Gravitation/Relativity/Modified/Lovelock/Contract5.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Lovelock.bach_lanczos_four` | `Gravitation/Relativity/Modified/Lovelock/Contract5.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory` | `Gravitation/Relativity/Modified/MOG.lean` | (none) | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.yukawaEnhancementFactor` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.potential` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.yukawaEnhancementFactor_zero` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.yukawaEnhancementFactor_alpha_zero` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.yukawaEnhancementFactor_mu_zero` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.yukawaEnhancementFactor_bounds` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.MOG.MOGTheory.yukawaEnhancementFactor_tendsto_atTop` | `Gravitation/Relativity/Modified/MOG.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.MOND.MONDTheory` | `Gravitation/Relativity/Modified/MOND.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.MOND.newtonianAcceleration` | `Gravitation/Relativity/Modified/MOND.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.MOND.MONDTheory.deepMONDAcceleration` | `Gravitation/Relativity/Modified/MOND.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -1301,31 +1294,6 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Modified.Ostrogradsky.HigherDerivativeOscillator.hamiltonian` | `Gravitation/Relativity/Modified/Ostrogradsky.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Ostrogradsky.HigherDerivativeOscillator.hamiltonian_add` | `Gravitation/Relativity/Modified/Ostrogradsky.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Ostrogradsky.HigherDerivativeOscillator.ostrogradsky_unbounded_below` | `Gravitation/Relativity/Modified/Ostrogradsky.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.PPNParameters` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.IsFullyConservative` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.IsSemiconservative` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.IsFullyConservative.isSemiconservative` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.grPPN` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.bransDickePPN` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.fRMetricPPN` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.nordstromPPN` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.grPPN_isFullyConservative` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.bransDickePPN_isFullyConservative` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.bransDickePPN_zero_eq_fRMetricPPN` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.lightDeflectionFactor` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.shapiroDelayFactor` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.perihelionPrecessionFactor` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.nordtvedtParameter` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.lightDeflectionFactor_gr` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.lightDeflectionFactor_nordstrom` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.lightDeflectionFactor_fRMetric` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.perihelionPrecessionFactor_gr` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.perihelionPrecessionFactor_nordstrom` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.perihelionPrecessionFactor_bransDicke` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.nordtvedtParameter_gr` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.nordtvedtParameter_bransDicke` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.nordtvedtParameter_fRMetric` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
-| `GeneralRelativity.Modified.PPN.cassini_deviation_bransDickePPN` | `Gravitation/Relativity/Modified/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.TeVeS.TeVeSMetric` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.TeVeS.TeVeSMetric.metric` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.TeVeS.TeVeSMetric.metricInv` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
@@ -1335,6 +1303,12 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.Modified.TeVeS.TeVeSMetric.inv_mul` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.TeVeS.TeVeSMetric.mul_inv` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.TeVeS.TeVeSMetric.metricTensor` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Modified.TeVeS.tevesActionDensity` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Modified.TeVeS.tevesScalarResidual` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Modified.TeVeS.tevesScalarResidual_eq_zero_iff` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Modified.TeVeS.tevesEinsteinResidual` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Modified.TeVeS.tevesEinsteinResidual_eq_zero_iff` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.Modified.TeVeS.IsTeVeSSolution` | `Gravitation/Relativity/Modified/TeVeS.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Teleparallel.Tetrad` | `Gravitation/Relativity/Modified/Teleparallel/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Teleparallel.Tetrad.weitzenbockConnection` | `Gravitation/Relativity/Modified/Teleparallel/Basic.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Modified.Teleparallel.Tetrad.mul_weitzenbockConnection` | `Gravitation/Relativity/Modified/Teleparallel/Basic.lean` | propext, Classical.choice, Quot.sound | proved |

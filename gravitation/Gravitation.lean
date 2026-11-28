@@ -43,7 +43,6 @@ public import Gravitation.Cosmology.FLRW.Curvature
 public import Gravitation.Cosmology.FLRW.FriedmannEquations
 public import Gravitation.Mathematics.Calculus.CoordDeriv
 public import Gravitation.Mathematics.FinSum
-public import Gravitation.Mathematics.MatrixInverse
 public import Gravitation.Mathematics.GeneralizedKronecker
 public import Gravitation.Relativity.General.FrameSumOfSquares
 public import Gravitation.Relativity.General.GeodesicSystem
@@ -109,7 +108,6 @@ public import Gravitation.Relativity.Modified.KaluzaKlein.TriangularFactorizatio
 public import Gravitation.Relativity.Modified.Lovelock.Basic
 public import Gravitation.Relativity.Modified.Lovelock.ConstantCurvature
 public import Gravitation.Relativity.Modified.Lovelock.Contract5
-public import Gravitation.Relativity.Modified.MOG
 public import Gravitation.Relativity.Modified.MOND
 public import Gravitation.Relativity.Modified.MassiveGravity.Basic
 public import Gravitation.Relativity.Modified.MassiveGravity.DRGT
@@ -118,7 +116,6 @@ public import Gravitation.Relativity.Modified.MassiveGravity.VDVZ
 public import Gravitation.Perturbation
 public import Gravitation.Relativity.Modified.Nordstrom
 public import Gravitation.Relativity.Modified.Ostrogradsky
-public import Gravitation.Relativity.Modified.PPNParameters
 public import Gravitation.Relativity.Modified.TeVeS
 public import Gravitation.Relativity.Modified.Teleparallel.Basic
 public import Gravitation.Relativity.Modified.Teleparallel.FLRWTorsion
@@ -130,6 +127,7 @@ public import Gravitation.Relativity.Tensors.PerfectFluidStressEnergy
 public import Gravitation.Relativity.Tensors.RicciTensor
 public import Gravitation.Relativity.Tensors.RiemannTensor
 public import Gravitation.Relativity.Tensors.Tensor2
+public import Gravitation.Relativity.General.SchwarzschildDeSitter.Embedding
 /-!
 
 # General relativity: the Physlib development
