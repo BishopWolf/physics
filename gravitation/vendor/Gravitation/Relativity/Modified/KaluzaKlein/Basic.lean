@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.BigOperators.Fin
 public import Mathlib.LinearAlgebra.Matrix.Notation
+public import Gravitation.Mathematics.FinSum
 public import Gravitation.Relativity.Metrics.MetricTrace
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.FinCases
@@ -48,6 +49,8 @@ symmetry, and assembles the `MetricTensor 5` `kkMetricTensor`.
   37, pp. 895-906 (1926), Sec. 1-2. [ref: Klein1926]
 * Oskar Klein, *The Atomicity of Electricity as a Quantum Theory Law*, *Nature* 118, p. 516 (1926).
   [ref: Klein1926Nature]
+* J. M. Overduin and P. S. Wesson, *Kaluza-Klein Gravity*, *Physics Reports* 283, pp. 303-380
+  (1997), Sec. 2 (https://arxiv.org/pdf/gr-qc/9805018#page=6). [ref: OverduinWesson1997]
 -/
 
 @[expose] public section
@@ -195,12 +198,6 @@ private lemma kkMetricInv_apply_four_four (ginv4 : Tensor2 4) (A : Fin 4 → ℝ
     kkMetricInv ginv4 A φ 4 4 =
       1 / φ ^ 2 + ∑ k : Fin 4, A k * contravariantPotential ginv4 A k := by
   simp [kkMetricInv]
-
-/-- Split a sum over `Fin 5` into its first four terms and the last term. -/
-lemma sum_fin5_split (f : Fin 5 → ℝ) :
-    (∑ k : Fin 5, f k) = (∑ k : Fin 4, f ⟨k.val, by omega⟩) + f 4 := by
-  simp only [Fin.sum_univ_five, Fin.sum_univ_four]
-  rfl
 
 private lemma contravariantPotential_mul_g (M : MetricTensor 4) (A : Fin 4 → ℝ) (b : Fin 4) :
     (∑ k : Fin 4, contravariantPotential M.ginv A k * M.g k b) = A b :=

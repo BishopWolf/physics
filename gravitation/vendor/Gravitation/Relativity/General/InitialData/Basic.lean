@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Algebra.BigOperators.Fin
 public import Gravitation.Relativity.Metrics.Basic
-public import Gravitation.Relativity.Metrics.CovariantDerivTensor2
+public import Gravitation.Relativity.General.InitialData.CovariantDerivTensor2
 public import Gravitation.Relativity.Metrics.RicciScalar
 import Mathlib.Tactic.Linarith
 

@@ -6,6 +6,7 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Gravitation.Mathematics.MatrixInverse
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.FinCases
@@ -26,10 +27,8 @@ spatial curvature `k`, carrying the diagonal line element:
 
 `g = diag(-1, a(t)² / (1 - k r²), a(t)² r², a(t)² r² sin²θ)`.
 
-This module treats the homogeneous, isotropic Friedmann–Lemaître–Robertson–Walker (FLRW) spacetimes
-`FLRWSpacetime` of scale factor `a(t)`, spatial curvature `k`, and coordinate metric `metric`,
-establishes the symmetry and two-sided invertibility of the inverse `metricInv` on the regular chart
-domain, and constructs the resulting `MetricTensor 4` and `CoordinateMetric 4`.
+This module establishes the symmetry and two-sided invertibility of the inverse `metricInv` on the
+regular chart domain, and constructs the resulting `MetricTensor 4` and `CoordinateMetric 4`.
 
 ## ii. Key results
 
@@ -117,6 +116,11 @@ noncomputable def metricInv (S : FLRWSpacetime) (x : Fin 4 → ℝ) : Tensor2 4 
       else ((S.a (x 0)) ^ 2 * (x 1) ^ 2 * Real.sin (x 2) ^ 2)⁻¹
     else 0
 
+/-- Off-diagonal entries of the FLRW inverse metric vanish. -/
+@[simp] lemma metricInv_offdiag (S : FLRWSpacetime) (x : Fin 4 → ℝ) {i j : Fin 4}
+    (hij : i ≠ j) : S.metricInv x i j = 0 := by
+  simp [metricInv, hij]
+
 /-- Symmetry of `FLRWSpacetime.metric`. -/
 lemma metric_symm (S : FLRWSpacetime) (x : Fin 4 → ℝ) : IsSymm (S.metric x) := by
   ext i j
@@ -150,17 +154,17 @@ noncomputable def metricTensor (S : FLRWSpacetime) (x : Fin 4 → ℝ) (ha : S.a
   inv_left := S.metric_mul_inv x ha hr hkr hsin
   inv_right := S.metricInv_mul x ha hr hkr hsin
 
-/-- The FLRW metric at a bundled regular chart point. -/
+/-- The FLRW metric at a point of the regular chart. -/
 noncomputable def RegularPoint.metricTensor {S : FLRWSpacetime} (p : S.RegularPoint) :
     MetricTensor 4 :=
   S.metricTensor p.x p.ha p.hr p.hkr p.hsin
 
-/-- Right inverse identity at a bundled regular chart point. -/
+/-- `g * g⁻¹ = 1` at a point of the regular chart. -/
 lemma RegularPoint.metric_mul_inv {S : FLRWSpacetime} (p : S.RegularPoint) :
     S.metric p.x * S.metricInv p.x = 1 :=
   S.metric_mul_inv p.x p.ha p.hr p.hkr p.hsin
 
-/-- Left inverse identity at a bundled regular chart point. -/
+/-- `g⁻¹ * g = 1` at a point of the regular chart. -/
 lemma RegularPoint.metricInv_mul {S : FLRWSpacetime} (p : S.RegularPoint) :
     S.metricInv p.x * S.metric p.x = 1 :=
   S.metricInv_mul p.x p.ha p.hr p.hkr p.hsin

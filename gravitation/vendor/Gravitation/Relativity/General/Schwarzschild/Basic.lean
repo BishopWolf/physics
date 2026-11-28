@@ -29,10 +29,9 @@ matching to the exterior of `IncompressibleSphere`.
 
 Starting from the line element `g = diag(-f, f⁻¹, r², r² sin²θ)` with radial metric function
 `f = 1 - 2M/r`, where `M` is the mass of `S : SchwarzschildSpacetime`, this module views the metric
-as a `Metric`, computes radial derivatives of the metric and its static Newtonian
-potential `Φ = -M/r`, evaluates the radial Christoffel symbols
-(`Γ^t_{tr}`, `Γ^r_{rr}`, `Γ^r_{θθ}`, `Γ^r_{φφ}`), and computes all six independent Riemann
-components directly from the metric components.
+as a `StaticSpherical.StaticSphericalMetric`, computes radial derivatives of the metric and its static Newtonian
+potential `Φ = -M/r`, and evaluates the radial Christoffel symbols `Γ^t_{tr}` and `Γ^r_{rr}`
+from the metric components.
 
 Note that this module uses the `(-, +, +, +)` signature (`g_tt = -f`), whereas
 `IncompressibleSphere.gttOut` stores the positive factor `f = 1 - r_s / r` directly.
@@ -49,10 +48,8 @@ Note that this module uses the `(-, +, +, +)` signature (`g_tt = -f`), whereas
   `SchwarzschildSpacetime.metric_rr_ofIncompressibleSphere` : exterior matching with
   `IncompressibleSphere`.
 - `SchwarzschildSpacetime.christoffelTtr_from_metric`,
-  `SchwarzschildSpacetime.christoffelRrr_from_metric`,
-  `SchwarzschildSpacetime.christoffelRThetaTheta_from_metric`,
-  `SchwarzschildSpacetime.christoffelRPhiPhi_from_metric` : radial Christoffel symbols derived
-  from the metric.
+  `SchwarzschildSpacetime.christoffelRrr_from_metric` : radial Christoffel symbols derived from
+  the metric.
 
 The coordinate Riemann, Ricci, scalar, and Einstein tensors are proved in
 `Schwarzschild/CoordinateCurvature.lean` from `SchwarzschildSpacetime.toCoordinateMetric`.
@@ -97,9 +94,9 @@ namespace SchwarzschildSpacetime
 /-- The Schwarzschild radial metric function `f(r) = 1 - 2M / r`. -/
 noncomputable def metricFn (S : SchwarzschildSpacetime) (r : ℝ) : ℝ := 1 - 2 * S.M / r
 
-/-- View a Schwarzschild spacetime as a `Metric` with profile `S.metricFn`. -/
+/-- View a Schwarzschild spacetime as a `StaticSpherical.StaticSphericalMetric` with profile `S.metricFn`. -/
 noncomputable def toStaticSpherical (S : SchwarzschildSpacetime) :
-    StaticSpherical.Metric :=
+    StaticSpherical.StaticSphericalMetric :=
   ⟨S.metricFn⟩
 
 /-- The underlying radial metric function of `S.toStaticSpherical` is `S.metricFn`. -/
@@ -140,7 +137,7 @@ lemma r_mul_metricFn (S : SchwarzschildSpacetime) (r : ℝ) (hr : r ≠ 0) :
 /-- The `tt` component of the Schwarzschild metric is `-(1 - 2M/r)`. -/
 lemma metric_tt (S : SchwarzschildSpacetime) (x : Fin 4 → ℝ) :
     S.metric x 0 0 = -(1 - 2 * S.M / x 1) := by
-  simp [metric, toStaticSpherical, StaticSpherical.Metric.metric, metricFn]
+  simp [metric, toStaticSpherical, StaticSpherical.StaticSphericalMetric.metric, metricFn]
 
 /-- The static Newtonian potential is `Φ = -M / r`: `g_tt = -(1 + 2Φ)`. -/
 lemma metric_tt_potential (S : SchwarzschildSpacetime) (x : Fin 4 → ℝ) :
@@ -179,7 +176,7 @@ lemma potential_second_hasDerivAt (S : SchwarzschildSpacetime) (r : ℝ) (hr : r
 /-- The `rr` component of the Schwarzschild metric is `f⁻¹`. -/
 lemma metric_rr (S : SchwarzschildSpacetime) (x : Fin 4 → ℝ) :
     S.metric x 1 1 = (S.metricFn (x 1))⁻¹ := by
-  simp [metric, toStaticSpherical, StaticSpherical.Metric.metric, metricFn]
+  simp [metric, toStaticSpherical, StaticSpherical.StaticSphericalMetric.metric, metricFn]
 
 /-- `f ≠ 0` forces `r - 2M ≠ 0` away from `r = 0`. -/
 lemma sub_ne_zero_of_ne (S : SchwarzschildSpacetime) (r : ℝ) (hr : r ≠ 0) (hf : S.metricFn r ≠ 0) :

@@ -36,7 +36,7 @@ module
 public import Gravitation.Bianchi
 public import Gravitation.ReducedCauchy
 public import Gravitation.Cosmology.FLRW.Basic
-public import Gravitation.Cosmology.FLRW.PerfectFluid
+public import Gravitation.Cosmology.FLRW.FriedmannEquations
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Tactic.FieldSimp

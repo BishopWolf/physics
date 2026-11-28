@@ -41,10 +41,11 @@ public import Gravitation.Cosmology.FLRW.Basic
 public import Gravitation.Cosmology.FLRW.Christoffel
 public import Gravitation.Cosmology.FLRW.Curvature
 public import Gravitation.Cosmology.FLRW.FriedmannEquations
-public import Gravitation.Cosmology.FLRW.PerfectFluid
 public import Gravitation.Mathematics.Calculus.CoordDeriv
+public import Gravitation.Mathematics.FinSum
+public import Gravitation.Mathematics.MatrixInverse
 public import Gravitation.Mathematics.GeneralizedKronecker
-public import Gravitation.Relativity.General.FrameKretschmann
+public import Gravitation.Relativity.General.FrameSumOfSquares
 public import Gravitation.Relativity.General.GeodesicSystem
 public import Gravitation.Relativity.General.GravitationalConstant
 public import Gravitation.Relativity.General.InitialData.AnisotropicSlice
@@ -78,9 +79,9 @@ public import Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame
 public import Gravitation.Relativity.Metrics.Basic
 public import Gravitation.Relativity.Metrics.Christoffel
 public import Gravitation.Relativity.Metrics.ConformalMetric
-public import Gravitation.Relativity.Metrics.CoordDeriv
+public import Gravitation.Relativity.Metrics.SpaceTimeDerivBridge
 public import Gravitation.Relativity.Metrics.CoordinateMetric
-public import Gravitation.Relativity.Metrics.CovariantDerivTensor2
+public import Gravitation.Relativity.General.InitialData.CovariantDerivTensor2
 public import Gravitation.Relativity.Metrics.CurvatureBridge
 public import Gravitation.Relativity.Metrics.CurvatureDerivatives
 public import Gravitation.Relativity.Metrics.Einstein
@@ -93,7 +94,6 @@ public import Gravitation.Relativity.Metrics.Riemann
 public import Gravitation.Relativity.Metrics.RiemannFromData
 public import Gravitation.Relativity.Metrics.StaticSphericalMetric.Basic
 public import Gravitation.Relativity.Metrics.StaticSphericalMetric.Christoffel
-public import Gravitation.Relativity.Metrics.StaticSphericalMetric.RicciCurvature
 public import Gravitation.Relativity.Modified.BransDicke
 public import Gravitation.Relativity.Modified.ChameleonScreening
 public import Gravitation.Relativity.Modified.EinsteinAether
@@ -139,7 +139,7 @@ Umbrella module for the general-relativity development maintained in Physlib
 merged, its modules are vendored under `vendor/Gravitation/Relativity/{General,Metrics,
 Modified,Tensors}/`, `vendor/Gravitation/Cosmology/FLRW/`, and the shared
 helpers under `vendor/Gravitation/{Mathematics,ClassicalMechanics}/` at commit
-`3540573` as `Gravitation.Relativity.*`, `Gravitation.Cosmology.*`,
+`61505fa6` as `Gravitation.Relativity.*`, `Gravitation.Cosmology.*`,
 `Gravitation.Mathematics.*` and `Gravitation.ClassicalMechanics.*`; the namespace
 is still `GeneralRelativity` and the proofs are unchanged, so migrating consists
 of switching these imports back to the corresponding `PhyslibAlpha.*` paths.  The

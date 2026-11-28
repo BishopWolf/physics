@@ -32,7 +32,7 @@ public import Gravitation.CauchyInterfaces
 public import Gravitation.SobolevInitialData
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Gravitation.Cosmology.FLRW.Basic
-public import Gravitation.Cosmology.FLRW.PerfectFluid
+public import Gravitation.Cosmology.FLRW.FriedmannEquations
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.Basic
 public import Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature
 public import Gravitation.Relativity.General.SchwarzschildDeSitter.CoordinateCurvature
@@ -110,12 +110,15 @@ def explicitSolutionObligations : ExplicitDevelopmentObligations where
 `t = 0` spatial slice metric match, and 3D nonlinear Hamiltonian constraint. -/
 theorem schwarzschild_explicit_development : explicitSolutionObligations.schwarzschild := by
   intro M
-  refine ⟨fun x hr hf hsin i j =>
-      (schwarzschildSpacetime M).einsteinTensor x hr hf hsin i j,
-    fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
+  refine ⟨fun x hr hf hsin i j => ?_, fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
+  · have hf' : (schwarzschildSpacetime M).toStaticSpherical.metricFn (x 1) ≠ 0 := by
+      simpa using hf
+    have h := Schwarzschild.SchwarzschildSpacetime.einsteinTensor_eq_zero
+      (schwarzschildSpacetime M) ⟨x, hr, hf', hsin⟩ i j
+    simpa using h
   · fin_cases i <;> fin_cases j <;>
       simp [schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.metric,
-        StaticSpherical.Metric.metric, sdsSpatialMetric,
+        StaticSpherical.StaticSphericalMetric.metric, sdsSpatialMetric,
         Schwarzschild.SchwarzschildSpacetime.metricFn,
         Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
         SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn]
@@ -128,13 +131,17 @@ spatial scalar curvature `³R = 2 Λ`. -/
 theorem sds_explicit_development : explicitSolutionObligations.deSitter := by
   intro M Λ
   refine ⟨fun x hr hf hsin i j => ?_, fun r θ φ hr hf hsin => ⟨fun i j => ?_, ?_⟩⟩
-  · have h := (sdsSpacetime M Λ).einsteinTensor x hr hf hsin i j
+  · have hf' : (sdsSpacetime M Λ).toStaticSpherical.metricFn (x 1) ≠ 0 := by
+      simpa using hf
+    have h := SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.einsteinTensor_eq
+      (sdsSpacetime M Λ) ⟨x, hr, hf', hsin⟩ i j
     have h' : CoordinateCurvature.einsteinTensor (sdsSpacetime M Λ).metric
-        (sdsSpacetime M Λ).metricInv x i j = -(Λ * (sdsSpacetime M Λ).metric x i j) := h
+        (sdsSpacetime M Λ).metricInv x i j = -(Λ * (sdsSpacetime M Λ).metric x i j) := by
+      simpa using h
     linarith
   · fin_cases i <;> fin_cases j <;>
       simp [sdsSpacetime, SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metric,
-        StaticSpherical.Metric.metric, sdsSpatialMetric,
+        StaticSpherical.StaticSphericalMetric.metric, sdsSpatialMetric,
         SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.toStaticSpherical,
         SchwarzschildDeSitter.SchwarzschildDeSitterSpacetime.metricFn]
   · exact spatialScalarCurvOf_sdsSpatial M Λ ![r, θ, φ]

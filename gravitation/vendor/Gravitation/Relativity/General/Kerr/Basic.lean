@@ -6,6 +6,7 @@ Authors: Alex Vergara Gil
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Gravitation.Mathematics.MatrixInverse
 public import Gravitation.Relativity.Metrics.CoordinateMetric
 public import Gravitation.Relativity.Tensors.EinsteinTensor
 import Mathlib.Tactic.FieldSimp

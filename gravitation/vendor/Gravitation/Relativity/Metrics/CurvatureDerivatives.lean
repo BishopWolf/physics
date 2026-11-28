@@ -5,7 +5,7 @@ Authors: Alex Vergara Gil
 -/
 module
 
-public import Gravitation.Relativity.Metrics.CoordDeriv
+public import Gravitation.Relativity.Metrics.SpaceTimeDerivBridge
 public import Gravitation.Relativity.Metrics.Minkowski
 public import Gravitation.Relativity.Tensors.EinsteinTensor
 import Mathlib.Tactic.Linarith

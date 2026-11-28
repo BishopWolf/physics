@@ -28,15 +28,15 @@ Einstein equation with the 4D Einstein–Maxwell equations sourced by `maxwellSt
 
 The reduction is carried out algebraically: the horizontal and fifth-dimensional Ricci components
 `D.ricci5DHorizontal` and `D.ricci44` are defined directly by the stated component formulas rather
-than derived from the 5D metric `D.M` and the coordinate curvature operators, so
+than derived from the 5D metric `D.metric` and the coordinate curvature operators, so
 `KaluzaKleinData.kaluza_miracle` certifies the agreement of the postulated components with the 4D
 Einstein–Maxwell scalar.
 
 ## ii. Key results
 
 - `GeneralRelativity.maxwellFieldInvariant`, `GeneralRelativity.maxwellStressEnergy`,
-  `GeneralRelativity.maxwellStressEnergy_trace_zero` : 4D Maxwell invariant, stress-energy tensor,
-  and tracelessness.
+  `GeneralRelativity.maxwellStressEnergy_trace_zero` (all in `Tensors/MaxwellStressEnergy.lean`) :
+  4D Maxwell invariant, stress-energy tensor, and tracelessness.
 - `KaluzaKleinData.ricci44`, `KaluzaKleinData.ricci5DHorizontal`, `KaluzaKleinData.scalar5D`,
   `KaluzaKleinData.kaluza_miracle` : Kaluza miracle scalar reduction on `KaluzaKleinData`.
 - `KaluzaKleinData.einstein4D_eq_zero_iff` : equivalence of 5D vacuum and 4D Einstein–Maxwell
@@ -55,6 +55,8 @@ Einstein–Maxwell scalar.
   37, pp. 895-906 (1926), Sec. 1-2. [ref: Klein1926]
 * Oskar Klein, *The Atomicity of Electricity as a Quantum Theory Law*, *Nature* 118, p. 516 (1926).
   [ref: Klein1926Nature]
+* J. M. Overduin and P. S. Wesson, *Kaluza-Klein Gravity*, *Physics Reports* 283, pp. 303-380
+  (1997), Sec. 2 (https://arxiv.org/pdf/gr-qc/9805018#page=9). [ref: OverduinWesson1997]
 -/
 
 @[expose] public section
@@ -71,6 +73,9 @@ namespace KaluzaKlein
 
 Evaluating the constant-dilaton Kaluza–Klein Ricci components of a `KaluzaKleinData` splits the 5D
 scalar curvature into the 4D Einstein–Hilbert term and the Maxwell gauge-field invariant.
+Throughout this file the dilaton is fixed to its unit value `φ = 1`, so the components below are
+not the general dilaton-dependent ones; a running dilaton adds the `∂φ` terms of the reduced
+action, which are not treated here.
 
 -/
 

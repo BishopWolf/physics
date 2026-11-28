@@ -39,7 +39,7 @@ not claim a global development.
 module
 
 public import Gravitation.InitialDataInterface
-public import Gravitation.Relativity.Metrics.CovariantDerivTensor2
+public import Gravitation.Relativity.General.InitialData.CovariantDerivTensor2
 public import Gravitation.SobolevInitialData
 
 @[expose] public section
@@ -152,7 +152,7 @@ lemma exteriorChart_isSmooth (M : ℝ) (hM : 0 < M) :
     funext x
     exact congrFun (congrFun (exteriorChart_coordinateMetric M hM x) i) j]
   fin_cases i <;> fin_cases j <;>
-    simp [StaticSpherical.Metric.metric, exteriorPoint]
+    simp [StaticSpherical.StaticSphericalMetric.metric, exteriorPoint]
   all_goals
     first
     | exact contDiff_const
@@ -450,7 +450,7 @@ lemma manifoldInitialData_isInduced (M : ℝ) (hM : 0 < M) :
   ext i j
   rw [ChartSpacetime.spatialMetric, exteriorChart_coordinateMetric M hM 0]
   fin_cases i <;> fin_cases j <;>
-    simp [StaticSpherical.Metric.metric, exteriorPoint,
+    simp [StaticSpherical.StaticSphericalMetric.metric, exteriorPoint,
       exteriorSpatialPoint, sdsSpatialMetric,
       Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
       Schwarzschild.SchwarzschildSpacetime.metricFn,

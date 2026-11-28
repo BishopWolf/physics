@@ -1,5 +1,2 @@
-# Physlib branch the vendored copy was taken from.  Keep this in step with
-# gravitation/vendor/Gravitation/; scripts/check_vendor_sync.sh fails CI when
-# the branch tip or any vendored file has moved.
 branch: gravity
-commit: 3540573fd23acaeaceaf70f76426f1bf93cffb4a
+commit: 61505fa6fd377e3b335f9f7a943d478353088b99

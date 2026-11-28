@@ -34,11 +34,11 @@ namespace Schwarzschild
 
 /-- The Schwarzschild frame Kretschmann scalar, with the `r ≠ 0` hypothesis removed. -/
 lemma kretschmann_scalar_total (M r : ℝ) :
-    ((SchwarzschildSpacetime.mk M).frameRiemann r).frameKretschmannScalar
+    ((SchwarzschildSpacetime.mk M).frameRiemann r).frameSumOfSquares
       = 48 * M ^ 2 / r ^ 6 := by
   by_cases hr : r = 0
   · subst r
-    simp [SchwarzschildSpacetime.frameRiemann, electricWeyl_frameKretschmannScalar_eq]
+    simp [SchwarzschildSpacetime.frameRiemann, electricWeyl_frameSumOfSquares_eq]
   · exact (SchwarzschildSpacetime.mk M).kretschmann_scalar r hr
 
 end Schwarzschild

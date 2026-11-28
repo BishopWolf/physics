@@ -7,7 +7,7 @@ module
 
 public import Gravitation.Relativity.General.GeodesicSystem
 public import Gravitation.Relativity.Metrics.Basic
-public import Gravitation.Relativity.Metrics.CoordDeriv
+public import Gravitation.Relativity.Metrics.SpaceTimeDerivBridge
 
 /-!
 
@@ -19,18 +19,16 @@ Levi-Civita Christoffel symbols computed from a coordinate metric and its invers
 
 For a coordinate metric field `C : CoordinateMetric n`, the Levi-Civita connection
 `Γ^k_{ij} = (1/2) g^{kl} (∂_i g_{jl} + ∂_j g_{il} - ∂_l g_{ij})` is evaluated from the metric
-components and their coordinate partial derivatives. The chart-level API is
-`CoordinateMetric.christoffel`; the component-level function `CoordinateCurvature.christoffel`
-takes the metric and inverse as bare functions and is used by coordinate-chart proofs.
+components and their coordinate partial derivatives. The component-level function
+`CoordinateCurvature.christoffel` takes the metric and inverse as bare functions and is used by
+coordinate-chart proofs; the chart-level wrapper `CoordinateMetric.christoffel` lives in
+`Metrics/CoordinateMetric.lean`.
 
 ## ii. Key results
 
 - `CoordinateCurvature.christoffel` : component-level Christoffel symbols.
 - `CoordinateCurvature.christoffel_diag` : diagonal-inverse collapse of the contraction.
-- `CoordinateMetric.christoffel` : Christoffel symbols of a `CoordinateMetric`.
-- `CoordinateMetric.geodesicAccel`, `CoordinateMetric.IsGeodesic` : chart geodesic acceleration
-  and free-fall predicate.
-- `CoordinateMetric.isGeodesic_iff` : agreement with `GeodesicSystem.IsGeodesic`.
+- `CoordinateCurvature.christoffel_const` : vanishing symbols for a constant metric.
 
 ## iii. Table of contents
 
@@ -43,6 +41,8 @@ takes the metric and inverse as bare functions and is used by coordinate-chart p
   [ref: mtw_1973_gravitation]
 * B. O'Neill, *Semi-Riemannian Geometry With Applications to Relativity* (1983), Ch. 3.
   [ref: oneill_1983_semi_riemannian]
+* S. M. Carroll, *Lecture Notes on General Relativity* (1997), Ch. 3 (Sec. 3.3)
+  (https://arxiv.org/pdf/gr-qc/9712019#page=63). [ref: Carroll1997]
 -/
 
 @[expose] public section
@@ -79,38 +79,19 @@ lemma christoffel_diag {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (x : F
   simp only [christoffel]
   rw [Finset.sum_eq_single k (fun l _ hl => by simp [hdiag l hl]) (by simp)]
 
+/-- A constant metric has vanishing Christoffel symbols at every point. -/
+lemma christoffel_const {n : ℕ} (g ginv : (Fin n → ℝ) → Tensor2 n) (G : Tensor2 n)
+    (hg : ∀ x, g x = G) (x : Fin n → ℝ) (k i j : Fin n) :
+    christoffel g ginv x k i j = 0 := by
+  have hpd : ∀ (μ a b : Fin n), coordDeriv μ (fun y => g y a b) x = 0 := by
+    intro μ a b
+    rw [coordDeriv_congr μ x (fun y => by rw [hg y])]
+    exact coordDeriv_const μ (G a b) x
+  simp only [christoffel]
+  rw [Finset.sum_eq_zero (fun l _ => by rw [hpd i j l, hpd j i l, hpd l i j]; ring)]
+  ring
+
 end CoordinateCurvature
 
-/-- Christoffel symbols of a `CoordinateMetric`. -/
-noncomputable def CoordinateMetric.christoffel {n : ℕ} (C : CoordinateMetric n)
-    (x : Fin n → ℝ) (k i j : Fin n) : ℝ :=
-  CoordinateCurvature.christoffel C.g C.ginv x k i j
-
-/-- Unfolding lemma for `CoordinateMetric.christoffel`. -/
-@[simp] lemma CoordinateMetric.christoffel_apply {n : ℕ} (C : CoordinateMetric n)
-    (x : Fin n → ℝ) (k i j : Fin n) :
-    C.christoffel x k i j = CoordinateCurvature.christoffel C.g C.ginv x k i j := rfl
-
-/-- Chart geodesic acceleration `-Γ^k_{ij}(x) v^i v^j` of a coordinate metric at position `x` for
-velocity `v`. -/
-noncomputable def CoordinateMetric.geodesicAccel {n : ℕ} (C : CoordinateMetric n)
-    (x v : Fin n → ℝ) : Fin n → ℝ :=
-  fun k => -∑ i, ∑ j, C.christoffel x k i j * v i * v j
-
-/-- Predicate asserting that `(γ, w)` solves the coordinate geodesic equation of `C` on a
-parameter set `s`, with acceleration supplied by `C.geodesicAccel`. -/
-def CoordinateMetric.IsGeodesic {n : ℕ} (C : CoordinateMetric n) (s : Set ℝ)
-    (γ w : ℝ → Fin n → ℝ) : Prop :=
-  ∀ t ∈ s, HasDerivAt γ (w t) t ∧ HasDerivAt w (C.geodesicAccel (γ t) (w t)) t
-
-/-- A `GeodesicSystem` whose acceleration agrees with the chart Christoffel acceleration of `C`
-has exactly the same free-fall trajectories as `C`. -/
-lemma CoordinateMetric.isGeodesic_iff {n : ℕ} (C : CoordinateMetric n)
-    (G : GeodesicSystem (Fin n → ℝ))
-    (hΓ : ∀ x v, G.accel x v = C.geodesicAccel x v) (s : Set ℝ) (γ w : ℝ → Fin n → ℝ) :
-    C.IsGeodesic s γ w ↔ GeneralRelativity.IsGeodesic G s γ w := by
-  constructor <;> intro h t ht
-  · simpa [CoordinateMetric.IsGeodesic, GeneralRelativity.IsGeodesic, hΓ] using h t ht
-  · simpa [CoordinateMetric.IsGeodesic, GeneralRelativity.IsGeodesic, hΓ] using h t ht
 
 end GeneralRelativity

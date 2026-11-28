@@ -19,11 +19,11 @@ import Mathlib.Tactic.Ring
 
 /-!
 
-# Static spherically symmetric Christoffel symbols and derivatives
+# Static spherically symmetric connection and curvature
 
-Closed-form Levi-Civita connection coefficients `Metric.christoffel` and their
-partial derivatives `Metric.christoffelDeriv`, verified against the coordinate
-Christoffel symbols of the metric.
+Closed-form Levi-Civita connection coefficients `StaticSphericalMetric.christoffel`, their partial
+derivatives `StaticSphericalMetric.christoffelDeriv`, and the resulting Riemann, Ricci, scalar,
+and Einstein tensors, verified against the coordinate metric.
 
 ## i. Overview
 
@@ -37,16 +37,20 @@ coordinate Christoffel symbols with the closed-form table `S.christoffel` and id
 
 - `christoffelPhiPhiTheta_from_metric` : angular
   Levi-Civita connection coefficients of 2-spheres of radius `r`.
-- `Metric.christoffel`, `Metric.christoffelDeriv` : closed-form
+- `StaticSphericalMetric.christoffel`, `StaticSphericalMetric.christoffelDeriv` : closed-form
   Christoffel and partial-derivative tables.
 - `Metric.christoffel_eq`, `Metric.eventually_christoffel_eq`,
-  `Metric.pd_christoffel_eq`, `Metric.pd_christoffel_eq_deriv` :
+  `StaticSphericalMetric.pd_christoffel_eq`, `StaticSphericalMetric.pd_christoffel_eq_deriv` :
   agreement with `CoordinateMetric.christoffel` and its partial derivatives.
+- `StaticSphericalMetric.riemann_eq_data`, `StaticSphericalMetric.ricciTensor`,
+  `StaticSphericalMetric.ricciScalar`, `StaticSphericalMetric.einsteinTensor` : closed-form
+  curvature for an arbitrary twice-differentiable radial metric function.
 
 ## iii. Table of contents
 
 - A. Angular Christoffel symbols and metric partial derivatives
 - B. Second-order Christoffel derivative table
+- C. Riemann, Ricci, scalar, and Einstein tensors
 
 ## iv. References
 
@@ -63,7 +67,7 @@ namespace GeneralRelativity
 
 namespace StaticSpherical
 
-namespace Metric
+namespace StaticSphericalMetric
 
 open GeneralRelativity.CoordinateCurvature
 
@@ -85,7 +89,7 @@ lemma christoffelPhiPhiTheta_from_metric (r th : ℝ) (hr : r ≠ 0) (hsin : Rea
 
 /-- Closed-form Levi-Civita Christoffel symbols `Γ^k_{ij}` for a static spherically symmetric
 metric in `(t, r, θ, φ)` coordinates. -/
-noncomputable def christoffel (S : Metric) (x : Fin 4 → ℝ)
+noncomputable def christoffel (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (k i j : Fin 4) : ℝ :=
   if k = 0 then
     (if (i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 1) then
@@ -105,16 +109,16 @@ noncomputable def christoffel (S : Metric) (x : Fin 4 → ℝ)
      else if (i = 2 ∧ j = 3) ∨ (i = 3 ∧ j = 2) then Real.cos (x 2) / Real.sin (x 2) else 0)
 
 @[simp]
-private lemma metricDeriv_t_eq_zero (S : Metric) (x : Fin 4 → ℝ) (a b : Fin 4) :
+private lemma metricDeriv_t_eq_zero (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (a b : Fin 4) :
     coordDeriv 0 (fun y => S.metric y a b) x = 0 :=
   coordDeriv_const_slice 0 (S.metric x a b) fun _ => by simp [metric]
 
 @[simp]
-private lemma metricDeriv_phi_eq_zero (S : Metric) (x : Fin 4 → ℝ) (a b : Fin 4) :
+private lemma metricDeriv_phi_eq_zero (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (a b : Fin 4) :
     coordDeriv 3 (fun y => S.metric y a b) x = 0 :=
   coordDeriv_const_slice 3 (S.metric x a b) fun _ => by simp [metric]
 
-private lemma metricDeriv_theta_33 (S : Metric) (x : Fin 4 → ℝ) :
+private lemma metricDeriv_theta_33 (S : StaticSphericalMetric) (x : Fin 4 → ℝ) :
     coordDeriv 2 (fun y => S.metric y 3 3) x
       = 2 * (x 1) ^ 2 * Real.sin (x 2) * Real.cos (x 2) := by
   have hfun : (fun s : ℝ => S.metric (Function.update x 2 s) 3 3)
@@ -128,7 +132,7 @@ private lemma metricDeriv_theta_33 (S : Metric) (x : Fin 4 → ℝ) :
   rw [coordDeriv_of_hasDerivAt _ (hfun ▸ (hsinSq.const_mul ((x 1) ^ 2)))]
   ring
 
-private lemma metricDeriv_theta (S : Metric) (x : Fin 4 → ℝ) (a b : Fin 4) :
+private lemma metricDeriv_theta (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (a b : Fin 4) :
     coordDeriv 2 (fun y => S.metric y a b) x
       = if a = 3 ∧ b = 3 then 2 * (x 1) ^ 2 * Real.sin (x 2) * Real.cos (x 2) else 0 := by
   fin_cases a <;> fin_cases b <;>
@@ -136,7 +140,7 @@ private lemma metricDeriv_theta (S : Metric) (x : Fin 4 → ℝ) (a b : Fin 4) :
     | exact metricDeriv_theta_33 S x
     | simp [coordDeriv, metric]
 
-private lemma metricDeriv_r_00 (S : Metric) (x : Fin 4 → ℝ)
+private lemma metricDeriv_r_00 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf_diff : DifferentiableAt ℝ S.metricFn (x 1)) :
     coordDeriv 1 (fun y => S.metric y 0 0) x = -(deriv S.metricFn (x 1)) := by
   have hfun : (fun s : ℝ => S.metric (Function.update x 1 s) 0 0)
@@ -147,7 +151,7 @@ private lemma metricDeriv_r_00 (S : Metric) (x : Fin 4 → ℝ)
     hf_diff.hasDerivAt.neg
   rw [coordDeriv_of_hasDerivAt _ (hfun ▸ hd)]
 
-private lemma metricDeriv_r_11 (S : Metric) (x : Fin 4 → ℝ)
+private lemma metricDeriv_r_11 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf_diff : DifferentiableAt ℝ S.metricFn (x 1)) (hf : S.metricFn (x 1) ≠ 0) :
     coordDeriv 1 (fun y => S.metric y 1 1) x
       = -(deriv S.metricFn (x 1)) / (S.metricFn (x 1)) ^ 2 := by
@@ -160,7 +164,7 @@ private lemma metricDeriv_r_11 (S : Metric) (x : Fin 4 → ℝ)
     convert hf_diff.hasDerivAt.inv hf using 1
   rw [coordDeriv_of_hasDerivAt _ (hfun ▸ hd)]
 
-private lemma metricDeriv_r_22 (S : Metric) (x : Fin 4 → ℝ) :
+private lemma metricDeriv_r_22 (S : StaticSphericalMetric) (x : Fin 4 → ℝ) :
     coordDeriv 1 (fun y => S.metric y 2 2) x = 2 * (x 1) := by
   have hfun : (fun s : ℝ => S.metric (Function.update x 1 s) 2 2)
       = fun s : ℝ => s ^ 2 := by
@@ -169,7 +173,7 @@ private lemma metricDeriv_r_22 (S : Metric) (x : Fin 4 → ℝ) :
   rw [coordDeriv, hfun]
   simp
 
-private lemma metricDeriv_r_33 (S : Metric) (x : Fin 4 → ℝ) :
+private lemma metricDeriv_r_33 (S : StaticSphericalMetric) (x : Fin 4 → ℝ) :
     coordDeriv 1 (fun y => S.metric y 3 3) x = 2 * (x 1) * Real.sin (x 2) ^ 2 := by
   have hfun : (fun s : ℝ => S.metric (Function.update x 1 s) 3 3)
       = fun s : ℝ => s ^ 2 * Real.sin (x 2) ^ 2 := by
@@ -181,7 +185,7 @@ private lemma metricDeriv_r_33 (S : Metric) (x : Fin 4 → ℝ) :
     ring
   rw [coordDeriv_of_hasDerivAt _ (hfun ▸ hd)]
 
-private lemma metricDeriv_r (S : Metric) (x : Fin 4 → ℝ)
+private lemma metricDeriv_r (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf_diff : DifferentiableAt ℝ S.metricFn (x 1)) (hf : S.metricFn (x 1) ≠ 0)
     (a b : Fin 4) :
     coordDeriv 1 (fun y => S.metric y a b) x
@@ -200,17 +204,16 @@ private lemma metricDeriv_r (S : Metric) (x : Fin 4 → ℝ)
 
 /-- All 64 coordinate Christoffel symbols agree with the closed-form connection table at every
 regular point where the radial metric function is differentiable. -/
-lemma christoffel_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+lemma christoffel_eq (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
     (hf_diff : DifferentiableAt ℝ S.metricFn (x 1)) :
     ∀ k i j, S.toCoordinateMetric.christoffel x k i j =
       S.christoffel x k i j := by
   intro k i j
-  have hdiag : ∀ l : Fin 4, l ≠ k → S.metricInv x k l = 0 := by
-    intro l hl
-    fin_cases k <;> fin_cases l <;> simp_all [metricInv]
-  rw [show S.toCoordinateMetric.christoffel x k i j =
-      CoordinateCurvature.christoffel S.metric S.metricInv x k i j from rfl]
+  have hdiag : ∀ l : Fin 4, l ≠ k → S.metricInv x k l = 0 :=
+    fun l hl => S.metricInv_offdiag x (Ne.symm hl)
+  simp only [CoordinateMetric.christoffel_apply, StaticSphericalMetric.toCoordinateMetric_g,
+    StaticSphericalMetric.toCoordinateMetric_ginv]
   rw [christoffel_diag S.metric S.metricInv x k i j hdiag]
   fin_cases k <;> fin_cases i <;> fin_cases j <;>
     simp [christoffel, metricInv, metricDeriv_theta, metricDeriv_r S x hf_diff hf] <;>
@@ -218,7 +221,7 @@ lemma christoffel_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
 
 /-- Neighbourhood equality between `CoordinateMetric.christoffel` and the closed-form static
 spherical Christoffel table around any regular point. -/
-lemma eventually_christoffel_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+lemma eventually_christoffel_eq (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
     (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s) (a b c : Fin 4) :
     (fun y => S.toCoordinateMetric.christoffel y a b c)
@@ -239,7 +242,7 @@ lemma eventually_christoffel_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0
 
 /-- Equality of coordinate partial derivatives of the coordinate Christoffel symbols and the
 closed-form static spherical Christoffel table along every coordinate axis. -/
-lemma pd_christoffel_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+lemma pd_christoffel_eq (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
     (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s) (μ a b c : Fin 4) :
     coordDeriv μ (fun y => S.toCoordinateMetric.christoffel y a b c) x
@@ -257,7 +260,7 @@ second radial derivative `f''(r)` that enters the Riemann and Ricci curvature co
 
 /-- Closed-form partial-derivative table `∂_μ Γ^k_{ij}` for a static spherically symmetric metric
 across all 256 index tuples `(μ, k, i, j)`. -/
-noncomputable def christoffelDeriv (S : Metric) (μ : Fin 4) (x : Fin 4 → ℝ)
+noncomputable def christoffelDeriv (S : StaticSphericalMetric) (μ : Fin 4) (x : Fin 4 → ℝ)
     (k i j : Fin 4) : ℝ :=
   if μ = 1 then
     (if k = 0 ∧ ((i = 1 ∧ j = 0) ∨ (i = 0 ∧ j = 1)) then
@@ -286,7 +289,7 @@ noncomputable def christoffelDeriv (S : Metric) (μ : Fin 4) (x : Fin 4 → ℝ)
      else 0)
   else 0
 
-private lemma christoffelDeriv_r_001 (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_r_001 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf : S.metricFn (x 1) ≠ 0) (hf1 : DifferentiableAt ℝ S.metricFn (x 1))
     (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
     coordDeriv 1 (fun y => S.christoffel y 0 0 1) x = S.christoffelDeriv 1 x 0 0 1 := by
@@ -304,7 +307,7 @@ private lemma christoffelDeriv_r_001 (S : Metric) (x : Fin 4 → ℝ)
   simp [christoffelDeriv]
   field_simp [hf]
 
-private lemma christoffelDeriv_r_100 (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_r_100 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf1 : DifferentiableAt ℝ S.metricFn (x 1))
     (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
     coordDeriv 1 (fun y => S.christoffel y 1 0 0) x = S.christoffelDeriv 1 x 1 0 0 := by
@@ -320,7 +323,7 @@ private lemma christoffelDeriv_r_100 (S : Metric) (x : Fin 4 → ℝ)
   simp [christoffelDeriv]
   ring
 
-private lemma christoffelDeriv_r_111 (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_r_111 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf : S.metricFn (x 1) ≠ 0) (hf1 : DifferentiableAt ℝ S.metricFn (x 1))
     (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
     coordDeriv 1 (fun y => S.christoffel y 1 1 1) x = S.christoffelDeriv 1 x 1 1 1 := by
@@ -338,7 +341,7 @@ private lemma christoffelDeriv_r_111 (S : Metric) (x : Fin 4 → ℝ)
   simp [christoffelDeriv]
   field_simp [hf]
 
-private lemma christoffelDeriv_r_122 (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_r_122 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf1 : DifferentiableAt ℝ S.metricFn (x 1)) :
     coordDeriv 1 (fun y => S.christoffel y 1 2 2) x = S.christoffelDeriv 1 x 1 2 2 := by
   have hfun : (fun s : ℝ => S.christoffel (Function.update x 1 s) 1 2 2)
@@ -352,7 +355,7 @@ private lemma christoffelDeriv_r_122 (S : Metric) (x : Fin 4 → ℝ)
   simp [christoffelDeriv]
   ring
 
-private lemma christoffelDeriv_r_133 (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_r_133 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hf1 : DifferentiableAt ℝ S.metricFn (x 1)) :
     coordDeriv 1 (fun y => S.christoffel y 1 3 3) x = S.christoffelDeriv 1 x 1 3 3 := by
   have hfun : (fun s : ℝ => S.christoffel (Function.update x 1 s) 1 3 3)
@@ -369,7 +372,7 @@ private lemma christoffelDeriv_r_133 (S : Metric) (x : Fin 4 → ℝ)
   simp [christoffelDeriv]
   ring
 
-private lemma christoffelDeriv_r_inv (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+private lemma christoffelDeriv_r_inv (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (k i j : Fin 4)
     (hmatch : (k = 2 ∧ ((i = 1 ∧ j = 2) ∨ (i = 2 ∧ j = 1)))
       ∨ (k = 3 ∧ ((i = 1 ∧ j = 3) ∨ (i = 3 ∧ j = 1)))) :
@@ -392,7 +395,7 @@ private lemma christoffelDeriv_r_inv (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 
         = fun s : ℝ => 1 / s := by funext s; simp [christoffel]
     rw [coordDeriv, hfun, hderiv]; simp [christoffelDeriv]
 
-private lemma christoffelDeriv_theta_133 (S : Metric) (x : Fin 4 → ℝ) :
+private lemma christoffelDeriv_theta_133 (S : StaticSphericalMetric) (x : Fin 4 → ℝ) :
     coordDeriv 2 (fun y => S.christoffel y 1 3 3) x = S.christoffelDeriv 2 x 1 3 3 := by
   have hfun : (fun s : ℝ => S.christoffel (Function.update x 2 s) 1 3 3)
       = fun s : ℝ => -(x 1 * Real.sin s ^ 2 * S.metricFn (x 1)) := by
@@ -408,7 +411,7 @@ private lemma christoffelDeriv_theta_133 (S : Metric) (x : Fin 4 → ℝ) :
   rw [coordDeriv, hfun, hderiv]
   simp [christoffelDeriv]
 
-private lemma christoffelDeriv_theta_233 (S : Metric) (x : Fin 4 → ℝ) :
+private lemma christoffelDeriv_theta_233 (S : StaticSphericalMetric) (x : Fin 4 → ℝ) :
     coordDeriv 2 (fun y => S.christoffel y 2 3 3) x = S.christoffelDeriv 2 x 2 3 3 := by
   have hfun : (fun s : ℝ => S.christoffel (Function.update x 2 s) 2 3 3)
       = fun s : ℝ => -(Real.sin s * Real.cos s) := by
@@ -421,7 +424,7 @@ private lemma christoffelDeriv_theta_233 (S : Metric) (x : Fin 4 → ℝ) :
   rw [coordDeriv_of_hasDerivAt _ (hfun ▸ hd)]
   simp [christoffelDeriv]
 
-private lemma christoffelDeriv_theta_323 (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_theta_323 (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hsin : Real.sin (x 2) ≠ 0) :
     coordDeriv 2 (fun y => S.christoffel y 3 2 3) x = S.christoffelDeriv 2 x 3 2 3 := by
   have hfun : (fun s : ℝ => S.christoffel (Function.update x 2 s) 3 2 3)
@@ -439,7 +442,7 @@ private lemma christoffelDeriv_theta_323 (S : Metric) (x : Fin 4 → ℝ)
   rw [coordDeriv_of_hasDerivAt _ (hfun ▸ hd)]
   simp [christoffelDeriv]
 
-private lemma christoffelDeriv_t_phi_eq (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_t_phi_eq (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (μ k i j : Fin 4) (hμ : μ = 0 ∨ μ = 3) :
     coordDeriv μ (fun y => S.christoffel y k i j) x = S.christoffelDeriv μ x k i j := by
   rcases hμ with rfl | rfl
@@ -450,7 +453,7 @@ private lemma christoffelDeriv_t_phi_eq (S : Metric) (x : Fin 4 → ℝ)
       coordDeriv_const_slice 3 (S.christoffel x k i j) fun _ => by simp [christoffel]
     simp [hc, christoffelDeriv]
 
-private lemma christoffelDeriv_theta_eq (S : Metric) (x : Fin 4 → ℝ)
+private lemma christoffelDeriv_theta_eq (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
     (hsin : Real.sin (x 2) ≠ 0) (k i j : Fin 4) :
     coordDeriv 2 (fun y => S.christoffel y k i j) x = S.christoffelDeriv 2 x k i j := by
   fin_cases k <;>
@@ -461,7 +464,7 @@ private lemma christoffelDeriv_theta_eq (S : Metric) (x : Fin 4 → ℝ)
       | exact christoffelDeriv_theta_323 S x hsin
       | simp [coordDeriv, christoffel, christoffelDeriv])
 
-private lemma christoffelDeriv_r_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+private lemma christoffelDeriv_r_eq (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hf : S.metricFn (x 1) ≠ 0) (hf1 : DifferentiableAt ℝ S.metricFn (x 1))
     (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) (k i j : Fin 4) :
     coordDeriv 1 (fun y => S.christoffel y k i j) x = S.christoffelDeriv 1 x k i j := by
@@ -477,8 +480,8 @@ private lemma christoffelDeriv_r_eq (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 �
       | simp [coordDeriv, christoffel, christoffelDeriv])
 
 /-- Complete identification of all 256 partial derivatives of the static spherical Christoffel
-symbols with `Metric.christoffelDeriv`. -/
-lemma pd_christoffel_eq_deriv (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+symbols with `StaticSphericalMetric.christoffelDeriv`. -/
+lemma pd_christoffel_eq_deriv (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
     (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
     (hf1 : DifferentiableAt ℝ S.metricFn (x 1))
     (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) (μ k i j : Fin 4) :
@@ -489,7 +492,172 @@ lemma pd_christoffel_eq_deriv (S : Metric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
   · exact christoffelDeriv_theta_eq S x hsin k i j
   · exact christoffelDeriv_t_phi_eq S x 3 k i j (Or.inr rfl)
 
-end Metric
+/-!
+
+## C. Riemann, Ricci, scalar, and Einstein tensors
+
+Contracting the closed-form Riemann tensor gives a diagonal Ricci tensor, the spherical scalar
+curvature `R = -f'' - 4 f'/r + 2 (1 - f) / r²`, and the Einstein tensor governing static
+spherically symmetric spacetimes such as Schwarzschild, Kottler, and Reissner–Nordström.
+
+-/
+
+/-- The coordinate Riemann tensor of a static spherical metric agrees with
+`riemannFromData S.christoffel S.christoffelDeriv` across all 256 components. -/
+lemma riemann_eq_data (S : StaticSphericalMetric) (p : S.RegularPoint)
+    (hf_diff : ∀ᶠ s in nhds (p.x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (p.x 1)) (ρ σ μ ν : Fin 4) :
+    CoordinateCurvature.riemann S.metric S.metricInv p.x ρ σ μ ν
+      = riemannFromData S.christoffel S.christoffelDeriv p.x ρ σ μ ν := by
+  rw [riemann_eq_riemannFromData]
+  have hf1 : DifferentiableAt ℝ S.metricFn (p.x 1) := hf_diff.self_of_nhds
+  have hconv : ∀ y k i j, CoordinateCurvature.christoffel S.metric S.metricInv y k i j
+      = S.toCoordinateMetric.christoffel y k i j := fun _ _ _ _ => rfl
+  have h1 : coordDeriv μ (fun y =>
+      CoordinateCurvature.christoffel S.metric S.metricInv y ρ ν σ) p.x
+      = S.christoffelDeriv μ p.x ρ ν σ := by
+    simp only [hconv]
+    exact (S.pd_christoffel_eq p.x p.hr p.hf p.hsin hf_diff μ ρ ν σ).trans
+      (S.pd_christoffel_eq_deriv p.x p.hr p.hf p.hsin hf1 hf2 μ ρ ν σ)
+  have h2 : coordDeriv ν (fun y =>
+      CoordinateCurvature.christoffel S.metric S.metricInv y ρ μ σ) p.x
+      = S.christoffelDeriv ν p.x ρ μ σ := by
+    simp only [hconv]
+    exact (S.pd_christoffel_eq p.x p.hr p.hf p.hsin hf_diff ν ρ μ σ).trans
+      (S.pd_christoffel_eq_deriv p.x p.hr p.hf p.hsin hf1 hf2 ν ρ μ σ)
+  have hquad : ∀ k i j, CoordinateCurvature.christoffel S.metric S.metricInv p.x k i j
+      = S.christoffel p.x k i j :=
+    fun k i j => (hconv p.x k i j).trans (S.christoffel_eq p.x p.hr p.hf p.hsin hf1 k i j)
+  simp only [riemannFromData, h1, h2, hquad]
+
+private lemma ricciComponent_tt (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
+    CoordinateCurvature.ricciTensor S.metric S.metricInv x 0 0
+      = S.metricFn (x 1) * (deriv (deriv S.metricFn) (x 1) / 2
+          + deriv S.metricFn (x 1) / x 1) := by
+  simp [CoordinateCurvature.ricciTensor, Fin.sum_univ_four,
+    S.riemann_eq_data ⟨x, hr, hf, hsin⟩ hf_diff hf2,
+    riemannFromData, christoffel, christoffelDeriv]
+  field_simp [hr, hf]
+  ring
+
+private lemma ricciComponent_rr (S : StaticSphericalMetric) (x : Fin 4 → ℝ) (hr : x 1 ≠ 0)
+    (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
+    CoordinateCurvature.ricciTensor S.metric S.metricInv x 1 1
+      = -(deriv (deriv S.metricFn) (x 1) / 2
+          + deriv S.metricFn (x 1) / x 1) / S.metricFn (x 1) := by
+  simp [CoordinateCurvature.ricciTensor, Fin.sum_univ_four,
+    S.riemann_eq_data ⟨x, hr, hf, hsin⟩ hf_diff hf2,
+    riemannFromData, christoffel, christoffelDeriv]
+  field_simp [hr, hf]
+  ring
+
+private lemma ricciComponent_thetatheta (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
+    (hr : x 1 ≠ 0) (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
+    CoordinateCurvature.ricciTensor S.metric S.metricInv x 2 2
+      = 1 - S.metricFn (x 1) - x 1 * deriv S.metricFn (x 1) := by
+  simp [CoordinateCurvature.ricciTensor, Fin.sum_univ_four,
+    S.riemann_eq_data ⟨x, hr, hf, hsin⟩ hf_diff hf2,
+    riemannFromData, christoffel, christoffelDeriv]
+  field_simp [hr, hf, hsin]
+  rw [Real.sin_sq (x 2)]
+  ring
+
+private lemma ricciComponent_phiphi (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
+    (hr : x 1 ≠ 0) (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) :
+    CoordinateCurvature.ricciTensor S.metric S.metricInv x 3 3
+      = (1 - S.metricFn (x 1) - x 1 * deriv S.metricFn (x 1)) * Real.sin (x 2) ^ 2 := by
+  simp [CoordinateCurvature.ricciTensor, Fin.sum_univ_four,
+    S.riemann_eq_data ⟨x, hr, hf, hsin⟩ hf_diff hf2,
+    riemannFromData, christoffel, christoffelDeriv]
+  field_simp [hr, hf, hsin]
+  ring
+
+private lemma ricciComponent_offdiag (S : StaticSphericalMetric) (x : Fin 4 → ℝ)
+    (hr : x 1 ≠ 0) (hf : S.metricFn (x 1) ≠ 0) (hsin : Real.sin (x 2) ≠ 0)
+    (hf_diff : ∀ᶠ s in nhds (x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (x 1)) {σ ν : Fin 4} (h : σ ≠ ν) :
+    CoordinateCurvature.ricciTensor S.metric S.metricInv x σ ν = 0 := by
+  fin_cases σ <;> fin_cases ν <;> try exact absurd rfl h
+  all_goals
+    simp [CoordinateCurvature.ricciTensor, Fin.sum_univ_four,
+      S.riemann_eq_data ⟨x, hr, hf, hsin⟩ hf_diff hf2,
+      riemannFromData, christoffel, christoffelDeriv]
+  ring
+
+/-- Complete coordinate Ricci tensor for any static spherically symmetric metric
+`ds² = -f(r) dt² + f(r)⁻¹ dr² + r² dΩ²`. -/
+lemma ricciTensor (S : StaticSphericalMetric) (p : S.RegularPoint)
+    (hf_diff : ∀ᶠ s in nhds (p.x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (p.x 1)) (σ ν : Fin 4) :
+    CoordinateCurvature.ricciTensor S.metric S.metricInv p.x σ ν
+      = if σ = ν then
+          if σ = 0 then S.metricFn (p.x 1) * (deriv (deriv S.metricFn) (p.x 1) / 2
+            + deriv S.metricFn (p.x 1) / p.x 1)
+          else if σ = 1 then -(deriv (deriv S.metricFn) (p.x 1) / 2
+            + deriv S.metricFn (p.x 1) / p.x 1) / S.metricFn (p.x 1)
+          else if σ = 2 then 1 - S.metricFn (p.x 1) - p.x 1 * deriv S.metricFn (p.x 1)
+          else (1 - S.metricFn (p.x 1) - p.x 1 * deriv S.metricFn (p.x 1)) * Real.sin (p.x 2) ^ 2
+        else 0 := by
+  by_cases h : σ = ν
+  · subst h
+    fin_cases σ
+    · simpa using ricciComponent_tt S p.x p.hr p.hf p.hsin hf_diff hf2
+    · simpa using ricciComponent_rr S p.x p.hr p.hf p.hsin hf_diff hf2
+    · simpa using ricciComponent_thetatheta S p.x p.hr p.hf p.hsin hf_diff hf2
+    · simpa using ricciComponent_phiphi S p.x p.hr p.hf p.hsin hf_diff hf2
+  · simp [h, ricciComponent_offdiag S p.x p.hr p.hf p.hsin hf_diff hf2 h]
+
+/-- Scalar curvature of a static spherical metric computed from the coordinate metric:
+`R = -f'' - 4 f'/r + 2 (1 - f) / r²`. -/
+lemma ricciScalar (S : StaticSphericalMetric) (p : S.RegularPoint)
+    (hf_diff : ∀ᶠ s in nhds (p.x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (p.x 1)) :
+    CoordinateCurvature.ricciScalar S.metric S.metricInv p.x
+      = -deriv (deriv S.metricFn) (p.x 1) - 4 * deriv S.metricFn (p.x 1) / p.x 1
+          + 2 * (1 - S.metricFn (p.x 1)) / (p.x 1) ^ 2 := by
+  simp only [CoordinateCurvature.ricciScalar,
+    S.ricciTensor ⟨p.x, p.hr, p.hf, p.hsin⟩ hf_diff hf2]
+  simp only [Fin.sum_univ_four, metricInv, Fin.reduceEq, ↓reduceIte,
+    Fin.isValue, mul_zero, add_zero, zero_add, Matrix.of_apply]
+  field_simp [p.hr, p.hf, p.hsin]
+  ring
+
+/-- Einstein tensor of a static spherical metric computed from the coordinate metric. -/
+lemma einsteinTensor (S : StaticSphericalMetric) (p : S.RegularPoint)
+    (hf_diff : ∀ᶠ s in nhds (p.x 1), DifferentiableAt ℝ S.metricFn s)
+    (hf2 : DifferentiableAt ℝ (deriv S.metricFn) (p.x 1)) (i j : Fin 4) :
+    CoordinateCurvature.einsteinTensor S.metric S.metricInv p.x i j
+      = if i = j then
+          if i = 0 then
+            S.metricFn (p.x 1) * (1 - S.metricFn (p.x 1) - p.x 1 * deriv S.metricFn (p.x 1))
+              / (p.x 1) ^ 2
+          else if i = 1 then
+            -(1 - S.metricFn (p.x 1) - p.x 1 * deriv S.metricFn (p.x 1)) /
+              ((p.x 1) ^ 2 * S.metricFn (p.x 1))
+          else if i = 2 then
+            (p.x 1) ^ 2 * (deriv (deriv S.metricFn) (p.x 1) / 2 + deriv S.metricFn (p.x 1) / p.x 1)
+          else (p.x 1) ^ 2 * Real.sin (p.x 2) ^ 2
+            * (deriv (deriv S.metricFn) (p.x 1) / 2 + deriv S.metricFn (p.x 1) / p.x 1)
+        else 0 := by
+  simp only [CoordinateCurvature.einsteinTensor,
+    S.ricciTensor ⟨p.x, p.hr, p.hf, p.hsin⟩ hf_diff hf2,
+    S.ricciScalar ⟨p.x, p.hr, p.hf, p.hsin⟩ hf_diff hf2, metric]
+  fin_cases i <;> fin_cases j <;> simp
+  · field_simp [p.hr]; ring
+  · field_simp [p.hr, p.hf]; ring
+  · field_simp [p.hr]; ring
+  · field_simp [p.hr]; ring
+
+end StaticSphericalMetric
 
 end StaticSpherical
 

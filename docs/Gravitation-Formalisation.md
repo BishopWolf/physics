@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1527 declarations, 926 of them theorem-like. An independent Vulkan
+contains 1531 declarations, 930 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1527 declarations, 926 of them theorem-like; no declaration uses `sorry`,
+1531 declarations, 930 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -662,13 +662,13 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.AqualVariation` | 67 |
 | `PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere` | 53 |
 | `Gravitation.SobolevInitialData` | 42 |
-| `Gravitation.Bianchi` | 38 |
 | `Gravitation.DiracCounting` | 41 |
+| `Gravitation.Bianchi` | 38 |
 | `Gravitation.EddingtonFinkelstein` | 36 |
+| `Gravitation.Relativity.General.SchwarzschildDeSitter.Basic` | 36 |
 | `Gravitation.SchwarzschildManifold` | 34 |
 | `Gravitation.KruskalSzekeres` | 33 |
-| `Gravitation.Relativity.General.SchwarzschildDeSitter.Basic` | 31 |
-| `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 30 |
+| `Gravitation.Relativity.General.ReissnerNordstrom.Basic` | 31 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.DeSitterFrame` | 25 |
 | `Gravitation.Relativity.Modified.PPNParameters` | 25 |
 | `Gravitation.Relativity.General.Kerr.Basic` | 24 |
@@ -678,11 +678,13 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.ReducedCauchy` | 22 |
 | `Gravitation.Relativity.Modified.EinsteinAether` | 21 |
 | `Gravitation.ConformalDecomposition` | 20 |
-| `Gravitation.Relativity.Modified.KaluzaKlein.Basic` | 20 |
+| `Gravitation.Relativity.Modified.KaluzaKlein.Basic` | 19 |
+| `Gravitation.PPNParameters` | 18 |
 | `Gravitation.Relativity.General.GravitationalConstant` | 18 |
 | `Gravitation.Relativity.Modified.BransDicke` | 18 |
 | `Gravitation.Mathematics.Calculus.CoordDeriv` | 17 |
 | `Gravitation.Relativity.General.Schwarzschild.ElectricWeyl` | 16 |
+| `Gravitation.Perturbation` | 15 |
 | `Gravitation.Relativity.Modified.FRGravity` | 15 |
 | `Gravitation.WaveEnergy` | 15 |
 | `Gravitation.Relativity.General.GeodesicSystem` | 14 |
@@ -691,6 +693,7 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Modified.Teleparallel.FLRWTorsion` | 14 |
 | `Gravitation.ReducedWave3D` | 13 |
 | `Gravitation.Cosmology.FLRW.Basic` | 12 |
+| `Gravitation.Cosmology.FLRW.FriedmannEquations` | 12 |
 | `Gravitation.GaugeRecovery` | 12 |
 | `Gravitation.Relativity.General.SchwarzschildDeSitter.CoordinateCurvature` | 12 |
 | `Gravitation.Relativity.Metrics.Minkowski` | 12 |
@@ -699,33 +702,28 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.MaximalDevelopment` | 11 |
 | `Gravitation.Relativity.General.Linearized.TraceReversed` | 11 |
 | `Gravitation.Relativity.General.MinkowskiCoordinateMetric` | 11 |
+| `Gravitation.Relativity.Metrics.StaticSphericalMetric.Christoffel` | 11 |
 | `Gravitation.Relativity.Modified.MassiveGravity.DRGT` | 11 |
 | `Gravitation.WaveCauchy` | 11 |
 | `Gravitation.ClassicalMechanics.OrbitalMechanics.NewtonianGravity` | 10 |
-| `Gravitation.PPNParameters` | 18 |
+| `Gravitation.Relativity.Metrics.CoordinateMetric` | 10 |
 | `Gravitation.Relativity.Modified.EinsteinCartan.Basic` | 10 |
 | `Gravitation.Relativity.Modified.Nordstrom` | 10 |
-| `Gravitation.Cosmology.FLRW.FriedmannEquations` | 9 |
 | `Gravitation.MondFieldTheory` | 9 |
 | `Gravitation.Relativity.General.InitialData.Basic` | 9 |
 | `Gravitation.Relativity.General.Kerr.RicciCurvature` | 9 |
-| `Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature` | 9 |
-| `Gravitation.Relativity.Metrics.Basic` | 9 |
+| `Gravitation.Relativity.Metrics.MetricTrace` | 9 |
 | `Gravitation.Relativity.Modified.EinsteinCartan.ModifiedTorsion` | 9 |
 | `Gravitation.Relativity.Modified.MassiveGravity.FierzPauli` | 9 |
 | `Gravitation.Relativity.Modified.TeVeS` | 9 |
 | `Gravitation.Relativity.Modified.Teleparallel.Basic` | 9 |
-| `Gravitation.Relativity.Metrics.MetricTrace` | 8 |
 | `Gravitation.Relativity.Modified.Lovelock.Basic` | 8 |
 | `Gravitation.Relativity.Modified.Lovelock.ConstantCurvature` | 8 |
 | `Gravitation.Relativity.Modified.MOG` | 8 |
 | `Gravitation.Cosmology.FLRW.Christoffel` | 7 |
 | `Gravitation.ExplicitDevelopments` | 7 |
 | `Gravitation.Relativity.General.Kerr.Christoffel` | 7 |
-| `Gravitation.Perturbation` | 15 |
 | `Gravitation.Relativity.Metrics.CurvatureDerivatives` | 7 |
-| `Gravitation.Relativity.Metrics.Einstein` | 7 |
-| `Gravitation.Relativity.Metrics.StaticSphericalMetric.Christoffel` | 7 |
 | `Gravitation.Relativity.Tensors.EinsteinTensor` | 7 |
 | `Gravitation.Relativity.Tensors.RiemannTensor` | 7 |
 | `Gravitation.WaveEnergy3D` | 7 |
@@ -733,11 +731,12 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.MogFieldTheory` | 6 |
 | `Gravitation.Relativity.General.Linearized.GaugeTransform` | 6 |
 | `Gravitation.Relativity.General.Linearized.MinkowskiDalembertian` | 6 |
-| `Gravitation.Relativity.Metrics.Christoffel` | 6 |
+| `Gravitation.Relativity.Metrics.Basic` | 6 |
 | `Gravitation.Relativity.Modified.Lovelock.Contract5` | 6 |
 | `Gravitation.Relativity.Modified.MassiveGravity.Basic` | 6 |
 | `Gravitation.Relativity.Modified.Ostrogradsky` | 6 |
 | `Gravitation.Relativity.Modified.Teleparallel.FTGravity` | 6 |
+| `Gravitation.Relativity.Tensors.MaxwellStressEnergy` | 6 |
 | `Gravitation.TeVeSFieldTheory` | 6 |
 | `Gravitation.Relativity.General.InitialData.AnisotropicSlice` | 5 |
 | `Gravitation.Relativity.General.InitialData.FlatSlice` | 5 |
@@ -757,33 +756,35 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Mathematics.GeneralizedKronecker` | 4 |
 | `Gravitation.Relativity.General.Linearized.Laplacian3` | 4 |
 | `Gravitation.Relativity.General.Linearized.LinearizedChristoffel` | 4 |
+| `Gravitation.Relativity.General.Schwarzschild.CoordinateCurvature` | 4 |
 | `Gravitation.Relativity.Metrics.Ricci` | 4 |
 | `Gravitation.Relativity.Metrics.Riemann` | 4 |
-| `Gravitation.Relativity.Metrics.StaticSphericalMetric.RicciCurvature` | 4 |
 | `Gravitation.Relativity.Modified.KaluzaKlein.GaugeTransform` | 4 |
-| `Gravitation.Relativity.Tensors.MaxwellStressEnergy` | 4 |
 | `Gravitation.Relativity.Tensors.RicciTensor` | 4 |
-| `Gravitation.Cosmology.FLRW.PerfectFluid` | 3 |
 | `Gravitation.Relativity.General.Linearized.LinearizedRiemann` | 3 |
+| `Gravitation.Relativity.Metrics.Christoffel` | 3 |
 | `Gravitation.Relativity.Metrics.RicciScalar` | 3 |
 | `Gravitation.Divergence3D` | 2 |
 | `Gravitation.KretschmannTotal` | 2 |
+| `Gravitation.Relativity.General.InitialData.CovariantDerivTensor2` | 2 |
 | `Gravitation.Relativity.General.Linearized.LinearizedRicci` | 2 |
-| `Gravitation.Relativity.Metrics.CovariantDerivTensor2` | 2 |
+| `Gravitation.Relativity.Metrics.Einstein` | 2 |
 | `Gravitation.Relativity.Metrics.NullVector` | 2 |
 | `Gravitation.Relativity.Metrics.RiemannFromData` | 2 |
 | `Gravitation.Relativity.Tensors.EMFieldStrength` | 2 |
 | `Gravitation.Relativity.Tensors.Tensor2` | 2 |
 | `Gravitation.WaveUniqueness` | 2 |
 | `Gravitation.ManifoldSobolev` | 1 |
-| `Gravitation.Relativity.General.FrameKretschmann` | 1 |
+| `Gravitation.Mathematics.FinSum` | 1 |
+| `Gravitation.Mathematics.MatrixInverse` | 1 |
+| `Gravitation.Relativity.General.FrameSumOfSquares` | 1 |
 | `Gravitation.Relativity.General.Linearized.LinearizedEinstein` | 1 |
-| `Gravitation.Relativity.Metrics.CoordDeriv` | 1 |
+| `Gravitation.Relativity.Metrics.SpaceTimeDerivBridge` | 1 |
 | `Gravitation.Relativity.Tensors.PerfectFluidStressEnergy` | 1 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1527** |
+| **Total** | **1531** |
 
-All 1527 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1531 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References

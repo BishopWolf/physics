@@ -135,7 +135,7 @@ check_subtree "PhyslibAlpha/Relativity/Tensors" "Gravitation/Relativity/Tensors"
   "Tensor2.lean,RiemannTensor.lean,RicciTensor.lean,EinsteinTensor.lean,MaxwellStressEnergy.lean,EMFieldStrength.lean,PerfectFluidStressEnergy.lean"
 check_subtree "PhyslibAlpha/Cosmology" "Gravitation/Cosmology" all ""
 check_subtree "PhyslibAlpha/Mathematics" "Gravitation/Mathematics" allow \
-  "Calculus/CoordDeriv.lean,GeneralizedKronecker.lean"
+  "Calculus/CoordDeriv.lean,GeneralizedKronecker.lean,FinSum.lean,MatrixInverse.lean"
 check_subtree "PhyslibAlpha/ClassicalMechanics" "Gravitation/ClassicalMechanics" allow \
   "OrbitalMechanics/NewtonianGravity.lean"
 

@@ -596,7 +596,7 @@ lemma schwarzschild_eq_pullback (M : ℝ) (x : SpacetimeChart) (hM : 0 < M)
   ext σ ν
   fin_cases σ <;> fin_cases ν <;>
     simp [Schwarzschild.SchwarzschildSpacetime.metric, Schwarzschild.SchwarzschildSpacetime.metric,
-      StaticSpherical.Metric.metric, schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.metricFn,
+      StaticSpherical.StaticSphericalMetric.metric, schwarzschildSpacetime, Schwarzschild.SchwarzschildSpacetime.metricFn,
       Schwarzschild.SchwarzschildSpacetime.toStaticSpherical,
       metric, schwarzschildToEF, transitionJacobian,
       Matrix.mul_apply, Matrix.transpose_apply, Fin.sum_univ_four] <;>
