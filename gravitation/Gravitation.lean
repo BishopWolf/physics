@@ -23,6 +23,7 @@ public import Gravitation.InitialDataInterface
 public import Gravitation.SobolevInitialData
 public import Gravitation.ConformalDecomposition
 public import Gravitation.MondFieldTheory
+public import Gravitation.PPNParameters
 public import Gravitation.ManifoldSobolev
 public import Gravitation.MogFieldTheory
 public import Gravitation.TeVeSFieldTheory

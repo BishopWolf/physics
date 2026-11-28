@@ -536,6 +536,16 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.aqualFieldResidual` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsAqualSolution` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.aqualFieldResidual_eq_zero_iff` | `Gravitation/MondFieldTheory.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.PPNParameters` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.grParameters` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.grParameters_gamma` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.grParameters_beta` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ppnG00` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ppnGij` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ppnG00_eq` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ppnGij_eq` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ppnG00_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.ppnGij_gr` | `Gravitation/PPNParameters.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.dot3` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.directionalWave3D_wave_equation` | `Gravitation/ReducedCauchy.lean` | propext, Classical.choice, Quot.sound | proved |
