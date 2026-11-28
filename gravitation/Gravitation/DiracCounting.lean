@@ -31,8 +31,10 @@ finite-dimensional model: with `pi^0` and `sum_i pi^i + m^2 A_0` the Dirac
 matrix is antisymmetric with determinant `m^4`, so the pair is second-class.
 Smeared constraints are treated on a finite lattice: the bracket of the primary
 constraint with the smeared Gauss constraint is minus the mass squared times the
-smearing inner product, which is nondegenerate for nonzero mass.  The continuum
-field-theoretic bracket and the unit-vector bracket are not formalised.
+smearing inner product, which is nondegenerate for nonzero mass.  The unit-vector
+primary constraints are abelian both in the finite-dimensional model and in the
+smeared lattice form, so they are first-class.  The continuum field-theoretic
+bracket is not formalised.
 
 ## ii. Key results
 
@@ -45,6 +47,9 @@ field-theoretic bracket and the unit-vector bracket are not formalised.
 - `smearedBracket_primary_gauss`, `smeared_constraints_second_class` : the
   smeared bracket is `-m^2` times the smearing inner product and has no nonzero
   null direction for `m != 0`.
+- `unitVectorPrimary_first_class`, `smearedUnitVectorPrimary_first_class` : the
+  unit-vector primary constraints are abelian, in the finite-dimensional and the
+  smeared lattice models.
 
 ## iii. Table of contents
 
@@ -53,6 +58,7 @@ field-theoretic bracket and the unit-vector bracket are not formalised.
 - C. Dirac brackets for the Proca constraints
 - D. Smeared constraints on a finite lattice
 - E. The unit-vector primary constraints
+- F. Smeared unit-vector constraints on a finite lattice
 
 ## iv. References
 
@@ -283,5 +289,37 @@ constraint.  This is the bracket behind the `4 - 1 = 3` count. -/
 theorem unitVectorPrimary_first_class (ξ η : Fin 4 → ℝ) :
     unitVectorBracket (unitVectorPrimary ξ) (unitVectorPrimary η) = 0 := by
   simp [unitVectorBracket, unitVectorPrimary]
+
+/-! ## F. Smeared unit-vector constraints on a finite lattice -/
+
+/-- A linear observable on a lattice unit-vector phase space: coefficient
+functions for the four vector components and their momenta at each site. -/
+structure SmearedUnitVectorObservable (ι : Type*) where
+  /-- Coefficient of the vector components. -/
+  u : ι → Fin 4 → ℝ
+  /-- Coefficient of the momentum components. -/
+  p : ι → Fin 4 → ℝ
+
+/-- The canonical Poisson bracket of two linear smeared observables, from
+`{u_a(x), p_b(y)} = delta_a_b delta(x,y)` at each site. -/
+def smearedUnitVectorBracket {ι : Type*} [Fintype ι]
+    (A B : SmearedUnitVectorObservable ι) : ℝ :=
+  (∑ i, ∑ a, A.u i a * B.p i a) - ∑ i, ∑ a, A.p i a * B.u i a
+
+/-- The smeared primary constraint `sum_{i,a} xi_i_a p_i_a` of the unit-vector
+sector. -/
+def smearedUnitVectorPrimary {ι : Type*} (ξ : ι → Fin 4 → ℝ) :
+    SmearedUnitVectorObservable ι where
+  u := 0
+  p := ξ
+
+/-- The smeared primary constraints of the unit-vector sector are abelian,
+hence first-class; this is the field-theoretic (lattice) form of
+`unitVectorPrimary_first_class`. -/
+theorem smearedUnitVectorPrimary_first_class {ι : Type*} [Fintype ι]
+    (ξ η : ι → Fin 4 → ℝ) :
+    smearedUnitVectorBracket (smearedUnitVectorPrimary ξ)
+      (smearedUnitVectorPrimary η) = 0 := by
+  simp [smearedUnitVectorBracket, smearedUnitVectorPrimary]
 
 end GeneralRelativity

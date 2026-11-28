@@ -243,6 +243,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.unitVectorBracket` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.unitVectorPrimary` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.unitVectorPrimary_first_class` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.SmearedUnitVectorObservable` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedUnitVectorBracket` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedUnitVectorPrimary` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.smearedUnitVectorPrimary_first_class` | `Gravitation/DiracCounting.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Space3` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.integral_divergence_box_eq_zero` | `Gravitation/Divergence3D.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.EddingtonFinkelstein.metric` | `Gravitation/EddingtonFinkelstein.lean` | propext, Classical.choice, Quot.sound | proved |
