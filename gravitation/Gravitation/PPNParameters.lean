@@ -217,4 +217,23 @@ lemma bransDickeGamma_lt_one (omega : ℝ) (h : -2 < omega) :
 lemma bransDickeGamma_zero : bransDickeGamma 0 = 1 / 2 := by
   norm_num [bransDickeGamma]
 
+/-- The deviation of the Brans–Dicke `gamma` from the general-relativistic
+value is `1/(2 + omega)`. -/
+lemma one_sub_bransDickeGamma (omega : ℝ) (h : -2 < omega) :
+    1 - bransDickeGamma omega = 1 / (2 + omega) := by
+  rw [bransDickeGamma_eq omega (by linarith)]
+  ring
+
+/-- Solar-System comparison: a bound `1 - gamma < epsilon` on the light-deflection
+deviation (the Cassini-type bound) forces `omega > 1/epsilon - 2`. -/
+lemma bransDickeGamma_cassini (omega ε : ℝ) (hω : -2 < omega) (hε : 0 < ε)
+    (hbound : 1 - bransDickeGamma omega < ε) : 1 / ε - 2 < omega := by
+  rw [one_sub_bransDickeGamma omega hω] at hbound
+  have h2 : 0 < 2 + omega := by linarith
+  rw [div_lt_iff₀ h2] at hbound
+  have hgoal : 1 / ε < 2 + omega := by
+    rw [div_lt_iff₀ hε]
+    linarith
+  linarith
+
 end GeneralRelativity
