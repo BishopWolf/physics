@@ -383,7 +383,32 @@ cosmological value of the scalar forces it negative, making scalar waves
 superluminal. These are not all ghosts, but they are dynamical pathologies, and
 they are why TeVeS is listed as partial rather than promoted.
 
-## 4. The order of work
+## 4. Verdict
+
+The promotion test (V1–V5 of §2) is applied to each alternative. The table
+records, per theory, whether the action and field equations are formalised
+(V1), whether a post-Newtonian limit is formalised (V2), whether a
+degree-of-freedom or stability statement is formalised (V3), and the resulting
+verdict. "Demoted" means the theory is recorded as a structural or
+phenomenological statement, not as a full field theory in this development.
+
+| Theory | V1 action/field eq | V2 PPN | V3 DOF/stability | Verdict |
+| --- | --- | --- | --- | --- |
+| MOND (AQUAL) | action density, residual and the 1D and whole-line action-to-field-equation route proved (`AqualVariation`) | weak-field limits `mu(x)/x -> 1` and `mu <= x`; PPN framework stated | — | demoted: structural, with the most complete action route (1D models) |
+| MOG / STVG | action density, Proca equation and modified Einstein equation stated (`MogFieldTheory`) | literature values collected | Dirac count; smeared Proca and unit-vector brackets | demoted: structural |
+| TeVeS | action density, scalar equation and modified Einstein equation stated (`TeVeSFieldTheory`) | literature values collected | Dirac count | demoted: structural |
+| Brans–Dicke, f(R), chameleon, Einstein–Aether, massive gravity, Kaluza–Klein, Lovelock, Einstein–Cartan, teleparallel, Nordström, Galileon | stated in Paper I | — | — | demoted: not promoted here |
+
+No alternative is promoted to a full field theory in this development. The
+formalised core on which a promotion would build is the AQUAL action route
+(one-dimensional and whole-line), the PPN language (`PPNParameters`), the Dirac
+degree-of-freedom count with the smeared Proca and unit-vector brackets
+(`DiracCounting`), and the FLRW linear-perturbation layer (`Perturbation`),
+whose Bardeen-form field equations and master equation are proved. The
+per-theory derivations (STVG and TeVeS from their actions, the PPN parameters
+of each theory, the continuum brackets) remain open.
+
+## 5. The order of work
 
 1. Derive the STVG and TeVeS field equations from their actions, adding the
    vector and scalar stress to the Einstein equation.
@@ -395,7 +420,7 @@ they are why TeVeS is listed as partial rather than promoted.
 5. Apply V5 as a filter and record the verdicts in the first paper's
    alternatives section, demoting prose that no longer matches.
 
-## 5. What is not claimed
+## 6. What is not claimed
 
 - No alternative is a full field theory in this development today.
 - The Euler-Lagrange residual of the AQUAL action is assembled, its two partial
@@ -430,14 +455,14 @@ they are why TeVeS is listed as partial rather than promoted.
 - No quantum-gravity embedding. The structural correspondences in
   `QUANTUM-GRAVITY-MAPPING.md` are classification, not derivation.
 
-## 6. Relation to the other papers
+## 7. Relation to the other papers
 
 The first paper owns the alternatives' current statements; this paper owns their
 promotion. The Cauchy and constraint papers are independent of this track.
 The quantum-gravity mapping note records which programmes the structures
 resemble; it is not part of the promotion test.
 
-## 7. Reproducibility and trust
+## 8. Reproducibility and trust
 
 The development's build, axiom and proof-status checks apply unchanged. Any
 promoted statement is fully proved like the rest, with no axiom of its own.
