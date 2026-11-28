@@ -160,6 +160,10 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.ConformalData.ShiftRegular` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.ConformalData.IsTransverseTraceless` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.hamiltonianResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearisedHamiltonianResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearisedHamiltonianResidual_add` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearisedHamiltonianResidual_smul` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.linearisedHamiltonianResidual_vacuum` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.momentumResidual` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.IsLichnerowiczYorkSolution` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.momentumResidual_zero_gradTau` | `Gravitation/ConformalDecomposition.lean` | propext, Classical.choice, Quot.sound | proved |

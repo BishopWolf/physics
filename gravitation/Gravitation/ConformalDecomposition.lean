@@ -38,6 +38,10 @@ constraint equations.
 - `ConformalData.physicalMetric` : `h = phi^4 hbar`, packaged with its inverse.
 - `ConformalData.extrinsicCurvature` : `K = phi^{-2} sigma + (tau/3) h`.
 - `hamiltonianResidual` : `8 lap phi - R phi + |sigma|^2 phi^{-7}`.
+- `linearisedHamiltonianResidual` : `8 lap psi - R psi - 7 |sigma|^2 psi phi^{-8}`,
+  the algebraic linearisation; it is additive and homogeneous in the direction
+  and reduces to the conformal Laplacian in vacuum.  Its derivative and
+  elliptic estimates are the open layer.
 - `momentumResidual` : `(div sigma)_i - (2/3) phi^6 (grad tau)_i`.
 - `IsLichnerowiczYorkSolution` : both residuals vanish.
 
@@ -137,6 +141,37 @@ phi^{-7}`, with the value of the seed Laplacian at the point supplied
 explicitly. -/
 noncomputable def hamiltonianResidual (lapPhi R sigmaSq phi : ℝ) : ℝ :=
   8 * lapPhi - R * phi + sigmaSq / phi ^ 7
+
+/-- The linearised Lichnerowicz operator at the conformal factor `phi` in the
+direction `psi`: `8 lap psi - R psi - 7 sigmaSq psi / phi^8`.  It is the Gateaux
+derivative of `hamiltonianResidual` in `phi`, computed algebraically; no elliptic
+theory enters. -/
+noncomputable def linearisedHamiltonianResidual (lapPsi R sigmaSq phi psi : ℝ) : ℝ :=
+  8 * lapPsi - R * psi - 7 * sigmaSq * psi / phi ^ 8
+
+/-- The linearised Lichnerowicz operator is additive in the direction `psi`
+(and in the Laplacian `lap psi`). -/
+lemma linearisedHamiltonianResidual_add
+    (lapPsi1 lapPsi2 R sigmaSq phi psi1 psi2 : ℝ) :
+    linearisedHamiltonianResidual (lapPsi1 + lapPsi2) R sigmaSq phi (psi1 + psi2) =
+      linearisedHamiltonianResidual lapPsi1 R sigmaSq phi psi1
+        + linearisedHamiltonianResidual lapPsi2 R sigmaSq phi psi2 := by
+  unfold linearisedHamiltonianResidual
+  ring
+
+/-- The linearised Lichnerowicz operator is homogeneous in the direction `psi`
+(and in the Laplacian `lap psi`). -/
+lemma linearisedHamiltonianResidual_smul (c lapPsi R sigmaSq phi psi : ℝ) :
+    linearisedHamiltonianResidual (c * lapPsi) R sigmaSq phi (c * psi) =
+      c * linearisedHamiltonianResidual lapPsi R sigmaSq phi psi := by
+  unfold linearisedHamiltonianResidual
+  ring
+
+/-- In vacuum (`sigmaSq = 0`) the linearised operator is the conformal
+Laplacian `8 lap psi - R psi`. -/
+lemma linearisedHamiltonianResidual_vacuum (lapPsi R phi psi : ℝ) :
+    linearisedHamiltonianResidual lapPsi R 0 phi psi = 8 * lapPsi - R * psi := by
+  simp [linearisedHamiltonianResidual]
 
 /-- The momentum residual `(div sigma)_i - (2/3) phi^6 (grad tau)_i`. -/
 noncomputable def momentumResidual (divSigma gradTau : Fin 3 → ℝ) (phi : ℝ) :

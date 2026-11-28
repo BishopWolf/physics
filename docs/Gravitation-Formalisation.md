@@ -41,7 +41,7 @@ a one-dimensional wave Cauchy theorem with an energy uniqueness argument. It
 also contains the field equations or exact reductions of sixteen alternative
 theories. All statements are checked in Lean 4 against Mathlib, with no
 `sorry` and no axiom beyond those of the base libraries; the audited surface
-contains 1483 declarations, 903 of them theorem-like. An independent Vulkan
+contains 1487 declarations, 906 of them theorem-like. An independent Vulkan
 pass evaluates the same tensors in double precision and reproduces the closed
 forms at the $10^{-6}$ level.
 
@@ -174,7 +174,7 @@ or the first Bianchi identity cannot be passed off as curvature.
 ### 3.1 Verification
 
 The derivation is checked in Lean 4 with Mathlib. The audited surface contains
-1483 declarations, 903 of them theorem-like; no declaration uses `sorry`,
+1487 declarations, 906 of them theorem-like; no declaration uses `sorry`,
 `admit` or an axiom of its own, and every axiom report stays inside
 `{propext, Classical.choice, Quot.sound}`. The build is silent, and CI checks
 the axiom audit, the silent build and the generated proof-status table. The
@@ -678,11 +678,11 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.ReducedCauchy` | 22 |
 | `Gravitation.Relativity.Modified.EinsteinAether` | 21 |
 | `Gravitation.Relativity.Modified.KaluzaKlein.Basic` | 20 |
+| `Gravitation.ConformalDecomposition` | 19 |
 | `Gravitation.Relativity.General.GravitationalConstant` | 18 |
 | `Gravitation.Relativity.Modified.BransDicke` | 18 |
 | `Gravitation.Mathematics.Calculus.CoordDeriv` | 17 |
 | `Gravitation.Relativity.General.Schwarzschild.ElectricWeyl` | 16 |
-| `Gravitation.ConformalDecomposition` | 15 |
 | `Gravitation.Relativity.Modified.FRGravity` | 15 |
 | `Gravitation.WaveEnergy` | 15 |
 | `Gravitation.Relativity.General.GeodesicSystem` | 14 |
@@ -779,9 +779,9 @@ in the proofs are the `GeneralRelativity` ones either way.
 | `Gravitation.Relativity.Metrics.CoordDeriv` | 1 |
 | `Gravitation.Relativity.Tensors.PerfectFluidStressEnergy` | 1 |
 | `Gravitation.WaveEnergy3DConservation` | 1 |
-| **Total** | **1483** |
+| **Total** | **1487** |
 
-All 1483 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
+All 1487 declarations are `proved` against `{propext, Classical.choice, Quot.sound}`; the generated table is
 `Proof-Status.md`.
 
 ## References
