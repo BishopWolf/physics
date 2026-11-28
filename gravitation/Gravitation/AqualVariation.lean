@@ -1481,4 +1481,151 @@ theorem sampledPath_residual_tendsto_continuum
   simp [aqualEulerLagrangeResidual, aqualDivergence1D]
   ring
 
+/-- The smooth interval variation expressed directly in terms of a `C^2` free
+function: the derivative data `F'` is `deriv F`, and the parametric `C^1`
+hypotheses are discharged from the smoothness of `F` and the fields.  This is
+the free-function form of `hasDerivAt_aqualAction1D_of_contDiff` with the
+interpolating function's differentiability stated as `ContDiff ℝ 2 F` rather
+than as a separate derivative. -/
+theorem hasDerivAt_aqualAction1D_of_contDiff_deriv
+    (a0 G : ℝ) (F ρ φ φ' v : ℝ → ℝ) (a b : ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : ContDiff ℝ 2 F)
+    (hρ : ContDiffOn ℝ 1 ρ (Set.uIcc a b))
+    (hφ : ContDiffOn ℝ 1 φ (Set.uIcc a b))
+    (hφ' : ContDiffOn ℝ 1 φ' (Set.uIcc a b))
+    (hv : ContDiffOn ℝ 1 v (Set.uIcc a b))
+    (hv' : ContDiffOn ℝ 1 (deriv v) (Set.uIcc a b)) :
+    HasDerivAt
+      (fun ε : ℝ => aqualAction1D a0 G F ρ (φ + ε • v) (φ' + ε • deriv v) a b)
+      (aqualFirstVariationIntegral a0 G (deriv F) ρ φ' v a b) 0 := by
+  exact hasDerivAt_aqualAction1D_of_contDiff a0 G F (deriv F) ρ φ φ' v a b hG ha0 hF
+    (fun y => hF.differentiable (by norm_num) y |>.hasDerivAt) hρ hφ hφ' hv hv'
+
+/-- The smooth whole-line variation: the free function is `C^2`, so its
+parametric derivative is `deriv F`, and the measurability hypotheses are
+retained as data while the pointwise derivative hypothesis is discharged. -/
+theorem hasDerivAt_aqualActionLine_of_contDiff
+    (a0 G : ℝ) (F ρ φ φ' v v' : ℝ → ℝ) (bound : ℝ → ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0)
+    (hF : ContDiff ℝ 2 F)
+    (hL0_int : MeasureTheory.Integrable
+      (aqualVariationDensity a0 G F ρ φ φ' v v' 0) MeasureTheory.volume)
+    (hmeas : ∀ᶠ ε in nhds (0 : ℝ), MeasureTheory.AEStronglyMeasurable
+      (aqualVariationDensity a0 G F ρ φ φ' v v' ε) MeasureTheory.volume)
+    (hmeas' : MeasureTheory.AEStronglyMeasurable
+      (aqualVariationDerivative a0 G (deriv F) ρ v v' φ' 0) MeasureTheory.volume)
+    (hbound : ∀ᵐ x ∂MeasureTheory.volume, ∀ ε ∈ Set.Ioo (-1 : ℝ) 1,
+      ‖aqualVariationDerivative a0 G (deriv F) ρ v v' φ' ε x‖ ≤ bound x)
+    (hbound_int : MeasureTheory.Integrable bound MeasureTheory.volume) :
+    HasDerivAt
+      (fun ε : ℝ => ∫ x, aqualVariationDensity a0 G F ρ φ φ' v v' ε x)
+      (∫ x, aqualVariationDerivative a0 G (deriv F) ρ v v' φ' 0 x) 0 := by
+  exact hasDerivAt_aqualActionLine_of_dominated a0 G F (deriv F) ρ φ φ' v v' bound
+    hG ha0 (fun y => hF.differentiable (by norm_num) y |>.hasDerivAt) hL0_int hmeas hmeas'
+    (by simpa using hbound) hbound_int
+
+/-- A concrete decay route to the whole-line variation: if the free function's
+derivative is bounded by `K`, the density is integrable at the base parameter,
+the field `ρ` and `φ'` are integrable, `v` and `v'` are bounded and
+measurable, and `v'` is integrable, then the domination bound
+`|ρ v| + (K/(4π|G|)) (|φ'|+|v'|) |v'|` is integrable and the whole-line
+action is differentiable. -/
+theorem hasDerivAt_aqualActionLine_of_decay
+    (a0 G K : ℝ) (F F' ρ φ φ' v v' : ℝ → ℝ)
+    (hG : G ≠ 0) (ha0 : a0 ≠ 0) (hK : 0 ≤ K)
+    (hF : ∀ y : ℝ, HasDerivAt F (F' y) y)
+    (hF'bound : ∀ y : ℝ, ‖F' y‖ ≤ K)
+    (hL0_int : MeasureTheory.Integrable
+      (aqualVariationDensity a0 G F ρ φ φ' v v' 0) MeasureTheory.volume)
+    (hmeas : ∀ᶠ ε in nhds (0 : ℝ), MeasureTheory.AEStronglyMeasurable
+      (aqualVariationDensity a0 G F ρ φ φ' v v' ε) MeasureTheory.volume)
+    (hmeas' : MeasureTheory.AEStronglyMeasurable
+      (aqualVariationDerivative a0 G F' ρ v v' φ' 0) MeasureTheory.volume)
+    (hρ_int : MeasureTheory.Integrable ρ MeasureTheory.volume)
+    (hφ'_int : MeasureTheory.Integrable φ' MeasureTheory.volume)
+    (hv'_int : MeasureTheory.Integrable v' MeasureTheory.volume)
+    (hv_meas : MeasureTheory.AEStronglyMeasurable v MeasureTheory.volume)
+    (hv'_meas : MeasureTheory.AEStronglyMeasurable v' MeasureTheory.volume)
+    (hv_bdd : ∃ C : ℝ, ∀ᵐ x ∂MeasureTheory.volume, ‖v x‖ ≤ C)
+    (hv'_bdd : ∃ C : ℝ, ∀ᵐ x ∂MeasureTheory.volume, ‖v' x‖ ≤ C) :
+    HasDerivAt
+      (fun ε : ℝ => ∫ x, aqualVariationDensity a0 G F ρ φ φ' v v' ε x)
+      (∫ x, aqualVariationDerivative a0 G F' ρ v v' φ' 0 x) 0 := by
+  let C : ℝ := K / (4 * Real.pi * |G|)
+  let bound : ℝ → ℝ := fun x =>
+    |ρ x| * |v x| + C * (|φ' x| + |v' x|) * |v' x|
+  have hbound : ∀ᵐ x ∂MeasureTheory.volume, ∀ ε ∈ Set.Ioo (-1 : ℝ) 1,
+      ‖aqualVariationDerivative a0 G F' ρ v v' φ' ε x‖ ≤ bound x := by
+    filter_upwards with x
+    intro ε hε
+    have habsε : |ε| < 1 := by
+      have h1 : ε ∈ Set.Ioo (-1 : ℝ) 1 := hε
+      exact abs_lt.mpr ⟨h1.1, h1.2⟩
+    have htri : |φ' x + ε * v' x| ≤ |φ' x| + |v' x| := by
+      calc |φ' x + ε * v' x|
+          ≤ |φ' x| + |ε * v' x| := abs_add_le _ _
+        _ = |φ' x| + |ε| * |v' x| := by rw [abs_mul]
+        _ ≤ |φ' x| + 1 * |v' x| := by
+            gcongr
+        _ = |φ' x| + |v' x| := by ring
+    have hmom : |aqualMomentumDensity a0 G F' (fun t => φ' t + ε * v' t) x|
+        ≤ C * (|φ' x| + |v' x|) := by
+      unfold aqualMomentumDensity
+      calc |-(1 / (4 * Real.pi * G)) * F' ((φ' x + ε * v' x) ^ 2 / a0 ^ 2) *
+            (φ' x + ε * v' x)|
+          = (1 / (4 * Real.pi * |G|)) * |F' ((φ' x + ε * v' x) ^ 2 / a0 ^ 2)| *
+            |φ' x + ε * v' x| := by
+            rw [abs_mul, abs_mul, abs_neg, abs_div, abs_one]
+            simp [abs_mul]
+        _ ≤ (1 / (4 * Real.pi * |G|)) * K * (|φ' x| + |v' x|) := by
+            gcongr
+            · exact hF'bound _
+        _ = C * (|φ' x| + |v' x|) := by
+            simp only [C]
+            ring
+    have hderiv : |aqualVariationDerivative a0 G F' ρ v v' φ' ε x|
+        ≤ |ρ x| * |v x| + C * (|φ' x| + |v' x|) * |v' x| := by
+      unfold aqualVariationDerivative
+      calc |-ρ x * v x + aqualMomentumDensity a0 G F' (fun t => φ' t + ε * v' t) x * v' x|
+          ≤ |-ρ x * v x| + |aqualMomentumDensity a0 G F' (fun t => φ' t + ε * v' t) x * v' x| :=
+            abs_add_le _ _
+        _ = |ρ x| * |v x| + |aqualMomentumDensity a0 G F' (fun t => φ' t + ε * v' t) x| * |v' x| := by
+            rw [abs_mul, abs_neg, abs_mul]
+        _ ≤ |ρ x| * |v x| + (C * (|φ' x| + |v' x|)) * |v' x| := by
+            gcongr
+        _ = |ρ x| * |v x| + C * (|φ' x| + |v' x|) * |v' x| := by ring
+    simpa only [bound, Real.norm_eq_abs] using hderiv
+  have hbound_int : MeasureTheory.Integrable bound MeasureTheory.volume := by
+    have hρabs : MeasureTheory.Integrable (fun x => |ρ x|) MeasureTheory.volume :=
+      hρ_int.abs
+    have hφ'abs : MeasureTheory.Integrable (fun x => |φ' x|) MeasureTheory.volume :=
+      hφ'_int.abs
+    have hv'abs : MeasureTheory.Integrable (fun x => |v' x|) MeasureTheory.volume :=
+      hv'_int.abs
+    obtain ⟨Cv, hvCv⟩ := hv_bdd
+    obtain ⟨Cv', hvCv'⟩ := hv'_bdd
+    have hterm1 : MeasureTheory.Integrable (fun x => |ρ x| * |v x|) MeasureTheory.volume := by
+      have hprod : MeasureTheory.Integrable (fun x => ρ x * v x) MeasureTheory.volume :=
+        hρ_int.mul_bdd hv_meas hvCv
+      simpa only [abs_mul] using hprod.abs
+    have hterm2a : MeasureTheory.Integrable (fun x => |φ' x| * |v' x|) MeasureTheory.volume := by
+      have hprod : MeasureTheory.Integrable (fun x => φ' x * v' x) MeasureTheory.volume :=
+        hφ'_int.mul_bdd hv'_meas hvCv'
+      simpa only [abs_mul] using hprod.abs
+    have hterm2b : MeasureTheory.Integrable (fun x => |v' x| * |v' x|) MeasureTheory.volume := by
+      have hprod : MeasureTheory.Integrable (fun x => v' x * v' x) MeasureTheory.volume :=
+        hv'_int.mul_bdd hv'_meas hvCv'
+      simpa only [abs_mul] using hprod.abs
+    have hterm2 : MeasureTheory.Integrable (fun x => C * (|φ' x| + |v' x|) * |v' x|) MeasureTheory.volume := by
+      have hsum : MeasureTheory.Integrable (fun x => |φ' x| * |v' x| + |v' x| * |v' x|) MeasureTheory.volume :=
+        hterm2a.add hterm2b
+      have hmul : MeasureTheory.Integrable (fun x => C * (|φ' x| * |v' x| + |v' x| * |v' x|)) MeasureTheory.volume :=
+        hsum.const_mul C
+      refine hmul.congr (Filter.Eventually.of_forall (fun x => ?_))
+      ring
+    exact hterm1.add hterm2
+  exact hasDerivAt_aqualActionLine_of_dominated a0 G F F' ρ φ φ' v v' bound
+    hG ha0 hF hL0_int hmeas hmeas' hbound hbound_int
+
 end GeneralRelativity

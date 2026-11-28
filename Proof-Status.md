@@ -78,6 +78,9 @@ and that report stays inside `{propext, Classical.choice, Quot.sound}`.
 | `GeneralRelativity.sampledPath_residual_tendsto_of_contDiff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sampledPath_residual_tendsto_of_contDiff_site` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.sampledPath_residual_tendsto_continuum` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_aqualAction1D_of_contDiff_deriv` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_aqualActionLine_of_contDiff` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
+| `GeneralRelativity.hasDerivAt_aqualActionLine_of_decay` | `Gravitation/AqualVariation.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_const` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.pd_congr` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
 | `GeneralRelativity.Bianchi.hasDerivAt_update` | `Gravitation/Bianchi.lean` | propext, Classical.choice, Quot.sound | proved |
